@@ -3241,3 +3241,140 @@ html body #app #match .powers {
     margin-top: 3px !important;
   }
 }
+
+/* =========================================================
+   MOBILE BOARD-FIRST FIT
+   Keep the board square and width-led. The compact HUD and ability dock
+   deliberately give vertical space back without shrinking touch targets.
+   ========================================================= */
+
+@media (max-width: 600px) and (max-height: 850px) {
+  html body #app #match.match-screen {
+    padding-top: calc(7px + env(safe-area-inset-top)) !important;
+    padding-right: calc(2px + env(safe-area-inset-right)) !important;
+    padding-bottom: calc(5px + env(safe-area-inset-bottom)) !important;
+    padding-left: calc(2px + env(safe-area-inset-left)) !important;
+  }
+
+  html body #app #match .match-top {
+    gap: 6px !important;
+  }
+
+  html body #app #match .fighter {
+    min-height: 0 !important;
+    padding: 4px 6px !important;
+    gap: 5px !important;
+    border-radius: 10px !important;
+  }
+
+  html body #app #match .fighter .avatar,
+  html body #app #match .avatar-ring {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  html body #app #match .fighter-copy b,
+  html body #app #match .score-rail b {
+    font-size: 18px !important;
+  }
+
+  html body #app #match .vs-badge {
+    font-size: 21px !important;
+  }
+
+  html body #app #match .vs-column .timer {
+    padding: 3px 6px !important;
+    gap: 3px !important;
+  }
+
+  html body #app #match .attack-row {
+    margin: 5px 0 4px !important;
+  }
+
+  html body #app #match .attack-meter {
+    padding: 4px 7px !important;
+    gap: 6px !important;
+  }
+
+  html body #app #match .boards {
+    gap: 4px !important;
+    margin-top: 2px !important;
+    margin-bottom: 1px !important;
+  }
+
+  html body #app #match .energy-wrap {
+    padding: 5px 8px !important;
+    gap: 7px !important;
+  }
+
+  html body #app #match .energy-options {
+    gap: 6px !important;
+  }
+
+  html body #app #match .energy-attack {
+    min-height: 46px !important;
+    height: 46px !important;
+    padding: 4px 6px !important;
+    grid-template-columns: 22px minmax(0, 1fr) !important;
+    column-gap: 5px !important;
+  }
+
+  html body #app #match .energy-attack-glyph {
+    width: 19px !important;
+    height: 25px !important;
+  }
+
+  html body #app #match .energy-attack-copy b {
+    font-size: 7px !important;
+  }
+
+  html body #app #match .energy-attack-copy small {
+    font-size: 6px !important;
+  }
+
+  html body #app #match .player-side {
+    min-height: 0 !important;
+  }
+
+  html body #app #match .player-side .you-meta {
+    margin-bottom: 3px !important;
+  }
+
+  html body #app #match .player-side .board-slot {
+    width: 100% !important;
+    height: auto !important;
+    max-width: 100% !important;
+    max-height: none !important;
+    aspect-ratio: 1 / 1 !important;
+    flex: 0 0 auto !important;
+  }
+
+  html body #app #match .powers {
+    gap: 5px !important;
+    padding: 3px 1px 2px !important;
+    margin-top: 2px !important;
+  }
+
+  html body #app #match .power {
+    min-height: 80px !important;
+    padding: 6px 4px !important;
+    gap: 2px !important;
+  }
+
+  html body #app #match #freeze .glyph,
+  html body #app #match #timeshift .glyph,
+  html body #app #match #rewind .glyph {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  html body #app #match .power b {
+    font-size: 8px !important;
+    margin-top: 0 !important;
+  }
+
+  html body #app #match .power .cost {
+    padding: 2px 6px !important;
+    font-size: 9px !important;
+  }
+}
