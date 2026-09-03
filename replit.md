@@ -1,9 +1,11 @@
-# [Project name]
+# Chrono Clash
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Mobile-first cosmic puzzle battle game with crystalline gem matching, rival combat, and Chrono Power abilities.
 
 ## Run & Operate
 
+- `pnpm --filter @workspace/chrono-clash run dev` — run the game preview
+- `pnpm --filter @workspace/chrono-clash run typecheck` — check the game client
 - `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
@@ -22,15 +24,19 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/chrono-clash/src/engine/` — gameplay, scoring, board, power, and progression logic
+- `artifacts/chrono-clash/src/ui/` — canvas rendering and presentation helpers
+- `artifacts/chrono-clash/src/styles/` — visual skin and responsive match presentation
+- `artifacts/chrono-clash/public/assets/` — logo, arena art, metallic texture, and gem atlas
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Treat visual redesigns as presentation-only: preserve gameplay logic, critical DOM IDs, board geometry, canvas input, and the gem atlas contract.
+- Keep the player side cyan and the rival side crimson throughout match presentation.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+Players match crystalline gems, build score and attack charge, use Freeze, Time Shift, and Rewind powers, and compete against a rival across time and score modes.
 
 ## User preferences
 
