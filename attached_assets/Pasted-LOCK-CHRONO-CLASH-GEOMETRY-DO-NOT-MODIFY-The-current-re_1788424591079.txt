@@ -1,0 +1,100 @@
+LOCK CHRONO CLASH GEOMETRY — DO NOT MODIFY
+
+The current responsive game geometry is APPROVED and must now be treated as LOCKED.
+
+Create a clear code comment/documentation marker identifying the current responsive geometry as the LOCKED BASELINE.
+
+LOCK ALL OF THE FOLLOWING:
+
+• Game viewport/container architecture
+• Responsive vertical layout/grid
+• Header geometry
+• YOU / VS / RIVAL geometry
+• Energy row geometry
+• Energy Burst / Mega Strike dimensions
+• YOUR BOARD label positioning
+• 8x8 board sizing and responsive behavior
+• Board aspect ratio
+• Board-to-HUD spacing
+• Board-to-controls spacing
+• FREEZE / TIME SHIFT / REWIND dimensions and positioning
+• Bottom-control reservation
+• Dynamic viewport-height behavior
+• 390px mobile geometry behavior
+• Responsive behavior across different viewport heights
+
+The current rule is:
+
+FIXED HUD SECTIONS
++
+FLEXIBLE SQUARE BOARD
++
+FIXED BOTTOM CONTROLS
+
+The board may adapt to available viewport height, but the established layout architecture must NOT be redesigned.
+
+==================================================
+FUTURE CHANGES
+==================================================
+
+From this point forward:
+
+DO NOT change geometry as part of visual-polish tasks.
+
+DO NOT add new viewport-specific geometry overrides.
+
+DO NOT add competing media-query height calculations.
+
+DO NOT change board dimensions.
+
+DO NOT change section heights.
+
+DO NOT change bottom-control height.
+
+DO NOT change vertical spacing.
+
+DO NOT change the responsive grid architecture.
+
+If a future visual-polish change would require modifying the locked geometry, STOP and report that conflict instead of changing the geometry automatically.
+
+==================================================
+WHAT REMAINS OPEN
+==================================================
+
+Future work may modify visual presentation ONLY, such as:
+
+• colors
+• materials
+• lighting
+• glow
+• gem appearance
+• VFX
+• typography styling
+• icons
+• backgrounds
+• borders
+• shadows
+• audio
+• animations
+
+provided those changes do NOT alter the locked layout geometry.
+
+==================================================
+IMPORTANT
+==================================================
+
+Do NOT change gameplay or functionality.
+
+Do NOT restore YOUR ATTACK or RIVAL ATTACK.
+
+Do NOT undo the responsive viewport solution.
+
+This is now the OFFICIAL CHRONO CLASH GEOMETRY BASELINE.
+
+Before finishing, verify that no existing CSS rule or media query is overriding the locked geometry.
+
+Then create a checkpoint/commit documenting:
+
+"Lock Chrono Clash responsive geometry baseline"
+
+Do not make any other changes.
