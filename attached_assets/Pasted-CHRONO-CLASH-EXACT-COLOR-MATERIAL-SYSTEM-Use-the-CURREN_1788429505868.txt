@@ -1,0 +1,728 @@
+CHRONO CLASH — EXACT COLOR + MATERIAL SYSTEM
+
+Use the CURRENT GAME SCREEN as the visual reference.
+
+IMPORTANT:
+This is a VISUAL DESIGN SYSTEM pass.
+
+DO NOT change:
+- locked responsive geometry
+- positions
+- dimensions
+- spacing
+- 8×8 board geometry
+- HUD layout
+- bottom control layout
+- gameplay
+- scoring
+- CPU behavior
+- game mechanics
+- authentication
+- navigation
+
+Do NOT move or resize anything.
+
+The purpose of this task is to replace the current inconsistent glow/color treatment with a CONSISTENT PREMIUM SCI-FI COLOR + MATERIAL SYSTEM.
+
+Do not guess colors.
+Use the exact HEX values below.
+
+==================================================
+1. GLOBAL BACKGROUND
+==================================================
+
+Base:
+#020611
+
+Deep navy:
+#061322
+
+Secondary depth:
+#081A2A
+
+Player atmospheric blue:
+#006B8F
+
+Bright player atmosphere:
+#00D9FF
+
+Rival atmospheric red:
+#8A1235
+
+Bright rival atmosphere:
+#FF174F
+
+Background highlight:
+#123448
+
+White atmospheric highlight:
+#DDF8FF
+
+RULE:
+The background must remain predominantly dark.
+
+Approximate visual balance:
+85% dark navy/black
+10% cyan/blue atmosphere
+5% red/magenta atmosphere
+
+Do NOT make the entire background neon.
+
+==================================================
+2. PLAYER / YOU COLOR SYSTEM
+==================================================
+
+Primary:
+#00D9FF
+
+Deep:
+#006B8F
+
+Secondary:
+#009BC2
+
+Highlight:
+#7CF5FF
+
+Bright highlight:
+#EAFBFF
+
+Dark player panel:
+#06151F
+
+Player panel secondary:
+#0A2634
+
+Player border:
+#00BFE8
+
+Player inner glow:
+#007A9E
+
+Use these consistently across:
+- YOU panel
+- player icon
+- player-side lighting
+- player board lighting
+- cyan accents
+- selected states
+
+==================================================
+3. RIVAL COLOR SYSTEM
+==================================================
+
+Primary:
+#FF174F
+
+Deep:
+#8A1235
+
+Secondary:
+#C51A4C
+
+Highlight:
+#FF6B91
+
+Bright highlight:
+#FFD6E2
+
+Dark rival panel:
+#190812
+
+Rival panel secondary:
+#300D1C
+
+Rival border:
+#E91E55
+
+Rival inner glow:
+#8F163D
+
+Use these consistently across:
+- RIVAL panel
+- rival icon
+- rival-side lighting
+- red accents
+- rival states
+
+==================================================
+4. VS / CENTER
+==================================================
+
+Primary purple:
+#A855F7
+
+Deep purple:
+#4C1D95
+
+Secondary:
+#7C3AED
+
+Highlight:
+#D8B4FE
+
+Bright highlight:
+#F3E8FF
+
+Center background:
+#080B18
+
+The VS area should feel like a neutral temporal-energy zone between cyan and red.
+
+==================================================
+5. BOARD FRAME
+==================================================
+
+Outer frame:
+#06131D
+
+Outer frame highlight:
+#173344
+
+Primary cyan edge:
+#00CFFF
+
+Secondary cyan edge:
+#007A9E
+
+Deep edge:
+#033847
+
+Metal highlight:
+#6FEAFF
+
+Shadow:
+#01050A
+
+Board inner frame:
+#04101A
+
+Board playfield:
+#020812
+
+Board playfield secondary:
+#061321
+
+Board inner glow:
+#005B78
+
+IMPORTANT:
+The board should look like dark metallic/glass/crystalline hardware.
+
+Use DARK values for depth.
+
+Do NOT make the whole board cyan.
+
+The cyan should primarily appear on:
+- edges
+- bevel highlights
+- reflected light
+- subtle inner glow
+
+==================================================
+6. BOARD CELL SYSTEM
+==================================================
+
+Cell base:
+#02060D
+
+Cell secondary:
+#06111C
+
+Cell border:
+#0A2635
+
+Cell highlight:
+#12394A
+
+Cell inner shadow:
+#010307
+
+Cell selected border:
+#7CF5FF
+
+Cell selected glow:
+#00D9FF
+
+Cells should feel recessed into the board.
+
+Do NOT make each cell look like a glowing individual button.
+
+==================================================
+7. GEM MATERIAL SYSTEM
+==================================================
+
+IMPORTANT:
+
+Do NOT simply apply one solid color to each gem.
+
+Each gem should use a 3-part material system:
+
+DARK BASE
+→ PRIMARY COLOR
+→ BRIGHT INTERNAL HIGHLIGHT
+
+Add controlled white/cyan highlights only where appropriate.
+
+--------------------------------
+CYAN CRYSTAL
+--------------------------------
+
+Dark:
+#005C73
+
+Primary:
+#00BFFF
+
+Bright:
+#49F6FF
+
+Highlight:
+#EAFBFF
+
+--------------------------------
+BLUE CRYSTAL
+--------------------------------
+
+Dark:
+#073A9E
+
+Primary:
+#126BFF
+
+Bright:
+#28C8FF
+
+Highlight:
+#DDF8FF
+
+--------------------------------
+PURPLE CRYSTAL
+--------------------------------
+
+Dark:
+#3B0878
+
+Primary:
+#8A20FF
+
+Bright:
+#D94CFF
+
+Highlight:
+#F3D9FF
+
+--------------------------------
+PINK CRYSTAL
+--------------------------------
+
+Dark:
+#8F0848
+
+Primary:
+#FF167F
+
+Bright:
+#FF48C8
+
+Highlight:
+#FFE1F4
+
+--------------------------------
+GREEN CRYSTAL
+--------------------------------
+
+Dark:
+#005C38
+
+Primary:
+#00B86B
+
+Bright:
+#35FFB0
+
+Highlight:
+#D9FFF1
+
+--------------------------------
+GOLD CRYSTAL
+--------------------------------
+
+Dark:
+#8A4C00
+
+Primary:
+#FF9D00
+
+Bright:
+#FFD447
+
+Highlight:
+#FFF2B0
+
+GEMS MUST:
+- retain current size
+- retain current position
+- retain current shapes
+- retain current gameplay identity
+
+Improve only:
+- material depth
+- lighting
+- highlights
+- reflections
+- internal glow
+- contact with the board
+
+==================================================
+8. ENERGY BAR
+==================================================
+
+Energy bar background:
+#02070D
+
+Energy track:
+#071521
+
+Energy border:
+#173344
+
+Energy fill:
+#00BFFF
+
+Energy bright:
+#49F6FF
+
+Energy highlight:
+#B9F8FF
+
+Energy text:
+#EAFBFF
+
+The energy bar should look like contained energy inside a futuristic device.
+
+==================================================
+9. ENERGY BURST
+==================================================
+
+Primary:
+#39FF88
+
+Deep:
+#087A42
+
+Secondary:
+#16C96B
+
+Highlight:
+#A7FFD0
+
+Bright:
+#E4FFF1
+
+Dark card:
+#04130C
+
+Border:
+#16894E
+
+Inner glow:
+#1DFF86
+
+Use green energy without making the whole card fluorescent.
+
+==================================================
+10. MEGA STRIKE
+==================================================
+
+Primary:
+#FF174F
+
+Deep:
+#8A1235
+
+Secondary:
+#D61F55
+
+Magenta:
+#FF2BD6
+
+Highlight:
+#FF8BB5
+
+Bright:
+#FFE1EA
+
+Dark card:
+#180710
+
+Border:
+#B7194A
+
+Inner glow:
+#FF174F
+
+==================================================
+11. FREEZE
+==================================================
+
+Primary:
+#00D9FF
+
+Deep:
+#006B8F
+
+Ice:
+#7CF5FF
+
+Highlight:
+#EAFBFF
+
+Dark:
+#03121A
+
+Freeze effect should feel like crystalline ice energy.
+
+==================================================
+12. TIME SHIFT
+==================================================
+
+Primary:
+#A855F7
+
+Deep:
+#4C1D95
+
+Secondary:
+#7C3AED
+
+Bright:
+#D8B4FE
+
+Highlight:
+#F3E8FF
+
+Dark:
+#090516
+
+Use purple temporal energy.
+
+==================================================
+13. REWIND
+==================================================
+
+Primary:
+#FF174F
+
+Secondary:
+#A855F7
+
+Deep red:
+#8A1235
+
+Deep purple:
+#4C1D95
+
+Bright:
+#FF6B91
+
+Highlight:
+#E9D5FF
+
+Rewind should visually combine red + purple temporal energy.
+
+==================================================
+14. TYPOGRAPHY
+==================================================
+
+Primary text:
+#F3FAFF
+
+Secondary text:
+#91A8B8
+
+Muted:
+#526B79
+
+Player cyan text:
+#00D9FF
+
+Rival red text:
+#FF174F
+
+Purple text:
+#C084FC
+
+Green text:
+#39FF88
+
+Gold text:
+#FFD447
+
+White highlights:
+#FFFFFF
+
+IMPORTANT:
+Do not use pure white everywhere.
+
+White should primarily be used for:
+- important highlights
+- icons
+- critical numbers
+- gem reflections
+
+==================================================
+15. PREMIUM MATERIAL RULES
+==================================================
+
+Do NOT achieve polish by simply increasing brightness.
+
+Every major component should have:
+
+1. DARK BASE
+2. CONTROLLED PRIMARY COLOR
+3. EDGE HIGHLIGHT
+4. INNER SHADOW
+5. SUBTLE REFLECTION
+6. CONTROLLED GLOW
+
+Use gradients where appropriate.
+
+Avoid:
+- flat single-color panels
+- excessive neon
+- excessive bloom
+- washed-out whites
+- random colors
+- rainbow effects
+- excessive saturation
+- glowing everything equally
+
+==================================================
+16. LIGHTING HIERARCHY
+==================================================
+
+PLAYER SIDE:
+cyan/blue light.
+
+CENTER:
+dark neutral/purple temporal depth.
+
+RIVAL SIDE:
+red/magenta light.
+
+The lighting should gradually blend toward the center.
+
+The board should receive subtle environmental light from these sources.
+
+==================================================
+17. VISUAL HIERARCHY
+==================================================
+
+The final screen must visually prioritize:
+
+1. GEMS / GAMEPLAY
+2. BOARD
+3. PLAYER + RIVAL HUD
+4. ABILITY CARDS
+5. BACKGROUND
+
+Nothing should compete with the gems.
+
+==================================================
+18. VFX COLORS
+==================================================
+
+Existing VFX must use the same palette.
+
+Gem explosions:
+Use the actual gem's color palette.
+
+Match flash:
+#EAFBFF with the matching gem color.
+
+Energy gain:
+#00D9FF
+
+Energy Burst:
+#39FF88
+
+Mega Strike:
+#FF174F + #FF2BD6
+
+Freeze:
+#00D9FF + #7CF5FF
+
+Time Shift:
+#A855F7
+
+Rewind:
+#FF174F + #A855F7
+
+Victory:
+#00D9FF + #39FF88 + #FFD447
+
+Defeat:
+#FF174F + #8A1235
+
+==================================================
+19. CRITICAL QUALITY RULE
+==================================================
+
+The current screenshot should NOT simply become:
+
+“the same game but brighter.”
+
+It must become:
+
+“the same game with a coherent premium sci-fi material and lighting system.”
+
+Think:
+DARK METAL + GLASS + CRYSTAL + ENERGY + CONTROLLED LIGHT.
+
+Not:
+NEON + GLOW + MORE NEON.
+
+==================================================
+20. PERFORMANCE
+==================================================
+
+Keep it smooth on iPhone Safari.
+
+Do not add expensive effects that cause frame drops.
+
+Prefer:
+- CSS gradients
+- controlled shadows
+- existing VFX systems
+- lightweight overlays
+- optimized animations
+
+Avoid unnecessary large blur layers or continuously rendered expensive effects.
+
+==================================================
+21. FINAL VERIFICATION
+==================================================
+
+After implementation:
+
+- Run TypeScript check.
+- Run production build.
+- Open the actual game.
+- Verify the rendered screen, not just the code.
+- Confirm all existing geometry is unchanged.
+- Confirm the board remains exactly 8×8.
+- Confirm bottom controls remain visible.
+- Confirm gameplay still works.
+- Confirm no scrolling was introduced.
+
+MOST IMPORTANT:
+Visually inspect the actual rendered game and make sure the exact color system above is visibly applied across the game.
+
+Do NOT make unrelated changes.
+
+Do NOT modify the locked geometry.
+
+Do NOT stop after changing only a few colors.
+
+This is a COMPLETE COLOR + MATERIAL + LIGHTING SYSTEM implementation.
