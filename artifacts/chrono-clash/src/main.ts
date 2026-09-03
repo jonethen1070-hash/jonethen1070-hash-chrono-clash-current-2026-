@@ -1352,9 +1352,9 @@ ui.emailForm.addEventListener("submit", (event) => {
 $("#menuGuest").addEventListener("click", () => {
   unlockGameAudio(audio, settings.music);
   pressUi();
-  void signInWith("guest").then((signedIn) => {
-    if (signedIn) enterBattleSelect();
-  });
+  // TEMPORARY GUEST GAMEPLAY BYPASS — REMOVE AFTER AUTH CONFIGURATION IS FIXED
+  ui.menuStatus.textContent = "TEMPORARY LOCAL GUEST MODE";
+  enterBattleSelect();
 });
 $("#hudMute").addEventListener("click", () => {
   const muted = !isMatchAudioMuted(settings);
