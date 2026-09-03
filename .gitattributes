@@ -3,3 +3,5 @@ chrono-clash-current-exact.zip filter=lfs diff=lfs merge=lfs -text
 chrono-clash-current-max.zip filter=lfs diff=lfs merge=lfs -text
 chrono-clash-current.zip filter=lfs diff=lfs merge=lfs -text
 chrono-clash-current-split.z01 filter=lfs diff=lfs merge=lfs -text
+chrono-clash-dist.zip filter=lfs diff=lfs merge=lfs -text
+chrono-clash-project.zip filter=lfs diff=lfs merge=lfs -text
