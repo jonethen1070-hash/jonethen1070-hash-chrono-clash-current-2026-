@@ -532,6 +532,10 @@ export class BoardRenderer {
     roundRect(ctx, ox + 3, oy + 3, size - 6, size - 6, 18);
     ctx.stroke();
 
+    if (isPlayer) {
+      this.paintPlayerFrameLighting(ctx, ox, oy, size);
+    }
+
     const live = new Set<number>();
     const dt = this.animDt;
     const anim = this.fx.animation ?? this.fx.quality;
@@ -1473,6 +1477,104 @@ export class BoardRenderer {
       ctx.fillStyle = f.color;
       ctx.fillText(f.text, f.x, f.y - t * f.rise);
     }
+    ctx.restore();
+  }
+
+  private paintPlayerFrameLighting(
+    ctx: CanvasRenderingContext2D,
+    ox: number,
+    oy: number,
+    size: number,
+  ): void {
+    const radius = 22;
+    const frameInset = FRAME - 0.7;
+
+    ctx.save();
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    // Keep the lower-right plane dark so the cyan rim reads as raised hardware.
+    const depth = ctx.createLinearGradient(ox, oy, ox + size, oy + size);
+    depth.addColorStop(0, "#EAFBFF16");
+    depth.addColorStop(0.36, "#00D9FF08");
+    depth.addColorStop(0.7, "#01050A66");
+    depth.addColorStop(1, "#01050AC8");
+    roundRect(ctx, ox + 1.7, oy + 1.7, size - 3.4, size - 3.4, radius - 1.5);
+    ctx.strokeStyle = depth;
+    ctx.lineWidth = 3.2;
+    ctx.stroke();
+
+    // Focus the brightest light on the upper-left and left perimeter.
+    const upperLeft = ctx.createLinearGradient(ox, oy, ox + size * 0.72, oy + size * 0.72);
+    upperLeft.addColorStop(0, "#F4FFFFE8");
+    upperLeft.addColorStop(0.22, "#7CF5FFDC");
+    upperLeft.addColorStop(0.7, "#00D9FF8A");
+    upperLeft.addColorStop(1, "#00D9FF00");
+    ctx.strokeStyle = upperLeft;
+    ctx.shadowColor = "#00D9FF66";
+    ctx.shadowBlur = 4;
+    ctx.lineWidth = 2.35;
+    ctx.beginPath();
+    ctx.moveTo(ox + size * 0.58, oy + 1.5);
+    ctx.lineTo(ox + radius, oy + 1.5);
+    ctx.arcTo(ox + 1.5, oy + 1.5, ox + 1.5, oy + radius, radius - 1.5);
+    ctx.lineTo(ox + 1.5, oy + size * 0.62);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Add a quiet inner-lip reflection where the recessed glass meets the frame.
+    const innerReflection = ctx.createLinearGradient(
+      ox + frameInset,
+      oy + frameInset,
+      ox + size - frameInset,
+      oy + size - frameInset,
+    );
+    innerReflection.addColorStop(0, "#EAFBFF42");
+    innerReflection.addColorStop(0.28, "#00D9FF12");
+    innerReflection.addColorStop(0.68, "#00D9FF18");
+    innerReflection.addColorStop(1, "#7CF5FF58");
+    roundRect(
+      ctx,
+      ox + frameInset,
+      oy + frameInset,
+      size - frameInset * 2,
+      size - frameInset * 2,
+      15,
+    );
+    ctx.strokeStyle = innerReflection;
+    ctx.lineWidth = 1.15;
+    ctx.stroke();
+
+    const lowerReflection = ctx.createLinearGradient(ox, oy + size, ox + size, oy + size);
+    lowerReflection.addColorStop(0, "#00D9FF00");
+    lowerReflection.addColorStop(0.28, "#00D9FF2A");
+    lowerReflection.addColorStop(0.62, "#7CF5FF66");
+    lowerReflection.addColorStop(1, "#00D9FF10");
+    ctx.strokeStyle = lowerReflection;
+    ctx.lineWidth = 1.65;
+    ctx.beginPath();
+    ctx.moveTo(ox + size * 0.22, oy + size - 2.5);
+    ctx.lineTo(ox + size * 0.78, oy + size - 2.5);
+    ctx.stroke();
+
+    // Corner hotspots stay within the existing perimeter and off the gems.
+    const hotspots: Array<[number, number]> = [
+      [ox + size * 0.16, oy + 2.4],
+      [ox + size * 0.84, oy + 2.4],
+      [ox + size * 0.16, oy + size - 2.4],
+      [ox + size * 0.84, oy + size - 2.4],
+    ];
+    for (const [hx, hy] of hotspots) {
+      const light = ctx.createRadialGradient(hx, hy, 0, hx, hy, 3.2);
+      light.addColorStop(0, "#EAFBFFFF");
+      light.addColorStop(0.38, "#7CF5FFCC");
+      light.addColorStop(1, "#00D9FF00");
+      ctx.fillStyle = light;
+      ctx.beginPath();
+      ctx.arc(hx, hy, 3.1, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
     ctx.restore();
   }
 

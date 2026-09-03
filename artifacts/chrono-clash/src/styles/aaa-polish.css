@@ -9102,7 +9102,9 @@ html body #app #match.active .player-side .board-slot {
     0 0 18px #00D9FF29,
     inset 0 4px 13px #01050AF5,
     inset 0 0 0 3px #005B7847,
-    inset 0 -10px 17px #01050AC7 !important;
+    inset 0 -10px 17px #01050AC7,
+    inset 2px 2px 0 #7CF5FF18,
+    inset -3px -3px 0 #000307B8 !important;
 }
 
 html body #app #match.active .board-outer-rail {
@@ -9113,7 +9115,18 @@ html body #app #match.active .board-outer-rail {
     0 23px 22px #01050AF7,
     inset 0 1px 0 #EAFBFF5C,
     inset 8px 0 12px #00BFFF1C,
-    inset -10px 0 14px #01050AC7 !important;
+    inset -10px 0 14px #01050AC7,
+    inset 2px 0 0 #7CF5FF2B,
+    inset -3px 0 0 #000307B8 !important;
+}
+
+html body #app #match.active .board-energy-glass {
+  box-shadow:
+    inset 0 1px 0 #EAFBFF7A,
+    inset 2px 0 0 #00D9FF2B,
+    inset -3px -2px 0 #01050A8C,
+    inset 0 -1px 0 #7CF5FF4A,
+    0 0 10px #00D9FF20 !important;
 }
 
 html body #app #match.active #playerGems {
