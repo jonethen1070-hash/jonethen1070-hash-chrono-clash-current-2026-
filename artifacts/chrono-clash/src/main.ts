@@ -2297,7 +2297,7 @@ function frame(now: number): void {
     const fade = snap.screen === "results" ? Math.max(0, 1 - (now - resultAt) / 700) : 1;
     refreshLayout();
     renderer.draw(snap, layout.player, layout.opp, now, fade);
-    drawStageBackdrop(ctx, layout.canvas, layout.player);
+    drawStageBackdrop(ctx!, layout.canvas, layout.player);
     boardsDrawn = true;
   } else if (boardsDrawn && !showBoards) {
     renderer.clear();
