@@ -6625,3 +6625,64 @@ html body #app #match .ability-deck-core {
   html body #app #match .board-outer-rail { inset: -5px; border-bottom-width: 7px; }
   html body #app #match .vs-reactor { top: -2px; }
 }
+
+/* Surgical mobile header repair: preserve every control in one clean row. */
+html body #app #match .match-brand-row {
+  position: relative;
+  z-index: 8;
+  width: 100%;
+  min-width: 0;
+  gap: clamp(4px, 1vw, 8px) !important;
+}
+
+html body #app #match .match-brand {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0 !important;
+  text-align: left;
+  white-space: nowrap;
+  overflow: visible;
+  font-size: clamp(8px, 2.5vw, 12px) !important;
+  letter-spacing: clamp(.2em, .8vw, .34em) !important;
+  line-height: 1;
+}
+
+html body #app #match .match-brand-actions {
+  display: flex;
+  flex: 0 0 auto;
+  min-width: max-content;
+  gap: clamp(3px, .8vw, 6px) !important;
+  margin-left: auto;
+  position: relative;
+  z-index: 2;
+}
+
+html body #app #match .match-brand-actions .hud-icon,
+html body #app #match .match-brand-actions .hud-mute {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+}
+
+html body #app #match .match-brand-actions .hud-icon {
+  width: clamp(27px, 7.2vw, 32px) !important;
+  padding-inline: 0 !important;
+}
+
+html body #app #match .match-brand-actions .hud-mute {
+  width: clamp(72px, 19vw, 84px) !important;
+  padding-inline: 4px !important;
+  font-size: clamp(8px, 2.1vw, 10px) !important;
+  letter-spacing: .1em !important;
+  white-space: nowrap;
+}
+
+@media (max-width: 360px) {
+  html body #app #match .match-brand {
+    letter-spacing: .16em !important;
+  }
+
+  html body #app #match .match-brand-actions .hud-mute {
+    width: 68px !important;
+    letter-spacing: .06em !important;
+  }
+}
