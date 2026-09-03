@@ -8,7 +8,6 @@
   --surface: rgba(4, 10, 18, 0.82);
   --surface-2: rgba(6, 12, 22, 0.9);
 }
-
 html,
 body {
   background:
@@ -5741,7 +5740,7 @@ html body #app #match .player-side .board-slot::after {
 html body #app #match .board-canvas {
   position: relative;
   z-index: 1;
-  transform: translateZ(-5px) scale(.992);
+  transform: translateZ(-5px);
   border-radius: 10px;
   filter:
     saturate(1.18)
@@ -5874,37 +5873,16 @@ html body #app #match.match-screen {
   --safe-right: env(safe-area-inset-right, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
-  --game-pad-x: clamp(3px, 1.6vw, 10px);
-  --game-pad-top: clamp(4px, 0.8dvh, 8px);
-  --game-pad-bottom: clamp(5px, 0.9dvh, 9px);
-  --section-gap: clamp(2px, 0.7dvh, 6px);
-  --brand-height: clamp(36px, 5.7dvh, 48px);
-  --battle-height: clamp(70px, 10.9dvh, 92px);
-  --energy-height: clamp(30px, 4.75dvh, 40px);
-  --ability-height: clamp(62px, 9dvh, 76px);
-  --board-label-height: clamp(20px, 2.8dvh, 24px);
-  --control-height: clamp(62px, 9.7dvh, 82px);
-  --vertical-chrome:
-    calc(
-      var(--brand-height) +
-      var(--battle-height) +
-      var(--energy-height) +
-      var(--ability-height) +
-      var(--board-label-height) +
-      var(--control-height) +
-      (var(--section-gap) * 5) +
-      var(--game-pad-top) +
-      var(--game-pad-bottom) +
-      var(--safe-top) +
-      var(--safe-bottom) +
-      6px
-    );
-  --board-size:
-    min(
-      calc(100vw - var(--safe-left) - var(--safe-right) - (var(--game-pad-x) * 2) - 20px),
-      calc(100dvh - var(--vertical-chrome)),
-      430px
-    );
+  --game-pad-x: 8px;
+  --game-pad-top: 0px;
+  --game-pad-bottom: 0px;
+  --section-gap: 0px;
+  --brand-height: 40px;
+  --battle-height: 68px;
+  --energy-height: 32px;
+  --ability-height: 60px;
+  --board-label-height: 24px;
+  --control-height: 78px;
 
   inset: 0 !important;
   width: 100% !important;
@@ -5916,7 +5894,7 @@ html body #app #match.match-screen {
     calc(var(--game-pad-x) + var(--safe-right))
     calc(var(--game-pad-bottom) + var(--safe-bottom))
     calc(var(--game-pad-x) + var(--safe-left)) !important;
-  overflow: hidden !important;
+  overflow: visible !important;
   contain: layout paint;
 }
 
@@ -5925,8 +5903,12 @@ html body #app #match .match-stage {
   grid-template-rows:
     var(--brand-height)
     var(--battle-height)
-    auto
+    var(--energy-height)
+    var(--ability-height)
+    var(--board-label-height)
+    minmax(0, 1fr)
     var(--control-height) !important;
+  grid-template-columns: minmax(0, 1fr) !important;
   width: min(100%, 480px) !important;
   height: 100% !important;
   min-height: 0 !important;
@@ -5945,11 +5927,31 @@ html body #app #match .match-top {
 }
 
 html body #app #match .boards {
+  display: contents !important;
+}
+
+html body #app #match .boards > .energy-wrap {
   grid-row: 3 !important;
 }
 
-html body #app #match .powers {
+html body #app #match .boards > .energy-options {
   grid-row: 4 !important;
+}
+
+html body #app #match .boards > .player-side {
+  display: contents !important;
+}
+
+html body #app #match .player-side > .you-meta {
+  grid-row: 5 !important;
+}
+
+html body #app #match .player-side > .board-slot {
+  grid-row: 6 !important;
+}
+
+html body #app #match .powers {
+  grid-row: 7 !important;
 }
 
 html body #app #match .match-brand-row {
@@ -6025,26 +6027,8 @@ html body #app #match .attack-meter {
 }
 
 html body #app #match .boards {
-  display: grid !important;
-  flex: none !important;
-  width: 100% !important;
-  height:
-    calc(
-      var(--energy-height) +
-      var(--ability-height) +
-      var(--board-label-height) +
-      var(--board-size) +
-      (var(--section-gap) * 2)
-    ) !important;
-  min-height: 0 !important;
-  grid-template-rows:
-    var(--energy-height)
-    var(--ability-height)
-    calc(var(--board-size) + var(--board-label-height)) !important;
-  gap: var(--section-gap) !important;
+  display: contents !important;
   margin: 0 !important;
-  align-content: start !important;
-  justify-items: center;
 }
 
 html body #app #match .energy-wrap {
@@ -6086,13 +6070,11 @@ html body #app #match .energy-attack-copy small {
 }
 
 html body #app #match .player-side {
-  width: var(--board-size) !important;
-  height: calc(var(--board-size) + var(--board-label-height)) !important;
+  width: 100% !important;
+  height: auto !important;
   min-width: 0 !important;
   min-height: 0 !important;
   max-width: 100% !important;
-  flex: 0 0 auto !important;
-  justify-self: center;
 }
 
 html body #app #match .player-side .you-meta {
@@ -6103,17 +6085,19 @@ html body #app #match .player-side .you-meta {
   position: relative !important;
   inset: auto !important;
   padding-block: 0 !important;
-  flex: 0 0 var(--board-label-height) !important;
+  display: flex !important;
+  align-self: stretch !important;
 }
 
 html body #app #match .player-side .board-slot {
-  width: var(--board-size) !important;
-  height: var(--board-size) !important;
-  min-width: var(--board-size) !important;
-  min-height: var(--board-size) !important;
-  max-width: var(--board-size) !important;
-  max-height: var(--board-size) !important;
-  flex: 0 0 var(--board-size) !important;
+  width: auto !important;
+  height: min(100%, 368px) !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: 100% !important;
+  max-height: 368px !important;
+  justify-self: center !important;
+  align-self: center !important;
   aspect-ratio: 1 / 1 !important;
 }
 
@@ -6126,13 +6110,13 @@ html body #app #match #playerGems {
 }
 
 html body #app #match .powers {
-  flex: 0 0 var(--control-height) !important;
+  display: grid !important;
   width: min(100%, 480px) !important;
   height: var(--control-height) !important;
   min-height: 0 !important;
   margin: 0 auto !important;
   padding: 0 1px !important;
-  gap: clamp(4px, 1.5vw, 8px) !important;
+  gap: 8px !important;
 }
 
 html body #app #match .power {
@@ -6172,78 +6156,6 @@ html body #app #match .power .cost {
     clip: rect(0 0 0 0) !important;
     clip-path: inset(50%) !important;
     white-space: nowrap !important;
-  }
-}
-
-/* Short phones compact secondary chrome first. The board continues to be
-   calculated from remaining height instead of being tied to viewport width. */
-@media (max-height: 780px) {
-  html body #app #match.match-screen {
-    --brand-height: clamp(23px, 3.8dvh, 29px);
-    --battle-height: clamp(62px, 9.4dvh, 72px);
-    --energy-height: clamp(25px, 3.8dvh, 29px);
-    --ability-height: clamp(41px, 6.1dvh, 47px);
-    --board-label-height: clamp(16px, 2.3dvh, 18px);
-    --control-height: clamp(61px, 9dvh, 69px);
-    --section-gap: clamp(2px, 0.42dvh, 4px);
-  }
-
-  html body #app #match .fighter-copy em,
-  html body #app #match .energy-attack-copy small {
-    display: none !important;
-  }
-}
-
-@media (max-height: 720px) {
-  html body #app #match.match-screen {
-    --game-pad-top: 3px;
-    --game-pad-bottom: 4px;
-    --brand-height: 23px;
-    --battle-height: 62px;
-    --energy-height: 25px;
-    --ability-height: 41px;
-    --board-label-height: 16px;
-    --control-height: 61px;
-    --section-gap: 2px;
-  }
-
-  html body #app #match .fighter {
-    padding-block: 3px !important;
-  }
-
-  html body #app #match .energy-attack-cost {
-    font-size: 8px !important;
-  }
-}
-
-@media (max-width: 370px) {
-  html body #app #match.match-screen {
-    --game-pad-x: 2px;
-  }
-
-  html body #app #match .match-top {
-    gap: 3px !important;
-  }
-
-  html body #app #match .fighter {
-    padding-inline: 3px !important;
-  }
-
-  html body #app #match .fighter-copy small,
-  html body #app #match .attack-meter small {
-    letter-spacing: 0.04em !important;
-  }
-}
-
-/* Taller phones spend extra room on controlled breathing space, never on
-   stretching the board away from square. */
-@media (min-height: 880px) {
-  html body #app #match.match-screen {
-    --section-gap: clamp(4px, 0.7dvh, 7px);
-  }
-
-  html body #app #match .match-stage {
-    justify-content: center;
   }
 }
 
@@ -7131,272 +7043,4 @@ html body #app #match .power#rewind {
     display: none !important;
   }
 }
-
-@media (max-width: 600px) and (max-height: 720px) {
-  html body #app #match.match-screen {
-    --game-pad-x: 4px;
-    --game-pad-top: 0px;
-    --game-pad-bottom: 0px;
-    --section-gap: clamp(2px, 0.5dvh, 4px);
-    --brand-height: clamp(36px, 5.2dvh, 40px);
-    --battle-height: clamp(66px, 9.5dvh, 72px);
-    --energy-height: clamp(28px, 4.1dvh, 32px);
-    --ability-height: clamp(62px, 10.5dvh, 74px);
-    --board-label-height: clamp(20px, 2.8dvh, 22px);
-    --control-height: clamp(62px, 11.1dvh, 78px);
-    --vertical-chrome:
-      calc(
-        var(--brand-height) +
-        var(--battle-height) +
-        var(--energy-height) +
-        var(--ability-height) +
-        var(--board-label-height) +
-        var(--control-height) +
-        var(--game-pad-top) +
-        var(--game-pad-bottom) +
-        var(--safe-top) +
-        var(--safe-bottom) +
-        (var(--section-gap) * 5) +
-        8px
-      );
-    --board-size:
-      min(
-        calc(100vw - var(--safe-left) - var(--safe-right) - (var(--game-pad-x) * 2) - 20px),
-        calc(100dvh - var(--vertical-chrome)),
-        430px
-      );
-
-    html body #app #match .fighter {
-      padding: 4px 7px !important;
-      gap: 6px !important;
-    }
-
-    html body #app #match .avatar-ring,
-    html body #app #match .fighter .avatar {
-      width: 39px !important;
-      height: 39px !important;
-    }
-
-    html body #app #match .energy-wrap {
-      padding: 4px 8px !important;
-    }
-
-    html body #app #match .energy-wrap .energy {
-      height: 8px !important;
-      margin-block: 2px !important;
-    }
-
-    html body #app #match .energy-attack {
-      padding: 5px 6px !important;
-    }
-
-    html body #app #match .energy-attack-glyph {
-      width: 22px !important;
-      height: 30px !important;
-    }
-
-    html body #app #match .energy-attack-copy b {
-      font-size: 8px !important;
-    }
-
-    html body #app #match .energy-attack-copy small {
-      font-size: 7px !important;
-    }
-
-    html body #app #match .board-outer-rail {
-      inset: -3px !important;
-    }
-
-    html body #app #match .powers {
-      padding: 3px 1px 2px !important;
-    }
-
-    html body #app #match .power {
-      padding: 6px 4px !important;
-    }
-
-    html body #app #match .power .glyph,
-    html body #app #match #freeze .glyph,
-    html body #app #match #timeshift .glyph,
-    html body #app #match #rewind .glyph {
-      width: 32px !important;
-      height: 32px !important;
-    }
-
-    html body #app #match .power b {
-      font-size: 9px !important;
-    }
-
-    html body #app #match .power .cost {
-      font-size: 10px !important;
-    }
-  }
-
-  html body #app #match .boards {
-    gap: var(--section-gap) !important;
-  }
-
-  html body #app #match .player-side .you-meta > span:first-child {
-    white-space: nowrap !important;
-    font-size: 7px !important;
-    letter-spacing: .08em !important;
-  }
-}
-
-/* =========================================================
-   FINAL EXPLICIT MOBILE GEOMETRY
-   Reserve every fixed section before calculating the square board.
-   ========================================================= */
-
-@media (max-width: 600px) {
-  html body #app #match.match-screen {
-    --game-pad-x: 8px;
-    --section-gap: 4px;
-    --brand-height: 40px;
-    --battle-height: 70px;
-    --energy-height: 32px;
-    --ability-height: 60px;
-    --board-label-height: 24px;
-    --control-height: 80px;
-    --vertical-chrome:
-      calc(
-        var(--brand-height) +
-        var(--battle-height) +
-        var(--energy-height) +
-        var(--ability-height) +
-        var(--board-label-height) +
-        var(--control-height) +
-        (var(--section-gap) * 5) +
-        var(--game-pad-top) +
-        var(--game-pad-bottom) +
-        var(--safe-top) +
-        var(--safe-bottom) +
-        8px
-      );
-    --board-size:
-      min(
-        calc(100vw - var(--safe-left) - var(--safe-right) - (var(--game-pad-x) * 2) - 8px),
-        calc(100dvh - var(--vertical-chrome)),
-        430px
-      );
-  }
-
-  html body #app #match .match-stage {
-    grid-template-rows:
-      var(--brand-height)
-      var(--battle-height)
-      auto
-      var(--control-height) !important;
-    gap: var(--section-gap) !important;
-    align-content: start !important;
-  }
-
-  html body #app #match .boards {
-    height:
-      calc(
-        var(--energy-height) +
-        var(--ability-height) +
-        var(--board-label-height) +
-        var(--board-size) +
-        (var(--section-gap) * 2)
-      ) !important;
-    grid-template-rows:
-      var(--energy-height)
-      var(--ability-height)
-      calc(var(--board-size) + var(--board-label-height)) !important;
-    gap: var(--section-gap) !important;
-  }
-
-  html body #app #match .energy-wrap,
-  html body #app #match .energy-options,
-  html body #app #match .energy-attack {
-    height: var(--energy-height) !important;
-  }
-
-  html body #app #match .energy-options,
-  html body #app #match .energy-attack {
-    height: var(--ability-height) !important;
-  }
-
-  html body #app #match .energy-attack {
-    padding: 4px 6px !important;
-    grid-template-columns: 24px minmax(0, 1fr) !important;
-    column-gap: 5px !important;
-  }
-
-  html body #app #match .energy-attack-glyph {
-    width: 22px !important;
-    height: 30px !important;
-  }
-
-  html body #app #match .energy-attack-copy b {
-    font-size: 8px !important;
-  }
-
-  html body #app #match .energy-attack-copy small {
-    display: block !important;
-    font-size: 6px !important;
-  }
-
-  html body #app #match .energy-attack-cost {
-    font-size: 9px !important;
-  }
-
-  html body #app #match .player-side {
-    width: var(--board-size) !important;
-    height: calc(var(--board-size) + var(--board-label-height)) !important;
-  }
-
-  html body #app #match .player-side .you-meta {
-    height: var(--board-label-height) !important;
-    flex-basis: var(--board-label-height) !important;
-    position: relative !important;
-    inset: auto !important;
-    margin: 0 !important;
-  }
-
-  html body #app #match .player-side .you-meta > span:first-child {
-    white-space: nowrap !important;
-  }
-
-  html body #app #match .player-side .board-slot {
-    width: var(--board-size) !important;
-    height: var(--board-size) !important;
-    min-width: var(--board-size) !important;
-    min-height: var(--board-size) !important;
-    max-width: var(--board-size) !important;
-    max-height: var(--board-size) !important;
-    flex-basis: var(--board-size) !important;
-    aspect-ratio: 1 / 1 !important;
-  }
-
-  html body #app #match .powers,
-  html body #app #match .power {
-    height: var(--control-height) !important;
-  }
-
-  html body #app #match .power {
-    min-height: var(--control-height) !important;
-  }
-}
-
-@media (max-width: 600px) and (max-height: 749px) {
-  html body #app #match.match-screen {
-    --game-pad-top: 0px;
-    --game-pad-bottom: 0px;
-    --section-gap: 4px;
-    --brand-height: 36px;
-    --battle-height: 64px;
-    --energy-height: 30px;
-    --ability-height: 58px;
-    --board-label-height: 20px;
-    --control-height: 64px;
-  }
-}
-
-@media (max-width: 600px) and (max-height: 599px) {
-  html body #app #match.match-screen {
-    --section-gap: 3px;
-    --ability-height: 54px;
-  }
-}
+/* End of match layout styling. */
