@@ -1,0 +1,202 @@
+CHRONO CLASH — VISUAL POLISH X10 PASS
+
+Use the current Chrono Clash game shown in my latest screenshot as the starting point.
+
+GOAL:
+Make the game look approximately 10× more premium, polished, sharp, immersive, and AAA-inspired WITHOUT changing gameplay or the locked responsive geometry.
+
+THIS IS A VISUAL-ONLY PASS.
+
+🚨 ABSOLUTE LOCK — DO NOT CHANGE:
+- Overall responsive game geometry
+- Header position/size
+- YOU / VS / RIVAL panels
+- Timer position
+- Energy bar position/height
+- Ability card geometry
+- YOUR BOARD position
+- 8×8 board size, aspect ratio, spacing or placement
+- Bottom FREEZE / TIME SHIFT / REWIND geometry
+- Mobile responsive behavior
+- Game viewport structure
+- Gameplay rules
+- Matching logic
+- Scoring
+- Energy calculations
+- CPU behavior
+- Controls/functionality
+
+Do NOT move, resize or rearrange anything.
+
+VISUAL TARGET:
+
+Make the existing design feel like a premium futuristic mobile puzzle game rather than a web prototype.
+
+1. BACKGROUND
+- Much richer deep-space/cosmic environment.
+- Very dark navy/black base.
+- Strong but controlled cyan/blue energy atmosphere on YOU side.
+- Strong but controlled red/magenta energy atmosphere on RIVAL side.
+- Add layered nebula depth, subtle particles, atmospheric glow and distant stars.
+- Keep the center darker so the board remains the visual focus.
+- Avoid a flat gradient.
+- Avoid making the background so dark that the atmosphere disappears.
+
+2. BOARD
+- Make the board feel physically dimensional.
+- Stronger depth around the outer frame.
+- Premium metallic/glass/crystalline appearance.
+- Improve bevels, edge highlights, inner shadows and subtle reflections.
+- Make the board feel like a real futuristic arena sitting inside the environment.
+- Keep EXACTLY the same 8×8 geometry.
+
+3. GEMS
+Upgrade every gem visually:
+- More dimensional 3D/crystalline appearance.
+- Better internal lighting.
+- Stronger controlled emissive glow.
+- Sharper silhouettes.
+- More convincing glass/crystal depth.
+- Better highlights and reflections.
+- Each color should remain instantly recognizable.
+- Cyan, purple, pink, green, blue and gold gems must have distinct premium materials.
+- Do NOT change their size or grid positions.
+
+4. HUD
+Upgrade:
+- CHRONO CLASH title
+- YOU / VS / RIVAL panels
+- player icons
+- timer
+- ENERGY bar
+- ability cards
+- bottom ability controls
+
+Use:
+- cleaner typography
+- sharper borders
+- realistic depth
+- subtle glass/metal materials
+- controlled inner glow
+- better contrast
+- premium highlights
+
+Do NOT make the HUD brighter just for the sake of brightness. It should look expensive and controlled.
+
+5. ABILITY CARDS
+ENERGY BURST:
+- premium cyan/green energy treatment
+- stronger crystalline/lightning visual
+- subtle animated energy inside the card
+
+MEGA STRIKE:
+- premium red/magenta energy treatment
+- stronger crystalline strike visual
+- subtle animated energy inside the card
+
+Keep their exact current dimensions and positions.
+
+6. BOTTOM CONTROLS
+Make FREEZE, TIME SHIFT and REWIND feel like premium futuristic controls:
+- dimensional buttons
+- glass/metal depth
+- subtle colored energy cores
+- sharper icons
+- better typography
+- subtle idle glow
+- polished active/disabled states
+
+Do NOT resize or reposition them.
+
+7. LIGHTING
+Create a consistent lighting system:
+- cyan light from the player's side
+- red/magenta light from the rival side
+- subtle neutral/cool light around the board
+- darker center/background
+- highlights should react visually to the existing game state
+
+Avoid excessive bloom or washed-out whites.
+
+8. MICRO-POLISH
+Add subtle visual details that make the game feel expensive:
+- soft reflections
+- tiny ambient particles
+- faint energy dust
+- subtle edge lighting
+- glass reflections
+- controlled glow
+- depth shadows
+- very subtle animated atmospheric movement
+
+These should enhance the game without distracting from gameplay.
+
+9. VFX
+Strengthen the existing VFX so they are clearly visible:
+- gem selection
+- match
+- explosion
+- cascade
+- combo
+- energy gain
+- Energy Burst
+- Mega Strike
+- Freeze
+- Time Shift
+- Rewind
+- victory/defeat
+
+Do not invent new gameplay mechanics.
+Only visually improve the existing effects.
+
+10. ANIMATION
+Make existing animations feel smoother and more premium:
+- ease-in/ease-out
+- better timing
+- subtle anticipation
+- satisfying completion
+- smooth energy movement
+- smooth gem transitions
+
+Do not change gameplay timing in a way that affects mechanics.
+
+11. MOBILE QUALITY
+Optimize specifically for iPhone/mobile Safari:
+- crisp rendering
+- no blurry text
+- no pixelated UI
+- no unnecessary layout movement
+- no scrolling
+- no frame-rate destroying effects
+- maintain responsive behavior
+
+IMPORTANT:
+Do NOT solve this by simply increasing glow, brightness, saturation or particle count.
+
+The goal is:
+DEPTH + MATERIAL QUALITY + LIGHTING + CONTRAST + SHARPNESS + ATMOSPHERE + VFX.
+
+The final result should feel like a premium AAA-inspired 2.5D/3D sci-fi puzzle battle game.
+
+IMPLEMENTATION RULE:
+Before editing, inspect the existing visual/CSS/component structure and reuse existing systems where possible.
+
+Do NOT rewrite unrelated code.
+Do NOT touch locked geometry.
+Do NOT change gameplay.
+Do NOT add authentication work.
+Do NOT change the menu/login flow.
+Do NOT modify backend behavior.
+
+After implementation:
+1. Run TypeScript/build checks.
+2. Confirm the game loads normally.
+3. Confirm the 8×8 board remains exactly in the locked position/size.
+4. Confirm all bottom controls remain visible.
+5. Confirm gameplay still works.
+6. Manually verify the visual improvements on the actual game screen.
+7. Report exactly which visual systems were improved.
+
+IMPORTANT:
+Do not stop after changing a few CSS colors.
+This must be a COMPLETE visual polish pass across the existing game, while respecting the locked geometry.
