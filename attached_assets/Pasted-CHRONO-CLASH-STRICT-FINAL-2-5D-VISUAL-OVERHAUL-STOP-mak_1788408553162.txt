@@ -1,0 +1,384 @@
+CHRONO CLASH — STRICT FINAL 2.5D VISUAL OVERHAUL
+
+STOP making small CSS polish changes.
+
+The current result is NOT yet sufficiently 2.5D.
+
+I want the ENTIRE GAME SCREEN to look like a premium 2.5D sci-fi mobile game, not a 2D webpage with gradients and glow.
+
+THIS IS A VISUAL-ONLY TASK.
+
+DO NOT CHANGE:
+- gameplay
+- match logic
+- scoring
+- timer behavior
+- gem movement
+- gem matching
+- energy calculations
+- Energy Burst behavior
+- Mega Strike behavior
+- Freeze behavior
+- Time Shift behavior
+- Rewind behavior
+- networking
+- game state
+- touch controls
+- existing functionality
+
+DO NOT rebuild the game from scratch.
+
+==================================================
+CORE VISUAL REQUIREMENT
+==================================================
+
+The whole screen must have a consistent DEPTH HIERARCHY:
+
+BACKGROUND
+↓
+COSMIC ARENA
+↓
+RECESSED / FLOATING HUD
+↓
+ENERGY & ATTACK MODULES
+↓
+RAISED BOARD HOUSING
+↓
+RECESSED GEM PLAYFIELD
+↓
+3D CRYSTAL GEMS
+↓
+FOREGROUND POWER CONTROLS
+
+Every layer must visually feel like it occupies a different depth plane.
+
+The player should immediately perceive:
+"These are physical futuristic objects inside a sci-fi arena."
+
+NOT:
+"These are HTML/CSS boxes."
+
+==================================================
+1. COSMIC ENVIRONMENT
+==================================================
+
+Strengthen the background into a layered sci-fi arena.
+
+Use:
+- distant cosmic depth
+- atmospheric haze
+- subtle stars/particles
+- large distant planetary/nebula forms
+- foreground and background layers
+- subtle parallax-style depth where possible
+- cyan illumination on the player side
+- red illumination on the rival side
+
+Do NOT use a flat single background gradient.
+
+The background should visually sit BEHIND the HUD and board.
+
+==================================================
+2. YOU / RIVAL PANELS
+==================================================
+
+Transform both panels into dimensional sci-fi cockpit modules.
+
+They need:
+- thick beveled outer shell
+- recessed inner glass
+- raised score area
+- physical emblem housing
+- inner shadows
+- edge highlights
+- subtle reflection
+- depth separation from background
+- controlled cyan/red environmental lighting
+
+The cyan panel should feel physically illuminated from the cyan side.
+
+The red panel should feel physically illuminated from the red side.
+
+Do NOT make them simple rounded rectangles.
+
+==================================================
+3. VS + TIMER
+==================================================
+
+Make VS and timer a raised central holographic module.
+
+Use:
+- multiple depth layers
+- glass/metal housing
+- subtle extrusion
+- inner glow
+- shadow behind the module
+- dimensional separator elements
+
+It should look physically positioned between YOU and RIVAL.
+
+==================================================
+4. ATTACK BARS
+==================================================
+
+Make both attack bars recessed energy channels.
+
+They must have:
+- thick outer frame
+- recessed interior
+- raised edge
+- inner glass
+- energy material
+- subtle reflection
+- shadow/depth separation
+
+They should NOT look like ordinary HTML progress bars.
+
+==================================================
+5. ENERGY BAR
+==================================================
+
+Turn the Energy bar into a physical futuristic energy reservoir.
+
+Use:
+- dimensional housing
+- recessed glass channel
+- inner illuminated energy
+- beveled frame
+- subtle metallic reflections
+- depth shadow
+
+The energy reservoir should appear physically mounted in the arena.
+
+==================================================
+6. ENERGY BURST + MEGA STRIKE
+==================================================
+
+These two modules are extremely important.
+
+Make them look like physical 2.5D ability devices.
+
+ENERGY BURST:
+- raised green/cyan energy module
+- beveled metal frame
+- recessed glass interior
+- dimensional lightning icon
+- internal light
+- subtle shadow underneath
+- controlled green energy illumination
+
+MEGA STRIKE:
+- raised red/crimson energy module
+- beveled metal frame
+- recessed glass interior
+- dimensional crystal icon
+- internal light
+- subtle shadow underneath
+- controlled red energy illumination
+
+They must visually match the board's material quality.
+
+==================================================
+7. MAIN BOARD
+==================================================
+
+The board is currently the strongest part.
+
+Keep the current large 8x8 board and all 64 gems.
+
+DO NOT shrink it.
+
+Make the board feel like a heavy physical futuristic machine.
+
+Use:
+- thick outer housing
+- multiple frame layers
+- raised cyan rim
+- recessed playfield
+- socket depth behind every gem
+- contact shadows
+- subtle reflections
+- environmental cyan illumination
+
+The playfield must clearly sit INSIDE the board housing.
+
+==================================================
+8. GEMS
+==================================================
+
+Keep the existing crystalline gem artwork.
+
+Do not replace the gem types.
+
+Increase physical depth using:
+- faceted highlights
+- internal light
+- edge reflections
+- subtle contact shadows
+- small separation from their sockets
+- controlled glow
+
+Each gem should appear physically mounted above the recessed board surface.
+
+Avoid making every gem excessively bright.
+
+==================================================
+9. YOUR BOARD LABEL
+==================================================
+
+"YOUR BOARD" must appear integrated into the board housing.
+
+Make it look like a raised/illuminated metal or holographic plate attached to the arena.
+
+Do not let it look like plain text floating above the board.
+
+==================================================
+10. FREEZE / TIME SHIFT / REWIND
+==================================================
+
+Keep these controls compact enough to preserve the current mobile composition.
+
+However, visually transform them into physical 2.5D control modules.
+
+Each should have:
+- raised housing
+- beveled frame
+- recessed icon chamber
+- dimensional icon
+- internal glow
+- contact shadow
+- glass/metal material
+
+FREEZE = cyan/blue
+
+TIME SHIFT = purple
+
+REWIND = crimson/red
+
+They should appear physically in the foreground of the board.
+
+==================================================
+11. LIGHTING
+==================================================
+
+Create ONE coherent lighting system.
+
+Do not give every component an unrelated glow.
+
+Cyan light should subtly affect nearby surfaces.
+
+Red light should subtly affect nearby surfaces.
+
+Gem light should subtly illuminate nearby sockets.
+
+Board light should affect the board housing.
+
+HUD should receive subtle environmental lighting.
+
+Use light falloff and shadows so objects feel connected to the same physical environment.
+
+==================================================
+12. MATERIAL LANGUAGE
+==================================================
+
+Use a consistent premium material hierarchy:
+
+DARK METAL
+→ smoked glass
+→ polished bevels
+→ crystalline gems
+→ controlled emissive energy
+→ subtle reflections
+→ contact shadows
+
+The screen should feel premium and expensive.
+
+Avoid:
+- flat cards
+- flat icons
+- generic CSS gradients
+- excessive bloom
+- random neon
+- cartoon styling
+- cheap glow effects
+- inconsistent materials
+
+==================================================
+13. IMPORTANT 2.5D TEST
+==================================================
+
+Before finishing, visually inspect the game at 390x844.
+
+Ask:
+
+"If all text were removed, would the screen still look like a collection of physical layered objects?"
+
+If the answer is NO, continue the visual work.
+
+The final result must clearly communicate:
+
+PREMIUM 2.5D SCI-FI GAME
+
+NOT
+
+2D WEBSITE WITH CSS EFFECTS.
+
+==================================================
+14. MOBILE COMPOSITION
+==================================================
+
+Keep the current successful composition.
+
+Top:
+YOU / VS / RIVAL
+
+Then:
+ATTACK BARS
+
+Then:
+ENERGY
+
+Then:
+ENERGY BURST + MEGA STRIKE
+
+Then:
+LARGE 8x8 BOARD
+
+Then:
+FREEZE / TIME SHIFT / REWIND
+
+Do not introduce scrolling.
+
+Do not allow clipping.
+
+All 64 gems must remain visible.
+
+All three bottom controls must remain accessible.
+
+==================================================
+FINAL VERIFICATION
+==================================================
+
+Test at exactly 390x844.
+
+Verify:
+- 8x8 board fully visible
+- 64 gems visible
+- board frame fully visible
+- no clipping
+- no overlap
+- no scrolling
+- all controls touch-responsive
+- no console errors
+- TypeScript passes
+- production build passes
+
+Most importantly:
+
+DO NOT REPORT THIS AS COMPLETE JUST BECAUSE THE CSS COMPILES.
+
+Visually inspect the actual running game.
+
+Only finish when the ENTIRE SCREEN has a consistent 2.5D physical depth treatment.
+
+GAMEPLAY MUST REMAIN UNCHANGED.
