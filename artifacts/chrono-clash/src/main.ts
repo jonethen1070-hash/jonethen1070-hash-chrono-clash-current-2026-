@@ -110,9 +110,43 @@ app.innerHTML = `
         <p class="menu-kicker">ENTER THE GAME</p>
         <p class="menu-ident" id="menuIdent">Sign in to save your Player ID, progression and trophies.</p>
         <div class="identity-list">
-          <button type="button" class="primary game-ctl identity-facebook" id="menuFacebook">SIGN IN WITH FACEBOOK</button>
-          <button type="button" class="ghost game-ctl" id="menuEmail">SIGN IN WITH EMAIL</button>
-          <button type="button" class="ghost game-ctl identity-guest" id="menuGuest">CONTINUE AS GUEST</button>
+          <button type="button" class="primary game-ctl identity-facebook" id="menuFacebook">
+            <span class="identity-button-content">
+              <span class="identity-icon identity-icon-facebook" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img"><circle cx="12" cy="12" r="10" fill="#1877F2"/><path fill="#fff" d="M13.35 12.75h2.08l.33-2.15h-2.41V9.2c0-.62.3-1.04 1.15-1.04h1.35V6.24c-.24-.03-.93-.09-1.77-.09-1.75 0-2.95 1.07-2.95 3.03v1.42H9.15v2.15h1.98v5.52h2.22v-5.52Z"/></svg>
+              </span>
+              <span>SIGN IN WITH FACEBOOK</span>
+            </span>
+          </button>
+          <button type="button" class="ghost game-ctl identity-google" id="menuGoogle">
+            <span class="identity-button-content">
+              <span class="identity-icon identity-icon-google" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img">
+                  <path fill="#4285F4" d="M21.35 12.27c0-.77-.07-1.51-.22-2.22H12v4.2h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.37Z"/>
+                  <path fill="#34A853" d="M12 21.75c2.63 0 4.84-.87 6.45-2.36l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.69-1.72-5.46-4.03H3.3v2.53A9.74 9.74 0 0 0 12 21.75Z"/>
+                  <path fill="#FBBC05" d="M6.54 13.83A5.85 5.85 0 0 1 6.23 12c0-.64.11-1.26.31-1.83V7.64H3.3A9.75 9.75 0 0 0 2.25 12c0 1.57.38 3.05 1.05 4.36l3.24-2.53Z"/>
+                  <path fill="#EA4335" d="M12 6.14c1.43 0 2.71.49 3.72 1.46l2.79-2.79C16.84 3.24 14.63 2.25 12 2.25a9.74 9.74 0 0 0-8.7 5.39l3.24 2.53C7.31 7.86 9.46 6.14 12 6.14Z"/>
+                </svg>
+              </span>
+              <span>SIGN IN WITH GOOGLE</span>
+            </span>
+          </button>
+          <button type="button" class="ghost game-ctl identity-email" id="menuEmail">
+            <span class="identity-button-content">
+              <span class="identity-icon identity-icon-email" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 6.75h16v10.5H4zM4.5 7.5 12 13l7.5-5.5"/></svg>
+              </span>
+              <span>SIGN IN WITH EMAIL</span>
+            </span>
+          </button>
+          <button type="button" class="ghost game-ctl identity-guest" id="menuGuest">
+            <span class="identity-button-content">
+              <span class="identity-icon identity-icon-guest" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img"><circle cx="12" cy="8" r="3.1" fill="none" stroke="currentColor" stroke-width="1.8"/><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8" d="M5.5 19.25c.72-3.03 2.87-4.55 6.5-4.55s5.78 1.52 6.5 4.55"/></svg>
+              </span>
+              <span>CONTINUE AS GUEST</span>
+            </span>
+          </button>
         </div>
         <p class="menu-status" id="menuStatus" aria-live="polite"></p>
       </div>
@@ -1261,6 +1295,13 @@ $("#menuFacebook").addEventListener("click", () => {
   unlockGameAudio(audio, settings.music);
   pressUi();
   void signInWith("facebook").then((signedIn) => {
+    if (signedIn) enterBattleSelect();
+  });
+});
+$("#menuGoogle").addEventListener("click", () => {
+  unlockGameAudio(audio, settings.music);
+  pressUi();
+  void signInWith("google").then((signedIn) => {
     if (signedIn) enterBattleSelect();
   });
 });

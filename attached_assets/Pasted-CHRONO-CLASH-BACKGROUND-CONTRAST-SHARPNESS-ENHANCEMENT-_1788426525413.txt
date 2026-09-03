@@ -1,0 +1,89 @@
+CHRONO CLASH — BACKGROUND CONTRAST + SHARPNESS ENHANCEMENT ONLY
+
+Improve ONLY the existing main-menu background.
+
+DO NOT change the locked Chrono Clash geometry.
+DO NOT change layout, spacing, button positions, sizes, or responsive behavior.
+
+TARGET:
+
+Make the existing blue-vs-red cosmic background significantly more:
+
+• sharp
+• crisp
+• high-contrast
+• deep
+• saturated
+• visually dimensional
+• premium
+• smooth
+
+LEFT SIDE — BLUE/CYAN:
+- Increase cyan/blue luminosity and saturation.
+- Make the cosmic energy and nebula details more visible.
+- Sharpen subtle mechanical/cosmic structures.
+- Add controlled cyan glow around the edges.
+- Preserve fine detail instead of making it blurry.
+
+RIGHT SIDE — RED/MAGENTA:
+- Increase red/magenta saturation and clarity.
+- Make the energy/nebula details more visible.
+- Add controlled red/magenta edge glow.
+- Preserve fine detail and avoid muddy gradients.
+
+CENTER:
+- Keep the center significantly darker than the sides.
+- Maintain a clean dark zone behind the UI.
+- Add subtle depth/atmosphere rather than a flat black area.
+- Do NOT brighten the center enough to reduce text readability.
+
+STARS / PARTICLES:
+- Increase visibility slightly.
+- Make particles crisp and small.
+- Avoid excessive particles competing with the UI.
+
+CONTRAST:
+Create a strong visual separation:
+
+CYAN/BLUE ← DARK CENTER → RED/MAGENTA
+
+The background should immediately communicate a futuristic blue-vs-red cosmic arena.
+
+SHARPNESS:
+- Remove any blurry/foggy appearance from the existing background.
+- Increase clarity of existing background details.
+- Use crisp gradients and controlled glow.
+- Avoid excessive bloom that washes out detail.
+- Avoid heavy blur filters.
+
+IMPORTANT:
+The background must remain BEHIND the UI.
+
+Do NOT reduce text readability.
+Do NOT make the background brighter than the buttons/text.
+
+DO NOT change:
+- logo
+- typography
+- buttons
+- button dimensions
+- button positions
+- menu geometry
+- responsive layout
+- authentication functionality
+- gameplay
+- game-screen geometry
+
+Do NOT touch the locked geometry baseline.
+
+This is strictly a BACKGROUND CONTRAST + SHARPNESS pass.
+
+After implementation, open the actual rendered mobile page and visually verify that the background is:
+1. noticeably sharper,
+2. more blue/cyan on the left,
+3. more red/magenta on the right,
+4. darker and cleaner in the center,
+5. more detailed without becoming noisy,
+6. still highly readable behind the UI.
+
+Do not make any unrelated changes.
