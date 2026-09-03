@@ -1,0 +1,71 @@
+CHRONO CLASH — VISUAL CHANGE DIAGNOSTIC ONLY
+
+STOP making visual changes for now.
+
+I need you to determine why recent visual/color changes are reported as successful but are barely visible in the actual running game.
+
+DO NOT modify the game.
+
+Investigate only.
+
+Check:
+
+1. Which exact files/components render the visible game screen.
+2. Which file renders the 8×8 board and gems.
+3. Whether the board/gems use CSS, Canvas, SVG, or a combination.
+4. Find every source of the current cyan, red, purple, green and glow colors.
+5. Check for hard-coded renderer colors that override the new palette.
+6. Check for CSS selectors that override the new palette.
+7. Check inline styles and CSS variables.
+8. Check whether aaa-polish.css is actually loaded by the running game.
+9. Check whether renderer.ts is actually the renderer used by the current running game.
+10. Check whether the browser preview is serving a stale/cached bundle or old build.
+11. Check whether the current preview URL is running the same source that was just modified.
+12. Check whether there are duplicate Chrono Clash files/components or another build/entry point being used.
+
+MOST IMPORTANT:
+
+Trace ONE visible element from source code to screen.
+
+Use the BOARD OUTER CYAN GLOW as the test.
+
+Tell me:
+- where its color is defined
+- where its glow is defined
+- which code actually renders it
+- whether the recent palette change affects it
+- whether another rule/renderer overrides it
+
+Do NOT fix anything yet.
+
+Do NOT change CSS.
+Do NOT change renderer code.
+Do NOT change geometry.
+Do NOT change gameplay.
+
+I want the ROOT CAUSE first.
+
+After investigating, give me a short report containing:
+
+ACTUAL RENDERER:
+[filename/component]
+
+BOARD GLOW SOURCE:
+[filename + relevant selector/function]
+
+PALETTE SOURCE:
+[filename]
+
+OVERRIDE FOUND:
+[yes/no + explanation]
+
+STALE BUILD/CACHE POSSIBLE:
+[yes/no + explanation]
+
+DUPLICATE RENDERER/ENTRY FOUND:
+[yes/no + explanation]
+
+RECOMMENDED FIX:
+[one specific fix]
+
+Do not report success based only on TypeScript/build checks.
