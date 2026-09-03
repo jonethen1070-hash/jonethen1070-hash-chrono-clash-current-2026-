@@ -1,0 +1,148 @@
+DO NOT make another cosmetic CSS adjustment yet.
+
+The previous changes are technically being committed, but the rendered 390x700 match screen is visually almost unchanged. This means the CSS variables/rules you modified are NOT the final rules controlling the rendered geometry, or they are being overridden by later/more-specific CSS.
+
+I need you to find the ACTUAL source of the rendered geometry before making any more changes.
+
+USE THE ATTACHED REFERENCE IMAGE AS THE VISUAL TARGET.
+
+FIRST: TRACE THE REAL DOM AND CSS
+
+1. Find the actual root match-screen element.
+2. Find the actual containers for:
+   - header
+   - player/VS row
+   - energy row
+   - Energy Burst / Mega Strike
+   - YOUR BOARD label
+   - 8x8 board
+   - bottom controls
+3. Find EVERY CSS rule affecting their:
+   - height
+   - min-height
+   - max-height
+   - width
+   - margin
+   - padding
+   - gap
+   - position
+   - transform
+   - flex/grid sizing
+4. Search the entire project for:
+   - board-size
+   - battle-height
+   - energy-height
+   - ability-height
+   - control-height
+   - match screen selectors
+   - board selectors
+5. Check for duplicated mobile media queries.
+6. Check for later CSS rules overriding aaa-polish.css.
+7. Check inline styles and React/TypeScript style objects.
+8. Check CSS specificity.
+9. Check whether the production preview is actually loading the modified aaa-polish.css.
+
+CRITICAL:
+Do NOT assume aaa-polish.css is the final authority just because it contains the variables.
+
+SECOND: PROVE THE REAL VALUES
+
+At runtime, inspect the actual rendered elements using getComputedStyle / DOM inspection.
+
+For each major section report its actual:
+- boundingClientRect top
+- boundingClientRect height
+- boundingClientRect width
+- computed margin
+- computed padding
+- computed min-height
+- computed max-height
+- computed gap
+
+Do this at EXACTLY 390x700.
+
+Do NOT just say "no overlap."
+
+I need the ACTUAL computed geometry.
+
+THIRD: FIX THE REAL CONTROLLING RULES
+
+After identifying which rules actually control the rendered layout, modify THOSE rules.
+
+Do not create another disconnected set of CSS variables that the UI does not consume.
+
+The desired vertical composition is:
+
+HEADER
+↓
+YOU / VS / RIVAL
+↓
+ENERGY
+↓
+ENERGY BURST + MEGA STRIKE
+↓
+YOUR BOARD
+↓
+8×8 BOARD
+↓
+FREEZE / TIME SHIFT / REWIND
+
+There must be NO YOUR ATTACK bar and NO RIVAL ATTACK bar anywhere.
+
+Energy Burst and Mega Strike are the intended ability cards and remain.
+
+FOURTH: MATCH THE REFERENCE
+
+The reference is the source of truth for proportions.
+
+At 390x700:
+
+- Header compact.
+- Player/VS row compact but readable.
+- Energy compact.
+- Ability cards compact.
+- YOUR BOARD label immediately above board.
+- Board is the dominant visual element.
+- Board must remain a true 8×8 grid.
+- All 64 gems visible.
+- Bottom three controls fully visible.
+- No scrolling.
+- No clipping.
+- No overlap.
+- No large unexplained empty gaps.
+
+If there is insufficient vertical space, reduce BOARD HEIGHT first while preserving the 8×8 grid proportions and readable gems.
+
+Do NOT simply shrink the whole application with transform: scale().
+Do NOT use overflow:hidden to hide a layout problem.
+Do NOT allow scrolling.
+Do NOT change gameplay.
+Do NOT change gem artwork.
+Do NOT change touch/swipe logic.
+Do NOT change scoring or CPU behavior.
+
+FIFTH: IMPORTANT VALIDATION
+
+After the real controlling CSS is fixed:
+
+1. Restart the workflow.
+2. Hard-refresh the preview.
+3. Open the actual live match screen.
+4. Inspect it at exactly 390x700.
+5. Verify the computed geometry again.
+6. Compare the rendered composition against the attached reference.
+
+MOST IMPORTANT:
+
+If the rendered screenshot looks essentially unchanged after your edit, STOP and investigate why the edited CSS is not controlling the element.
+
+Do NOT report success merely because:
+- TypeScript passes
+- production build passes
+- git diff passes
+- there is no console error
+- there is no overlap
+
+SUCCESS means the ACTUAL RENDERED 390x700 SCREEN visibly changes toward the attached reference.
+
+Make the actual fix now and show the final rendered match screen.
