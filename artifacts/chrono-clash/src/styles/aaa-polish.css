@@ -5763,7 +5763,7 @@ html body #app #match #playerGems {
 html body #app #match .powers {
   position: relative;
   z-index: 8;
-  transform: translateY(24px);
+  transform: translateZ(2px);
 }
 
 html body #app #match .power {
@@ -5921,13 +5921,35 @@ html body #app #match.match-screen {
 }
 
 html body #app #match .match-stage {
+  display: grid !important;
+  grid-template-rows:
+    var(--brand-height)
+    var(--battle-height)
+    auto
+    var(--control-height) !important;
   width: min(100%, 480px) !important;
   height: 100% !important;
   min-height: 0 !important;
   margin-inline: auto;
   gap: var(--section-gap) !important;
-  overflow: hidden !important;
-  justify-content: flex-start;
+  overflow: visible !important;
+  align-content: start;
+}
+
+html body #app #match .match-brand-row {
+  grid-row: 1 !important;
+}
+
+html body #app #match .match-top {
+  grid-row: 2 !important;
+}
+
+html body #app #match .boards {
+  grid-row: 3 !important;
+}
+
+html body #app #match .powers {
+  grid-row: 4 !important;
 }
 
 html body #app #match .match-brand-row {
@@ -6004,9 +6026,16 @@ html body #app #match .attack-meter {
 
 html body #app #match .boards {
   display: grid !important;
-  flex: 0 0 auto !important;
+  flex: none !important;
   width: 100% !important;
-  height: auto !important;
+  height:
+    calc(
+      var(--energy-height) +
+      var(--ability-height) +
+      var(--board-label-height) +
+      var(--board-size) +
+      (var(--section-gap) * 2)
+    ) !important;
   min-height: 0 !important;
   grid-template-rows:
     var(--energy-height)
@@ -6071,6 +6100,8 @@ html body #app #match .player-side .you-meta {
   height: var(--board-label-height) !important;
   min-height: 0 !important;
   margin: 0 !important;
+  position: relative !important;
+  inset: auto !important;
   padding-block: 0 !important;
   flex: 0 0 var(--board-label-height) !important;
 }
@@ -7106,13 +7137,13 @@ html body #app #match .power#rewind {
     --game-pad-x: 4px;
     --game-pad-top: 0px;
     --game-pad-bottom: 0px;
-    --section-gap: 0px;
-    --brand-height: 36px;
-    --battle-height: 66px;
-    --energy-height: 29px;
-    --ability-height: 74px;
-    --board-label-height: 17px;
-    --control-height: 78px;
+    --section-gap: clamp(2px, 0.5dvh, 4px);
+    --brand-height: clamp(36px, 5.2dvh, 40px);
+    --battle-height: clamp(66px, 9.5dvh, 72px);
+    --energy-height: clamp(28px, 4.1dvh, 32px);
+    --ability-height: clamp(62px, 10.5dvh, 74px);
+    --board-label-height: clamp(20px, 2.8dvh, 22px);
+    --control-height: clamp(62px, 11.1dvh, 78px);
     --vertical-chrome:
       calc(
         var(--brand-height) +
@@ -7125,7 +7156,8 @@ html body #app #match .power#rewind {
         var(--game-pad-bottom) +
         var(--safe-top) +
         var(--safe-bottom) +
-        (var(--section-gap) * 5)
+        (var(--section-gap) * 5) +
+        8px
       );
     --board-size:
       min(
@@ -7198,5 +7230,15 @@ html body #app #match .power#rewind {
     html body #app #match .power .cost {
       font-size: 10px !important;
     }
+  }
+
+  html body #app #match .boards {
+    gap: var(--section-gap) !important;
+  }
+
+  html body #app #match .player-side .you-meta > span:first-child {
+    white-space: nowrap !important;
+    font-size: 7px !important;
+    letter-spacing: .08em !important;
   }
 }
