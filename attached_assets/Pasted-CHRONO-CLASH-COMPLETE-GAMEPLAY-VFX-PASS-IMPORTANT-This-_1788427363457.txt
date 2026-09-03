@@ -1,0 +1,438 @@
+CHRONO CLASH — COMPLETE GAMEPLAY VFX PASS
+
+IMPORTANT:
+This is a VFX / FEEL pass only.
+
+DO NOT CHANGE THE LOCKED GAME GEOMETRY.
+
+DO NOT change:
+- layout
+- board size
+- board position
+- HUD position
+- ability-card size
+- bottom-control size
+- responsive geometry
+- 8x8 board structure
+- gem positions/layout
+- gameplay rules
+- match logic
+- CPU logic
+- energy calculations
+- scoring
+- timers
+- authentication
+- navigation
+
+Do not create a new game renderer.
+
+Use the EXISTING Chrono Clash rendering/gameplay system.
+
+==================================================
+MAIN GOAL
+==================================================
+
+Make Chrono Clash feel like a premium futuristic competitive puzzle game.
+
+The player should receive an immediate visual response for every important action.
+
+VFX should follow this feeling:
+
+TOUCH
+→ GEM RESPONSE
+→ MATCH
+→ IMPACT
+→ CASCADE
+→ COMBO
+→ ENERGY
+→ ABILITY
+→ BATTLE RESPONSE
+
+Every effect must be:
+- fast
+- crisp
+- smooth
+- readable
+- satisfying
+- mobile-friendly
+
+Do NOT make the screen constantly flashy.
+
+Effects happen mainly when something important occurs.
+
+==================================================
+1. GEM TOUCH / SELECTION
+==================================================
+
+When the player touches/selects a gem:
+
+- subtle bright outline
+- small scale pulse
+- soft glow
+- tiny particle sparkle
+- very short response time
+
+The response must feel immediate.
+
+Do NOT permanently enlarge gems.
+
+Do NOT change gem size/layout.
+
+==================================================
+2. GEM MATCH
+==================================================
+
+When a valid match occurs:
+
+First:
+- matched gems briefly brighten
+- quick energy flash
+- subtle pulse
+
+Then:
+- gems disappear with a crisp burst
+- small particles radiate outward
+- tiny fragments/sparkles
+- short glow flash
+
+The effect should feel like the gem is breaking apart from energy.
+
+Use color-aware particles based on the gem type.
+
+Keep the effect centered on the matched gems.
+
+Do NOT cover the entire board.
+
+==================================================
+3. MATCH IMPACT
+==================================================
+
+Create a very short impact flash when a match is confirmed.
+
+Use:
+- bright center flash
+- radial particles
+- subtle ring/shockwave
+- tiny screen/board impact
+
+The impact must be extremely short.
+
+Avoid excessive screen shake.
+
+The player should feel:
+
+"YES — I made that match."
+
+==================================================
+4. CASCADE / FALLING GEMS
+==================================================
+
+When gems fall after a match:
+
+- smooth falling animation
+- subtle motion trail
+- tiny glow during movement
+- soft landing pulse
+
+When new gems enter the board:
+
+- quick materialize effect
+- small sparkle
+- subtle upward energy shimmer
+
+Do NOT slow gameplay excessively.
+
+Animations must remain responsive.
+
+==================================================
+5. COMBO SYSTEM VISUALS
+==================================================
+
+If the game already has combo/multiple-match logic:
+
+Increase VFX intensity gradually.
+
+Example:
+
+MATCH 1
+small impact
+
+MATCH 2
+stronger particles + glow
+
+MATCH 3
+stronger burst + brighter energy
+
+HIGH COMBO
+larger but still controlled impact
+
+Do NOT invent or change scoring rules.
+
+Only react visually to the existing combo state.
+
+If there is no combo state available, do NOT modify gameplay logic just to create one.
+
+==================================================
+6. ENERGY GAIN
+==================================================
+
+When the player gains energy:
+
+- small energy particles travel toward the ENERGY meter
+- meter receives a short glow pulse
+- number briefly highlights
+- tiny blue/cyan spark effect
+
+The visual should communicate:
+
+"That match gave me energy."
+
+Do NOT change energy values or calculations.
+
+==================================================
+7. ENERGY BURST
+==================================================
+
+When Energy Burst is successfully used:
+
+Create a clearly recognizable ability effect.
+
+Sequence:
+
+1. Ability card flashes.
+2. Energy travels from the HUD toward the board.
+3. 3x3 affected area receives a cyan/green energy grid highlight.
+4. Short charging pulse.
+5. Strong radial explosion.
+6. Affected gems break with particles.
+7. Energy shockwave expands outward.
+8. Board settles with a short residual glow.
+
+Make this feel substantially stronger than a normal match.
+
+Do NOT change the existing 3x3 gameplay logic.
+
+The VFX must follow the actual affected cells.
+
+==================================================
+8. MEGA STRIKE
+==================================================
+
+When Mega Strike is successfully used:
+
+Make it the most visually powerful normal ability.
+
+Sequence:
+
+1. Ability card flashes.
+2. Red/magenta energy charges.
+3. Affected color is highlighted across the board.
+4. Short warning pulse.
+5. Energy beam/flash sweeps through the affected gems.
+6. Gems explode simultaneously.
+7. Particles travel outward.
+8. Short red/magenta shockwave.
+9. Board settles.
+
+It should feel like a powerful weapon.
+
+Do NOT change which gems are affected.
+
+Use the existing ability logic.
+
+==================================================
+9. FREEZE
+==================================================
+
+When FREEZE is activated:
+
+- cyan/ice energy spreads over the board
+- subtle frost particles
+- affected board edges glow
+- brief crystalline/frozen shimmer
+- activation button pulses once
+
+Keep the effect elegant.
+
+Do NOT cover gem readability.
+
+Do NOT change Freeze mechanics.
+
+==================================================
+10. TIME SHIFT
+==================================================
+
+When TIME SHIFT is activated:
+
+Use a distinct time-manipulation effect:
+
+- purple circular energy ring
+- short reverse-time particles
+- subtle radial distortion
+- brief clock/time pulse
+- particles move backward briefly
+- board receives a short purple glow
+
+Do NOT alter the actual gameplay logic.
+
+The effect should communicate:
+
+TIME IS BEING MANIPULATED.
+
+==================================================
+11. REWIND
+==================================================
+
+When REWIND is activated:
+
+Create a stronger temporal effect:
+
+- red/purple circular rewind ring
+- particles briefly move backward
+- short rotational energy trail
+- board receives a temporal pulse
+- quick flash as the previous state returns
+
+Do NOT modify the underlying rewind functionality.
+
+Only visualize it.
+
+==================================================
+12. CPU / RIVAL ACTION
+==================================================
+
+When the CPU makes an important action:
+
+Give the player visual feedback.
+
+Examples:
+
+- subtle red pulse around Rival HUD
+- red energy travelling toward the board
+- brief board-side red flash
+- affected gems receive a short warning glow
+- impact when the CPU action resolves
+
+Do NOT make the CPU unfairly obvious.
+
+Do NOT expose hidden CPU information.
+
+Do NOT change CPU behavior.
+
+==================================================
+13. PLAYER VS RIVAL FEEL
+==================================================
+
+The game should visually communicate:
+
+PLAYER = CYAN / BLUE ENERGY
+
+RIVAL = RED / MAGENTA ENERGY
+
+Player actions should primarily use cyan/blue.
+
+Rival actions should primarily use red/magenta.
+
+Temporal abilities can use purple.
+
+This creates a consistent visual language.
+
+==================================================
+14. BOARD AMBIENT VFX
+==================================================
+
+Add very subtle ambient movement around the board:
+
+- tiny floating particles
+- occasional energy spark
+- subtle cyan edge energy
+- subtle red edge energy
+- extremely slow atmospheric movement
+
+This must NOT become distracting.
+
+The board should feel alive even when nothing is happening.
+
+Do NOT animate every gem continuously.
+
+==================================================
+15. BUTTON FEEDBACK
+==================================================
+
+Existing game controls should feel responsive.
+
+When tapped:
+
+- tiny press animation
+- short glow
+- icon pulse
+- quick release animation
+
+Do NOT resize or reposition buttons.
+
+Do NOT change their locked dimensions.
+
+==================================================
+16. VICTORY
+==================================================
+
+When the player wins:
+
+Create a strong reward sequence.
+
+Suggested sequence:
+
+- board energy pulse
+- cyan particle burst
+- expanding energy ring
+- bright but brief screen glow
+- particles rise outward/upward
+- victory UI receives a premium glow
+
+The result should feel earned.
+
+Do NOT change victory logic.
+
+==================================================
+17. DEFEAT
+==================================================
+
+When the player loses:
+
+Use a different emotional treatment:
+
+- red/magenta energy pulse
+- brief board dim
+- particles fall/dissipate
+- controlled red glow
+- subtle temporal fade
+
+Do not make defeat visually frustrating or overly dark.
+
+==================================================
+18. TRANSITIONS
+==================================================
+
+Use smooth transitions between important game states.
+
+Avoid instant hard cuts where an existing transition is expected.
+
+Keep transitions short.
+
+Target approximately:
+
+100–300ms for small UI feedback.
+
+300–700ms for major ability/result effects.
+
+Do NOT delay gameplay unnecessarily.
+
+==================================================
+19. VFX STYLE
+==================================================
+
+Overall visual language:
+
+PREMIUM
+SCI-FI
+CR
