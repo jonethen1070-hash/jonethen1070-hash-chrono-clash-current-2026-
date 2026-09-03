@@ -7047,15 +7047,35 @@ html body #app #match .power#rewind {
 
 @media (max-width: 600px) and (max-height: 720px) {
   html body #app #match.match-screen {
+    --game-pad-x: 4px;
+    --game-pad-top: 0px;
+    --game-pad-bottom: 0px;
+    --section-gap: 0px;
+    --brand-height: 36px;
+    --battle-height: 84px;
+    --energy-height: 37px;
+    --ability-height: 60px;
+    --board-label-height: 28px;
+    --control-height: 90px;
+    --vertical-chrome:
+      calc(
+        var(--brand-height) +
+        var(--battle-height) +
+        var(--energy-height) +
+        var(--ability-height) +
+        var(--board-label-height) +
+        var(--control-height) +
+        var(--game-pad-top) +
+        var(--game-pad-bottom) +
+        var(--safe-top) +
+        var(--safe-bottom) +
+        (var(--section-gap) * 5)
+      );
     --board-size:
       min(
         calc(100vw - var(--safe-left) - var(--safe-right) - (var(--game-pad-x) * 2) - 10px),
         calc(100dvh - var(--vertical-chrome)),
         430px
       );
-    --battle-height: 58px;
-    --energy-height: 24px;
-    --ability-height: 43px;
-    --control-height: 60px;
   }
 }
