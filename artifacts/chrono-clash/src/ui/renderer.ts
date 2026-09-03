@@ -975,7 +975,7 @@ export class BoardRenderer {
     now: number,
   ): void {
     if (this.fx.quality === "low" || this.fx.reducedMotion) return;
-    const active = boosted || frozen || isPlayer;
+    const active = boosted || frozen;
     if (!active) return;
     const pulse = 0.5 + Math.sin(now / (boosted ? 150 : 420)) * 0.5;
     const color = frozen ? "#7CF5FF" : isPlayer ? "#00D9FF" : "#FF174F";

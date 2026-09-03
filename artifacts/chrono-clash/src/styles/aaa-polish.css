@@ -8753,3 +8753,234 @@ html body #app #match button.energy-attack:disabled .energy-attack-copy b {
 html body #app #match button.energy-attack:disabled .energy-attack-copy small {
   color: #91A8B8 !important;
 }
+
+/* =========================================================
+   IDLE MATCH CLEANUP
+   Keep the locked match geometry and all functional controls.
+   Remove only static decoration, ambient motion, and generic
+   idle glow. Event classes retain their own VFX.
+   ========================================================= */
+
+html #app:has(#match.active) .space-nebula,
+html #app:has(#match.active) .space-stars,
+html #app:has(#match.active) .space-planet,
+html #app:has(#match.active) .space-clouds,
+html #app:has(#match.active) .space-drift,
+html #app:has(#match.active) .space-structure,
+html #app:has(#match.active) .space-peaks,
+html #app:has(#match.active) .space-split,
+html #app:has(#match.active) .space-sparks,
+html #app:has(#match.active) .space-dust,
+html #app:has(#match.active) .space-debris {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  animation: none !important;
+  filter: none !important;
+}
+
+html #app:has(#match.active) .space-layer {
+  display: none !important;
+}
+
+html:has(#match.active) body::before {
+  background: none !important;
+}
+
+html:has(#match.active) body::after {
+  background: none !important;
+}
+
+html body #app #match .arena-architecture,
+html body #app #match .match-brand,
+html body #app #match .hud-conduit,
+html body #app #match .vs-arcs,
+html body #app #match .vs-reactor,
+html body #app #match .ability-deck,
+html body #app #match .board-fastener,
+html body #app #match .board-energy-glass {
+  display: none !important;
+  animation: none !important;
+  filter: none !important;
+}
+
+html body #app #match:not(.clash-in) .vs-clash {
+  display: none !important;
+  animation: none !important;
+}
+
+html body #app #match.clash-in .vs-clash {
+  display: block !important;
+}
+
+html body #app #match #timerLabel,
+html body #app #match #youLevel,
+html body #app #match #rivalLevel {
+  visibility: hidden !important;
+}
+
+html body #app #match .match-stage::before {
+  content: none !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+html body #app #match .vs-column::before,
+html body #app #match .vs-column::after {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+html body #app #match .vs-badge {
+  filter: none !important;
+  text-shadow: none !important;
+}
+
+html body #app #match .you-meta {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+html body #app #match .hud-icon,
+html body #app #match .hud-mute {
+  box-shadow:
+    inset 0 1px 0 #EAFBFF33,
+    inset 0 -5px 8px #01050AA3,
+    0 3px 0 #01050AB3 !important;
+}
+
+html body #app #match .fighter.you,
+html body #app #match .fighter.rival {
+  box-shadow:
+    inset 0 1px 0 #EAFBFF3D,
+    inset 0 -11px 15px #01050ACC,
+    0 4px 0 #01050AC2 !important;
+}
+
+html body #app #match .avatar-ring,
+html body #app #match .avatar-ring.rival {
+  box-shadow:
+    0 0 0 2px #01050AA3,
+    inset 0 2px 0 #EAFBFF57 !important;
+}
+
+html body #app #match .fighter .avatar {
+  text-shadow: 0 2px 0 #01050AB8 !important;
+}
+
+html body #app #match .score-rail {
+  box-shadow:
+    inset 0 2px 7px #01050AB8,
+    inset 0 -1px 0 #EAFBFF14 !important;
+}
+
+html body #app #match .score-track {
+  box-shadow: inset 0 2px 4px #01050AB3 !important;
+}
+
+html body #app #match .fighter.you .score-track i,
+html body #app #match .fighter.rival .score-track i {
+  box-shadow: inset 0 1px 0 #FFFFFFD1 !important;
+}
+
+html body #app #match .vs-column .timer {
+  box-shadow:
+    inset 0 1px 0 #EAFBFF38,
+    inset 0 -5px 8px #01050AB3,
+    0 4px 0 #01050AAD !important;
+}
+
+html body #app #match .vs-column .timer b {
+  text-shadow: 0 2px 0 #01050ADC !important;
+}
+
+html body #app #match .energy-wrap {
+  box-shadow:
+    inset 0 1px 0 #EAFBFF3D,
+    inset 0 -7px 11px #01050AB8,
+    0 4px 0 #01050ABD !important;
+}
+
+html body #app #match .energy-wrap small,
+html body #app #match .energy-wrap b {
+  text-shadow: 0 2px 0 #01050AF2 !important;
+}
+
+html body #app #match .energy-wrap .energy {
+  box-shadow:
+    inset 0 3px 5px #01050AF7,
+    inset 0 -1px 0 #EAFBFF24 !important;
+}
+
+html body #app #match .energy-wrap .energy > span {
+  box-shadow:
+    inset 0 1px 0 #FFFFFFDC,
+    inset 0 -2px 3px #006B8F80 !important;
+}
+
+html body #app #match .energy-attack {
+  box-shadow:
+    inset 0 1px 0 #EAFBFF3B,
+    inset 0 -9px 13px #01050AB8,
+    0 4px 0 #01050ABD !important;
+}
+
+html body #app #match .energy-attack-glyph {
+  filter: drop-shadow(0 2px 0 #01050AC2) !important;
+}
+
+html body #app #match .energy-attack-copy b {
+  text-shadow: 0 2px 0 #01050AF2 !important;
+}
+
+html body #app #match .player-side .board-slot {
+  box-shadow:
+    0 0 0 1px #01050A,
+    0 0 0 3px #007A9E5C,
+    0 2px 0 #DDF8FF4D,
+    0 15px 0 #01050A94,
+    0 24px 38px #01050ADC,
+    inset 0 4px 13px #01050AF5,
+    inset 0 0 0 3px #005B7847,
+    inset 0 -10px 17px #01050AC7 !important;
+}
+
+html body #app #match .board-outer-rail {
+  box-shadow:
+    0 3px 0 #007A9E,
+    0 8px 0 #033847,
+    0 15px 0 #04101A,
+    0 23px 22px #01050AF7,
+    inset 0 1px 0 #EAFBFF4D,
+    inset -10px 0 14px #01050AC7 !important;
+}
+
+html body #app #match #playerGems {
+  filter:
+    saturate(1.12)
+    contrast(1.12)
+    brightness(1.02)
+    drop-shadow(0 5px 8px #01050AF0) !important;
+}
+
+html body #app #match .power {
+  box-shadow:
+    inset 0 1px 0 #EAFBFF3B,
+    inset 0 -9px 14px #01050AB8,
+    0 4px 0 #01050AC2,
+    0 11px 18px #01050AB3 !important;
+}
+
+html body #app #match .power .glyph {
+  box-shadow:
+    inset 0 3px 7px #EAFBFF4D,
+    inset 0 -7px 10px #01050AB8,
+    0 3px 0 #01050A9E !important;
+}
+
+html body #app #match .power b,
+html body #app #match .power .cost {
+  text-shadow: 0 2px 0 #01050AF0 !important;
+}
