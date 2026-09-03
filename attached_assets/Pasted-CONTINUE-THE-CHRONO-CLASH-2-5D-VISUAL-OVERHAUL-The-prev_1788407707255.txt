@@ -1,0 +1,117 @@
+CONTINUE THE CHRONO CLASH 2.5D VISUAL OVERHAUL.
+
+The previous instruction was cut off after “CORE”. No project changes were made yet.
+
+CORE REQUIREMENT:
+The ENTIRE game must look like a cohesive 2.5D sci-fi mobile game, not a 2D website with CSS effects.
+
+Do NOT change:
+- gameplay
+- match-3 logic
+- gem movement
+- scoring
+- timer
+- energy calculations
+- attacks
+- power-up behavior
+- controls
+- networking
+- game state
+- existing functionality
+
+Do NOT rebuild the game.
+
+VISUAL TARGET:
+Use my supplied Chrono Clash reference image as the design benchmark.
+
+Make the entire scene 2.5D:
+
+1. BACKGROUND
+- Deep layered cosmic environment
+- Stars, nebula and atmospheric depth
+- Multiple visual depth layers
+- Subtle parallax
+- No flat single-color background
+
+2. ARENA
+- Make the whole gameplay area feel like a physical futuristic arena
+- Layered metal/glass surfaces
+- Beveled edges
+- Depth and shadows
+- Reflections and controlled glow
+
+3. BOARD
+- Large dominant 8x8 board
+- Thick dimensional outer housing
+- Beveled cyan frame
+- Recessed playfield
+- Inner and outer rims
+- Realistic depth separation
+- Complete frame visible
+
+4. GEMS
+- Large dimensional crystalline gems
+- Faceted 3D appearance
+- Internal glow
+- Reflections
+- Highlights
+- Contact shadows
+- Gems must look like physical crystals sitting inside recessed sockets
+- NOT flat icons
+
+5. HUD
+Make YOU, RIVAL, VS, timer, attack bars and ENERGY feel like physical glass/metal holographic components with:
+- depth
+- bevels
+- shadows
+- reflections
+- controlled emissive lighting
+
+6. ENERGY BURST / MEGA STRIKE
+Make both physical 2.5D ability modules with dimensional glass/metal construction and their existing green/red identities.
+
+7. FREEZE / TIME SHIFT / REWIND
+Keep them compact and fully visible, but give them dimensional glass/metal depth, bevels, shadows and lighting.
+
+8. LIGHTING
+Create ONE coherent lighting system:
+- cyan illumination around the player/board
+- crimson illumination around the rival side
+- gem glow
+- board light spilling onto nearby surfaces
+- consistent reflections and shadows
+
+Everything must look like it exists in the SAME physical environment.
+
+FINAL COMPOSITION:
+Compact top HUD
+↓
+Attack bars
+↓
+Energy
+↓
+Energy Burst + Mega Strike
+↓
+LARGE 8x8 BOARD + LARGE CRYSTAL GEMS
+↓
+Compact Freeze + Time Shift + Rewind
+
+At 390x844:
+- all 8x8 gems visible
+- complete board frame visible
+- bottom controls completely visible
+- no clipping
+- no overlap
+- no scrolling
+- touch targets remain usable
+
+MOST IMPORTANT:
+Do not simply add neon gradients or shadows to flat elements.
+
+The finished game must visually communicate:
+“premium futuristic 2.5D sci-fi game arena.”
+
+NOT:
+“2D webpage with neon CSS.”
+
+After implementation, test the game and confirm gameplay/functionality was not changed.

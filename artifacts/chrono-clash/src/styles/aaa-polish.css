@@ -3383,3 +3383,250 @@ html body #app #match .powers {
     font-size: 9px !important;
   }
 }
+
+/* =========================================================
+   AAA 2.5D PHYSICAL MATERIAL POLISH
+   ========================================================= */
+
+/* Deep Layered Cosmic Environment */
+html body #app #match.match-screen {
+  background:
+    radial-gradient(ellipse 100% 100% at 50% -5%, rgba(4, 12, 28, 0.7), transparent 70%),
+    radial-gradient(ellipse 80% 80% at 10% 10%, rgba(0, 180, 220, 0.15), transparent 60%),
+    radial-gradient(ellipse 80% 80% at 90% 10%, rgba(220, 0, 60, 0.12), transparent 60%);
+  box-shadow: inset 0 0 100px rgba(0, 2, 8, 0.85);
+}
+
+/* Layered Beveled Metal/Glass Housing for HUD (Fighters) */
+html body #app #match .fighter.you,
+html body #app #match .fighter.rival {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.01) 8%, transparent 14%),
+    linear-gradient(180deg, rgba(14, 22, 34, 0.85), rgba(6, 10, 16, 0.95));
+  backdrop-filter: blur(10px);
+  border-radius: 14px;
+  position: relative;
+}
+
+/* Cyan Illumination on Player Surfaces */
+html body #app #match .fighter.you {
+  border: 1px solid rgba(0, 180, 220, 0.4);
+  box-shadow:
+    inset 0 1px 0 rgba(180, 240, 255, 0.25),
+    inset 0 -3px 8px rgba(0, 180, 220, 0.2),
+    0 12px 24px rgba(0, 0, 0, 0.65),
+    0 0 12px rgba(0, 180, 220, 0.15);
+}
+html body #app #match .fighter.you::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 10%; right: 10%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(180, 240, 255, 0.9), transparent);
+}
+
+/* Crimson Accents on Rival Surfaces */
+html body #app #match .fighter.rival {
+  border: 1px solid rgba(220, 0, 60, 0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 200, 210, 0.2),
+    inset 0 -3px 8px rgba(220, 0, 60, 0.2),
+    0 12px 24px rgba(0, 0, 0, 0.65),
+    0 0 12px rgba(220, 0, 60, 0.12);
+}
+html body #app #match .fighter.rival::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 10%; right: 10%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 180, 200, 0.8), transparent);
+}
+
+/* Recessed Board Depth with Clear Inner and Outer Rims */
+html body #app #match .player-side .board-slot,
+html body #app #match .rival-side .board-slot {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.04), transparent 40%),
+    linear-gradient(180deg, #03060c, #060a12);
+  border-radius: 22px;
+  position: relative;
+}
+
+html body #app #match .player-side .board-slot {
+  border: 1px solid rgba(0, 180, 220, 0.35);
+  box-shadow:
+    inset 0 4px 16px rgba(0, 0, 0, 0.85),
+    inset 0 0 0 2px rgba(0, 180, 220, 0.15),
+    inset 0 0 24px rgba(0, 180, 220, 0.12),
+    0 2px 0 rgba(255, 255, 255, 0.08),
+    0 16px 32px rgba(0, 0, 0, 0.75);
+}
+
+html body #app #match .rival-side .board-slot {
+  border: 1px solid rgba(220, 0, 60, 0.3);
+  box-shadow:
+    inset 0 3px 12px rgba(0, 0, 0, 0.85),
+    inset 0 0 0 2px rgba(220, 0, 60, 0.12),
+    inset 0 0 18px rgba(220, 0, 60, 0.1),
+    0 2px 0 rgba(255, 255, 255, 0.06),
+    0 12px 24px rgba(0, 0, 0, 0.65);
+}
+
+/* Inner Rim Highlights for Board */
+html body #app #match .player-side .board-slot::after,
+html body #app #match .rival-side .board-slot::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: 20px;
+  pointer-events: none;
+}
+html body #app #match .player-side .board-slot::after {
+  box-shadow: inset 0 2px 0 rgba(0, 212, 255, 0.15);
+}
+html body #app #match .rival-side .board-slot::after {
+  box-shadow: inset 0 2px 0 rgba(255, 0, 76, 0.12);
+}
+
+/* Attack Meters Dimensionality */
+html body #app #match .attack-meter {
+  background: linear-gradient(180deg, rgba(8, 12, 20, 0.95), rgba(4, 6, 10, 0.98));
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.6),
+    0 6px 12px rgba(0, 0, 0, 0.5);
+}
+html body #app #match .attack-meter span {
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.85);
+  border: 1px solid rgba(0, 0, 0, 0.6);
+  border-radius: 4px;
+}
+html body #app #match .attack-meter.you span {
+  background: #020508;
+}
+html body #app #match .attack-meter.rival span {
+  background: #060203;
+}
+
+/* Energy Modules */
+html body #app #match .energy-wrap {
+  background: linear-gradient(180deg, rgba(20, 28, 42, 0.85), rgba(8, 12, 18, 0.95));
+  border: 1px solid rgba(0, 180, 220, 0.25);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    0 10px 20px rgba(0, 0, 0, 0.6);
+  border-radius: 12px;
+}
+html body #app #match .energy-wrap .energy {
+  background: #020306;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.9);
+  border: 1px solid rgba(0, 120, 160, 0.4);
+  border-radius: 99px;
+}
+
+/* Energy Attack Modules */
+html body #app #match .energy-attack {
+  background: linear-gradient(180deg, rgba(22, 30, 44, 0.9), rgba(10, 14, 22, 0.96));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 8px 16px rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+}
+html body #app #match .energy-attack.burst {
+  border-color: rgba(0, 180, 220, 0.4);
+}
+html body #app #match .energy-attack.strike {
+  border-color: rgba(220, 0, 60, 0.4);
+}
+html body #app #match .energy-attack::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 10%; right: 10%; height: 1px;
+  opacity: 0.8;
+}
+html body #app #match .energy-attack.burst::before {
+  background: linear-gradient(90deg, transparent, rgba(180, 240, 255, 0.7), transparent);
+}
+html body #app #match .energy-attack.strike::before {
+  background: linear-gradient(90deg, transparent, rgba(255, 180, 200, 0.7), transparent);
+}
+
+/* Ability Powers (Freeze, Time Shift, Rewind) */
+html body #app #match .power {
+  background: linear-gradient(180deg, rgba(24, 32, 46, 0.88), rgba(8, 12, 18, 0.96));
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.5),
+    0 8px 16px rgba(0, 0, 0, 0.6);
+}
+html body #app #match .power:active {
+  box-shadow:
+    inset 0 4px 10px rgba(0, 0, 0, 0.8),
+    0 2px 4px rgba(0, 0, 0, 0.4);
+  transform: translateY(2px) scale(0.96);
+}
+
+/* Ready States with Physical Glow */
+html body #app #match #freeze.ready {
+  border-color: rgba(125, 211, 252, 0.7);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 0 20px rgba(56, 189, 248, 0.25),
+    0 8px 16px rgba(0, 0, 0, 0.6);
+}
+html body #app #match #timeshift.ready {
+  border-color: rgba(56, 189, 248, 0.7);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 0 20px rgba(14, 165, 233, 0.25),
+    0 8px 16px rgba(0, 0, 0, 0.6);
+}
+html body #app #match #rewind.ready {
+  border-color: rgba(251, 113, 133, 0.75);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 0 20px rgba(244, 63, 94, 0.25),
+    0 8px 16px rgba(0, 0, 0, 0.6);
+}
+
+/* Central Timer/VS Module */
+html body #app #match .vs-column .timer {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.01) 8%, transparent 14%),
+    linear-gradient(180deg, rgba(20, 28, 42, 0.9), rgba(8, 12, 18, 0.96));
+  border: 1px solid rgba(180, 220, 240, 0.35);
+  border-radius: 12px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.5),
+    0 10px 20px rgba(0, 0, 0, 0.65),
+    0 0 12px rgba(0, 180, 220, 0.15);
+  position: relative;
+}
+html body #app #match .vs-column .timer::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 10%; right: 10%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(180, 240, 255, 0.9), transparent);
+  opacity: 0.8;
+}
+
+/* Avatar Ring Refinements for Physicality */
+html body #app #match .avatar-ring {
+  border: 1px solid rgba(0, 180, 220, 0.4);
+  box-shadow:
+    inset 0 2px 4px rgba(255, 255, 255, 0.25),
+    inset 0 -4px 8px rgba(0, 30, 50, 0.6),
+    0 6px 12px rgba(0, 0, 0, 0.5);
+}
+html body #app #match .avatar-ring.rival {
+  border: 1px solid rgba(220, 0, 60, 0.4);
+  box-shadow:
+    inset 0 2px 4px rgba(255, 255, 255, 0.2),
+    inset 0 -4px 8px rgba(50, 0, 16, 0.6),
+    0 6px 12px rgba(0, 0, 0, 0.5);
+}
