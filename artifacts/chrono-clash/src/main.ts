@@ -107,15 +107,16 @@ app.innerHTML = `
       </div>
       <div class="menu-pilot" id="menuPilot"></div>
       <div class="menu-account" id="menuAccount">
-        <p class="menu-ident" id="menuIdent">Sign in or continue as Guest to get a Player ID.</p>
-        <div class="menu-row">
-          <button type="button" class="ghost game-ctl" id="menuSignIn">SIGN IN</button>
-          <button type="button" class="primary game-ctl" id="menuGuest">CONTINUE AS GUEST</button>
+        <p class="menu-kicker">ENTER THE GAME</p>
+        <p class="menu-ident" id="menuIdent">Sign in to save your Player ID, progression and trophies.</p>
+        <div class="identity-list">
+          <button type="button" class="primary game-ctl identity-facebook" id="menuFacebook">SIGN IN WITH FACEBOOK</button>
+          <button type="button" class="ghost game-ctl" id="menuEmail">SIGN IN WITH EMAIL</button>
+          <button type="button" class="ghost game-ctl identity-guest" id="menuGuest">CONTINUE AS GUEST</button>
         </div>
+        <p class="menu-status" id="menuStatus" aria-live="polite"></p>
       </div>
       <div class="menu-nav">
-        <button type="button" class="primary play-cta" id="play">PLAY</button>
-        <button type="button" class="ghost game-ctl" id="toOnline">ONLINE 1v1</button>
         <div class="menu-row">
           <button type="button" class="ghost game-ctl" id="toProfile">PROFILE</button>
           <button type="button" class="ghost game-ctl" id="toTrophies">TROPHIES</button>
@@ -125,9 +126,9 @@ app.innerHTML = `
     </section>
 
     <section id="online" class="screen">
-      <div class="logo compact"><h1>ONLINE 1v1</h1><p id="onlineSub">CHRONO CLASH SERVER</p></div>
+      <div class="logo compact"><h1>CHOOSE YOUR BATTLE</h1><p id="onlineSub">SELECT A MATCH TYPE</p></div>
       <div class="settings-body">
-        <p class="brief" id="onlineIdent">Sign in to get a Player ID.</p>
+        <p class="brief" id="onlineIdent">Choose how you want to play.</p>
         <div class="mode-list" id="authButtons"></div>
         <p class="muted" id="onlineStatus"></p>
       </div>
@@ -427,6 +428,7 @@ const ui = {
   splash: $("#splash"),
   skipIntro: $("#skipIntro"),
   menu: $("#menu"),
+  menuStatus: $("#menuStatus"),
   online: $("#online"),
   onlineSub: $("#onlineSub"),
   onlineIdent: $("#onlineIdent"),
@@ -936,7 +938,7 @@ function paintMenuAccount(): void {
   if (!ident) return;
   ident.textContent = net.player
     ? `${net.player.provider.toUpperCase()} · ${net.player.playerId}`
-    : "Sign in or continue as Guest to get a Player ID.";
+    : "Sign in to save your Player ID, progression and trophies.";
 }
 
 function allowedAuth(config: PublicAuthConfig | null): AuthProvider[] {
@@ -951,40 +953,22 @@ function providerHint(provider: AuthProvider, config: PublicAuthConfig | null): 
 }
 
 async function paintOnline(): Promise<void> {
-  const platform = detectPlatform();
-  ui.onlineSub.textContent = `${platform.toUpperCase()} · CHRONO CLASH SERVER`;
-  if (!net.token) {
-    const config = await net.authConfig().catch(() => null);
-    ui.onlineIdent.textContent = "Sign in to get a Player ID.";
-    const providers = allowedAuth(config);
-    ui.authButtons.innerHTML = providers
-      .map(
-        (provider) =>
-          `<button class="mode-card" data-provider="${provider}"><small>${platform.toUpperCase()}</small><b>${provider.toUpperCase()}</b><span>${providerHint(provider, config)}</span></button>`,
-      )
-      .join("");
-    ui.onlineStatus.textContent = providers.length ? "" : "Guest sign-in is unavailable.";
-    return;
-  }
-  try {
-    const me = await net.me();
-    ui.onlineIdent.textContent = `${me.name} · ${me.playerId}`;
-    ui.authButtons.innerHTML = onlineSignedInHtml(me.provider.toUpperCase(), me.playerId, "Signed in");
-    ui.onlineStatus.textContent = "";
-  } catch (err) {
-    if (isAuthFailure(err)) {
-      stopMatchPoll();
-      await net.signOut();
-      await paintOnline();
-      return;
-    }
-    // Server/network fault: keep the Player ID instead of bouncing back to sign-in.
-    const cached = net.player;
-    const savedId = cached?.playerId || loadOnlineSession()?.playerId || "";
-    ui.onlineIdent.textContent = cached ? `${cached.name} · ${cached.playerId}` : `PLAYER ID ${savedId}`;
-    ui.authButtons.innerHTML = onlineSignedInHtml((cached?.provider || "session").toUpperCase(), savedId, "Signed in · offline");
-    ui.onlineStatus.textContent = err instanceof Error ? err.message : "chrono clash server unreachable";
-  }
+  const me = net.player;
+  ui.onlineSub.textContent = "SELECT A MATCH TYPE";
+  ui.onlineIdent.textContent = me ? `${me.name} · ${me.playerId}` : "Guest pilot · Player ID ready.";
+  ui.authButtons.innerHTML = `
+    <button class="mode-card battle-choice" id="battleLocal">
+      <small>LOCAL ARENA</small>
+      <b>1v1 BATTLE</b>
+      <span>Challenge another player</span>
+    </button>
+    <button class="mode-card battle-choice" id="battleRandom">
+      <small>ONLINE ARENA</small>
+      <b>RANDOM MATCH</b>
+      <span>Find an opponent automatically</span>
+    </button>
+  `;
+  ui.onlineStatus.textContent = "";
 }
 
 function onlineSignedInHtml(providerLabel: string, playerId: string, note: string): string {
@@ -1141,9 +1125,20 @@ async function cancelOnlineMatch(): Promise<void> {
   }
 }
 
-async function signInWith(provider: AuthProvider, existingToken?: string): Promise<void> {
+function setIdentityStatus(message: string): void {
+  ui.menuStatus.textContent = message;
+  ui.onlineStatus.textContent = message;
+}
+
+function enterBattleSelect(): void {
+  session.openOnline();
+  syncScreenNow();
+  void paintOnline();
+}
+
+async function signInWith(provider: AuthProvider, existingToken?: string): Promise<boolean> {
   const platform = detectPlatform();
-  ui.onlineStatus.textContent = provider === "guest" ? "SIGNING IN AS GUEST..." : `CONTACTING ${provider.toUpperCase()}...`;
+  setIdentityStatus(provider === "guest" ? "SIGNING IN AS GUEST..." : `CONTACTING ${provider.toUpperCase()}...`);
   try {
     // Guest must not depend on /v1/auth/config; the server decides whether guest is allowed.
     const config = await net.authConfig().catch((err) => {
@@ -1158,11 +1153,12 @@ async function signInWith(provider: AuthProvider, existingToken?: string): Promi
     }
     await net.signIn({ platform, provider, token, displayName: session.progress.name });
     await Promise.all([pullRemoteEconomy(), pullRemoteDailyRun()]);
-    ui.onlineStatus.textContent = `PLAYER ID ${net.player?.playerId ?? ""}`;
+    setIdentityStatus(`PLAYER ID ${net.player?.playerId ?? ""}`);
     paintMenuAccount();
-    await paintOnline();
+    return true;
   } catch (err) {
-    ui.onlineStatus.textContent = err instanceof Error ? err.message : "sign-in failed";
+    setIdentityStatus(err instanceof Error ? err.message : "sign-in failed");
+    return false;
   }
 }
 
@@ -1179,20 +1175,23 @@ ui.splash.addEventListener("click", () => {
     syncScreenNow();
   }
 });
-$("#menuSignIn").addEventListener("click", () => {
+$("#menuFacebook").addEventListener("click", () => {
   unlockGameAudio(audio, settings.music);
   pressUi();
-  session.openOnline();
-  syncScreenNow();
-  void paintOnline();
+  void signInWith("facebook").then((signedIn) => {
+    if (signedIn) enterBattleSelect();
+  });
+});
+$("#menuEmail").addEventListener("click", () => {
+  unlockGameAudio(audio, settings.music);
+  pressUi();
+  ui.menuStatus.textContent = "EMAIL SIGN-IN IS NOT CONFIGURED YET. USE FACEBOOK OR GUEST.";
 });
 $("#menuGuest").addEventListener("click", () => {
   unlockGameAudio(audio, settings.music);
   pressUi();
-  void signInWith("guest").then(() => {
-    session.openOnline();
-    syncScreenNow();
-    void paintOnline();
+  void signInWith("guest").then((signedIn) => {
+    if (signedIn) enterBattleSelect();
   });
 });
 $("#hudMute").addEventListener("click", () => {
@@ -1203,22 +1202,6 @@ $("#hudMute").addEventListener("click", () => {
   if (settings.music) audio.startMusic();
   else audio.stopMusic();
   pressUi();
-});
-$("#play").addEventListener("click", () => {
-  unlockGameAudio(audio, settings.music);
-  pressUi("confirm");
-  audio.startMusic();
-  session.openModes();
-  syncScreenNow();
-  if (session.screen === "tutorial") renderTutorial();
-  if (session.screen === "modes") renderScoreTargets();
-});
-$("#toOnline").addEventListener("click", () => {
-  unlockGameAudio(audio, settings.music);
-  pressUi();
-  session.openOnline();
-  syncScreenNow();
-  void paintOnline();
 });
 $("#onlineBack").addEventListener("click", () => {
   pressUi();
@@ -1232,16 +1215,25 @@ $("#onlineBack").addEventListener("click", () => {
 $("#authButtons").addEventListener("click", (e) => {
   const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("button");
   if (!btn || !ui.authButtons.contains(btn)) return;
-  if (btn.dataset.provider) {
-    void signInWith(btn.dataset.provider as AuthProvider);
-    return;
-  }
-  if (btn.id === "findOnlineMatch") void startOnlineMatch();
+  if (btn.id === "battleLocal") {
+    pressUi("confirm");
+    session.openModes();
+    syncScreenNow();
+    if (session.screen === "tutorial") renderTutorial();
+    if (session.screen === "modes") renderScoreTargets();
+  } else if (btn.id === "battleRandom") {
+    pressUi("confirm");
+    void startOnlineMatch();
+  } else if (btn.id === "findOnlineMatch") void startOnlineMatch();
   else if (btn.id === "cancelOnlineMatch") void cancelOnlineMatch();
   else if (btn.id === "signOutOnline") {
     stopMatchPoll();
     leaveOnlineBattle();
-    void net.signOut().then(() => paintOnline());
+    void net.signOut().then(() => {
+      session.toMenu();
+      syncScreenNow();
+      paintMenuPilot();
+    });
   }
 });
 $("#toProfile").addEventListener("click", () => {

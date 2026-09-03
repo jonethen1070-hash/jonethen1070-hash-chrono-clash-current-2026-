@@ -1,0 +1,198 @@
+CHRONO CLASH — SIMPLIFY MAIN MENU AND CREATE 2-STEP PLAY FLOW
+
+IMPORTANT:
+This is a MENU / UX change only.
+
+DO NOT TOUCH THE LOCKED CHRONO CLASH GAMEPLAY GEOMETRY.
+
+Do not modify the locked in-game:
+- header geometry
+- battle HUD geometry
+- energy geometry
+- ability-card geometry
+- board geometry
+- bottom-control geometry
+- responsive game viewport system
+
+==================================================
+PAGE 1 — ENTER THE GAME
+==================================================
+
+Redesign the current main menu to have ONE clear primary purpose:
+
+ENTER / SIGN IN TO PLAY
+
+Keep the premium Chrono Clash visual style and existing background/art direction.
+
+Main hierarchy:
+
+CHRONO CLASH
+
+PREMIUM PUZZLE BATTLE
+
+[ SIGN IN WITH FACEBOOK ]
+
+[ SIGN IN WITH EMAIL ]
+
+Then a smaller secondary option:
+
+CONTINUE AS GUEST
+
+Supporting text:
+
+"Sign in to save your Player ID, progression and trophies."
+
+Do NOT show:
+- ONLINE 1v1
+- RANDOM MATCH
+- separate game-mode buttons
+
+on this first page.
+
+The first page is about PLAYER IDENTITY.
+
+==================================================
+SIGN-IN OPTIONS
+==================================================
+
+SIGN IN WITH FACEBOOK:
+Use the existing authentication architecture if available.
+
+SIGN IN WITH EMAIL:
+Use the existing email authentication architecture if available.
+
+Do NOT invent fake authentication.
+
+If authentication is not currently implemented, create the UI flow without breaking the existing application and clearly preserve the appropriate integration point.
+
+CONTINUE AS GUEST:
+Keep guest play functional if it already exists.
+
+Guest users should proceed to the battle-selection page.
+
+==================================================
+PAGE 2 — CHOOSE YOUR BATTLE
+==================================================
+
+After successful sign-in OR choosing Continue as Guest:
+
+Open a dedicated battle-selection screen.
+
+Title:
+
+CHOOSE YOUR BATTLE
+
+Two primary choices:
+
+[ 1v1 BATTLE ]
+"Challenge another player"
+
+[ RANDOM MATCH ]
+"Find an opponent automatically"
+
+Include:
+
+[ BACK ]
+
+Use the same premium Chrono Clash sci-fi visual language.
+
+==================================================
+NAVIGATION
+==================================================
+
+The intended flow is:
+
+MAIN MENU
+↓
+SIGN IN WITH FACEBOOK
+        OR
+SIGN IN WITH EMAIL
+        OR
+CONTINUE AS GUEST
+↓
+CHOOSE YOUR BATTLE
+↓
+1v1 BATTLE
+        OR
+RANDOM MATCH
+↓
+EXISTING MATCH / GAME FLOW
+
+Do not create duplicate paths to the same functionality.
+
+==================================================
+IMPORTANT UX RULE
+==================================================
+
+Do NOT treat SIGN IN / GUEST as game modes.
+
+They are PLAYER IDENTITY choices.
+
+Do NOT treat 1v1 / RANDOM MATCH as account choices.
+
+They are GAME MODE choices.
+
+Keep these decisions on separate screens.
+
+==================================================
+MINIMAL MAIN MENU
+==================================================
+
+The first page should feel clean and premium.
+
+Primary action:
+SIGN IN / ENTER
+
+Authentication choices:
+Facebook
+Email
+Guest
+
+The second page handles:
+1v1
+Random Match
+
+Do not overcrowd the first screen with unnecessary buttons.
+
+==================================================
+PRESERVE EXISTING FUNCTIONALITY
+==================================================
+
+Do not remove working functionality.
+
+Do not break existing guest play.
+
+Do not break existing profile/trophy data.
+
+Do not change gameplay.
+
+Do not change CPU behavior.
+
+Do not change the locked game-screen geometry.
+
+Do not modify the 8x8 board.
+
+Do not restore YOUR ATTACK or RIVAL ATTACK.
+
+==================================================
+FINAL TEST
+==================================================
+
+Verify:
+
+1. Main menu opens correctly.
+2. Facebook option is visible.
+3. Email option is visible.
+4. Guest option is visible.
+5. Selecting an identity proceeds to Choose Your Battle.
+6. Choose Your Battle shows exactly:
+   - 1v1 BATTLE
+   - RANDOM MATCH
+7. Back returns correctly.
+8. Existing game flow still works.
+9. No duplicate ONLINE 1v1 button remains on the main menu.
+10. No duplicate PLAY button remains that bypasses the new flow.
+
+This is a MENU/UX restructuring task only.
+
+Do not alter the locked Chrono Clash gameplay geometry.
