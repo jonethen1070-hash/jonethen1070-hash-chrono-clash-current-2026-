@@ -1,0 +1,114 @@
+CHRONO CLASH — THE COLOR PASS IS NOT VISIBLY SHOWING
+
+I inspected the actual rendered game after the previous change.
+
+The code reports that the exact palette was applied, but visually the game looks almost the same as before.
+
+DO NOT make another generic polish pass.
+
+First diagnose WHY the new palette is not visibly producing a major difference.
+
+CHECK BOTH RENDERING SYSTEMS:
+
+1. CSS UI
+2. Canvas renderer
+
+Specifically inspect for:
+- existing CSS overrides
+- later selectors overriding the new colors
+- CSS variables not actually being used
+- inline styles overriding CSS
+- canvas hard-coded colors
+- canvas gradients using old colors
+- renderer constants overriding the new palette
+- opacity values making the new colors visually insignificant
+- existing glow layers masking the new colors
+
+IMPORTANT:
+Do not simply tell me that the HEX values exist in the source code.
+
+Verify that those exact values are actually visible in the rendered game.
+
+Use the following exact primary colors:
+
+PLAYER CYAN:
+#00D9FF
+
+PLAYER DEEP:
+#006B8F
+
+RIVAL RED:
+#FF174F
+
+RIVAL DEEP:
+#8A1235
+
+TEMPORAL PURPLE:
+#A855F7
+
+ENERGY GREEN:
+#39FF88
+
+PINK:
+#FF167F
+
+BLUE:
+#126BFF
+
+CYAN GEM:
+#00BFFF
+
+GOLD:
+#FFD447
+
+BACKGROUND:
+#020611
+
+BOARD:
+#020812
+
+AFTER DIAGNOSIS:
+
+Make the color separation visibly stronger in the actual rendered game.
+
+PLAYER SIDE must visibly read as cyan/blue.
+
+RIVAL SIDE must visibly read as red/magenta.
+
+CENTER must visibly read as dark purple/temporal.
+
+BOARD must visibly read as dark metallic/cyan.
+
+GEMS must visibly retain their individual exact colors.
+
+Do NOT increase brightness everywhere.
+
+Do NOT just add more glow.
+
+The goal is stronger COLOR IDENTITY and MATERIAL CONTRAST.
+
+ABSOLUTE LOCK:
+Do not change:
+- layout
+- dimensions
+- positions
+- 8×8 board geometry
+- HUD geometry
+- bottom controls
+- responsive behavior
+- gameplay
+- CPU
+- scoring
+- mechanics
+
+After fixing it:
+
+1. Build the project.
+2. Open the actual rendered game.
+3. Compare the rendered result against the previous version.
+4. Confirm which visible elements changed.
+5. If the change is only detectable in source code but not clearly visible on screen, continue fixing the rendering path.
+
+Do not report “palette applied” as success.
+
+SUCCESS = I can clearly see the difference in the actual game.
