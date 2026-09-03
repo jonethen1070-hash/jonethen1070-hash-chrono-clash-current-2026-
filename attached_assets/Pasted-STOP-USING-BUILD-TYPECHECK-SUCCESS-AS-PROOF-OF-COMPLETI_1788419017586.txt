@@ -1,0 +1,178 @@
+STOP USING BUILD/TYPECHECK SUCCESS AS PROOF OF COMPLETION.
+
+The previous implementation changed CSS variables but the LIVE MATCH SCREEN still does not match my attached reference.
+
+I need an ACTUAL RENDERED LAYOUT CHANGE.
+
+Do NOT finish this task by saying:
+- TypeScript passed
+- production build passed
+- git diff passed
+- workflow restarted
+- preview loaded
+
+Those are NOT visual verification.
+
+THE ONLY SUCCESS CRITERION IS THE LIVE MATCH SCREEN.
+
+IMPORTANT:
+The automated 390x700 capture does not enter the live match, so DO NOT use that capture as visual proof.
+
+Instead, inspect the actual rendered match-screen DOM/CSS and make the layout changes directly.
+
+================================================
+TARGET GEOMETRY
+================================================
+
+Use my attached reference image as the strict geometry reference.
+
+The match screen must be a single non-scrolling mobile viewport.
+
+TOP TO BOTTOM:
+
+1. Header
+2. YOU / VS / RIVAL
+3. ENERGY BAR
+4. ENERGY BURST / MEGA STRIKE
+5. YOUR BOARD label
+6. 8x8 board
+7. FREEZE / TIME SHIFT / REWIND
+
+YOUR ATTACK and RIVAL ATTACK bars MUST REMAIN REMOVED.
+
+================================================
+CRITICAL LAYOUT
+================================================
+
+Use one parent match-screen layout that controls ALL vertical space.
+
+Do not position each section independently with arbitrary margins.
+
+Use a flex/grid vertical layout.
+
+The available viewport height must be divided deliberately between the sections.
+
+The board gets the largest flexible portion of the remaining height.
+
+The bottom three controls MUST always remain completely visible.
+
+If height is insufficient:
+
+FIRST reduce:
+- board height
+- board frame padding
+- section gaps
+
+DO NOT push the bottom controls below the viewport.
+
+================================================
+REFERENCE PROPORTIONS
+================================================
+
+For approximately 390x700:
+
+HEADER:
+~40px
+
+PLAYER ROW:
+~90px
+
+ENERGY:
+~35–40px
+
+SPECIAL ATTACK ROW:
+~65–75px
+
+BOARD LABEL:
+~25–30px
+
+BOARD:
+use all remaining safe height
+
+BOTTOM CONTROLS:
+~85–95px
+
+These are TARGET PROPORTIONS, not excuses to blindly set unrelated CSS variables.
+
+================================================
+BOARD
+================================================
+
+Exactly 8 × 8.
+
+64 cells.
+
+The board width should nearly fill the available horizontal space.
+
+The board height must be explicitly constrained by the available viewport.
+
+The grid must never create page scrolling.
+
+Each gem must fit inside its own grid cell.
+
+The gem artwork must NOT determine the grid's size.
+
+================================================
+BOTTOM CONTROLS
+================================================
+
+Freeze / Time Shift / Rewind must always be fully visible.
+
+Three equal columns.
+
+No clipping.
+
+No overlap.
+
+No scrolling.
+
+================================================
+DO NOT CHANGE GAMEPLAY
+================================================
+
+Do not change:
+
+- match-3 logic
+- CPU
+- CPU LOCKED state
+- gem artwork
+- score
+- timer
+- energy mechanics
+- Energy Burst functionality
+- Mega Strike functionality
+- Freeze
+- Time Shift
+- Rewind
+- touch/swipe logic
+- audio
+
+ONLY CHANGE LAYOUT/GEOMETRY.
+
+================================================
+MOST IMPORTANT
+================================================
+
+You MUST make actual source changes.
+
+Do not merely report that existing CSS already satisfies the request.
+
+After changing the source:
+
+OPEN THE LIVE MATCH SCREEN.
+
+If necessary, use the existing development/browser tools to enter the match manually.
+
+Inspect the actual rendered dimensions of:
+- header
+- player row
+- energy
+- special attacks
+- board
+- bottom controls
+
+Then correct them.
+
+Do not declare completion until the actual rendered match screen visibly changes toward my attached reference.
+
+The reference image is the source of truth.
