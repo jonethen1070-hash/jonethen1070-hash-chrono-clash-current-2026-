@@ -5847,8 +5847,10 @@ html body #app #match .power:active {
 }
 
 /* =========================================================
-   RESPONSIVE FULL-SCREEN GAME VIEWPORT
-   One fluid system for short, narrow, standard and tall phones.
+   LOCKED BASELINE — CHRONO CLASH RESPONSIVE GEOMETRY
+   Fixed HUD sections + flexible square board + fixed bottom controls.
+   Do not change section heights, spacing, board sizing, or grid architecture
+   as part of visual-polish work.
    ========================================================= */
 
 html,
