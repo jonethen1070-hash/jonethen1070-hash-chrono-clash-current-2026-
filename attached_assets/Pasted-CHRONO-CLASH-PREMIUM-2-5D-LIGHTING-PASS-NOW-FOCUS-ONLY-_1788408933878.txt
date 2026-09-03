@@ -1,0 +1,336 @@
+CHRONO CLASH — PREMIUM 2.5D LIGHTING PASS
+
+NOW FOCUS ONLY ON LIGHTING.
+
+DO NOT change:
+- gameplay
+- game logic
+- scoring
+- timer
+- gem matching
+- controls
+- board size
+- HUD layout
+- Energy Burst
+- Mega Strike
+- Freeze
+- Time Shift
+- Rewind
+- networking
+- touch behavior
+
+DO NOT create a new design.
+DO NOT rearrange the UI.
+
+==================================================
+LIGHTING GOAL
+==================================================
+
+Make Chrono Clash look like a PREMIUM 2.5D SCI-FI ARENA through lighting.
+
+The lighting must create the illusion that the UI, board, gems and controls are physical objects existing in the same 3D space.
+
+DEPTH MUST COME FROM LIGHT + SHADOW + MATERIAL.
+
+Do NOT simply increase brightness or add neon glow.
+
+==================================================
+1. GLOBAL ARENA LIGHT
+==================================================
+
+Create a subtle dark cinematic base illumination.
+
+The center gameplay area should remain readable.
+
+Use soft atmospheric illumination behind the game elements.
+
+The background should have:
+- distant light
+- subtle haze
+- depth falloff
+- faint particles
+- controlled cosmic illumination
+
+Keep the overall scene dark and premium.
+
+==================================================
+2. CYAN PLAYER LIGHT
+==================================================
+
+Create a soft cyan light source originating from the YOU side.
+
+It should subtly illuminate:
+
+- YOU panel
+- attack bar
+- Energy area
+- left side of board housing
+- nearby board edges
+- nearby gems
+- lower-left controls
+
+The cyan light must have natural falloff.
+
+Do NOT make the entire screen cyan.
+
+==================================================
+3. RED RIVAL LIGHT
+==================================================
+
+Create a soft crimson/red light source originating from the RIVAL side.
+
+It should subtly illuminate:
+
+- RIVAL panel
+- rival attack bar
+- right side of board housing
+- nearby board edges
+- nearby gems
+- lower-right controls
+
+Again, use natural falloff.
+
+Do NOT flood the whole screen with red.
+
+==================================================
+4. BOARD LIGHTING
+==================================================
+
+The board is the main focal object.
+
+Give the board a strong but controlled cyan rim light.
+
+Create:
+
+outer rim highlight
+→ bevel highlight
+→ darker recessed frame
+→ subtle interior illumination
+→ gem illumination
+
+The board should look like a physical illuminated machine.
+
+Add subtle contact shadows around the inner playfield.
+
+==================================================
+5. GEM LIGHTING
+==================================================
+
+Keep the existing crystalline gems.
+
+Do NOT replace them.
+
+Make each gem feel self-illuminated but physically grounded.
+
+Use:
+
+crystal emission
++
+edge highlights
++
+internal light
++
+subtle contact shadow
+
+The gem should illuminate its immediate socket slightly.
+
+The glow must NOT spill excessively onto neighboring gems.
+
+The crystals must remain sharply readable.
+
+==================================================
+6. GEM COLOR LIGHT
+==================================================
+
+Each gem type should have its own controlled light character.
+
+CYAN:
+cool crystalline emission
+
+GREEN:
+emerald energy emission
+
+PURPLE:
+violet crystal emission
+
+PINK:
+magenta energy emission
+
+BLUE:
+electric blue emission
+
+GOLD:
+warm energy emission
+
+Keep the illumination subtle enough that the crystal geometry remains visible.
+
+==================================================
+7. HUD LIGHTING
+==================================================
+
+Apply environmental lighting to the HUD.
+
+YOU:
+cyan edge illumination.
+
+RIVAL:
+red edge illumination.
+
+VS:
+balanced cyan/red illumination.
+
+Timer:
+cool white/cyan illumination.
+
+Attack bars:
+subtle internal energy illumination.
+
+Energy:
+stronger internal cyan energy.
+
+Energy Burst:
+controlled green energy.
+
+Mega Strike:
+controlled crimson energy.
+
+==================================================
+8. DEPTH SHADOWS
+==================================================
+
+This is extremely important.
+
+Add subtle shadows BETWEEN layers.
+
+Examples:
+
+YOU panel → shadow behind panel
+
+Score module → shadow inside panel
+
+Attack bar → recessed shadow
+
+Energy reservoir → recessed shadow
+
+Ability cards → shadow underneath chassis
+
+Board → shadow behind housing
+
+Gems → contact shadow inside sockets
+
+Bottom controls → shadow behind their housings
+
+The shadows must communicate DEPTH.
+
+Do not use harsh black outlines.
+
+==================================================
+9. BEVEL LIGHTING
+==================================================
+
+Make bevels catch the light.
+
+Raised surfaces should receive highlights.
+
+Recessed surfaces should become darker.
+
+Corners should catch subtle specular highlights.
+
+This should make the interface appear manufactured from:
+
+dark metal
++
+smoked glass
++
+crystal
++
+energy materials.
+
+==================================================
+10. GLASS LIGHTING
+==================================================
+
+HUD glass should have subtle reflections.
+
+Use:
+
+dark translucent glass
++
+soft reflection
++
+edge highlight
++
+inner shadow
+
+Do NOT make the panels transparent enough to lose readability.
+
+==================================================
+11. CINEMATIC LIGHT BALANCE
+==================================================
+
+The brightest areas should naturally draw attention in this order:
+
+1. gameplay gems
+2. board frame
+3. Energy / abilities
+4. YOU / RIVAL
+5. secondary controls
+6. background
+
+Do not make every element equally bright.
+
+==================================================
+12. PREMIUM 2.5D TEST
+==================================================
+
+Temporarily imagine the text is removed.
+
+The scene should still communicate:
+
+- raised objects
+- recessed objects
+- illuminated objects
+- objects sitting in front of other objects
+- physical board depth
+- crystal depth
+
+If everything still looks like flat rectangles, continue the lighting pass.
+
+==================================================
+13. MOBILE TEST
+==================================================
+
+Test at exactly 390x844.
+
+Verify:
+
+- complete 8x8 board visible
+- all 64 gems visible
+- no clipping
+- no overlap
+- no scrolling
+- all controls visible
+- touch remains responsive
+- no excessive bloom
+- no unreadable text
+- no excessive glow
+
+==================================================
+FINAL RULE
+==================================================
+
+DO NOT declare the lighting pass complete just because the build succeeds.
+
+Actually inspect the running game.
+
+The final result should feel like:
+
+"2.5D sci-fi game hardware illuminated inside a dark cosmic arena."
+
+NOT:
+
+"2D CSS interface with neon colors."
+
+ONLY CHANGE LIGHTING, SHADOWS, REFLECTIONS, BEVEL HIGHLIGHTS AND RELATED VISUAL PRESENTATION.
+
+PRESERVE EVERYTHING ELSE.

@@ -4339,3 +4339,369 @@ html body #app #match .power:active {
   transform: translateY(2px) translateZ(42px) scale(0.97) !important;
   filter: brightness(0.92);
 }
+
+/* =========================================================
+   PREMIUM 2.5D LIGHTING PASS
+   Illumination, falloff, reflections and contact shadows only.
+   ========================================================= */
+
+html body #app #match.match-screen {
+  background:
+    radial-gradient(ellipse 42% 48% at 4% 26%, rgba(22, 198, 226, 0.12), transparent 76%),
+    radial-gradient(ellipse 42% 48% at 96% 27%, rgba(219, 32, 72, 0.1), transparent 76%),
+    radial-gradient(ellipse 58% 34% at 50% 48%, rgba(28, 76, 93, 0.08), transparent 78%),
+    linear-gradient(180deg, rgba(7, 17, 26, 0.08), rgba(0, 1, 4, 0.4)) !important;
+  box-shadow:
+    inset 0 0 110px rgba(0, 0, 0, 0.68),
+    inset 0 28px 38px rgba(82, 174, 196, 0.035),
+    inset 0 -90px 120px rgba(0, 0, 0, 0.52) !important;
+}
+
+html body #app #match.match-screen::before {
+  background:
+    radial-gradient(ellipse 34% 35% at 5% 27%, rgba(69, 225, 246, 0.14), transparent 72%),
+    radial-gradient(ellipse 34% 35% at 95% 27%, rgba(239, 50, 92, 0.11), transparent 72%),
+    radial-gradient(circle at 14% 10%, rgba(222, 252, 255, 0.7) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 84% 14%, rgba(255, 190, 202, 0.55) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 57% 5%, rgba(218, 248, 255, 0.45) 0 1px, transparent 1.6px),
+    linear-gradient(90deg, rgba(0, 181, 211, 0.06), transparent 31%, transparent 69%, rgba(203, 25, 62, 0.05)),
+    repeating-linear-gradient(90deg, transparent 0 39px, rgba(140, 215, 229, 0.012) 40px),
+    repeating-linear-gradient(0deg, transparent 0 39px, rgba(140, 215, 229, 0.01) 40px) !important;
+  opacity: 0.66 !important;
+}
+
+html body #app #match .match-stage::before {
+  background:
+    radial-gradient(ellipse 32% 48% at 0% 31%, rgba(20, 211, 236, 0.14), transparent 76%),
+    radial-gradient(ellipse 32% 48% at 100% 31%, rgba(228, 39, 82, 0.11), transparent 76%),
+    linear-gradient(180deg, rgba(27, 62, 76, 0.21), rgba(2, 8, 13, 0.24) 48%, rgba(0, 2, 5, 0.42)) !important;
+  box-shadow:
+    inset 14px 0 28px rgba(0, 179, 212, 0.075),
+    inset -14px 0 28px rgba(220, 30, 71, 0.06),
+    inset 0 1px 0 rgba(221, 253, 255, 0.045),
+    0 20px 44px rgba(0, 0, 0, 0.42) !important;
+}
+
+html body #app #match .match-brand {
+  filter:
+    drop-shadow(0 2px 0 rgba(0, 0, 0, 0.82))
+    drop-shadow(0 0 8px rgba(61, 218, 239, 0.22)) !important;
+}
+
+html body #app #match .fighter.you {
+  background:
+    radial-gradient(ellipse 72% 116% at 0% 54%, rgba(31, 222, 242, 0.23), transparent 72%),
+    linear-gradient(112deg, rgba(240, 255, 255, 0.16), transparent 34% 72%, rgba(255, 255, 255, 0.03)),
+    linear-gradient(180deg, rgba(29, 67, 81, 0.84), rgba(7, 18, 25, 0.98)) !important;
+  box-shadow:
+    inset 3px 0 0 rgba(53, 226, 241, 0.62),
+    inset 0 1px 0 rgba(240, 255, 255, 0.26),
+    inset 0 -10px 14px rgba(0, 0, 0, 0.62),
+    inset -12px 0 20px rgba(0, 87, 105, 0.1),
+    0 3px 0 rgba(0, 0, 0, 0.44),
+    0 11px 19px rgba(0, 0, 0, 0.6),
+    -7px 0 22px rgba(26, 211, 235, 0.12) !important;
+}
+
+html body #app #match .fighter.rival {
+  background:
+    radial-gradient(ellipse 72% 116% at 100% 54%, rgba(238, 46, 87, 0.2), transparent 72%),
+    linear-gradient(248deg, rgba(255, 232, 238, 0.14), transparent 34% 72%, rgba(255, 255, 255, 0.025)),
+    linear-gradient(180deg, rgba(74, 27, 42, 0.84), rgba(17, 6, 12, 0.98)) !important;
+  box-shadow:
+    inset -3px 0 0 rgba(241, 54, 96, 0.66),
+    inset 0 1px 0 rgba(255, 237, 241, 0.24),
+    inset 0 -10px 14px rgba(0, 0, 0, 0.64),
+    inset 12px 0 20px rgba(118, 8, 35, 0.1),
+    0 3px 0 rgba(0, 0, 0, 0.44),
+    0 11px 19px rgba(0, 0, 0, 0.6),
+    7px 0 22px rgba(235, 38, 82, 0.11) !important;
+}
+
+html body #app #match .fighter.you::before,
+html body #app #match .fighter.rival::before {
+  background:
+    linear-gradient(112deg, transparent 7%, rgba(235, 255, 255, 0.24) 30%, rgba(255, 255, 255, 0.055) 55%, transparent 87%) !important;
+  opacity: 0.42 !important;
+  mix-blend-mode: screen;
+}
+
+html body #app #match .fighter.you::after,
+html body #app #match .fighter.rival::after {
+  box-shadow:
+    inset 0 2px 7px rgba(0, 0, 0, 0.72),
+    inset 0 -1px 0 rgba(229, 253, 255, 0.07),
+    inset 7px 0 12px rgba(33, 211, 233, 0.045),
+    inset -7px 0 12px rgba(235, 42, 84, 0.035) !important;
+}
+
+html body #app #match .score-rail {
+  background:
+    linear-gradient(180deg, rgba(232, 252, 255, 0.08), transparent 25%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.11), rgba(0, 0, 0, 0.28)) !important;
+  box-shadow:
+    inset 0 2px 7px rgba(0, 0, 0, 0.62),
+    inset 0 -1px 0 rgba(239, 255, 255, 0.055),
+    0 2px 4px rgba(0, 0, 0, 0.36) !important;
+}
+
+html body #app #match .score-track i,
+html body #app #match .attack-meter i {
+  filter: saturate(0.92) brightness(1.02);
+}
+
+html body #app #match .fighter.you .score-track i,
+html body #app #match .attack-meter.you i {
+  box-shadow:
+    inset 0 1px 0 rgba(238, 255, 255, 0.44),
+    0 0 5px rgba(34, 216, 239, 0.52),
+    4px 0 10px rgba(34, 216, 239, 0.14) !important;
+}
+
+html body #app #match .fighter.rival .score-track i,
+html body #app #match .attack-meter.rival i {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 232, 238, 0.4),
+    0 0 5px rgba(239, 56, 96, 0.46),
+    -4px 0 10px rgba(239, 56, 96, 0.12) !important;
+}
+
+html body #app #match .vs-column::before {
+  background:
+    radial-gradient(ellipse 70% 74% at 18% 54%, rgba(26, 210, 235, 0.2), transparent 70%),
+    radial-gradient(ellipse 70% 74% at 82% 54%, rgba(239, 51, 92, 0.17), transparent 70%),
+    linear-gradient(180deg, rgba(221, 253, 255, 0.1), rgba(17, 38, 46, 0.36) 24%, rgba(2, 7, 12, 0.74)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(236, 255, 255, 0.2),
+    inset 0 -9px 12px rgba(0, 0, 0, 0.58),
+    0 8px 13px rgba(0, 0, 0, 0.62),
+    -5px 0 12px rgba(0, 197, 225, 0.08),
+    5px 0 12px rgba(233, 44, 87, 0.07) !important;
+}
+
+html body #app #match .vs-badge {
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.82),
+    -2px 0 7px rgba(46, 215, 237, 0.34),
+    2px 0 7px rgba(240, 68, 104, 0.3) !important;
+}
+
+html body #app #match .vs-column .timer {
+  box-shadow:
+    inset 0 1px 0 rgba(239, 255, 255, 0.28),
+    inset 0 -6px 9px rgba(0, 0, 0, 0.66),
+    inset 0 0 14px rgba(87, 190, 209, 0.055),
+    0 3px 0 rgba(0, 0, 0, 0.44),
+    0 9px 15px rgba(0, 0, 0, 0.58),
+    0 0 10px rgba(139, 236, 249, 0.1) !important;
+}
+
+html body #app #match .attack-meter {
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.7),
+    inset 0 -1px 0 rgba(229, 253, 255, 0.08),
+    0 3px 0 rgba(0, 0, 0, 0.4),
+    0 8px 13px rgba(0, 0, 0, 0.5) !important;
+}
+
+html body #app #match .attack-meter.you span {
+  box-shadow:
+    inset 0 3px 5px rgba(0, 0, 0, 0.88),
+    inset 0 -1px 0 rgba(105, 237, 252, 0.12),
+    0 0 8px rgba(20, 198, 226, 0.1) !important;
+}
+
+html body #app #match .attack-meter.rival span {
+  box-shadow:
+    inset 0 3px 5px rgba(0, 0, 0, 0.88),
+    inset 0 -1px 0 rgba(255, 137, 158, 0.1),
+    0 0 8px rgba(226, 37, 78, 0.09) !important;
+}
+
+html body #app #match .energy-wrap {
+  background:
+    radial-gradient(ellipse 40% 150% at 50% 50%, rgba(26, 201, 225, 0.12), transparent 74%),
+    linear-gradient(180deg, rgba(217, 252, 255, 0.13), transparent 13%),
+    linear-gradient(180deg, rgba(24, 58, 70, 0.85), rgba(3, 11, 16, 0.98)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(231, 255, 255, 0.24),
+    inset 0 -7px 12px rgba(0, 0, 0, 0.64),
+    inset 0 0 16px rgba(0, 180, 210, 0.08),
+    0 3px 0 rgba(0, 0, 0, 0.42),
+    0 9px 16px rgba(0, 0, 0, 0.55),
+    0 0 13px rgba(31, 215, 237, 0.09) !important;
+}
+
+html body #app #match .energy-wrap .energy {
+  box-shadow:
+    inset 0 3px 6px rgba(0, 0, 0, 0.92),
+    inset 0 -1px 0 rgba(210, 248, 255, 0.09),
+    0 0 6px rgba(34, 213, 236, 0.14) !important;
+}
+
+html body #app #match .energy-wrap .energy > span {
+  background:
+    linear-gradient(180deg, rgba(235, 255, 255, 0.54), transparent 35%),
+    linear-gradient(90deg, #00627d, #00c8e2 42%, #8af8ff) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(247, 255, 255, 0.56),
+    0 0 8px rgba(42, 221, 241, 0.5),
+    6px 0 13px rgba(42, 221, 241, 0.1) !important;
+}
+
+html body #app #match .energy-attack.burst {
+  box-shadow:
+    inset 0 1px 0 rgba(226, 255, 234, 0.2),
+    inset 0 -8px 12px rgba(0, 0, 0, 0.58),
+    inset 0 0 17px rgba(45, 220, 87, 0.1),
+    0 3px 0 rgba(0, 0, 0, 0.4),
+    0 9px 16px rgba(0, 0, 0, 0.56),
+    0 0 12px rgba(74, 226, 97, 0.14) !important;
+}
+
+html body #app #match .energy-attack.strike {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 229, 237, 0.19),
+    inset 0 -8px 12px rgba(0, 0, 0, 0.6),
+    inset 0 0 17px rgba(233, 38, 81, 0.1),
+    0 3px 0 rgba(0, 0, 0, 0.4),
+    0 9px 16px rgba(0, 0, 0, 0.56),
+    0 0 12px rgba(235, 42, 85, 0.13) !important;
+}
+
+html body #app #match .energy-attack-glyph {
+  filter:
+    drop-shadow(0 2px 0 rgba(0, 0, 0, 0.7))
+    drop-shadow(0 0 4px currentColor)
+    brightness(1.04) !important;
+}
+
+html body #app #match .player-side .board-slot {
+  box-shadow:
+    0 0 0 1px #010307,
+    0 0 0 3px rgba(18, 139, 162, 0.27),
+    0 2px 0 rgba(222, 253, 255, 0.24),
+    0 5px 0 rgba(0, 11, 15, 0.8),
+    0 21px 35px rgba(0, 0, 0, 0.78),
+    0 0 22px rgba(34, 218, 239, 0.24),
+    0 0 46px rgba(0, 144, 179, 0.09),
+    inset 0 4px 14px rgba(0, 0, 0, 0.92),
+    inset 0 0 0 3px rgba(0, 143, 169, 0.23),
+    inset 0 0 22px rgba(0, 193, 218, 0.08),
+    inset 0 -11px 17px rgba(0, 0, 0, 0.74) !important;
+}
+
+html body #app #match .player-side .board-slot::after {
+  background:
+    linear-gradient(112deg, rgba(224, 255, 255, 0.11), transparent 22% 78%, rgba(47, 220, 239, 0.045)),
+    linear-gradient(90deg, transparent 8%, rgba(229, 255, 255, 0.64) 50%, transparent 92%) top / 38% 2px no-repeat,
+    linear-gradient(90deg, transparent 8%, rgba(31, 213, 233, 0.46) 50%, transparent 92%) bottom / 38% 2px no-repeat,
+    linear-gradient(180deg, transparent 10%, rgba(47, 221, 240, 0.4) 50%, transparent 90%) left / 2px 32% no-repeat,
+    linear-gradient(180deg, transparent 10%, rgba(47, 221, 240, 0.4) 50%, transparent 90%) right / 2px 32% no-repeat !important;
+  box-shadow:
+    inset 0 5px 14px rgba(0, 0, 0, 0.9),
+    inset 0 0 0 2px rgba(4, 58, 71, 0.8),
+    inset 0 -2px 0 rgba(30, 163, 184, 0.4),
+    inset 0 0 20px rgba(0, 184, 211, 0.07) !important;
+}
+
+html body #app #match .board-canvas {
+  filter:
+    saturate(1.32)
+    contrast(1.14)
+    brightness(1.06)
+    drop-shadow(0 5px 8px rgba(0, 0, 0, 0.9))
+    drop-shadow(0 0 5px rgba(79, 224, 242, 0.08)) !important;
+}
+
+html body #app #match .you-meta {
+  box-shadow:
+    inset 0 1px 0 rgba(229, 253, 255, 0.2),
+    inset 0 -4px 7px rgba(0, 0, 0, 0.56),
+    inset 0 0 12px rgba(29, 214, 235, 0.08),
+    0 3px 0 rgba(0, 0, 0, 0.45),
+    0 7px 11px rgba(0, 0, 0, 0.44),
+    0 0 9px rgba(39, 219, 239, 0.1) !important;
+}
+
+html body #app #match .powers {
+  filter:
+    drop-shadow(0 13px 8px rgba(0, 0, 0, 0.66))
+    drop-shadow(0 0 9px rgba(18, 169, 190, 0.05)) !important;
+}
+
+html body #app #match .power {
+  box-shadow:
+    inset 0 1px 0 rgba(239, 254, 255, 0.2),
+    inset 0 -9px 13px rgba(0, 0, 0, 0.64),
+    inset 0 0 14px rgba(86, 170, 190, 0.055),
+    0 3px 0 rgba(0, 0, 0, 0.5),
+    0 10px 17px rgba(0, 0, 0, 0.64) !important;
+}
+
+html body #app #match #freeze {
+  box-shadow:
+    inset 0 1px 0 rgba(234, 253, 255, 0.23),
+    inset 0 -9px 13px rgba(0, 18, 25, 0.68),
+    inset 0 0 15px rgba(22, 205, 229, 0.08),
+    0 3px 0 rgba(0, 0, 0, 0.5),
+    0 10px 17px rgba(0, 0, 0, 0.64),
+    0 0 13px rgba(45, 229, 245, 0.1) !important;
+}
+
+html body #app #match #timeshift {
+  box-shadow:
+    inset 0 1px 0 rgba(247, 232, 255, 0.21),
+    inset 0 -9px 13px rgba(24, 4, 38, 0.7),
+    inset 0 0 15px rgba(164, 65, 231, 0.08),
+    0 3px 0 rgba(0, 0, 0, 0.5),
+    0 10px 17px rgba(0, 0, 0, 0.64),
+    0 0 13px rgba(168, 69, 232, 0.1) !important;
+}
+
+html body #app #match #rewind {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 232, 238, 0.2),
+    inset 0 -9px 13px rgba(43, 2, 15, 0.72),
+    inset 0 0 15px rgba(238, 50, 93, 0.08),
+    0 3px 0 rgba(0, 0, 0, 0.5),
+    0 10px 17px rgba(0, 0, 0, 0.64),
+    0 0 13px rgba(240, 68, 104, 0.1) !important;
+}
+
+html body #app #match #freeze .glyph,
+html body #app #match #timeshift .glyph,
+html body #app #match #rewind .glyph {
+  box-shadow:
+    inset 0 3px 7px rgba(255, 255, 255, 0.22),
+    inset 0 -7px 10px rgba(0, 0, 0, 0.66),
+    0 3px 0 rgba(0, 0, 0, 0.56),
+    0 7px 12px rgba(0, 0, 0, 0.5) !important;
+}
+
+html body #app #match #freeze .glyph {
+  box-shadow:
+    inset 0 3px 7px rgba(236, 255, 255, 0.34),
+    inset 0 -7px 10px rgba(0, 30, 40, 0.68),
+    0 3px 0 rgba(0, 0, 0, 0.56),
+    0 7px 12px rgba(0, 0, 0, 0.5),
+    0 0 10px rgba(46, 222, 240, 0.24) !important;
+}
+
+html body #app #match #timeshift .glyph {
+  box-shadow:
+    inset 0 3px 7px rgba(250, 235, 255, 0.3),
+    inset 0 -7px 10px rgba(32, 4, 50, 0.7),
+    0 3px 0 rgba(0, 0, 0, 0.56),
+    0 7px 12px rgba(0, 0, 0, 0.5),
+    0 0 10px rgba(175, 83, 235, 0.2) !important;
+}
+
+html body #app #match #rewind .glyph {
+  box-shadow:
+    inset 0 3px 7px rgba(255, 236, 242, 0.28),
+    inset 0 -7px 10px rgba(53, 2, 17, 0.72),
+    0 3px 0 rgba(0, 0, 0, 0.56),
+    0 7px 12px rgba(0, 0, 0, 0.5),
+    0 0 10px rgba(240, 68, 104, 0.21) !important;
+}
