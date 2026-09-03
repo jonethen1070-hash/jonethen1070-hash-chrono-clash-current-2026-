@@ -7513,3 +7513,607 @@ html body #app #results.tie .result-burst {
     animation-duration: 1ms;
   }
 }
+
+/* =========================================================
+   X10 COSMIC ARENA FINISH
+   Presentation-only polish. Do not add layout, sizing, or
+   responsive placement rules here: the match geometry is locked.
+   ========================================================= */
+
+html #app:has(#match.active) .space-nebula {
+  background:
+    radial-gradient(ellipse 34% 24% at 17% 21%, rgba(28, 198, 235, .2), transparent 72%),
+    radial-gradient(ellipse 32% 25% at 84% 26%, rgba(235, 42, 91, .17), transparent 74%),
+    radial-gradient(ellipse 52% 34% at 50% 61%, rgba(13, 108, 151, .13), transparent 76%),
+    radial-gradient(ellipse 72% 48% at 50% 116%, rgba(0, 3, 10, .9), transparent 75%),
+    linear-gradient(180deg, rgba(0, 2, 8, .28), rgba(0, 0, 2, .72)),
+    var(--art-battle) !important;
+  background-blend-mode: screen, screen, screen, multiply, normal, normal;
+  filter: saturate(1.16) contrast(1.13) brightness(.74) !important;
+  animation: cc-nebula-breathe 18s ease-in-out infinite alternate;
+}
+
+html #app:has(#match.active) .space-stars {
+  opacity: .56 !important;
+  filter: brightness(1.42) contrast(1.2) drop-shadow(0 0 4px rgba(128, 225, 255, .22));
+  mix-blend-mode: screen;
+}
+
+html #app:has(#match.active) .space-clouds {
+  opacity: .42 !important;
+  filter: saturate(1.2) contrast(1.12) brightness(.82);
+  mix-blend-mode: screen;
+}
+
+html #app:has(#match.active) .space-structure {
+  opacity: .54 !important;
+  filter: contrast(1.28) saturate(1.18) brightness(.74);
+}
+
+html #app:has(#match.active) .space-sparks {
+  opacity: .42 !important;
+  filter: brightness(1.5) saturate(1.3);
+}
+
+html #app:has(#match.active) .space-vignette {
+  background:
+    radial-gradient(ellipse 48% 42% at 50% 48%, rgba(0, 0, 0, .04), rgba(0, 0, 0, .27) 58%, rgba(0, 0, 0, .86) 100%),
+    linear-gradient(90deg, rgba(0, 15, 31, .28), transparent 24% 76%, rgba(30, 0, 15, .25)),
+    linear-gradient(180deg, transparent 0 68%, rgba(0, 0, 0, .42)) !important;
+}
+
+html body #app #match.match-screen {
+  background:
+    radial-gradient(ellipse 48% 28% at 10% 38%, rgba(17, 183, 215, .12), transparent 72%),
+    radial-gradient(ellipse 44% 28% at 90% 38%, rgba(197, 26, 69, .1), transparent 74%),
+    radial-gradient(ellipse 68% 24% at 50% 74%, rgba(37, 131, 164, .06), transparent 78%),
+    linear-gradient(180deg, rgba(0, 4, 10, .18), rgba(0, 1, 4, .74)) !important;
+}
+
+html body #app #match .match-stage::before {
+  background:
+    linear-gradient(90deg, rgba(22, 220, 241, .12), transparent 10% 90%, rgba(229, 43, 83, .1)),
+    linear-gradient(180deg, rgba(37, 85, 98, .28), rgba(2, 9, 14, .18) 42%, rgba(0, 2, 5, .68)),
+    repeating-linear-gradient(90deg, transparent 0 46px, rgba(111, 207, 219, .035) 47px 48px) !important;
+  box-shadow:
+    inset 20px 0 36px rgba(0, 167, 194, .07),
+    inset -20px 0 36px rgba(191, 19, 59, .055),
+    0 24px 52px rgba(0, 0, 0, .62) !important;
+}
+
+html body #app #match .arena-backplane {
+  background:
+    radial-gradient(ellipse 42% 26% at 50% 38%, rgba(26, 139, 164, .14), transparent 72%),
+    linear-gradient(116deg, rgba(100, 222, 235, .1), transparent 20% 76%, rgba(231, 46, 88, .085)),
+    repeating-linear-gradient(90deg, transparent 0 46px, rgba(147, 222, 231, .045) 47px 48px),
+    linear-gradient(180deg, #122b34 0, #041018 30%, #010409 73%, #08151c 100%);
+  border-color: rgba(150, 229, 237, .2);
+  box-shadow:
+    inset 0 28px 46px rgba(137, 226, 236, .05),
+    inset 0 -60px 70px rgba(0, 0, 0, .86),
+    0 30px 60px rgba(0, 0, 0, .78);
+}
+
+html body #app #match .arena-pylon-left {
+  border-left-color: rgba(44, 226, 244, .58);
+  box-shadow:
+    inset 5px 0 8px rgba(119, 237, 247, .11),
+    0 0 16px rgba(24, 200, 224, .11),
+    inset -7px 0 10px rgba(0, 0, 0, .7),
+    0 15px 20px rgba(0, 0, 0, .78);
+}
+
+html body #app #match .arena-pylon-right {
+  border-right-color: rgba(238, 49, 87, .54);
+  box-shadow:
+    inset -5px 0 8px rgba(244, 101, 126, .1),
+    0 0 16px rgba(217, 28, 70, .1),
+    inset 7px 0 10px rgba(0, 0, 0, .7),
+    0 15px 20px rgba(0, 0, 0, .78);
+}
+
+html body #app #match .arena-pylon i {
+  border-top-color: rgba(222, 252, 255, .3);
+  background:
+    linear-gradient(90deg, rgba(59, 211, 229, .1), transparent 45%, rgba(255, 255, 255, .06)),
+    linear-gradient(180deg, rgba(255, 255, 255, .07), rgba(0, 0, 0, .28));
+  box-shadow: 0 0 8px rgba(56, 207, 224, .08);
+}
+
+html body #app #match .arena-deck {
+  background:
+    linear-gradient(90deg, rgba(0, 211, 239, .11), transparent 30% 70%, rgba(226, 34, 77, .1)),
+    repeating-linear-gradient(90deg, transparent 0 30px, rgba(123, 221, 230, .11) 31px 32px),
+    repeating-linear-gradient(0deg, transparent 0 20px, rgba(123, 221, 230, .09) 21px 22px),
+    linear-gradient(180deg, #17313a, #010407);
+  border-top-color: rgba(175, 240, 246, .27);
+  box-shadow: 0 -8px 24px rgba(26, 180, 205, .07);
+}
+
+html body #app #match .match-brand {
+  background: linear-gradient(180deg, #ffffff 0%, #d9fbff 38%, #62dceb 72%, #318b9d 100%);
+  filter: drop-shadow(0 0 8px rgba(82, 224, 239, .6)) drop-shadow(0 2px 0 rgba(0, 0, 0, .92));
+  text-shadow: 0 2px 0 rgba(0, 0, 0, .9);
+}
+
+html body #app #match .hud-icon,
+html body #app #match .hud-mute {
+  background:
+    linear-gradient(180deg, rgba(207, 250, 254, .14), transparent 32%),
+    linear-gradient(180deg, rgba(18, 44, 54, .96), rgba(2, 9, 14, .98)) !important;
+  border-color: rgba(116, 221, 232, .46) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(241, 255, 255, .2),
+    inset 0 -5px 8px rgba(0, 0, 0, .64),
+    0 3px 0 rgba(0, 0, 0, .7),
+    0 0 12px rgba(39, 211, 230, .12) !important;
+}
+
+html body #app #match .match-brand-actions .hud-mute.off {
+  border-color: rgba(244, 83, 111, .6) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 226, 232, .18),
+    inset 0 -5px 8px rgba(0, 0, 0, .68),
+    0 3px 0 rgba(0, 0, 0, .7),
+    0 0 12px rgba(226, 35, 76, .14) !important;
+}
+
+html body #app #match .fighter.you,
+html body #app #match .fighter.rival {
+  background:
+    linear-gradient(180deg, rgba(226, 253, 255, .13), transparent 30%),
+    linear-gradient(180deg, rgba(14, 43, 54, .98), rgba(1, 7, 12, .99)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(247, 255, 255, .24),
+    inset 0 -11px 15px rgba(0, 0, 0, .8),
+    0 4px 0 rgba(0, 0, 0, .76),
+    0 10px 18px rgba(0, 0, 0, .62) !important;
+}
+
+html body #app #match .fighter.you {
+  background:
+    linear-gradient(90deg, rgba(21, 222, 241, .18), transparent 34%),
+    linear-gradient(180deg, rgba(14, 49, 61, .98), rgba(1, 7, 12, .99)) !important;
+  border-color: rgba(64, 230, 244, .92) !important;
+}
+
+html body #app #match .fighter.rival {
+  background:
+    linear-gradient(270deg, rgba(237, 45, 85, .16), transparent 34%),
+    linear-gradient(180deg, rgba(54, 16, 27, .98), rgba(9, 2, 6, .99)) !important;
+  border-color: rgba(241, 58, 92, .9) !important;
+}
+
+html body #app #match .avatar-ring {
+  box-shadow:
+    0 0 0 2px rgba(0, 0, 0, .64),
+    0 0 16px rgba(38, 223, 239, .66),
+    inset 0 2px 0 rgba(255, 255, 255, .34) !important;
+}
+
+html body #app #match .avatar-ring.rival {
+  box-shadow:
+    0 0 0 2px rgba(0, 0, 0, .64),
+    0 0 16px rgba(239, 51, 91, .58),
+    inset 0 2px 0 rgba(255, 255, 255, .28) !important;
+}
+
+html body #app #match .fighter .avatar {
+  border-color: rgba(240, 255, 255, .42) !important;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, .72), 0 0 10px currentColor;
+}
+
+html body #app #match .score-rail {
+  background: rgba(0, 3, 7, .72);
+  border-color: rgba(154, 224, 232, .18) !important;
+  box-shadow:
+    inset 0 2px 7px rgba(0, 0, 0, .72),
+    inset 0 -1px 0 rgba(230, 255, 255, .08),
+    0 2px 4px rgba(0, 0, 0, .46);
+}
+
+html body #app #match .score-track {
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, .055) 0 8px, rgba(0, 0, 0, .3) 8px 10px),
+    #000306;
+  border-color: rgba(128, 206, 216, .2) !important;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, .7);
+}
+
+html body #app #match .fighter.you .score-track i {
+  background: linear-gradient(180deg, #d8ffff 0%, #42eff5 24%, #00a5c4 64%, #07556c 100%) !important;
+  box-shadow: 0 0 8px rgba(25, 228, 242, .92), inset 0 1px 0 rgba(255, 255, 255, .82);
+}
+
+html body #app #match .fighter.rival .score-track i {
+  background: linear-gradient(180deg, #ffe3e9 0%, #ff6d8b 24%, #db184e 64%, #6c0929 100%) !important;
+  box-shadow: 0 0 8px rgba(255, 44, 93, .86), inset 0 1px 0 rgba(255, 255, 255, .72);
+}
+
+html body #app #match .vs-column::before {
+  background:
+    radial-gradient(circle at 50% 16%, rgba(226, 255, 255, .18), transparent 38%),
+    linear-gradient(90deg, rgba(12, 206, 231, .24), rgba(190, 239, 245, .14) 48%, rgba(229, 43, 84, .23)),
+    linear-gradient(180deg, #1d3b47, #040a10) !important;
+  border-color: rgba(189, 243, 248, .28) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(249, 255, 255, .26),
+    inset 0 -10px 12px rgba(0, 0, 0, .66),
+    0 9px 15px rgba(0, 0, 0, .72),
+    -5px 0 15px rgba(0, 210, 235, .16),
+    5px 0 15px rgba(233, 44, 87, .13) !important;
+}
+
+html body #app #match .vs-reactor-ring.outer {
+  border-top-color: #d3fbff;
+  border-left-color: #18d6e9;
+  border-right-color: #e82f61;
+  box-shadow:
+    inset 0 0 0 2px #01070a,
+    inset 0 3px 5px rgba(245, 255, 255, .28),
+    0 0 14px rgba(39, 218, 236, .24),
+    0 0 14px rgba(224, 42, 83, .14);
+}
+
+html body #app #match .vs-reactor-core {
+  background:
+    radial-gradient(circle at 34% 28%, #f4ffff 0 4%, #64eff5 12%, transparent 24%),
+    radial-gradient(circle at 38% 32%, #baf9fc, #329aa7 19%, #4a1027 55%, #010408 76%);
+  box-shadow: 0 0 11px rgba(112, 239, 245, .42), 0 0 14px rgba(225, 40, 81, .18);
+}
+
+html body #app #match .vs-badge {
+  filter:
+    drop-shadow(0 2px 0 rgba(0, 0, 0, .96))
+    drop-shadow(0 0 12px rgba(58, 226, 240, .7))
+    drop-shadow(0 0 12px rgba(239, 49, 91, .55)) !important;
+}
+
+html body #app #match .vs-column .timer {
+  background:
+    linear-gradient(180deg, rgba(218, 253, 255, .14), transparent 36%),
+    linear-gradient(180deg, rgba(13, 36, 46, .96), rgba(1, 7, 12, .98)) !important;
+  border-color: rgba(132, 222, 232, .42) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(245, 255, 255, .22),
+    inset 0 -5px 8px rgba(0, 0, 0, .7),
+    0 4px 0 rgba(0, 0, 0, .68),
+    0 0 12px rgba(37, 207, 226, .16) !important;
+}
+
+html body #app #match .vs-column .timer b {
+  color: #e8ffff;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, .86), 0 0 10px rgba(86, 232, 241, .62);
+}
+
+html body #app #match .energy-wrap {
+  background:
+    linear-gradient(180deg, rgba(226, 255, 255, .16) 0 1px, transparent 38%),
+    linear-gradient(180deg, #173843 0%, #07171f 54%, #010508 100%) !important;
+  border-color: rgba(66, 222, 237, .68) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(245, 255, 255, .24),
+    inset 0 -7px 11px rgba(0, 0, 0, .72),
+    0 4px 0 rgba(0, 0, 0, .74),
+    0 0 16px rgba(38, 221, 237, .16) !important;
+}
+
+html body #app #match .energy-wrap small {
+  color: #b4fbff;
+  text-shadow: 0 0 8px rgba(45, 226, 241, .64);
+}
+
+html body #app #match .energy-wrap b {
+  color: #eaffff;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, .9), 0 0 8px rgba(61, 219, 234, .44);
+}
+
+html body #app #match .energy-wrap .energy {
+  background:
+    linear-gradient(180deg, #000204, #071a22 62%, #010306) !important;
+  border-color: rgba(100, 224, 235, .48) !important;
+  box-shadow:
+    inset 0 3px 5px rgba(0, 0, 0, .98),
+    inset 0 -1px 0 rgba(226, 255, 255, .14),
+    0 0 8px rgba(27, 213, 231, .16) !important;
+}
+
+html body #app #match .energy-wrap .energy > span {
+  background:
+    linear-gradient(180deg, #e4ffff 0%, #46f4f4 24%, #00b7d0 61%, #064f65 100%) !important;
+  box-shadow:
+    0 0 8px rgba(37, 232, 239, .78),
+    inset 0 1px 0 rgba(255, 255, 255, .86),
+    inset 0 -2px 3px rgba(0, 64, 88, .5) !important;
+}
+
+html body #app #match .energy-attack {
+  background:
+    linear-gradient(180deg, rgba(245, 255, 255, .16) 0 1px, transparent 30%),
+    linear-gradient(180deg, rgba(22, 56, 64, .98), rgba(3, 11, 14, .99)) !important;
+  border-color: rgba(136, 218, 226, .54) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(246, 255, 255, .23),
+    inset 0 -9px 13px rgba(0, 0, 0, .72),
+    0 4px 0 rgba(0, 0, 0, .74),
+    0 0 13px rgba(43, 204, 217, .1) !important;
+}
+
+html body #app #match .energy-attack.burst {
+  background:
+    linear-gradient(180deg, rgba(236, 255, 240, .2) 0 1px, transparent 32%),
+    radial-gradient(circle at 10% 48%, rgba(75, 244, 99, .32), transparent 38%),
+    linear-gradient(180deg, #1a4930 0%, #0a1e14 54%, #010806 100%) !important;
+  border-color: rgba(107, 248, 123, .78) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(242, 255, 245, .28),
+    inset 0 -9px 13px rgba(0, 0, 0, .7),
+    0 4px 0 rgba(0, 0, 0, .74),
+    0 0 16px rgba(65, 235, 92, .18) !important;
+}
+
+html body #app #match .energy-attack.strike {
+  background:
+    linear-gradient(180deg, rgba(255, 237, 242, .19) 0 1px, transparent 32%),
+    radial-gradient(circle at 10% 48%, rgba(255, 47, 98, .34), transparent 38%),
+    linear-gradient(180deg, #4e1a2b 0%, #210911 54%, #070204 100%) !important;
+  border-color: rgba(255, 73, 111, .78) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 242, 246, .27),
+    inset 0 -9px 13px rgba(0, 0, 0, .74),
+    0 4px 0 rgba(0, 0, 0, .74),
+    0 0 16px rgba(239, 38, 83, .2) !important;
+}
+
+html body #app #match .energy-attack-glyph {
+  filter:
+    drop-shadow(0 2px 0 rgba(0, 0, 0, .76))
+    drop-shadow(0 0 7px currentColor) !important;
+}
+
+html body #app #match .energy-attack-copy b {
+  color: #f2ffff !important;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, .9), 0 0 8px currentColor;
+}
+
+html body #app #match .energy-attack-copy small {
+  color: #b7ced1 !important;
+}
+
+html body #app #match .energy-attack-cost {
+  text-shadow: 0 2px 0 rgba(0, 0, 0, .9), 0 0 7px var(--attack-color) !important;
+}
+
+html body #app #match .you-meta {
+  background:
+    linear-gradient(180deg, rgba(236, 255, 255, .18) 0 1px, transparent 34%),
+    linear-gradient(180deg, #183b46, #061219) !important;
+  border-color: rgba(57, 226, 239, .68) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(239, 255, 255, .24),
+    inset 0 -5px 8px rgba(0, 0, 0, .68),
+    0 4px 0 rgba(0, 0, 0, .65),
+    0 0 13px rgba(32, 215, 232, .14) !important;
+}
+
+html body #app #match .player-side .board-slot {
+  background:
+    linear-gradient(135deg, rgba(236, 255, 255, .1), transparent 17% 82%, rgba(18, 129, 151, .08)),
+    radial-gradient(ellipse 56% 48% at 50% 40%, rgba(10, 82, 98, .24), transparent 72%),
+    linear-gradient(180deg, #071017 0%, #010306 100%) !important;
+  border-color: rgba(66, 230, 243, .96) !important;
+  box-shadow:
+    0 0 0 1px #010307,
+    0 0 0 3px rgba(22, 170, 190, .36),
+    0 2px 0 rgba(221, 255, 255, .3),
+    0 15px 0 rgba(0, 0, 0, .58),
+    0 24px 38px rgba(0, 0, 0, .86),
+    0 0 28px rgba(23, 222, 240, .3),
+    inset 0 4px 13px rgba(0, 0, 0, .96),
+    inset 0 0 0 3px rgba(0, 153, 177, .28),
+    inset 0 -10px 17px rgba(0, 0, 0, .78) !important;
+}
+
+html body #app #match .board-outer-rail {
+  border-top-color: rgba(218, 253, 255, .98);
+  border-left-color: rgba(67, 194, 210, .94);
+  border-right-color: #031017;
+  border-bottom-color: #000407;
+  box-shadow:
+    0 3px 0 #347b86,
+    0 8px 0 #0c3741,
+    0 15px 0 #021016,
+    0 23px 22px rgba(0, 0, 0, .98),
+    inset 0 1px 0 rgba(246, 255, 255, .3),
+    inset 10px 0 12px rgba(50, 190, 207, .11),
+    inset -10px 0 14px rgba(0, 0, 0, .78);
+}
+
+html body #app #match .board-energy-glass {
+  border-top-color: rgba(228, 255, 255, .96);
+  border-left-color: rgba(81, 222, 234, .78);
+  border-right-color: rgba(12, 91, 105, .82);
+  border-bottom-color: rgba(37, 166, 178, .78);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .32),
+    inset 0 0 12px rgba(28, 211, 226, .18),
+    0 0 8px rgba(35, 218, 235, .2) !important;
+}
+
+html body #app #match .board-socket-bed {
+  background:
+    radial-gradient(ellipse 48% 34% at 50% 0%, rgba(69, 188, 201, .13), transparent 72%),
+    repeating-radial-gradient(circle at center, rgba(0, 0, 0, .9) 0 25%, rgba(31, 127, 141, .2) 27% 30%, rgba(0, 0, 0, .95) 34% 100%) 0 0 / 12.5% 12.5%,
+    repeating-linear-gradient(90deg, transparent 0 calc(12.5% - 1px), rgba(130, 232, 239, .09) calc(12.5% - 1px) 12.5%),
+    repeating-linear-gradient(0deg, transparent 0 calc(12.5% - 1px), rgba(130, 232, 239, .07) calc(12.5% - 1px) 12.5%),
+    #000204;
+  box-shadow:
+    inset 0 13px 22px rgba(0, 0, 0, .99),
+    inset 0 0 0 3px #000,
+    inset 0 -1px 0 rgba(117, 223, 232, .2);
+}
+
+html body #app #match .board-fastener {
+  background: radial-gradient(circle at 32% 28%, #e8ffff 0 10%, #6c9298 24%, #0b1b20 65%, #000 71%);
+  box-shadow: 0 1px 2px #000, 0 0 5px rgba(133, 230, 237, .2);
+}
+
+html body #app #match #playerGems {
+  filter:
+    saturate(1.38)
+    contrast(1.18)
+    brightness(1.1)
+    drop-shadow(0 5px 8px rgba(0, 0, 0, .94))
+    drop-shadow(0 0 8px rgba(77, 227, 245, .15)) !important;
+}
+
+html body #app #match .powers {
+  filter: drop-shadow(0 13px 9px rgba(0, 0, 0, .7));
+}
+
+html body #app #match .ability-deck {
+  background:
+    linear-gradient(112deg, rgba(74, 210, 224, .14), transparent 24% 72%, rgba(205, 30, 70, .11)),
+    linear-gradient(180deg, #1b3944, #061118 40%, #010508) !important;
+  border-color: rgba(88, 190, 201, .62) !important;
+  border-top-color: rgba(206, 250, 255, .58) !important;
+  box-shadow:
+    0 13px 16px rgba(0, 0, 0, .82),
+    inset 0 1px 0 rgba(239, 255, 255, .18),
+    inset 0 -12px 16px rgba(0, 0, 0, .62) !important;
+}
+
+html body #app #match .ability-deck-rail {
+  background: linear-gradient(90deg, #35deed, rgba(151, 236, 241, .36) 34%, rgba(198, 122, 232, .32) 57%, #e23368);
+  box-shadow: 0 0 8px rgba(52, 218, 232, .32);
+}
+
+html body #app #match .power {
+  background:
+    linear-gradient(180deg, rgba(245, 255, 255, .16) 0 1px, transparent 28%),
+    linear-gradient(180deg, #1b3a45 0%, #08151c 52%, #010508 100%) !important;
+  border-color: rgba(137, 213, 222, .52) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(247, 255, 255, .23),
+    inset 0 -9px 14px rgba(0, 0, 0, .72),
+    0 4px 0 rgba(0, 0, 0, .76),
+    0 11px 18px rgba(0, 0, 0, .7) !important;
+  transition: filter 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+html body #app #match .power:hover:not(:disabled) {
+  filter: brightness(1.12) saturate(1.12);
+  border-color: rgba(195, 247, 251, .74) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .3),
+    inset 0 -9px 14px rgba(0, 0, 0, .68),
+    0 4px 0 rgba(0, 0, 0, .76),
+    0 0 18px rgba(63, 217, 232, .2) !important;
+}
+
+html body #app #match #freeze {
+  border-color: rgba(81, 224, 239, .76) !important;
+}
+
+html body #app #match #timeshift {
+  border-color: rgba(188, 119, 236, .72) !important;
+}
+
+html body #app #match #rewind {
+  border-color: rgba(244, 66, 104, .76) !important;
+}
+
+html body #app #match .power .glyph {
+  border-color: rgba(235, 255, 255, .44) !important;
+  background:
+    radial-gradient(circle at 35% 24%, rgba(255, 255, 255, .48), transparent 43%),
+    linear-gradient(180deg, rgba(51, 79, 93, .98), rgba(7, 15, 23, .98)) !important;
+  box-shadow:
+    inset 0 3px 7px rgba(255, 255, 255, .3),
+    inset 0 -7px 10px rgba(0, 0, 0, .72),
+    0 3px 0 rgba(0, 0, 0, .62),
+    0 0 15px currentColor !important;
+}
+
+html body #app #match #freeze .glyph {
+  color: #b9f8ff;
+  background:
+    radial-gradient(circle at 35% 24%, rgba(255, 255, 255, .52), transparent 43%),
+    linear-gradient(180deg, #276d7d, #061b27 75%, #02070c) !important;
+}
+
+html body #app #match #timeshift .glyph {
+  color: #e0b8ff;
+  background:
+    radial-gradient(circle at 35% 24%, rgba(255, 255, 255, .48), transparent 43%),
+    linear-gradient(180deg, #5a3c83, #170d2b 75%, #05020c) !important;
+}
+
+html body #app #match #rewind .glyph {
+  color: #ff9eb6;
+  background:
+    radial-gradient(circle at 35% 24%, rgba(255, 255, 255, .44), transparent 43%),
+    linear-gradient(180deg, #87334c, #2b0919 75%, #090207) !important;
+}
+
+html body #app #match .power b {
+  text-shadow: 0 2px 0 rgba(0, 0, 0, .96), 0 0 8px currentColor !important;
+}
+
+html body #app #match .power .cost {
+  color: #cffcff !important;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, .92), 0 0 7px currentColor;
+}
+
+html body #app #match .shift-clock,
+html body #app #match .combo,
+html body #app #match .combo-damage {
+  text-shadow: 0 2px 0 rgba(0, 0, 0, .94), 0 0 8px currentColor !important;
+}
+
+html body #app #match.cast-freeze .player-side .board-slot {
+  box-shadow:
+    0 0 0 1px #010307,
+    0 0 0 3px rgba(139, 229, 255, .42),
+    0 0 32px rgba(135, 226, 255, .42),
+    0 24px 38px rgba(0, 0, 0, .86),
+    inset 0 0 0 3px rgba(112, 218, 248, .32) !important;
+}
+
+html body #app #match.cast-shift .player-side .board-slot {
+  box-shadow:
+    0 0 0 1px #010307,
+    0 0 0 3px rgba(189, 141, 249, .42),
+    0 0 32px rgba(167, 95, 235, .34),
+    0 24px 38px rgba(0, 0, 0, .86),
+    inset 0 0 0 3px rgba(159, 100, 218, .3) !important;
+}
+
+html body #app #match.cast-rewind .player-side .board-slot {
+  box-shadow:
+    0 0 0 1px #010307,
+    0 0 0 3px rgba(255, 89, 128, .46),
+    0 0 32px rgba(236, 42, 91, .38),
+    0 24px 38px rgba(0, 0, 0, .86),
+    inset 0 0 0 3px rgba(226, 43, 86, .32) !important;
+}
+
+html body #app #match .energy-wrap.hot {
+  border-color: rgba(133, 248, 251, .9) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .34),
+    inset 0 -7px 11px rgba(0, 0, 0, .7),
+    0 4px 0 rgba(0, 0, 0, .74),
+    0 0 22px rgba(42, 237, 242, .32) !important;
+}
+
+@keyframes cc-nebula-breathe {
+  from { filter: saturate(1.1) contrast(1.1) brightness(.7); }
+  to { filter: saturate(1.2) contrast(1.16) brightness(.79); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html #app:has(#match.active) .space-nebula {
+    animation: none !important;
+  }
+}

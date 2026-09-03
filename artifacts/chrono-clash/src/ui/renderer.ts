@@ -1136,6 +1136,12 @@ export class BoardRenderer {
       ctx.beginPath();
       ctx.arc(wave.x, wave.y, 4 + wave.radius * eased, 0, Math.PI * 2);
       ctx.stroke();
+      ctx.globalAlpha = alpha * 0.34;
+      ctx.lineWidth = Math.max(0.6, wave.width * 0.42 * (1 - t));
+      ctx.shadowBlur = 3 + wave.width;
+      ctx.beginPath();
+      ctx.arc(wave.x, wave.y, 4 + wave.radius * eased * 0.72, 0, Math.PI * 2);
+      ctx.stroke();
     }
     ctx.restore();
   }
@@ -1244,11 +1250,14 @@ export class BoardRenderer {
 
   private drawParticles(view: BoardView): void {
     const ctx = this.ctx;
+    ctx.save();
     for (const p of view.particles) {
       const a = Math.max(0, p.life);
       const r = p.size * a;
       ctx.globalAlpha = a;
       ctx.fillStyle = p.color;
+      ctx.shadowColor = p.color;
+      ctx.shadowBlur = Math.max(1.5, r * 2.6);
       ctx.beginPath();
       ctx.moveTo(p.x, p.y - r);
       ctx.lineTo(p.x + r * 0.52, p.y);
@@ -1262,6 +1271,7 @@ export class BoardRenderer {
       ctx.arc(p.x, p.y, r * 0.28, 0, Math.PI * 2);
       ctx.fill();
     }
+    ctx.restore();
     ctx.globalAlpha = 1;
   }
 
@@ -1276,6 +1286,8 @@ export class BoardRenderer {
       const pop = t < 0.14 ? 0.55 + (t / 0.14) * 0.55 : t > 0.72 ? 1 - (t - 0.72) * 0.35 : 1;
       ctx.globalAlpha = Math.max(0, 1 - t * t);
       ctx.fillStyle = f.color;
+      ctx.shadowColor = f.color;
+      ctx.shadowBlur = 9;
       ctx.font = `800 ${Math.max(10, f.size * pop)}px Outfit, Trebuchet MS, sans-serif`;
       ctx.fillText(f.text, f.x, f.y - t * f.rise);
     }
@@ -1518,12 +1530,17 @@ export class BoardRenderer {
       if (selected) {
         ctx.strokeStyle = "#7eeaff";
         ctx.lineWidth = 2.1;
+        ctx.shadowColor = "rgba(126, 234, 255, 0.96)";
+        ctx.shadowBlur = 10;
       } else {
         const hintPulse = 0.62 + Math.sin(now / 180) * 0.38;
         ctx.strokeStyle = `rgba(186, 230, 253, ${0.55 + hintPulse * 0.3})`;
         ctx.lineWidth = 1.8;
+        ctx.shadowColor = "rgba(186, 230, 253, 0.7)";
+        ctx.shadowBlur = 6;
       }
       ctx.stroke();
+      ctx.shadowBlur = 0;
     }
 
     if (tile.kind !== "normal") {
