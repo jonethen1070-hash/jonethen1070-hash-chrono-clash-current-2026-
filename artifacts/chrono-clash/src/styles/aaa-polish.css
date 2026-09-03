@@ -5877,13 +5877,13 @@ html body #app #match.match-screen {
   --game-pad-x: clamp(3px, 1.6vw, 10px);
   --game-pad-top: clamp(4px, 0.8dvh, 8px);
   --game-pad-bottom: clamp(5px, 0.9dvh, 9px);
-  --section-gap: clamp(2px, 0.55dvh, 6px);
-  --brand-height: clamp(25px, 4.4dvh, 38px);
-  --battle-height: clamp(67px, 10.1dvh, 88px);
-  --energy-height: clamp(27px, 4.2dvh, 36px);
-  --ability-height: clamp(43px, 6.8dvh, 58px);
-  --board-label-height: clamp(17px, 2.5dvh, 22px);
-  --control-height: clamp(64px, 9.7dvh, 82px);
+  --section-gap: clamp(2px, 0.7dvh, 6px);
+  --brand-height: clamp(36px, 5.7dvh, 48px);
+  --battle-height: clamp(70px, 10.9dvh, 92px);
+  --energy-height: clamp(30px, 4.75dvh, 40px);
+  --ability-height: clamp(62px, 9dvh, 76px);
+  --board-label-height: clamp(20px, 2.8dvh, 24px);
+  --control-height: clamp(62px, 9.7dvh, 82px);
   --vertical-chrome:
     calc(
       var(--brand-height) +
@@ -5892,16 +5892,16 @@ html body #app #match.match-screen {
       var(--ability-height) +
       var(--board-label-height) +
       var(--control-height) +
-      (var(--section-gap) * 8) +
+      (var(--section-gap) * 5) +
       var(--game-pad-top) +
       var(--game-pad-bottom) +
       var(--safe-top) +
       var(--safe-bottom) +
-      18px
+      6px
     );
   --board-size:
     min(
-      calc(100vw - var(--safe-left) - var(--safe-right) - (var(--game-pad-x) * 2) - 16px),
+      calc(100vw - var(--safe-left) - var(--safe-right) - (var(--game-pad-x) * 2) - 20px),
       calc(100dvh - var(--vertical-chrome)),
       430px
     );

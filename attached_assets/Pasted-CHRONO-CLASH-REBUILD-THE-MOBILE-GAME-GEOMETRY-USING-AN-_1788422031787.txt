@@ -1,0 +1,429 @@
+CHRONO CLASH — REBUILD THE MOBILE GAME GEOMETRY USING AN EXPLICIT VERTICAL GRID
+
+This is a GEOMETRY correction.
+
+Do NOT make another series of random CSS height changes.
+
+I compared the supplied full-screen reference with the current Replit web render.
+
+The reference is approximately 711x1536, which is approximately 390x843 when normalized to a 390px game width.
+
+The current Replit game is rendered inside a mobile browser, where the ACTUAL GAME VIEWPORT can be much shorter than 843px.
+
+Therefore the game needs a RESPONSIVE VERTICAL GEOMETRY SYSTEM.
+
+==================================================
+CORE RULE
+==================================================
+
+The game container must use the ACTUAL AVAILABLE WEB VIEWPORT HEIGHT.
+
+Do NOT use a fixed 390x700 canvas.
+
+Do NOT assume the reference image's full height is available.
+
+The reference controls the DESIGN PROPORTIONS.
+
+The actual browser viewport controls the AVAILABLE HEIGHT.
+
+==================================================
+GAME CONTAINER
+==================================================
+
+Set the main Chrono Clash container to:
+
+width: 100%;
+height: 100dvh;
+min-height: 0;
+
+Also support 100svh where needed.
+
+The game itself must never create page scrolling.
+
+Do NOT use transform: scale().
+
+Do NOT crop the game with overflow:hidden.
+
+Do NOT push controls outside the viewport.
+
+==================================================
+CREATE AN EXPLICIT VERTICAL LAYOUT
+==================================================
+
+Use these named sections:
+
+HEADER
+BATTLE
+ENERGY
+ABILITIES
+BOARD_LABEL
+BOARD
+CONTROLS
+
+The vertical layout must be calculated.
+
+Do not let normal content flow determine the final board height.
+
+==================================================
+BASE DESIGN GEOMETRY
+==================================================
+
+At a tall mobile viewport, target these approximate heights:
+
+HEADER:
+48px
+
+BATTLE:
+92px
+
+ENERGY:
+40px
+
+ABILITIES:
+76px
+
+BOARD LABEL + GAP:
+28px
+
+CONTROLS:
+82px
+
+INTER-SECTION GAPS:
+approximately 20px total
+
+The BOARD receives ALL REMAINING HEIGHT.
+
+==================================================
+BOARD CALCULATION
+==================================================
+
+The board must be square.
+
+Calculate:
+
+availableBoardHeight =
+100dvh
+- header height
+- battle height
+- energy height
+- abilities height
+- board label height
+- controls height
+- required gaps
+- safe-area top
+- safe-area bottom
+
+Then:
+
+boardSize =
+min(
+  availableBoardHeight,
+  availableBoardWidth
+)
+
+The board MUST NEVER exceed availableBoardHeight.
+
+The board MUST NEVER push the controls below the viewport.
+
+==================================================
+IMPORTANT MOBILE SHORT-VIEWPORT RULE
+==================================================
+
+When the available viewport becomes short:
+
+DO NOT keep the board at a fixed 368px height.
+
+DO NOT let the board maintain its preferred size if that causes controls to disappear.
+
+Instead dynamically reduce the board.
+
+Example:
+
+If available game viewport = approximately 480px:
+
+Reserve approximately:
+
+HEADER       38px
+BATTLE       70px
+ENERGY       30px
+ABILITIES    62px
+LABEL        22px
+CONTROLS     62px
+GAPS         12px
+
+This leaves approximately:
+
+184px
+
+for the board.
+
+The exact values may be tuned by CSS, but the IMPORTANT RULE is:
+
+BOARD = REMAINING SPACE.
+
+The bottom controls ALWAYS get reserved space.
+
+==================================================
+DO NOT SHRINK EVERYTHING EQUALLY
+==================================================
+
+The reference's visual hierarchy must remain.
+
+Priority:
+
+1. Complete game visibility
+2. Complete bottom controls
+3. Complete 8x8 board
+4. Readable battle HUD
+5. Readable ability cards
+6. Reference-like spacing
+
+When height is constrained:
+
+FIRST remove unnecessary empty gaps.
+
+SECOND reduce board size.
+
+THIRD use responsive compact versions of the HUD.
+
+Do NOT randomly shrink fonts and icons.
+
+==================================================
+ABILITY CARDS
+==================================================
+
+Energy Burst and Mega Strike must be:
+
+display: grid/flex side-by-side
+
+equal width
+
+equal height
+
+At normal/tall mobile:
+
+approximately 72–76px tall.
+
+At short mobile:
+
+approximately 58–64px tall.
+
+Never allow these cards to become huge vertical blocks.
+
+Content must remain centered.
+
+==================================================
+BATTLE ROW
+==================================================
+
+YOU / VS / RIVAL must remain one horizontal row.
+
+Normal/tall viewport:
+
+approximately 90–95px.
+
+Short viewport:
+
+approximately 65–72px.
+
+Keep:
+
+YOU
+score
+VS
+timer
+RIVAL
+score
+
+Do not allow the battle section to consume excessive vertical space.
+
+==================================================
+ENERGY
+==================================================
+
+Normal:
+
+approximately 38–40px.
+
+Short:
+
+approximately 28–32px.
+
+Everything stays on one row.
+
+==================================================
+YOUR BOARD LABEL
+==================================================
+
+Keep it compact.
+
+Normal:
+
+approximately 24–28px.
+
+Short:
+
+approximately 20–22px.
+
+No large empty space above or below it.
+
+==================================================
+8x8 BOARD
+==================================================
+
+This is critical.
+
+The board must remain a REAL 8x8 grid.
+
+64 gems.
+
+8 columns.
+
+8 rows.
+
+No cropping.
+
+No stretching.
+
+No scrolling.
+
+The board's width should use the available width.
+
+But its HEIGHT must be allowed to shrink responsively.
+
+Use:
+
+width: min(100%, remainingHeight);
+aspect-ratio: 1 / 1;
+
+The board must fit inside the calculated remaining height.
+
+==================================================
+BOTTOM CONTROLS
+==================================================
+
+FREEZE
+TIME SHIFT
+REWIND
+
+must be explicitly reserved BEFORE calculating board height.
+
+Normal viewport:
+
+approximately 78–82px.
+
+Short viewport:
+
+approximately 58–64px.
+
+All three remain completely visible.
+
+Each must still show:
+
+icon
+label
+status/cost
+
+Do not clip the lower portion.
+
+==================================================
+REFERENCE COMPARISON
+==================================================
+
+The supplied reference is NOT a viewport-size specification.
+
+It is the ART/DESIGN reference.
+
+Match its:
+
+• proportions
+• visual hierarchy
+• card relationships
+• board dominance
+• spacing character
+• premium presentation
+
+But dynamically reflow those elements for the actual web viewport.
+
+==================================================
+CRITICAL TEST
+==================================================
+
+Test at:
+
+390px wide
+
+and at the ACTUAL short mobile web viewport.
+
+Test at approximately:
+
+480px available height
+550px available height
+650px available height
+843px available height
+
+The layout must adapt at each height.
+
+At EVERY height:
+
+✓ header visible
+✓ YOU visible
+✓ VS visible
+✓ RIVAL visible
+✓ ENERGY visible
+✓ Energy Burst visible
+✓ Mega Strike visible
+✓ YOUR BOARD visible
+✓ all 64 gems visible
+✓ FREEZE visible
+✓ TIME SHIFT visible
+✓ REWIND visible
+✓ all bottom costs/status visible
+
+There must never be:
+
+✗ vertical page scrolling
+✗ clipped controls
+✗ controls underneath browser/home-indicator area
+✗ cropped board
+✗ missing gem rows
+✗ overlapping sections
+
+==================================================
+VERY IMPORTANT
+==================================================
+
+Do NOT restore:
+
+YOUR ATTACK
+RIVAL ATTACK
+
+Those remain removed.
+
+Do NOT change gameplay.
+
+Do NOT change CPU behavior.
+
+Do NOT change gem logic.
+
+Do NOT change energy mechanics.
+
+Do NOT change abilities.
+
+This is ONLY a responsive geometry/layout correction.
+
+==================================================
+FINAL ACCEPTANCE CRITERIA
+==================================================
+
+Do not say "fixed" because the build succeeds.
+
+Actually open the rendered game.
+
+Inspect the complete game viewport.
+
+The test passes ONLY when the bottom three controls are completely inside the GAME VIEWPORT and the 8x8 board is completely visible.
+
+The board gets whatever square space remains AFTER reserving the bottom controls.
+
+That is the fundamental geometry rule.
