@@ -1,0 +1,387 @@
+USE THE ATTACHED REFERENCE IMAGE AS THE VISUAL REFERENCE.
+
+I need you to fix ONLY the responsive GEOMETRY and SPACING of the existing Chrono Clash mobile screen.
+
+DO NOT redesign the game.
+DO NOT replace the artwork.
+DO NOT rebuild the board.
+DO NOT change gameplay.
+DO NOT change game logic.
+DO NOT add features.
+
+The problem is that the UI sections are independently sizing/positioning themselves, which causes the screen to feel crowded and creates risk of overlap/clipping.
+
+I want a deterministic 390x700 mobile layout.
+
+IMPORTANT:
+Treat the game as an exact 390px wide × 700px high game viewport.
+
+ALL coordinates below are CSS pixels inside that viewport.
+
+==================================================
+EXACT VERTICAL GEOMETRY
+==================================================
+
+Y = 0–36
+TOP HEADER
+
+Contains:
+- CHRONO CLASH title
+- audio button
+- settings button
+
+Everything must remain inside Y=0–36.
+
+No element from the next section may overlap this area.
+
+--------------------------------------------
+
+Y = 36–120
+PLAYER / VS AREA
+
+Contains:
+- YOU panel
+- player score
+- player icon
+- VS
+- timer
+- RIVAL panel
+- rival score
+- rival icon
+
+Maximum height: 84px.
+
+The player and rival panels must fit inside this rectangle.
+
+VS/timer must remain centered horizontally.
+
+Do not allow the player or rival panels to overlap the VS area.
+
+Use a three-column structure:
+
+LEFT: player
+CENTER: VS + timer
+RIGHT: rival
+
+Approximate horizontal geometry:
+
+LEFT: 0–142
+CENTER: 142–248
+RIGHT: 248–390
+
+Keep internal padding inside each region.
+
+--------------------------------------------
+
+Y = 120–157
+ENERGY AREA
+
+Contains:
+- ENERGY label
+- energy progress bar
+- current/max value
+- optional + button
+
+Maximum height: 37px.
+
+Everything must remain inside this rectangle.
+
+Do not create a second energy row.
+
+Do not add extra vertical spacing above or below it.
+
+--------------------------------------------
+
+Y = 157–217
+MAIN ATTACK ABILITIES
+
+Contains exactly:
+
+ENERGY BURST
+MEGA STRIKE
+
+Maximum height: 60px.
+
+Two-column layout.
+
+ENERGY BURST:
+X = 4–193
+
+MEGA STRIKE:
+X = 197–386
+
+Gap = approximately 4px.
+
+Both buttons must have the same height.
+
+Keep:
+- icon
+- name
+- description
+- energy cost
+
+but compact them so everything fits inside the 60px height.
+
+Do not make these cards taller.
+
+Do not allow text to create additional height.
+
+--------------------------------------------
+
+Y = 217–245
+BOARD HEADER
+
+Contains:
+
+YOUR BOARD
+
+Maximum height: 28px.
+
+Keep it centered.
+
+The board header must not overlap the board.
+
+--------------------------------------------
+
+Y = 245–610
+BOARD REGION
+
+This is the most important section.
+
+The existing 8×8 board remains unchanged.
+
+Keep:
+- all 64 gems
+- existing gem artwork
+- existing matching/swiping
+- existing board logic
+
+Board region:
+X = 0–390
+Y = 245–610
+
+Maximum available board height = 365px.
+
+The board MUST remain entirely inside this rectangle.
+
+Use a square-cell grid.
+
+Do NOT allow the board to extend into the bottom ability region.
+
+If the available height is smaller on a particular device, reduce the board height proportionally while keeping the complete 8×8 grid visible.
+
+The board is allowed to become slightly shorter vertically if required.
+
+The bottom abilities are NOT allowed to be pushed downward to make room for the board.
+
+The bottom controls have priority over board height.
+
+No scrolling.
+
+No overflow.
+
+No absolute-positioned gem that can escape the board container.
+
+--------------------------------------------
+
+Y = 610–700
+BOTTOM ABILITIES
+
+Contains exactly:
+
+FREEZE
+TIME SHIFT
+REWIND
+
+These three buttons must ALWAYS remain completely visible.
+
+Maximum region:
+Y = 610–700
+
+Three equal columns.
+
+Approximate horizontal geometry:
+
+FREEZE:
+X = 0–130
+
+TIME SHIFT:
+X = 130–260
+
+REWIND:
+X = 260–390
+
+Keep a small internal gap/padding.
+
+Each button must contain:
+- icon
+- name
+- usage/cost
+
+Do not allow any button to extend below Y=700.
+
+Do not allow the bottom controls to be clipped.
+
+==================================================
+GLOBAL GEOMETRY RULES
+==================================================
+
+The entire game MUST use:
+
+width: 390px
+height: 700px
+
+as the design coordinate system.
+
+Use CSS grid/flex/layout containers rather than uncontrolled absolute positioning wherever possible.
+
+The vertical sections must be stacked in this exact order:
+
+HEADER
+PLAYER/VS
+ENERGY
+ENERGY BURST / MEGA STRIKE
+YOUR BOARD HEADER
+8x8 BOARD
+BOTTOM ABILITIES
+
+NO OVERLAPPING.
+
+NO SCROLLING.
+
+NO VERTICAL CONTENT FLOW ESCAPING ITS SECTION.
+
+The sum of all sections must never exceed 700px.
+
+If the board needs to shrink, shrink ONLY the board region.
+
+Do NOT shrink the bottom controls below a usable touch size.
+
+Do NOT let the header or player section grow automatically.
+
+Do NOT let text wrapping increase section height.
+
+Use overflow:hidden only as a safety mechanism, NOT as the primary layout solution.
+
+==================================================
+HORIZONTAL GEOMETRY
+==================================================
+
+The game width is exactly 390px.
+
+Nothing may extend outside:
+
+X = 0–390.
+
+Use consistent 4–6px outer margins.
+
+The two main attack buttons must remain side-by-side.
+
+The three bottom abilities must remain side-by-side.
+
+The 8 columns of the board must have equal width.
+
+No horizontal scrolling.
+
+==================================================
+VISUAL HIERARCHY
+==================================================
+
+The board is the visual HERO.
+
+The hierarchy should be:
+
+1. 8x8 gem board
+2. YOU vs RIVAL
+3. Energy
+4. Energy Burst / Mega Strike
+5. Bottom abilities
+6. Decorative UI
+
+Reduce visual clutter rather than shrinking the entire application.
+
+Reduce excessive:
+- borders
+- glow
+- padding
+- empty space
+- duplicate dividers
+
+Keep the premium sci-fi appearance.
+
+==================================================
+REFERENCE IMAGE
+==================================================
+
+Use the attached reference image to judge:
+- spacing
+- proportions
+- visual density
+- hierarchy
+- relative size of the board
+- relative size of the HUD
+- relative size of abilities
+
+Do NOT copy the reference as an image.
+
+The result must remain a real interactive Chrono Clash game.
+
+==================================================
+CRITICAL FUNCTIONALITY
+==================================================
+
+DO NOT change:
+
+- match-3 mechanics
+- gem swapping
+- scoring
+- player/rival logic
+- energy logic
+- Energy Burst
+- Mega Strike
+- Freeze
+- Time Shift
+- Rewind
+- touch interaction
+- audio
+
+Only change layout/geometry unless a tiny CSS/layout adjustment is required.
+
+==================================================
+FINAL TEST
+==================================================
+
+Test the actual running game at exactly 390x700.
+
+Verify:
+
+✓ Header completely visible
+✓ YOU panel completely visible
+✓ VS completely visible
+✓ RIVAL panel completely visible
+✓ Energy completely visible
+✓ Energy Burst completely visible
+✓ Mega Strike completely visible
+✓ YOUR BOARD header completely visible
+✓ Complete 8x8 board visible
+✓ All 64 gems visible
+✓ Freeze completely visible
+✓ Time Shift completely visible
+✓ Rewind completely visible
+✓ No overlapping
+✓ No clipping
+✓ No scrolling
+✓ No horizontal overflow
+✓ Board touch/swipe still works
+✓ Bottom buttons remain tappable
+✓ No browser console errors
+
+MOST IMPORTANT:
+
+Do not report success merely because TypeScript/build checks pass.
+
+Actually inspect the rendered 390x700 screen.
+
+The final screen must visually demonstrate that every section occupies its assigned rectangle and NOTHING overlaps.
+
+Make ONLY this geometry/layout correction.
