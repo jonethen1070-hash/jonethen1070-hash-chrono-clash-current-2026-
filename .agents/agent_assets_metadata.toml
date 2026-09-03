@@ -56,3 +56,17 @@ mtime_ms = 1788437171255
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:1cec5c45-a3d6-4e93-9cbc-d46b41211265/6ea51cae-96de-48c7-881d-5fd32123cef6/de62fac1-3ad1-4e52-8302-26a6af3a620e"
 storage_version_token = "1788437181330544"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "0vRDMetmzADrQvXEqAzWG"
+uri = "file://chrono-clash-current.zip"
+type = "unspecified"
+title = "chrono-clash-current.zip"
+description = "Current Chrono Clash development project with source, assets, configuration, API/client libraries, and project files. Generated dependencies, build output, caches, temporary files, screenshots, and prior archives are excluded."
+logical_id = "af13425a-3059-4adc-ba06-d62041fd5d28"
+content_hash = "sha256:b451a38db994aa6351f6f9bb4aec6392b1cd7a4f74a93f8c896d06eb8fc15fe1"
+size = 56162400
+mtime_ms = 1788469562861
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:1cec5c45-a3d6-4e93-9cbc-d46b41211265/af13425a-3059-4adc-ba06-d62041fd5d28/0abc7991-32ce-4390-821a-862350cbbabc"
+storage_version_token = "1788469572982626"
+content_type = "application/octet-stream"
