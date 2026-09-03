@@ -1,0 +1,73 @@
+CHRONO CLASH — BATTLE SELECTION BACKGROUND DEPTH PASS ONLY
+
+Improve ONLY the background of the "CHOOSE YOUR BATTLE" page.
+
+I want this page to have a background that feels approximately 2× deeper, darker, richer, and more dimensional than the first login page.
+
+IMPORTANT:
+This does NOT mean making the whole screen black.
+Keep the existing CYAN/BLUE vs RED/MAGENTA identity clearly visible.
+
+TARGET BACKGROUND:
+
+• Much deeper black/navy base than the first page
+• Approximately 2× stronger depth and contrast
+• Rich cyan/blue atmospheric energy on the left
+• Rich red/magenta atmospheric energy on the right
+• Darker central area behind "CHOOSE YOUR BATTLE"
+• More pronounced nebula/cloud depth
+• Subtle sharp stars and particles
+• Subtle futuristic/cosmic structures visible in the darker areas
+• Stronger blue/red edge illumination
+• Smooth, clean gradients
+• Crisp details — NOT blurry
+• Premium 2.5D sci-fi arena atmosphere
+
+The background should feel like the player has moved deeper INTO the Chrono Clash arena.
+
+COLOR RELATIONSHIP:
+
+BLUE/CYAN = left-side energy
+BLACK/DEEP NAVY = central depth
+RED/MAGENTA = right-side energy
+
+Make the colours richer and more saturated than the current version while keeping the center dark enough for white text.
+
+IMPORTANT:
+Do NOT change:
+
+- CHOOSE YOUR BATTLE typography
+- SELECT A MATCH TYPE
+- Guest pilot text
+- 1v1 BATTLE card
+- RANDOM MATCH card
+- BACK button
+- card sizes
+- card positions
+- spacing
+- page geometry
+- responsive layout
+- navigation
+- gameplay
+- authentication
+- locked game-screen geometry
+
+Do NOT add new UI elements.
+
+Do NOT generate or replace the background with a completely different image.
+
+Enhance the EXISTING background treatment only.
+
+The desired visual progression is:
+
+LOGIN PAGE:
+dark cosmic blue-vs-red background
+
+↓
+
+BATTLE SELECTION PAGE:
+same Chrono Clash universe, but noticeably deeper, darker, richer and more atmospheric — approximately 2× the perceived depth/contrast.
+
+After implementation, open the actual page and visually verify the background only.
+
+Do not make any unrelated changes.
