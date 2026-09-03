@@ -6193,3 +6193,161 @@ html body #app #match .power .cost {
     justify-content: center;
   }
 }
+
+/* =========================================================
+   ARENA COHESION PASS
+   Adds depth behind and beneath the existing responsive composition.
+   ========================================================= */
+
+html body #app #match.match-screen {
+  background:
+    radial-gradient(ellipse 46% 38% at 5% 34%, rgba(16, 157, 184, .12), transparent 73%),
+    radial-gradient(ellipse 42% 35% at 96% 31%, rgba(181, 22, 58, .1), transparent 74%),
+    radial-gradient(ellipse 54% 18% at 50% 72%, rgba(27, 123, 143, .055), transparent 78%),
+    linear-gradient(180deg, rgba(1, 7, 12, .34), rgba(0, 2, 5, .72)) !important;
+}
+
+/* Distant bulkheads, tiny light points and restrained atmospheric separation. */
+html body #app #match.match-screen::before {
+  background:
+    linear-gradient(118deg, transparent 0 11%, rgba(17, 53, 63, .17) 11.3% 13%, transparent 13.3% 87%, rgba(65, 18, 31, .14) 87.3% 89%, transparent 89.3%),
+    linear-gradient(90deg, rgba(6, 39, 48, .34) 0 3%, transparent 7% 93%, rgba(48, 7, 20, .32) 97% 100%),
+    radial-gradient(circle at 12% 14%, rgba(176, 242, 250, .46) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 82% 19%, rgba(255, 163, 183, .34) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 34% 38%, rgba(157, 222, 232, .2) 0 .7px, transparent 1.4px),
+    radial-gradient(circle at 73% 55%, rgba(202, 228, 233, .14) 0 .7px, transparent 1.4px),
+    repeating-linear-gradient(90deg, transparent 0 47px, rgba(87, 162, 175, .018) 48px 49px),
+    repeating-linear-gradient(0deg, transparent 0 47px, rgba(87, 162, 175, .014) 48px 49px) !important;
+  background-size: auto, auto, 79px 83px, 91px 89px, 113px 107px, 137px 131px, auto, auto !important;
+  opacity: .66 !important;
+}
+
+/* Perspective deck under the arena hardware. */
+html body #app #match.match-screen::after {
+  left: -38% !important;
+  right: -38% !important;
+  bottom: -23% !important;
+  height: 55% !important;
+  transform: rotateX(66deg) translateZ(-42px) !important;
+  background:
+    radial-gradient(ellipse 42% 36% at 28% 10%, rgba(16, 161, 187, .09), transparent 72%),
+    radial-gradient(ellipse 38% 34% at 74% 12%, rgba(186, 28, 62, .07), transparent 74%),
+    repeating-linear-gradient(90deg, transparent 0 43px, rgba(80, 159, 174, .085) 44px 45px),
+    repeating-linear-gradient(0deg, transparent 0 31px, rgba(80, 159, 174, .075) 32px 33px),
+    linear-gradient(180deg, rgba(8, 23, 29, .48), rgba(0, 3, 6, .96)) !important;
+  border-top-color: rgba(132, 221, 233, .16) !important;
+  box-shadow: inset 0 18px 32px rgba(0, 0, 0, .68), 0 -8px 28px rgba(18, 138, 158, .035) !important;
+}
+
+html body #app #match .match-stage::before {
+  inset: calc(var(--brand-height) - 2px) -6px calc(var(--control-height) + 2px) !important;
+  background:
+    linear-gradient(90deg, rgba(27, 185, 204, .09), transparent 4% 96%, rgba(205, 37, 72, .075)),
+    linear-gradient(180deg, rgba(25, 57, 67, .24), rgba(2, 8, 12, .15) 42%, rgba(0, 2, 5, .5)) !important;
+  border-left: 3px solid rgba(30, 149, 168, .12) !important;
+  border-right: 3px solid rgba(185, 35, 66, .1) !important;
+  box-shadow:
+    inset 16px 0 30px rgba(0, 109, 130, .045),
+    inset -16px 0 30px rgba(126, 8, 34, .04),
+    0 22px 48px rgba(0, 0, 0, .48) !important;
+}
+
+/* Gunmetal board shell with a glass-energy lip around the recessed field. */
+html body #app #match .player-side .board-slot {
+  background:
+    radial-gradient(circle at 50% 43%, rgba(10, 45, 53, .22), transparent 68%),
+    repeating-linear-gradient(90deg, rgba(45, 129, 143, .045) 0 1px, transparent 1px 12.5%),
+    repeating-linear-gradient(0deg, rgba(45, 129, 143, .038) 0 1px, transparent 1px 12.5%),
+    #010305 !important;
+  border-top-color: #a0dce3 !important;
+  border-left-color: #277f91 !important;
+  border-right-color: #062933 !important;
+  border-bottom-color: #00080d !important;
+  box-shadow:
+    0 1px 0 rgba(224, 252, 255, .88),
+    0 4px 0 #245f69,
+    0 8px 0 #0c3039,
+    0 12px 0 #04191f,
+    0 17px 0 #00070a,
+    -6px 9px 0 #082832,
+    6px 9px 0 #001016,
+    0 25px 18px rgba(0, 0, 0, .92),
+    0 35px 42px rgba(0, 0, 0, .76),
+    inset 0 0 0 3px #00070a,
+    inset 0 0 0 5px rgba(32, 147, 164, .18),
+    inset 0 9px 14px rgba(0, 0, 0, .98),
+    inset 0 -3px 0 rgba(75, 189, 202, .28) !important;
+}
+
+html body #app #match .player-side .board-slot::before {
+  background:
+    linear-gradient(108deg, rgba(205, 246, 250, .68) 0 1%, #255965 6%, #07191f 23%, #02090d 48%, #0b252d 78%, #031117 100%) !important;
+  border-color: rgba(102, 198, 210, .38) !important;
+  box-shadow:
+    inset 0 2px 0 rgba(236, 255, 255, .58),
+    inset 0 -10px 0 #00070a,
+    inset 9px 0 10px rgba(32, 153, 170, .14),
+    inset -8px 0 10px rgba(0, 0, 0, .46),
+    0 16px 0 #00070a,
+    0 27px 34px rgba(0, 0, 0, .94) !important;
+}
+
+html body #app #match .player-side .board-slot::after {
+  border-width: clamp(4px, 1.2vw, 6px) !important;
+  border-top-color: rgba(0, 3, 5, .98) !important;
+  border-left-color: rgba(2, 18, 23, .96) !important;
+  border-right-color: rgba(0, 6, 9, .98) !important;
+  border-bottom-color: rgba(83, 207, 219, .38) !important;
+  box-shadow:
+    inset 0 10px 15px rgba(0, 0, 0, .98),
+    inset 8px 0 11px rgba(0, 0, 0, .86),
+    inset -6px 0 9px rgba(0, 0, 0, .78),
+    inset 0 -2px 0 rgba(214, 251, 255, .28),
+    inset 0 0 18px rgba(31, 185, 202, .075) !important;
+}
+
+/* Seat the transparent gem layer against the socket grid without changing art. */
+html body #app #match #playerGems {
+  background:
+    repeating-linear-gradient(90deg, transparent 0 calc(12.5% - 1px), rgba(80, 179, 194, .035) calc(12.5% - 1px) 12.5%),
+    repeating-linear-gradient(0deg, transparent 0 calc(12.5% - 1px), rgba(80, 179, 194, .03) calc(12.5% - 1px) 12.5%),
+    radial-gradient(circle at 50% 42%, rgba(10, 52, 61, .12), rgba(0, 2, 4, .28) 74%) !important;
+  box-shadow:
+    inset 0 9px 14px rgba(0, 0, 0, .9),
+    inset 0 0 0 2px rgba(0, 0, 0, .84),
+    inset 0 -2px 0 rgba(117, 216, 226, .13),
+    0 6px 0 rgba(0, 0, 0, .56) !important;
+}
+
+/* One material family: machined shell, recessed glass, restrained emission. */
+html body #app #match .fighter,
+html body #app #match .vs-column::before,
+html body #app #match .attack-meter,
+html body #app #match .energy-wrap,
+html body #app #match .energy-attack,
+html body #app #match .power {
+  border-top-color: rgba(199, 240, 246, .32) !important;
+  background-blend-mode: screen, normal, normal;
+}
+
+html body #app #match .score-rail,
+html body #app #match .attack-meter span,
+html body #app #match .energy-wrap .energy {
+  border-top-color: rgba(0, 0, 0, .92) !important;
+  border-bottom-color: rgba(179, 230, 237, .1) !important;
+}
+
+@keyframes arenaBreath {
+  0%, 100% { opacity: .58; }
+  50% { opacity: .69; }
+}
+
+html body #app #match.active.match-screen::before {
+  animation: arenaBreath 7s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body #app #match.active.match-screen::before {
+    animation: none !important;
+  }
+}

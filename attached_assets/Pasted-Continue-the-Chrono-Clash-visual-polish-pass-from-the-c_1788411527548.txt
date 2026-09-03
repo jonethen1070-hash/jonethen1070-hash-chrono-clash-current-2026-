@@ -1,0 +1,69 @@
+Continue the Chrono Clash visual polish pass from the current working build.
+
+IMPORTANT:
+- Do NOT change gameplay mechanics, game rules, board logic, match detection, scoring, energy calculations, abilities, touch/swipe behavior, or renderer/gameplay logic.
+- Do NOT replace the current gem designs.
+- Keep all existing functionality intact.
+- This is a VISUAL/PRESENTATION pass only.
+- Preserve the responsive 390×700 mobile layout and touch alignment.
+
+NEXT PRIORITY: make the existing game screen feel like a premium AAA-inspired 2.5D sci-fi mobile arena.
+
+1. UPGRADE THE ARENA DEPTH
+- Transform the dark background surrounding the board into a more convincing layered sci-fi arena.
+- Add subtle perspective/depth layers behind the board: distant grid, atmospheric glow, dark metallic structures and restrained cyan/red illumination.
+- The background must remain dark enough that the board and HUD remain the visual focus.
+- Avoid a flat CSS-gradient/webpage appearance.
+
+2. UPGRADE THE BOARD FRAME
+- Give the existing board a stronger physical 2.5D construction.
+- Add visible layered thickness around the outer frame.
+- Use dark gunmetal/black metallic surfaces with controlled cyan edge illumination.
+- Add subtle inner glass/energy layers around the board.
+- The board should look like a physical futuristic game device embedded in an arena.
+- Do NOT alter the board dimensions or tile positions.
+
+3. IMPROVE GEM INTEGRATION
+- Keep every existing gem shape, color and gameplay identity.
+- Make each gem appear seated inside a dimensional tile/socket rather than simply sitting on a flat background.
+- Add restrained contact glow/shadow around gems to increase depth.
+- Do not make the glow so strong that gem colors become unreadable.
+
+4. HUD COHESION
+- Make YOU, RIVAL, VS, ENERGY, attack buttons and bottom ability controls feel like parts of the same physical futuristic interface.
+- Add subtle bevels, depth, glass/metal layering and controlled emissive edges.
+- Preserve all existing text, values, buttons and controls.
+- Do not change their functionality.
+
+5. VISUAL HIERARCHY
+The board should remain the primary focus.
+The HUD should support the board rather than overpower it.
+Keep the screen readable at 390×700.
+
+6. PREMIUM EFFECTS
+Add only restrained visual polish:
+- subtle ambient particles
+- soft arena glow
+- very subtle energy pulses
+- refined panel highlights
+- controlled cyan/red emissive accents
+
+Avoid excessive particles, blur, bloom, animation or expensive effects that could hurt mobile performance.
+
+7. PERFORMANCE
+- Keep the experience smooth on mobile.
+- Prefer CSS transforms, opacity and lightweight effects.
+- Avoid large continuously animated filters or expensive effects.
+- Respect existing overflow constraints.
+- No horizontal or vertical scrolling.
+
+8. VALIDATION
+After implementation:
+- Run TypeScript/build validation.
+- Verify the production build.
+- Verify 390×700 layout.
+- Verify touch/swipe alignment.
+- Verify all HUD controls remain visible and usable.
+- Verify no gameplay behavior changed.
+
+At the end, report exactly what visual files/components were changed and confirm that gameplay logic was untouched.
