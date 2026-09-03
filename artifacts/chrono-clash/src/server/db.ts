@@ -26,6 +26,12 @@ export class ChronoStore {
         created_at INTEGER NOT NULL
       );
       CREATE UNIQUE INDEX IF NOT EXISTS idx_players_subject ON players(subject);
+      CREATE TABLE IF NOT EXISTS email_accounts (
+        email TEXT PRIMARY KEY,
+        player_id TEXT NOT NULL,
+        password_hash TEXT NOT NULL
+      );
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_email_accounts_player ON email_accounts(player_id);
       CREATE TABLE IF NOT EXISTS sessions (
         token TEXT PRIMARY KEY,
         player_id TEXT NOT NULL,
@@ -160,6 +166,20 @@ export class ChronoStore {
            name=excluded.name`,
       )
       .run(player.playerId, player.provider, player.platform, player.subject, player.name, player.createdAt);
+  }
+
+  getEmailAccount(email: string): { playerId: string; passwordHash: string } | null {
+    const row = this.db
+      .prepare("SELECT player_id, password_hash FROM email_accounts WHERE email = ?")
+      .get(email) as { player_id?: string; password_hash?: string } | undefined;
+    if (!row?.player_id || !row.password_hash) return null;
+    return { playerId: row.player_id, passwordHash: row.password_hash };
+  }
+
+  putEmailAccount(email: string, playerId: string, passwordHash: string): void {
+    this.db
+      .prepare("INSERT INTO email_accounts (email, player_id, password_hash) VALUES (?, ?, ?)")
+      .run(email, playerId, passwordHash);
   }
 
   putSession(token: string, playerId: string, now: number): void {

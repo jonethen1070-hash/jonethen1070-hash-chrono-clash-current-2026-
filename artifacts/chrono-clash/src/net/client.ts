@@ -26,7 +26,10 @@ export class ChronoClient {
   async signIn(input: {
     platform: Platform;
     provider: AuthProvider;
-    token: string;
+    token?: string;
+    email?: string;
+    password?: string;
+    intent?: "sign-in" | "create-account";
     displayName?: string;
   }) {
     const res = await this.request<{ player: Player; sessionToken: string }>("POST", "/v1/auth", input, false);

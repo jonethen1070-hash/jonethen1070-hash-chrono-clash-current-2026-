@@ -1,17 +1,20 @@
 export type Platform = "android" | "ios" | "web";
-export type AuthProvider = "google" | "facebook" | "apple" | "guest";
+export type AuthProvider = "google" | "facebook" | "apple" | "email" | "guest";
 export type AuthMode = "development" | "production";
 
 export const PROVIDERS_BY_PLATFORM: Record<Platform, readonly AuthProvider[]> = {
-  android: ["google", "facebook", "guest"],
-  ios: ["google", "apple", "facebook", "guest"],
-  web: ["google", "facebook", "apple", "guest"],
+  android: ["google", "facebook", "email", "guest"],
+  ios: ["google", "apple", "facebook", "email", "guest"],
+  web: ["google", "facebook", "apple", "email", "guest"],
 };
 
 export interface AuthRequest {
   platform: Platform;
   provider: AuthProvider;
   token?: string;
+  email?: string;
+  password?: string;
+  intent?: "sign-in" | "create-account";
   displayName?: string;
 }
 
@@ -28,6 +31,7 @@ export interface PublicAuthConfig {
   google: PublicProviderConfig;
   apple: PublicProviderConfig;
   facebook: PublicProviderConfig;
+  email: PublicProviderConfig;
 }
 
 export interface Player {

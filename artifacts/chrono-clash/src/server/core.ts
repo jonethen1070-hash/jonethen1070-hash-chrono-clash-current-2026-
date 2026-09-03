@@ -1,4 +1,4 @@
-import { AuthError, verifyAuth } from "./auth";
+import { AuthError, hashEmailPassword, validateEmailCredentials, verifyAuth, verifyEmailPassword } from "./auth";
 import { AuthRuntimeConfig, loadAuthConfig } from "./auth-config";
 import { BattleActionInput, BattleDirector, BattleSync } from "./battle";
 import { ChronoStore, StoredMatch } from "./db";
@@ -30,18 +30,62 @@ export class ChronoClashServer {
   }
 
   async auth(req: AuthRequest): Promise<{ player: Player; created: boolean }> {
+    if (req.provider === "email") return this.authEmail(req);
     const ident = await verifyAuth(req, this.authConfig);
+    return this.issueSession(ident, req);
+  }
+
+  private async authEmail(req: AuthRequest): Promise<{ player: Player; created: boolean }> {
+    if (!this.authConfig.allowEmail) throw new AuthError("email sign-in is unavailable right now", 503);
+    const { email, password } = validateEmailCredentials(req);
+    const ident = await verifyAuth({ ...req, email, password }, this.authConfig);
+    const account = this.store.getEmailAccount(email);
+    const intent = req.intent || "sign-in";
+    if (intent !== "sign-in" && intent !== "create-account") {
+      throw new AuthError("unknown email sign-in action");
+    }
+    if (intent === "create-account") {
+      if (account) throw new AuthError("an account already exists for this email", 409);
+      const playerId = playerIdFor("email", ident.subject);
+      const existing = this.store.getPlayer(playerId);
+      this.store.transaction(() => {
+        this.store.putEmailAccount(email, playerId, hashEmailPassword(password));
+        if (!existing) {
+          this.store.upsertPlayer({
+            playerId,
+            provider: "email",
+            platform: ident.platform,
+            subject: ident.subject,
+            name: ident.name,
+            sessionToken: "",
+            createdAt: Date.now(),
+          });
+        }
+      });
+      return this.issueSession(ident, req, !existing);
+    }
+    if (!account || !verifyEmailPassword(password, account.passwordHash)) {
+      throw new AuthError("email or password is incorrect", 401);
+    }
+    return this.issueSession(ident, req);
+  }
+
+  private issueSession(
+    ident: { platform: Player["platform"]; provider: Player["provider"]; subject: string; name: string },
+    req: AuthRequest,
+    createdOverride?: boolean,
+  ): { player: Player; created: boolean } {
     const playerId = playerIdFor(ident.provider, ident.subject);
     const existing = this.store.getPlayer(playerId);
     const token = randomToken(16);
     if (existing) {
       existing.sessionToken = token;
       existing.platform = ident.platform;
-      if (req.displayName) existing.name = ident.name;
+      if (req.displayName && ident.provider !== "email") existing.name = ident.name;
       this.store.upsertPlayer(existing);
       this.store.putSession(token, playerId, Date.now());
       this.store.pruneSessions(playerId, this.authConfig.maxSessions);
-      return { player: { ...existing, sessionToken: token }, created: false };
+      return { player: { ...existing, sessionToken: token }, created: createdOverride ?? false };
     }
     const player: Player = {
       playerId,
@@ -55,7 +99,7 @@ export class ChronoClashServer {
     this.store.upsertPlayer(player);
     this.store.putSession(token, playerId, Date.now());
     this.store.pruneSessions(playerId, this.authConfig.maxSessions);
-    return { player: { ...player }, created: true };
+    return { player: { ...player }, created: createdOverride ?? true };
   }
 
   requireSession(token: string, now = Date.now()): Player {

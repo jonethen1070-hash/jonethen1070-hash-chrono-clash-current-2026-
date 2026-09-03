@@ -125,6 +125,30 @@ app.innerHTML = `
       </div>
     </section>
 
+    <div class="email-dialog hidden" id="emailDialog" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="emailDialogTitle">
+      <form class="email-dialog-card" id="emailForm">
+        <div class="email-dialog-heading">
+          <p class="menu-kicker">CHRONO CLASH ID</p>
+          <h2 id="emailDialogTitle">SIGN IN WITH EMAIL</h2>
+          <p id="emailDialogIntro">Use your email and password to continue your pilot profile.</p>
+        </div>
+        <label class="email-field">
+          <span>EMAIL</span>
+          <input id="emailAddress" type="email" autocomplete="email" maxlength="254" required />
+        </label>
+        <label class="email-field">
+          <span>PASSWORD</span>
+          <input id="emailPassword" type="password" autocomplete="current-password" minlength="8" maxlength="128" required />
+        </label>
+        <p class="email-dialog-status" id="emailDialogStatus" aria-live="polite"></p>
+        <div class="email-dialog-actions">
+          <button type="submit" class="primary game-ctl" id="emailSubmit">SIGN IN</button>
+          <button type="button" class="ghost game-ctl" id="emailCancel">CANCEL</button>
+        </div>
+        <button type="button" class="email-mode-toggle" id="emailModeToggle">NEW PILOT? CREATE AN ACCOUNT</button>
+      </form>
+    </div>
+
     <section id="online" class="screen">
       <div class="logo compact"><h1>CHOOSE YOUR BATTLE</h1><p id="onlineSub">SELECT A MATCH TYPE</p></div>
       <div class="settings-body">
@@ -429,6 +453,16 @@ const ui = {
   skipIntro: $("#skipIntro"),
   menu: $("#menu"),
   menuStatus: $("#menuStatus"),
+  emailDialog: $("#emailDialog"),
+  emailForm: $("#emailForm") as HTMLFormElement,
+  emailDialogTitle: $("#emailDialogTitle"),
+  emailDialogIntro: $("#emailDialogIntro"),
+  emailAddress: $("#emailAddress") as HTMLInputElement,
+  emailPassword: $("#emailPassword") as HTMLInputElement,
+  emailDialogStatus: $("#emailDialogStatus"),
+  emailSubmit: $("#emailSubmit") as HTMLButtonElement,
+  emailCancel: $("#emailCancel") as HTMLButtonElement,
+  emailModeToggle: $("#emailModeToggle") as HTMLButtonElement,
   online: $("#online"),
   onlineSub: $("#onlineSub"),
   onlineIdent: $("#onlineIdent"),
@@ -965,6 +999,36 @@ async function paintOnline(): Promise<void> {
 }
 
 let matchPoll: ReturnType<typeof setInterval> | null = null;
+let emailMode: "sign-in" | "create-account" = "sign-in";
+
+function updateEmailDialogMode(): void {
+  const create = emailMode === "create-account";
+  ui.emailDialogTitle.textContent = create ? "CREATE PILOT ACCOUNT" : "SIGN IN WITH EMAIL";
+  ui.emailDialogIntro.textContent = create
+    ? "Create a Player ID that keeps your profile, progression, and trophies."
+    : "Use your email and password to continue your pilot profile.";
+  ui.emailSubmit.textContent = create ? "CREATE ACCOUNT" : "SIGN IN";
+  ui.emailModeToggle.textContent = create ? "ALREADY HAVE AN ACCOUNT? SIGN IN" : "NEW PILOT? CREATE AN ACCOUNT";
+  ui.emailPassword.autocomplete = create ? "new-password" : "current-password";
+}
+
+function openEmailDialog(): void {
+  emailMode = "sign-in";
+  updateEmailDialogMode();
+  ui.emailDialogStatus.textContent = "";
+  ui.emailDialog.classList.remove("hidden");
+  ui.emailDialog.setAttribute("aria-hidden", "false");
+  ui.emailAddress.focus();
+}
+
+function closeEmailDialog(): void {
+  ui.emailDialog.classList.add("hidden");
+  ui.emailDialog.setAttribute("aria-hidden", "true");
+  ui.emailForm.reset();
+  ui.emailDialogStatus.textContent = "";
+  ui.emailSubmit.disabled = false;
+  ui.emailCancel.disabled = false;
+}
 
 function stopMatchPoll(): void {
   if (matchPoll) {
@@ -1151,6 +1215,35 @@ async function signInWith(provider: AuthProvider, existingToken?: string): Promi
   }
 }
 
+async function signInWithEmail(email: string, password: string): Promise<boolean> {
+  setIdentityStatus(emailMode === "create-account" ? "CREATING PILOT ACCOUNT..." : "SIGNING IN WITH EMAIL...");
+  try {
+    await net.signIn({
+      platform: detectPlatform(),
+      provider: "email",
+      email,
+      password,
+      intent: emailMode,
+      displayName: session.progress.name,
+    });
+    await Promise.all([pullRemoteEconomy(), pullRemoteDailyRun()]);
+    setIdentityStatus(`PLAYER ID ${net.player?.playerId ?? ""}`);
+    paintMenuAccount();
+    return true;
+  } catch (err) {
+    const status = (err as { status?: number } | null)?.status;
+    const message =
+      status === 503 || (status !== undefined && status >= 500)
+        ? "EMAIL SIGN-IN IS UNAVAILABLE RIGHT NOW. TRY AGAIN OR USE GUEST."
+        : err instanceof Error
+          ? err.message
+          : "email sign-in failed";
+    ui.emailDialogStatus.textContent = message;
+    ui.menuStatus.textContent = message;
+    return false;
+  }
+}
+
 ui.skipIntro.addEventListener("click", (e) => {
   e.stopPropagation();
   if (session.skipIntro(canSkipIntro(settings.introSeen))) {
@@ -1174,7 +1267,46 @@ $("#menuFacebook").addEventListener("click", () => {
 $("#menuEmail").addEventListener("click", () => {
   unlockGameAudio(audio, settings.music);
   pressUi();
-  ui.menuStatus.textContent = "EMAIL SIGN-IN IS NOT CONFIGURED YET. USE FACEBOOK OR GUEST.";
+  openEmailDialog();
+});
+ui.emailModeToggle.addEventListener("click", () => {
+  emailMode = emailMode === "sign-in" ? "create-account" : "sign-in";
+  updateEmailDialogMode();
+  ui.emailDialogStatus.textContent = "";
+  ui.emailPassword.focus();
+});
+ui.emailCancel.addEventListener("click", () => {
+  pressUi();
+  closeEmailDialog();
+  ui.menuStatus.textContent = "EMAIL SIGN-IN CANCELLED.";
+});
+ui.emailDialog.addEventListener("click", (event) => {
+  if (event.target === ui.emailDialog) {
+    closeEmailDialog();
+    ui.menuStatus.textContent = "EMAIL SIGN-IN CANCELLED.";
+  }
+});
+window.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !ui.emailDialog.classList.contains("hidden")) {
+    closeEmailDialog();
+    ui.menuStatus.textContent = "EMAIL SIGN-IN CANCELLED.";
+  }
+});
+ui.emailForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  if (ui.emailSubmit.disabled) return;
+  ui.emailSubmit.disabled = true;
+  ui.emailCancel.disabled = true;
+  ui.emailDialogStatus.textContent = emailMode === "create-account" ? "CREATING ACCOUNT..." : "CONTACTING CHRONO CLASH SERVER...";
+  void signInWithEmail(ui.emailAddress.value, ui.emailPassword.value).then((signedIn) => {
+    if (signedIn) {
+      closeEmailDialog();
+      enterBattleSelect();
+    } else {
+      ui.emailSubmit.disabled = false;
+      ui.emailCancel.disabled = false;
+    }
+  });
 });
 $("#menuGuest").addEventListener("click", () => {
   unlockGameAudio(audio, settings.music);

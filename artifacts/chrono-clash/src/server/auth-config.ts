@@ -30,6 +30,7 @@ export interface AuthRuntimeConfig {
   appleRedirectUri: string;
   facebookAppId: string;
   facebookAppSecret: string;
+  allowEmail: boolean;
   fetchImpl: FetchLike;
 }
 
@@ -72,6 +73,7 @@ export function loadAuthConfig(env: EnvMap = process.env, overrides: Partial<Aut
   const appleClientIds = overrides.appleClientIds ?? csv(env, "APPLE_CLIENT_ID", "APPLE_IOS_CLIENT_ID");
   const facebookAppId = overrides.facebookAppId ?? (env.FACEBOOK_APP_ID || "").trim();
   const facebookAppSecret = overrides.facebookAppSecret ?? (env.FACEBOOK_APP_SECRET || "").trim();
+  const allowEmail = overrides.allowEmail ?? flag(env, "CHRONO_ALLOW_EMAIL", true);
   const hasProviderCreds =
     googleClientIds.length > 0 || appleClientIds.length > 0 || Boolean(facebookAppId && facebookAppSecret);
   const allowGuest = overrides.allowGuest ?? flag(env, "CHRONO_ALLOW_GUEST", !hasProviderCreds || mode !== "production");
@@ -91,6 +93,7 @@ export function loadAuthConfig(env: EnvMap = process.env, overrides: Partial<Aut
     appleRedirectUri: overrides.appleRedirectUri ?? (env.APPLE_REDIRECT_URI || "").trim(),
     facebookAppId,
     facebookAppSecret,
+    allowEmail,
     fetchImpl: overrides.fetchImpl ?? ((url, init) => fetch(url, init)),
   };
 }
@@ -110,11 +113,12 @@ export function publicAuthConfig(cfg: AuthRuntimeConfig): PublicAuthConfig {
       redirectUri: cfg.appleRedirectUri,
     },
     facebook: { enabled: Boolean(cfg.facebookAppId && cfg.facebookAppSecret), appId: cfg.facebookAppId },
+    email: { enabled: cfg.allowEmail },
   };
 }
 
 export function authStatusLine(cfg: AuthRuntimeConfig): string {
-  return `auth mode=${cfg.mode} guest=${cfg.allowGuest ? "on" : "off"} google=${cfg.googleClientIds.length ? "on" : "off"} apple=${cfg.appleClientIds.length ? "on" : "off"} facebook=${cfg.facebookAppId && cfg.facebookAppSecret ? "on" : "off"}`;
+  return `auth mode=${cfg.mode} guest=${cfg.allowGuest ? "on" : "off"} google=${cfg.googleClientIds.length ? "on" : "off"} apple=${cfg.appleClientIds.length ? "on" : "off"} facebook=${cfg.facebookAppId && cfg.facebookAppSecret ? "on" : "off"} email=${cfg.allowEmail ? "on" : "off"}`;
 }
 
 export function assertProductionAuth(cfg: AuthRuntimeConfig): void {
