@@ -272,19 +272,29 @@ app.innerHTML = `
         <div class="incoming-banner hidden" id="incomingBanner">INCOMING</div>
       </div>
       <div class="boards">
-        <div class="rival-side">
-          <div class="opp-meta">
-            <span>RIVAL BOARD</span>
-            <span class="freeze-clock" id="freezeClock"></span>
-            <span class="combo" id="oppCombo"></span>
-          </div>
-          <div id="oppBoard" class="board-slot"><canvas id="oppGems" class="board-canvas" aria-hidden="true"></canvas></div>
-        </div>
         <div class="energy-wrap">
           <small>ENERGY</small>
           <div class="energy"><span id="energyFill"></span></div>
           <b id="energyLabel">0 / 100</b>
         </div>
+        <section class="energy-options" aria-label="Energy attack options">
+          <article class="energy-attack burst">
+            <span class="energy-attack-glyph" aria-hidden="true"></span>
+            <span class="energy-attack-copy">
+              <b>ENERGY BURST</b>
+              <small>Destroy 3x3 area</small>
+            </span>
+            <span class="energy-attack-cost"><i aria-hidden="true"></i>40</span>
+          </article>
+          <article class="energy-attack strike">
+            <span class="energy-attack-glyph" aria-hidden="true"></span>
+            <span class="energy-attack-copy">
+              <b>MEGA STRIKE</b>
+              <small>Destroy all gems of a color</small>
+            </span>
+            <span class="energy-attack-cost"><i aria-hidden="true"></i>50</span>
+          </article>
+        </section>
         <div class="player-side">
           <div class="you-meta">
             <span>YOUR BOARD</span>
@@ -299,6 +309,11 @@ app.innerHTML = `
         <button class="power" id="freeze"><span class="glyph" aria-hidden="true">❄</span><i class="ability-fx" aria-hidden="true"></i><b>FREEZE</b><span class="cost" id="freezeQty">0/5</span><span class="need">${ENERGY_FREEZE} ENERGY · Pauses rival board for 5 seconds.</span></button>
         <button class="power" id="timeshift"><span class="glyph" aria-hidden="true">⏱</span><i class="ability-fx" aria-hidden="true"></i><b>TIME SHIFT</b><span class="cost" id="shiftQty">0/5</span><span class="need">${ENERGY_TIMESHIFT} ENERGY · Steals 5s in TIME BATTLE, or grants a tempo surge.</span></button>
         <button class="power" id="rewind"><span class="glyph" aria-hidden="true">↺</span><i class="ability-fx" aria-hidden="true"></i><b>REWIND</b><span class="cost">${ENERGY_REWIND} ENERGY</span><span class="need">Restores your last valid move.</span></button>
+      </div>
+      <div id="oppBoard" class="opponent-render-reserve" aria-hidden="true">
+        <span id="freezeClock"></span>
+        <span id="oppCombo"></span>
+        <canvas id="oppGems" aria-hidden="true"></canvas>
       </div>
       </div>
       <canvas id="stage"></canvas>

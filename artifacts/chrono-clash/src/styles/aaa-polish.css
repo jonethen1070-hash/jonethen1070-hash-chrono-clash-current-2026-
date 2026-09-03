@@ -2988,3 +2988,233 @@ html body #app #match .power:disabled {
     font-size: 10px !important;
   }
 }
+
+/* =========================================================
+   SINGLE-BOARD MATCH COMPOSITION
+   The opponent simulation remains intact; only its board presentation is
+   removed so the player board can become the visual centerpiece.
+   ========================================================= */
+
+#match .opponent-render-reserve {
+  position: absolute !important;
+  left: -10000px !important;
+  top: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  contain: strict;
+}
+
+#match .opponent-render-reserve canvas {
+  width: 1px !important;
+  height: 1px !important;
+}
+
+html body #app #match .boards {
+  grid-template-rows: max-content max-content minmax(0, 1fr) !important;
+  gap: 7px !important;
+  margin: 5px 0 3px !important;
+}
+
+html body #app #match .energy-wrap {
+  order: 0;
+}
+
+#match .energy-options {
+  order: 1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  min-width: 0;
+}
+
+#match .energy-attack {
+  --attack-color: #54f15c;
+  --attack-soft: rgba(84, 241, 92, 0.24);
+  position: relative;
+  min-width: 0;
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  grid-template-rows: 1fr auto;
+  align-items: center;
+  column-gap: 7px;
+  padding: 7px 8px 6px;
+  color: #f3fff5;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.12), transparent 2px),
+    radial-gradient(circle at 18% 45%, var(--attack-soft), transparent 38%),
+    linear-gradient(155deg, rgba(10,24,15,0.98), rgba(2,7,5,0.99) 70%);
+  border: 1px solid color-mix(in srgb, var(--attack-color) 68%, transparent);
+  border-radius: 8px;
+  clip-path: polygon(7px 0, calc(100% - 7px) 0, 100% 7px, 100% calc(100% - 7px), calc(100% - 7px) 100%, 7px 100%, 0 calc(100% - 7px), 0 7px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.16),
+    inset 0 -10px 14px rgba(0,0,0,0.45),
+    0 0 12px var(--attack-soft),
+    0 7px 12px rgba(0,0,0,0.42);
+  overflow: hidden;
+}
+
+#match .energy-attack::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  pointer-events: none;
+  border: 1px solid color-mix(in srgb, var(--attack-color) 24%, transparent);
+  clip-path: inherit;
+}
+
+#match .energy-attack.strike {
+  --attack-color: #ff285d;
+  --attack-soft: rgba(255, 40, 93, 0.24);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.1), transparent 2px),
+    radial-gradient(circle at 18% 45%, var(--attack-soft), transparent 38%),
+    linear-gradient(155deg, rgba(38,7,15,0.98), rgba(10,2,6,0.99) 70%);
+}
+
+#match .energy-attack-glyph {
+  grid-row: 1 / span 2;
+  position: relative;
+  width: 25px;
+  height: 34px;
+  align-self: center;
+  justify-self: center;
+  color: var(--attack-color);
+  filter: drop-shadow(0 0 6px var(--attack-color));
+}
+
+#match .energy-attack.burst .energy-attack-glyph {
+  background: currentColor;
+  clip-path: polygon(47% 0, 92% 0, 64% 36%, 92% 36%, 25% 100%, 40% 57%, 7% 57%);
+}
+
+#match .energy-attack.burst .energy-attack-glyph::after {
+  content: "";
+  position: absolute;
+  inset: 3px 7px 8px 8px;
+  background: rgba(240,255,242,0.8);
+  clip-path: inherit;
+}
+
+#match .energy-attack.strike .energy-attack-glyph {
+  background: linear-gradient(145deg, #ffd6e0, #ff285d 40%, #7f0828 78%);
+  clip-path: polygon(54% 0, 90% 18%, 68% 100%, 18% 81%, 3% 42%);
+}
+
+#match .energy-attack.strike .energy-attack-glyph::after {
+  content: "";
+  position: absolute;
+  inset: 4px 6px 8px 7px;
+  background: rgba(255,255,255,0.5);
+  clip-path: polygon(50% 0, 100% 20%, 58% 50%, 0 100%, 18% 30%);
+}
+
+#match .energy-attack-copy {
+  min-width: 0;
+  align-self: end;
+}
+
+#match .energy-attack-copy b,
+#match .energy-attack-copy small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#match .energy-attack-copy b {
+  color: #f5fff8;
+  font-family: var(--font-display);
+  font-size: 8px;
+  line-height: 1.1;
+  letter-spacing: 0.07em;
+  white-space: nowrap;
+  text-shadow: 0 0 8px var(--attack-soft);
+}
+
+#match .energy-attack-copy small {
+  margin-top: 2px;
+  color: #afc4bc;
+  font-size: 7px;
+  line-height: 1.08;
+  letter-spacing: 0.01em;
+  white-space: normal;
+}
+
+#match .energy-attack-cost {
+  align-self: start;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--attack-color);
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 0 7px var(--attack-color);
+}
+
+#match .energy-attack-cost i {
+  width: 5px;
+  height: 9px;
+  background: currentColor;
+  clip-path: polygon(52% 0, 100% 0, 68% 38%, 100% 38%, 30% 100%, 44% 55%, 10% 55%);
+  filter: drop-shadow(0 0 3px currentColor);
+}
+
+html body #app #match .player-side {
+  order: 2;
+  min-height: 0 !important;
+}
+
+html body #app #match .player-side .board-slot {
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 1 / 1;
+  flex: 0 0 auto !important;
+  min-height: 0 !important;
+}
+
+html body #app #match .powers {
+  margin-top: 4px !important;
+}
+
+@media (max-height: 850px) {
+  html body #app #match {
+    padding-right: calc(4px + env(safe-area-inset-right)) !important;
+    padding-left: calc(4px + env(safe-area-inset-left)) !important;
+  }
+
+  html body #app #match .boards {
+    grid-template-rows: max-content max-content minmax(0, 1fr) !important;
+    gap: 5px !important;
+    margin-top: 3px !important;
+  }
+
+  html body #app #match .energy-attack {
+    min-height: 52px;
+    padding: 5px 7px 5px;
+    grid-template-columns: 25px minmax(0, 1fr);
+    column-gap: 6px;
+  }
+
+  #match .energy-attack-glyph {
+    width: 21px;
+    height: 29px;
+  }
+
+  #match .energy-attack-copy b {
+    font-size: 7px;
+  }
+
+  #match .energy-attack-copy small {
+    font-size: 6px;
+  }
+
+  html body #app #match .powers {
+    margin-top: 3px !important;
+  }
+}
