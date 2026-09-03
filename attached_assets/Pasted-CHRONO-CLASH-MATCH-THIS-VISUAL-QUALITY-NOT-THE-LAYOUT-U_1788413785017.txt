@@ -1,0 +1,374 @@
+CHRONO CLASH — MATCH THIS VISUAL QUALITY, NOT THE LAYOUT
+
+Use the uploaded reference image as the VISUAL QUALITY / ART-DIRECTION REFERENCE.
+
+IMPORTANT:
+Do NOT copy the reference game's layout, text, gameplay, board dimensions, controls, or mechanics.
+
+Keep our existing Chrono Clash gameplay and current successful 390x700 layout.
+
+The ONLY goal is to make Chrono Clash visually closer to the reference in:
+
+- 2.5D depth
+- sharpness
+- color contrast
+- material quality
+- crystalline gem readability
+- metallic/glass construction
+- neon edge lighting
+- visual separation
+- premium sci-fi presentation
+
+==================================================
+1. PRESERVE CURRENT FUNCTIONAL LAYOUT
+==================================================
+
+LOCK the current successful mobile geometry.
+
+Do NOT reposition:
+
+- title
+- top buttons
+- YOU panel
+- VS panel
+- RIVAL panel
+- attack bars
+- energy bar
+- attack buttons
+- YOUR BOARD label
+- 8x8 board
+- bottom abilities
+
+Do NOT change:
+
+- board dimensions
+- 8x8 grid
+- gem cell positions
+- touch/swipe coordinates
+- gameplay logic
+- scoring
+- timers
+- energy
+- abilities
+- Freeze
+- Time Shift
+- Rewind
+- gem matching
+- gem movement
+- networking
+
+==================================================
+2. VISUAL TARGET
+==================================================
+
+The uploaded reference demonstrates the target visual language.
+
+Make Chrono Clash feel:
+
+CRISP
+SHARP
+HIGH-CONTRAST
+PREMIUM
+DIMENSIONAL
+FUTURISTIC
+ENERGETIC
+
+Do NOT make it look soft, foggy, washed out, or like a flat webpage.
+
+==================================================
+3. 2.5D BOARD
+==================================================
+
+This is the most important change.
+
+Make the existing board look like a physical futuristic machine.
+
+Create:
+
+- thick dark metallic outer housing
+- multiple layered frame surfaces
+- beveled edges
+- recessed inner board
+- visible depth between outer frame and gem grid
+- dark glass/metal tile sockets
+- cyan emissive edge strips
+- subtle perspective/depth separation
+
+The board should visually feel THICK and PHYSICAL.
+
+Do not change its actual interactive geometry.
+
+The reference board has a strong sense of depth because the frame, sockets and gems have clearly separated layers.
+
+Reproduce that principle.
+
+==================================================
+4. SHARPEN THE GEMS
+==================================================
+
+KEEP OUR EXISTING GEM SHAPES AND COLORS.
+
+Do not replace the gem assets.
+
+Improve their presentation:
+
+- stronger edge definition
+- sharper highlights
+- clearer internal facets
+- brighter core
+- controlled outer glow
+- stronger contact shadow
+- darker socket behind each gem
+
+Each gem must clearly separate from its background.
+
+The gems should look like hard crystalline objects, not soft glowing icons.
+
+Avoid excessive bloom.
+
+IMPORTANT:
+
+The center of each gem must remain crisp.
+
+Glow should surround the gem, not wash over it.
+
+==================================================
+5. COLOR CONTRAST
+==================================================
+
+Increase contrast substantially.
+
+Use the following visual hierarchy:
+
+BACKGROUND:
+almost black / extremely dark blue
+
+BOARD:
+dark gunmetal / black
+
+PLAYER:
+cyan / electric blue
+
+RIVAL:
+crimson / hot red
+
+TIME:
+controlled purple
+
+GEMS:
+highly saturated individual colors
+
+Make bright elements stand strongly against the dark environment.
+
+Do not turn the entire screen neon.
+
+Dark areas should remain genuinely dark.
+
+Bright areas should be selectively bright.
+
+==================================================
+6. METALLIC MATERIALS
+==================================================
+
+Make panels look like materials instead of flat CSS boxes.
+
+Use:
+
+- dark gunmetal
+- black glass
+- beveled edges
+- thin specular highlights
+- inset shadows
+- layered borders
+- subtle reflections
+
+Avoid excessive gradients.
+
+The reference works because bright edges contrast with almost-black surfaces.
+
+==================================================
+7. NEON EDGE LIGHTING
+==================================================
+
+Add controlled emissive lighting around:
+
+- board frame
+- player HUD
+- rival HUD
+- attack panels
+- bottom ability panels
+
+PLAYER = cyan/blue
+
+RIVAL = red/crimson
+
+TIME = purple
+
+Lighting should appear to come FROM the objects.
+
+Avoid simply putting a huge glow around everything.
+
+==================================================
+8. HUD SHARPNESS
+==================================================
+
+Keep the existing HUD structure and information.
+
+Make it visually sharper:
+
+- crisp typography
+- stronger text contrast
+- thin luminous borders
+- darker panel interiors
+- sharper bevels
+- clearer separation between sections
+
+The HUD should have the same material language as the board.
+
+==================================================
+9. BACKGROUND
+==================================================
+
+Make the surrounding environment extremely dark and atmospheric.
+
+Add only subtle:
+
+- deep-space texture
+- faint particles
+- thin perspective grid
+- distant cyan/red atmospheric lighting
+
+The reference has a nearly black background that makes the bright game elements pop.
+
+Do NOT fill the background with bright gradients.
+
+==================================================
+10. DEPTH WITHOUT BREAKING TOUCH
+==================================================
+
+Use visual-only layers for depth.
+
+Decorative layers should use:
+
+pointer-events: none
+
+Do not allow any decorative layer to intercept touch.
+
+Prefer:
+
+- pseudo-elements
+- absolute-positioned visual layers
+- box shadows
+- inset shadows
+- transforms
+- borders
+- gradients used sparingly
+
+Do NOT use transforms that move the actual interactive cells away from their touch coordinates.
+
+==================================================
+11. SHARPNESS RULE
+==================================================
+
+This is critical:
+
+NO blurry "AI glow" look.
+
+Avoid:
+
+- excessive blur
+- excessive bloom
+- hazy overlays
+- low-contrast gradients
+- washed-out colors
+
+The reference has extremely crisp edges.
+
+Prioritize:
+
+EDGE DEFINITION
++
+DARK/LIGHT CONTRAST
++
+SATURATED COLORS
++
+MATERIAL SEPARATION
+
+==================================================
+12. MOBILE PERFORMANCE
+==================================================
+
+Keep the game smooth.
+
+Avoid expensive continuous effects.
+
+Use lightweight CSS effects where possible.
+
+No huge animated filters.
+
+No large particle systems.
+
+No layout changes that increase document dimensions.
+
+==================================================
+13. VALIDATE AT 390x700
+==================================================
+
+After implementation inspect the ACTUAL running game at exactly 390x700.
+
+Verify:
+
+- entire header visible
+- all top buttons visible
+- complete HUD visible
+- complete 8x8 board visible
+- all 64 gems visible
+- bottom three abilities visible
+- no clipping
+- no scrolling
+- no overlap
+- touch alignment unchanged
+- adjacent swipe works
+- no console errors
+
+==================================================
+14. FINAL VISUAL TEST
+==================================================
+
+Compare the result against the uploaded reference image.
+
+Do NOT ask whether the layouts are identical.
+
+Instead ask:
+
+Does Chrono Clash now have the same LEVEL OF:
+
+- sharpness?
+- contrast?
+- dimensionality?
+- crystalline readability?
+- metallic depth?
+- neon edge definition?
+- premium sci-fi finish?
+
+If not, continue refining the visual styling.
+
+Do not claim success simply because the build passes.
+
+The visual result itself must show a clear improvement.
+
+FINAL RULE:
+
+KEEP OUR GAME.
+
+KEEP OUR GAMEPLAY.
+
+KEEP OUR CURRENT MOBILE GEOMETRY.
+
+CHANGE THE VISUAL QUALITY.
+
+The target is:
+
+CURRENT CHRONO CLASH GAMEPLAY
++
+REFERENCE IMAGE'S SHARPNESS / CONTRAST / 2.5D VISUAL QUALITY.
