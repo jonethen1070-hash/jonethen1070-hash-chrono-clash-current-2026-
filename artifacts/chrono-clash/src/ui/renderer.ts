@@ -66,6 +66,16 @@ interface Particle {
   g?: number;
 }
 
+interface Shockwave {
+  x: number;
+  y: number;
+  born: number;
+  life: number;
+  radius: number;
+  color: string;
+  width: number;
+}
+
 interface FloatText {
   x: number;
   y: number;
@@ -89,6 +99,7 @@ interface Bolt {
 class BoardView {
   tiles = new Map<number, VisualTile>();
   particles: Particle[] = [];
+  shockwaves: Shockwave[] = [];
   floats: FloatText[] = [];
   seenFx = new Set<number>();
   shake = 0;
@@ -97,6 +108,7 @@ class BoardView {
   reset(): void {
     this.tiles.clear();
     this.particles = [];
+    this.shockwaves = [];
     this.floats = [];
     this.seenFx.clear();
     this.shake = 0;
@@ -161,6 +173,26 @@ export class BoardRenderer {
     this.invalidB = b;
     this.invalidUntil = now + 220;
     this.playerView.shake = Math.max(this.playerView.shake, 5);
+  }
+
+  flashSelect(at: Coord, now: number): void {
+    const tile = [...this.playerView.tiles.values()].find((t) => t.r === at.r && t.c === at.c && !t.dying);
+    if (!tile) return;
+    const cell = this.lastPlayerCell;
+    tile.flash = Math.max(tile.flash, 0.72);
+    tile.glow = Math.max(tile.glow, 0.82);
+    this.playerView.shake = Math.max(this.playerView.shake, 0.8);
+    this.addShockwave(
+      this.playerView,
+      tile.x + cell / 2,
+      tile.y + cell / 2,
+      cell * 0.16,
+      "#a5f3fc",
+      260,
+      1.7,
+    );
+    this.impactSpark(this.playerView, tile.x + cell / 2, tile.y + cell / 2, tile.color, cell);
+    void now;
   }
 
   flashSwap(a: Coord, b: Coord, _now: number): void {
@@ -427,6 +459,7 @@ export class BoardRenderer {
     ctx.translate(sx, sy);
 
     this.blitWells(ctx, ox, oy, size, cell, isPlayer);
+    this.drawBoardEnergy(ctx, ox, oy, size, isPlayer, boosted, frozen, now);
 
     const rim = boosted
       ? "rgba(94, 246, 255, 0.92)"
@@ -485,6 +518,9 @@ export class BoardRenderer {
             glow: populated ? 0.16 : 0,
           };
           view.tiles.set(piece.id, tile);
+          if (populated && tile.moveKind === "fall") {
+            this.impactSpark(view, tile.x + cell / 2, tile.y + cell / 2, tile.color, cell);
+          }
         }
         const prevR = tile.r;
         const prevC = tile.c;
@@ -546,6 +582,10 @@ export class BoardRenderer {
               tile.vy = 0;
               if (!reduced && anim !== "low" && Math.abs(tile.fromY - tile.toY) > cell * 0.4) {
                 tile.scale = Math.min(1.025, tile.scale + 0.018);
+              }
+              if (Math.abs(tile.fromY - tile.toY) > cell * 0.4) {
+                this.impactSpark(view, tile.x + cell / 2, tile.y + cell / 2, tile.color, cell);
+                this.addShockwave(view, tile.x + cell / 2, tile.y + cell / 2, cell * 0.12, isPlayer ? "#67e8f9" : "#fb7185", 220, 1.2);
               }
             }
           }
@@ -620,6 +660,15 @@ export class BoardRenderer {
         const pts = Math.abs(Number(String(fxEvent.text).replace(/[^\d]/g, "")) || 0);
         const px = fxEvent.at ? ix + GAP + fxEvent.at.c * (cell + GAP) + cell / 2 : ox + size / 2;
         const py = fxEvent.at ? iy + GAP + fxEvent.at.r * (cell + GAP) + cell / 2 : oy + size * 0.46;
+        this.addShockwave(
+          view,
+          px,
+          py,
+          cell * (combo >= 5 ? 1.55 : combo >= 3 ? 1.28 : 1),
+          isPlayer ? (combo >= 5 ? "#e0f2fe" : "#67e8f9") : (combo >= 5 ? "#ffe4e6" : "#fb7185"),
+          combo >= 5 ? 520 : 380,
+          combo >= 5 ? 3.4 : 2.2,
+        );
         view.floats.push({
           x: px,
           y: py,
@@ -650,6 +699,15 @@ export class BoardRenderer {
         if (view.floats.length > 5) view.floats.splice(0, view.floats.length - 5);
         if (combo >= 2) {
           this.ringBurst(view, ox + size / 2, oy + size / 2, cell, combo);
+          this.addShockwave(
+            view,
+            ox + size / 2,
+            oy + size / 2,
+            cell * (combo >= 8 ? 2.7 : combo >= 5 ? 2.2 : 1.8),
+            combo >= 8 ? "#fff3b0" : combo >= 5 ? "#7dd3fc" : "#a5f3fc",
+            combo >= 8 ? 900 : 680,
+            combo >= 8 ? 4.2 : 2.8,
+          );
         }
       }
     }
@@ -717,6 +775,7 @@ export class BoardRenderer {
 
     this.stepParticles(view);
     this.drawParticles(view);
+    this.drawShockwaves(view, now);
     this.drawFloats(view, now);
 
     if (frozen && !isPlayer) {
@@ -905,6 +964,44 @@ export class BoardRenderer {
     ctx.drawImage(sheet, ox, oy, size, size);
   }
 
+  private drawBoardEnergy(
+    ctx: CanvasRenderingContext2D,
+    ox: number,
+    oy: number,
+    size: number,
+    isPlayer: boolean,
+    boosted: boolean,
+    frozen: boolean,
+    now: number,
+  ): void {
+    if (this.fx.quality === "low" || this.fx.reducedMotion) return;
+    const active = boosted || frozen || isPlayer;
+    if (!active) return;
+    const pulse = 0.5 + Math.sin(now / (boosted ? 150 : 420)) * 0.5;
+    const color = frozen ? "#bae6fd" : isPlayer ? "#22d3ee" : "#fb7185";
+    const alpha = (boosted || frozen ? 0.16 : 0.055) + pulse * (boosted || frozen ? 0.13 : 0.035);
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = boosted ? 1.8 : 1;
+    const radius = size * 0.46;
+    const cx = ox + size / 2;
+    const cy = oy + size / 2;
+    const spin = now / (boosted ? 800 : 1800);
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, spin, spin + (boosted ? 1.5 : 0.9));
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius - 3, spin + Math.PI, spin + Math.PI + (boosted ? 1.1 : 0.65));
+    ctx.stroke();
+    if (boosted) {
+      ctx.globalAlpha = alpha * 0.55;
+      ctx.fillStyle = color;
+      ctx.fillRect(ox + size * 0.12, oy + size * 0.08 + ((now / 24) % (size * 0.84)), size * 0.76, 1);
+    }
+    ctx.restore();
+  }
+
   private spawnParticle(view: BoardView, init: Particle): void {
     const p = this.particlePool.pop() ?? init;
     if (p !== init) {
@@ -1008,14 +1105,53 @@ export class BoardRenderer {
     }
   }
 
+  private addShockwave(
+    view: BoardView,
+    x: number,
+    y: number,
+    radius: number,
+    color: string,
+    life: number,
+    width: number,
+  ): void {
+    if (this.fx.quality === "low" || this.fx.reducedMotion) return;
+    view.shockwaves.push({ x, y, born: performance.now(), life, radius, color, width });
+    if (view.shockwaves.length > 12) view.shockwaves.splice(0, view.shockwaves.length - 12);
+  }
+
+  private drawShockwaves(view: BoardView, now: number): void {
+    if (!view.shockwaves.length) return;
+    const ctx = this.ctx;
+    view.shockwaves = view.shockwaves.filter((wave) => now - wave.born < wave.life);
+    ctx.save();
+    for (const wave of view.shockwaves) {
+      const t = Math.max(0, Math.min(1, (now - wave.born) / wave.life));
+      const eased = 1 - Math.pow(1 - t, 2);
+      const alpha = (1 - t) * (1 - t) * 0.8;
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = wave.color;
+      ctx.lineWidth = Math.max(0.8, wave.width * (1 - t * 0.55));
+      ctx.shadowColor = wave.color;
+      ctx.shadowBlur = 8 + wave.width * 2;
+      ctx.beginPath();
+      ctx.arc(wave.x, wave.y, 4 + wave.radius * eased, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
   private castPower(view: BoardView, text: string, x: number, y: number, cell: number, isPlayer: boolean): void {
     const t = text.toUpperCase();
     const n = particleBudget(this.fx.quality, this.fx.reducedMotion);
     const mul = feelMul(this.fx.quality, this.fx.reducedMotion);
     const freeze = t.includes("FREEZE");
     const rewind = t.includes("REWIND") || t.includes("BOARD RESTORED");
-    view.flash = Math.max(view.flash, (freeze ? 0.32 : rewind ? 0.26 : 0.24) * Math.max(0.35, mul));
-    view.shake = Math.max(view.shake, (freeze ? 4.6 : rewind ? 3.8 : 3.4) * mul);
+    const burst = t.includes("ENERGY BURST");
+    const mega = t.includes("MEGA STRIKE");
+    const powerColor = freeze ? "#bae6fd" : rewind ? "#fb7185" : mega ? "#fb7185" : burst ? "#22d3ee" : "#7dd3fc";
+    view.flash = Math.max(view.flash, (freeze ? 0.32 : rewind ? 0.26 : mega ? 0.38 : 0.24) * Math.max(0.35, mul));
+    view.shake = Math.max(view.shake, (freeze ? 4.6 : rewind ? 3.8 : mega ? 6.2 : 3.4) * mul);
+    this.addShockwave(view, x, y, cell * (mega ? 3.7 : burst ? 2.8 : freeze ? 2.2 : 2.4), powerColor, mega ? 900 : 660, mega ? 4.8 : 3.2);
     if (!n) return;
     if (freeze) {
       const count = n + (isPlayer ? 0 : 2);
@@ -1052,7 +1188,7 @@ export class BoardRenderer {
     } else {
       for (let i = 0; i < n; i++) {
         const a = (Math.PI * 2 * i) / n;
-        const sp = 2.2 + Math.random();
+        const sp = (mega ? 2.9 : burst ? 2.5 : 2.2) + Math.random();
         this.spawnParticle(view, {
           x,
           y,
@@ -1061,7 +1197,7 @@ export class BoardRenderer {
           life: 1,
           max: 1,
           size: cell * 0.08,
-          color: i % 2 ? "#e0f2fe" : "#38bdf8",
+          color: i % 2 ? (mega ? "#ffe4e6" : "#e0f2fe") : powerColor,
           g: 0.03,
         });
       }

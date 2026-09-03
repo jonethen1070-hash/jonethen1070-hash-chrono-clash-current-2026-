@@ -1857,6 +1857,7 @@ ui.playerBoard.addEventListener(
     e.preventDefault();
     swipe = { id: e.pointerId, r: cell.r, c: cell.c, x: e.clientX, y: e.clientY };
     session.setDrag(cell, 0, 0);
+    renderer.flashSelect(cell, now);
     audio.play("place");
     feelHaptic("tap");
     try {
@@ -1920,6 +1921,7 @@ let shownPlayer = 0;
 let shownOpp = 0;
 let lastPlayerScore = 0;
 let lastOppScore = 0;
+let lastPlayerEnergy = 0;
 let lastTimerBand: "ok" | "warn" | "critical" = "ok";
 let lastCombo = "";
 let lastOppCombo = "";
@@ -1955,6 +1957,7 @@ function onScreenEnter(id: string, now: number): void {
   if (id === "match") {
     lastOverlay = "";
     seenFx = 0;
+    lastPlayerEnergy = 0;
     battleLog.length = 0;
     layout.dirty = true;
     paintMatchIdentities();
@@ -2102,6 +2105,13 @@ function frame(now: number): void {
     ui.shiftClock.classList.toggle("on", shiftText.length > 0);
     setWidth(ui.energyFill, `${snap.player.energy}%`);
     setText(ui.energyLabel, `${Math.round(snap.player.energy)} / ${ENERGY_MAX}`);
+    if (snap.player.energy > lastPlayerEnergy + 0.5) {
+      if (energyWrap instanceof HTMLElement) restartAnim(energyWrap, "gain");
+      restartAnim(ui.energyFill, "surge");
+    } else if (snap.player.energy < lastPlayerEnergy - 0.5) {
+      if (energyWrap instanceof HTMLElement) restartAnim(energyWrap, "spend");
+    }
+    lastPlayerEnergy = snap.player.energy;
     energyWrap?.classList.toggle("low", snap.player.energy < ENERGY_FREEZE);
     energyWrap?.classList.toggle("hot", snap.player.energy >= 70);
     const playing = snap.phase === "playing";
@@ -2142,6 +2152,13 @@ function frame(now: number): void {
       }
       if (fx.kind === "combo" && (fx.combo ?? 0) >= 2 && fx.side !== "opponent") {
         flashCombo(fx.combo ?? 1);
+      }
+      const rivalAction = fx.text.toUpperCase().startsWith("RIVAL");
+      if (
+        (fx.side === "opponent" || rivalAction) &&
+        (fx.kind === "clear" || fx.kind === "combo" || fx.kind === "power" || fx.kind === "attack")
+      ) {
+        restartAnim(ui.oppCard, "cpu-action");
       }
       if (fx.kind === "power") {
         const t = fx.text.toUpperCase();
