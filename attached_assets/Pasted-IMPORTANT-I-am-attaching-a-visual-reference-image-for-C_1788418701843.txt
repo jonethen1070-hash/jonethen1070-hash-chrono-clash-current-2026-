@@ -1,0 +1,462 @@
+IMPORTANT: I am attaching a visual reference image for CHRONO CLASH.
+
+Use the attached image as the STRICT VISUAL AND GEOMETRY REFERENCE.
+
+Do NOT interpret it as inspiration.
+Do NOT redesign it.
+Do NOT add new UI.
+Do NOT change gameplay logic.
+Do NOT change the gems, board mechanics, CPU behavior, attacks, abilities, scoring, energy system, touch/swipe logic, or animations.
+
+YOUR ONLY JOB IS TO FIX THE RESPONSIVE GAMEPLAY SCREEN GEOMETRY SO THE LIVE GAME MATCHES THE ATTACHED REFERENCE.
+
+FIRST: inspect the existing project and find the ACTUAL DOM/React components and CSS selectors responsible for:
+- top title/header
+- audio/settings controls
+- YOU player panel
+- VS/timer
+- RIVAL panel
+- energy bar
+- Energy Burst
+- Mega Strike
+- YOUR BOARD label
+- 8x8 board container
+- individual gem cells
+- Freeze
+- Time Shift
+- Rewind
+- overall match screen
+
+Do NOT create duplicate UI.
+Do NOT append another CSS layer blindly.
+Do NOT make a new mockup.
+Modify the existing active styles/components.
+
+==================================================
+TARGET SCREEN GEOMETRY
+==================================================
+
+The reference is a tall mobile gameplay screen.
+
+Treat the playable game area as one fixed vertical composition.
+
+The screen must NEVER scroll vertically during a match.
+
+Use:
+width: 100%;
+height: 100dvh;
+min-height: 0;
+overflow: hidden;
+
+Respect iPhone safe-area insets.
+
+Create one controlled vertical layout for the entire match screen.
+
+The important rule is:
+
+EVERY SECTION MUST HAVE A RESERVED HEIGHT.
+
+No element may push another section downward.
+No absolute-positioned element may overlap another section.
+No text may escape its box.
+No button may cover the board.
+No board may cover the bottom abilities.
+
+Use CSS grid/flex with explicit rows rather than uncontrolled margins.
+
+==================================================
+VERTICAL ORDER — THIS MUST NEVER CHANGE
+==================================================
+
+TOP TO BOTTOM:
+
+1. CHRONO CLASH TITLE + AUDIO + SETTINGS
+2. YOU / VS / RIVAL SCORE AREA
+3. YOUR ATTACK + RIVAL ATTACK
+4. ENERGY BAR
+5. USE ENERGY LABEL
+6. ENERGY BURST + MEGA STRIKE
+7. YOUR BOARD LABEL
+8. 8x8 BOARD
+9. FREEZE + TIME SHIFT + REWIND
+
+There must be NO other section inserted between these areas.
+
+==================================================
+REFERENCE PROPORTIONS
+==================================================
+
+Match the attached image's proportions rather than using arbitrary fixed desktop values.
+
+For a 390px-wide mobile viewport, use approximately:
+
+SIDE PADDING:
+10–12px
+
+HEADER:
+approximately 38–42px tall
+
+SCORE/VS ROW:
+approximately 92–105px tall
+
+ATTACK METERS:
+approximately 48–55px tall
+
+ENERGY BAR:
+approximately 42–46px tall
+
+USE ENERGY LABEL:
+approximately 24–28px tall
+
+ENERGY ABILITY ROW:
+approximately 76–86px tall
+
+BOARD LABEL:
+approximately 30px tall
+
+BOARD:
+the dominant central element
+
+BOTTOM ABILITIES:
+approximately 88–96px tall
+
+Use responsive calculations so these proportions scale smoothly on larger/smaller phones.
+
+==================================================
+TOP HEADER
+==================================================
+
+CHRONO CLASH must sit at the upper left.
+
+Audio and settings buttons must sit on the upper right.
+
+They must occupy ONE horizontal row.
+
+Do not allow the title to collide with the buttons.
+
+Use a real flex/grid layout.
+
+The title should have enough width to remain readable but must never push the right-side controls off screen.
+
+==================================================
+PLAYER / VS SECTION
+==================================================
+
+YOU panel on the LEFT.
+
+VS/timer in the CENTER.
+
+RIVAL panel on the RIGHT.
+
+This must be one controlled 3-column grid:
+
+LEFT: 1fr
+CENTER: approximately 72–82px
+RIGHT: 1fr
+
+The two player panels must have equal height.
+
+The VS/timer must remain centered.
+
+Never allow the timer to overlap either player panel.
+
+Never allow score text to escape its panel.
+
+==================================================
+ATTACK METERS
+==================================================
+
+The reference shows these as a separate horizontal row.
+
+LEFT:
+YOUR ATTACK
+
+RIGHT:
+RIVAL ATTACK
+
+Two equal-width boxes.
+
+They must NOT take the large amount of vertical space seen in the current broken version.
+
+Keep them compact.
+
+IMPORTANT:
+If the project already contains these elements, preserve their gameplay logic.
+
+This is ONLY a geometry change.
+
+==================================================
+ENERGY BAR
+==================================================
+
+Place ONE full-width energy bar underneath the attack row.
+
+It must have:
+
+ENERGY label on the left
+progress bar in the center
+numeric value on the right
+
+Keep it compact.
+
+Do NOT create another energy bar.
+
+Do NOT move the energy bar into the board.
+
+==================================================
+USE ENERGY SECTION
+==================================================
+
+Place:
+
+USE ENERGY
+
+centered between the energy bar and the two attack ability buttons.
+
+Then place:
+
+ENERGY BURST | MEGA STRIKE
+
+as a two-column row.
+
+Equal width.
+
+Equal height.
+
+They must never overlap.
+
+The buttons must remain visually readable when disabled.
+
+Disabled state should reduce brightness/opacity, NOT make the entire control look broken.
+
+When enough energy exists, the existing enabled state must still work.
+
+==================================================
+BOARD
+==================================================
+
+THIS IS THE MOST IMPORTANT PART.
+
+The board must remain a genuine 8x8 grid.
+
+Exactly:
+
+8 columns
+8 rows
+64 gem cells
+
+Do NOT change this to another number of rows or columns.
+
+The board should be the dominant central gameplay element.
+
+Use:
+
+display: grid;
+grid-template-columns: repeat(8, minmax(0, 1fr));
+grid-template-rows: repeat(8, minmax(0, 1fr));
+
+The board width should use almost all available screen width while preserving a small consistent outer margin.
+
+Do NOT allow the board to become wider than the viewport.
+
+Do NOT allow horizontal scrolling.
+
+Do NOT allow vertical scrolling.
+
+Do NOT let the board push the bottom abilities outside the viewport.
+
+IMPORTANT:
+If there is not enough vertical room, REDUCE THE BOARD HEIGHT FIRST.
+
+Do NOT push the bottom abilities off-screen.
+
+Do NOT shrink the entire HUD to unreadable sizes.
+
+The board may be slightly shorter vertically than the reference if necessary to guarantee that all controls remain visible.
+
+Keep all 64 gems fully visible.
+
+No gem may be clipped.
+
+No gem may overlap another gem.
+
+==================================================
+GEM CELLS
+==================================================
+
+Every gem must be centered inside its own cell.
+
+Each cell must have:
+
+box-sizing: border-box;
+min-width: 0;
+min-height: 0;
+
+Use a consistent gap.
+
+Do NOT allow individual gem images to determine grid size.
+
+The GRID determines the cell size.
+
+The GEM fits INSIDE the cell.
+
+Use:
+
+width: 80–88%;
+height: 80–88%;
+object-fit: contain;
+
+or equivalent existing implementation.
+
+No gem may overflow its cell.
+
+==================================================
+BOARD FRAME
+==================================================
+
+Keep the existing premium sci-fi board artwork/style.
+
+BUT reduce unnecessary frame thickness if it consumes gameplay space.
+
+The outer frame must surround the 8x8 grid.
+
+It must NOT create an additional huge empty area around the gems.
+
+The board label "YOUR BOARD" belongs directly above the board.
+
+==================================================
+BOTTOM ABILITIES
+==================================================
+
+Freeze | Time Shift | Rewind
+
+Three equal columns.
+
+They must remain completely visible at the bottom of the gameplay screen.
+
+They must NOT be cut off.
+
+They must NOT overlap the board.
+
+They must NOT require scrolling.
+
+Keep their existing functionality.
+
+Keep their existing icons.
+
+Keep their existing costs/counters.
+
+Only correct their geometry and spacing.
+
+==================================================
+GLOBAL SPACING RULE
+==================================================
+
+Remove excessive vertical margins between sections.
+
+The reference should feel like ONE compact premium mobile combat HUD.
+
+Do not stack large empty gaps between sections.
+
+Use consistent small spacing, approximately 4–8px between adjacent gameplay sections.
+
+Avoid:
+
+margin-top: 20px+
+margin-bottom: 20px+
+
+unless genuinely required by the reference.
+
+==================================================
+CRITICAL RESPONSIVE RULE
+==================================================
+
+The layout must work on approximately:
+
+320px wide phones
+360px wide phones
+390px wide phones
+393px wide phones
+414px wide phones
+430px wide phones
+
+and tall modern iPhones.
+
+Do not optimize only for one screenshot width.
+
+Use:
+
+100dvh
+100vw
+env(safe-area-inset-top)
+env(safe-area-inset-bottom)
+
+where appropriate.
+
+Never use fixed pixel positioning that causes overlap on another phone.
+
+==================================================
+DO NOT TOUCH THESE
+==================================================
+
+DO NOT change:
+
+- match-3 logic
+- gem generation
+- gem artwork
+- swipe detection
+- touch coordinates
+- CPU logic
+- CPU turn locking
+- LOCKED indicator
+- Energy Burst functionality
+- Mega Strike functionality
+- Freeze functionality
+- Time Shift functionality
+- Rewind functionality
+- score calculations
+- timers
+- audio
+- attack calculations
+- server/API logic
+- game state
+- existing animations
+
+ONLY fix visual layout/geometry.
+
+==================================================
+VERIFICATION
+==================================================
+
+After making the changes:
+
+1. Start the project.
+2. Open the actual live match screen.
+3. Verify the full gameplay screen at mobile dimensions.
+4. Verify there is ZERO vertical scrolling.
+5. Verify there is ZERO horizontal scrolling.
+6. Verify the top header does not overlap.
+7. Verify YOU / VS / RIVAL do not overlap.
+8. Verify Energy does not overlap the ability row.
+9. Verify Energy Burst and Mega Strike do not overlap.
+10. Verify the board label does not overlap the board.
+11. Verify exactly 8 columns x 8 rows.
+12. Verify all 64 gems are visible.
+13. Verify no gem overlaps another gem.
+14. Verify the board does not overlap Freeze/Time Shift/Rewind.
+15. Verify all three bottom abilities are completely visible.
+16. Verify CPU LOCKED state still works.
+17. Verify normal player touch/swipe input still works.
+18. Verify the existing game functionality still works.
+
+IMPORTANT:
+Do NOT tell me "styles were updated" unless you actually inspected the live rendered page.
+
+Take a screenshot of the final live match screen and compare it visually against the attached reference.
+
+If the first result still looks crowded, adjust the ACTUAL active layout values again.
+
+Do not simply report that TypeScript/build/tests passed.
+
+The success criterion is VISUAL:
+THE
