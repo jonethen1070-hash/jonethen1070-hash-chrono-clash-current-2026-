@@ -1,0 +1,30 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "cRHrpC7m918HHFfBJZ_yT"
+uri = "file://chrono-clash-current-split.z01"
+type = "unspecified"
+title = "Chrono Clash ZIP — Part 1 of 2"
+description = "First part of the complete split ZIP archive. Keep this file beside Part 2 before extracting."
+logical_id = "cd9a7609-43a6-477b-b3e5-643e18c1c1ea"
+content_hash = "sha256:11d9009b873a06dc23388bbd0aeb90f8c3c1d0c3f629bed358520adde9d16759"
+size = 94371840
+mtime_ms = 1788436528778
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:1cec5c45-a3d6-4e93-9cbc-d46b41211265/cd9a7609-43a6-477b-b3e5-643e18c1c1ea/14cdea06-360c-457f-96c8-64a3f25d259d"
+storage_version_token = "1788436550559903"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "TcYj51Jf3_WogKwPXgxiS"
+uri = "file://chrono-clash-current-split.zip"
+type = "unspecified"
+title = "Chrono Clash ZIP — Part 2 of 2"
+description = "Final part of the complete split ZIP archive. Keep this file beside Part 1 before extracting."
+logical_id = "3f9112eb-a84f-44d8-8c0c-bc87f7decfcf"
+content_hash = "sha256:94518798d8d88cbfa11a93f8864891397147c38f733ec4297b1b1aa242333f60"
+size = 17548586
+mtime_ms = 1788436529513
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:1cec5c45-a3d6-4e93-9cbc-d46b41211265/3f9112eb-a84f-44d8-8c0c-bc87f7decfcf/62b6b038-3591-4fd1-bc89-713042ada104"
+storage_version_token = "1788436552037114"
+content_type = "application/octet-stream"
