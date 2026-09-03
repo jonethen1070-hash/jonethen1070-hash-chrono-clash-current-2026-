@@ -1,0 +1,554 @@
+CHRONO CLASH — FINAL 2.5D DEPTH / PHYSICAL MATERIAL PASS
+
+IMPORTANT:
+This is a VISUAL PRESENTATION PASS ONLY.
+
+DO NOT change:
+- gameplay
+- game logic
+- scoring
+- gem matching
+- gem movement
+- timer
+- attacks
+- energy calculations
+- Energy Burst behavior
+- Mega Strike behavior
+- Freeze
+- Time Shift
+- Rewind
+- touch controls
+- networking
+- game state
+- existing gem artwork
+- 8x8 board logic
+
+DO NOT rebuild the game.
+
+DO NOT make it look like a normal 2D website.
+
+The goal is a PREMIUM AAA-INSPIRED 2.5D SCI-FI MOBILE GAME SCREEN.
+
+==================================================
+CORE REQUIREMENT
+==================================================
+
+The entire screen must visually feel like a collection of PHYSICAL OBJECTS sitting inside a futuristic arena.
+
+Do not rely on gradients or glow alone.
+
+Every major element must communicate:
+
+DEPTH
+THICKNESS
+RAISED SURFACE
+RECESSED SURFACE
+CONTACT SHADOW
+SPECULAR LIGHT
+MATERIAL DIFFERENCE
+
+The player should immediately feel that the UI and board are physical sci-fi hardware.
+
+==================================================
+1. OVERALL ARENA
+==================================================
+
+Create a dark cinematic cosmic arena behind everything.
+
+Use multiple depth layers:
+
+BACKGROUND SPACE
+↓
+ATMOSPHERIC LIGHT
+↓
+REAR HUD STRUCTURES
+↓
+RAISED HUD MODULES
+↓
+BOARD HOUSING
+↓
+RECESSED PLAYFIELD
+↓
+GEM SOCKETS
+↓
+RAISED CRYSTAL GEMS
+↓
+FOREGROUND CONTROLS
+
+Do NOT make the entire screen one flat CSS surface.
+
+The background must remain substantially darker than the physical objects.
+
+==================================================
+2. BOARD — MOST IMPORTANT
+==================================================
+
+The board is the hero object.
+
+Make the board housing visibly THICK.
+
+It must look like a real futuristic machine component.
+
+Create:
+
+- outer metallic shell
+- thick cyan illuminated bevel
+- darker side wall
+- recessed inner playfield
+- deep individual gem sockets
+- subtle underside shadow
+
+The cyan outer frame must not simply be a glowing border.
+
+It needs to appear like LIGHT IS HITTING A PHYSICAL BEVEL.
+
+Use different brightness on different edges.
+
+Top/left edges:
+stronger cool highlight.
+
+Bottom/right edges:
+darker falloff.
+
+This should create the illusion of thickness.
+
+==================================================
+3. RECESSED PLAYFIELD
+==================================================
+
+The inside of the board must sit visibly BELOW the outer frame.
+
+Do NOT let the playfield and outer frame appear on the same plane.
+
+Add:
+
+- inner bevel
+- dark cavity
+- contact shadow under the frame
+- subtle internal reflection
+
+The player should be able to visually distinguish:
+
+FRAME
+from
+PLAYFIELD.
+
+==================================================
+4. GEM SOCKETS
+==================================================
+
+Every gem must sit inside a physical socket.
+
+Do NOT make gems appear pasted onto the board.
+
+Each socket should have:
+
+- dark recessed cavity
+- inner bevel
+- subtle contact shadow
+- tiny local reflection
+
+The gem should appear to emerge FROM the socket.
+
+==================================================
+5. GEMS
+==================================================
+
+KEEP THE EXISTING GEM ARTWORK.
+
+Do not replace the crystals.
+
+Make them appear physically 3D through lighting.
+
+Each gem needs:
+
+TOP/FORWARD EDGE HIGHLIGHT
++
+DARKER LOWER EDGE
++
+CONTACT SHADOW
++
+SUBTLE LOCAL REFLECTION
++
+CONTROLLED INTERNAL EMISSION
+
+The lighting must follow the gem's geometry.
+
+Do not simply add a circular glow behind every gem.
+
+Different gem colors should produce very subtle local reflections:
+
+CYAN → cool blue reflection
+GREEN → green reflection
+RED/PINK → red/pink reflection
+PURPLE → violet reflection
+GOLD → warm gold reflection
+BLUE → deep blue reflection
+
+Keep the light localized.
+
+==================================================
+6. GEM DEPTH
+==================================================
+
+Increase the perceived size/depth of the gems without changing the 8x8 layout.
+
+The crystals should feel slightly raised above their sockets.
+
+Use:
+
+- layered shadow
+- inner shadow
+- edge highlight
+- facet highlight
+- slight ambient occlusion
+
+Do NOT make the gems physically overlap neighboring cells.
+
+All 64 gems must remain completely visible.
+
+==================================================
+7. HUD PLAYER PANELS
+==================================================
+
+YOU and RIVAL panels must look like physical cockpit modules.
+
+Current problem:
+they still read somewhat like flat rectangles.
+
+Fix this.
+
+Create:
+
+OUTER SHELL
+→ THICK BEVEL
+→ DARK GLASS SURFACE
+→ RAISED EMBLEM
+→ SCORE DISPLAY
+
+YOU:
+
+cyan/blue edge illumination.
+
+RIVAL:
+
+red/crimson edge illumination.
+
+The center glass surface should remain darker.
+
+The emblem must appear raised above the glass.
+
+Add a subtle shadow directly underneath the emblem.
+
+==================================================
+8. VS / TIMER MODULE
+==================================================
+
+Make the center VS/timer assembly physically layered.
+
+It should appear suspended between the player and rival modules.
+
+Use:
+
+- rear shadow
+- metallic side depth
+- bevel
+- glass center
+- directional highlight
+
+Do not make it look like text sitting on the background.
+
+==================================================
+9. ATTACK BARS
+==================================================
+
+Your Attack and Rival Attack must become physical recessed channels.
+
+Structure:
+
+outer metal housing
+→ recessed black channel
+→ illuminated energy bar inside
+
+The energy bar should sit INSIDE the channel.
+
+Add subtle shadow around the channel opening.
+
+==================================================
+10. ENERGY RESERVOIR
+==================================================
+
+Make the Energy bar look like a physical power conduit.
+
+The bar should sit inside a dark recessed housing.
+
+Use:
+
+- inner cavity
+- metallic frame
+- cyan energy core
+- subtle reflection
+- small highlight along the upper edge
+
+The number 0 / 100 remains unchanged.
+
+==================================================
+11. ENERGY BURST / MEGA STRIKE
+==================================================
+
+These must look like physical ability modules.
+
+ENERGY BURST:
+
+dark recessed glass
++
+thick green bevel
++
+raised lightning icon
++
+green internal energy
++
+contact shadow
+
+MEGA STRIKE:
+
+dark recessed glass
++
+thick red bevel
++
+raised crystal icon
++
+red internal energy
++
+contact shadow
+
+The icons must appear physically above the panel surface.
+
+==================================================
+12. BOTTOM CONTROLS
+==================================================
+
+Freeze / Time Shift / Rewind must look like three physical control consoles.
+
+Use:
+
+raised top bevel
++
+dark recessed body
++
+raised circular icon
++
+contact shadow
++
+bottom edge falloff
+
+They should NOT look like three flat cards.
+
+Keep them slightly darker than the board so the board remains the visual focal point.
+
+==================================================
+13. LIGHT DIRECTION
+==================================================
+
+Use one consistent virtual lighting direction across the ENTIRE screen.
+
+Primary:
+
+cool cyan light from upper-left/front.
+
+Secondary:
+
+controlled red light from upper-right.
+
+Very subtle neutral fill from above/front.
+
+Every object must react consistently to this lighting direction.
+
+Do NOT give every component its own unrelated glow.
+
+==================================================
+14. CONTACT SHADOWS
+==================================================
+
+This is critical.
+
+Add subtle contact shadows wherever one object sits above another.
+
+Especially:
+
+- board frame → playfield
+- gems → sockets
+- emblems → player panels
+- ability icons → ability panels
+- bottom icons → control panels
+- HUD modules → arena background
+
+Contact shadows are what will make the screen stop looking like flat CSS.
+
+==================================================
+15. MATERIAL DIFFERENTIATION
+==================================================
+
+Make materials visually different.
+
+METAL:
+hard highlights and darker reflections.
+
+GLASS:
+dark translucent surface with controlled reflections.
+
+CRYSTAL:
+bright internal emission + sharp facet highlights.
+
+ENERGY:
+soft luminous core.
+
+BACKGROUND:
+matte/dark.
+
+Do NOT apply the same glow treatment to everything.
+
+==================================================
+16. PERSPECTIVE / 2.5D FEEL
+==================================================
+
+Introduce subtle perspective cues without damaging the mobile layout.
+
+The board should feel like it has physical depth.
+
+HUD modules can have extremely subtle angled/beveled edges.
+
+Do NOT rotate the entire game UI.
+
+Do NOT distort the 8x8 board.
+
+Do NOT sacrifice readability.
+
+This is a 2.5D presentation, not a full 3D camera.
+
+==================================================
+17. LIGHT FALLoff
+==================================================
+
+Light must weaken with distance.
+
+A gem should primarily illuminate its immediate socket.
+
+The board frame should illuminate the nearby board surface.
+
+HUD lights should affect nearby surfaces slightly.
+
+Avoid uniform screen-wide neon.
+
+==================================================
+18. BLOOM
+==================================================
+
+Do NOT increase bloom as the primary solution.
+
+Keep bloom controlled.
+
+Prioritize:
+
+PHYSICAL SHADOW
+→ BEVEL
+→ REFLECTION
+→ SPECULAR
+→ LOCAL EMISSION
+→ SMALL BLOOM
+
+==================================================
+19. MOBILE COMPOSITION
+==================================================
+
+Maintain the current successful mobile composition.
+
+Exactly 8 columns.
+Exactly 8 rows.
+All 64 gems visible.
+
+No scrolling.
+
+No clipping.
+
+No overlap.
+
+No page overflow.
+
+Do not make the board smaller.
+
+The board should remain the dominant visual object.
+
+==================================================
+20. ACTIVE GAME TEST
+==================================================
+
+IMPORTANT:
+
+Do NOT validate only during LOCKED state.
+
+Run a completely normal ACTIVE MATCH.
+
+Inspect the screen while:
+
+- gems are active
+- board is visible
+- Energy Burst is visible
+- Mega Strike is visible
+- player/rival panels are visible
+- attack bars are visible
+- energy reservoir is visible
+- bottom controls are visible
+
+The physical 2.5D effect must remain visible during normal gameplay.
+
+==================================================
+21. QUALITY BAR
+==================================================
+
+Do NOT declare completion simply because:
+
+TypeScript passes
+or
+production build passes.
+
+Visually inspect the actual running game.
+
+Ask:
+
+"Does this look like physical sci-fi game hardware?"
+
+NOT:
+
+"Does this look like a nicely styled website?"
+
+If the answer is still website-like, continue the visual pass.
+
+==================================================
+FINAL RULE
+==================================================
+
+The target is:
+
+PREMIUM
+DARK
+CINEMATIC
+PHYSICAL
+DEPTH
+METALLIC
+GLASS
+CRYSTAL
+SCI-FI
+2.5D
+
+NOT:
+
+FLAT
+CSS-LIKE
+CARD-LIKE
+UNIFORM NEON
+GRADIENT-ONLY
+
+Change ONLY the visual presentation required for this 2.5D physical-depth pass.
+
+Preserve all existing gameplay and functionality exactly.
