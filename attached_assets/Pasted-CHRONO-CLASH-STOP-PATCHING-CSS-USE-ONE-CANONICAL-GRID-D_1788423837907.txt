@@ -1,0 +1,189 @@
+CHRONO CLASH — STOP PATCHING CSS. USE ONE CANONICAL GRID.
+
+Do not make another visual guess.
+
+Inspect the existing Chrono Clash layout CSS and replace the conflicting mobile geometry overrides with ONE canonical layout.
+
+The game needs exactly 7 vertical rows:
+
+GAME
+HEADER
+BATTLE
+ENERGY
+ABILITIES
+BOARD_LABEL
+BOARD
+CONTROLS
+
+Use CSS GRID.
+
+The game container:
+
+display: grid;
+
+grid-template-rows:
+  40px
+  68px
+  32px
+  60px
+  24px
+  minmax(0, 1fr)
+  78px;
+
+The BOARD row is the ONLY flexible row.
+
+Everything else is reserved.
+
+The board must be centered inside the BOARD row.
+
+The board itself:
+
+width: min(100%, 368px);
+height: min(100%, 368px);
+aspect-ratio: 1 / 1;
+
+Do NOT force the board to 368px if the available BOARD row is smaller.
+
+In other words:
+
+BOARD SIZE = the smaller of:
+1. available board width
+2. available board height
+3. 368px
+
+This is the entire geometry rule.
+
+================================================
+
+IMPORTANT:
+
+Do NOT use:
+
+transform: scale()
+zoom
+negative margins
+absolute positioning to fake layout
+overflow:hidden to hide content
+page scrolling
+
+Do NOT add another pile of media-query overrides.
+
+Remove/disable the old conflicting mobile height calculations that fight this grid.
+
+There must be ONE source of truth for the game's vertical geometry.
+
+================================================
+
+390px WIDTH
+
+Use approximately:
+
+game horizontal padding: 8px
+
+board maximum width: 368px
+
+three bottom controls:
+equal widths
+78px height
+
+Energy Burst / Mega Strike:
+60px height
+
+Battle:
+68px
+
+Energy:
+32px
+
+Header:
+40px
+
+Board label:
+24px
+
+The board receives EVERYTHING LEFT.
+
+================================================
+
+MOST IMPORTANT:
+
+The bottom controls are NOT part of the flexible area.
+
+They are a fixed 78px row.
+
+The board is NOT allowed to push them downward.
+
+The board row is:
+
+minmax(0, 1fr)
+
+Therefore:
+
+short viewport = smaller board
+tall viewport = larger board
+same UI structure at every height
+
+================================================
+
+DO NOT CHANGE:
+
+gameplay
+CPU
+gems
+match logic
+scores
+energy mechanics
+abilities
+touch/swipe
+audio
+VFX
+
+Do not restore YOUR ATTACK or RIVAL ATTACK.
+
+================================================
+
+REFERENCE IMAGE
+
+Use the reference ONLY to match the visual proportions and styling.
+
+Do NOT use the reference image's total height as the browser viewport.
+
+================================================
+
+ACCEPTANCE TEST
+
+Render the actual game at:
+
+390 × 550
+390 × 650
+390 × 750
+390 × 843
+
+At every size the following must remain inside the game container:
+
+HEADER
+YOU / VS / RIVAL
+ENERGY
+ENERGY BURST
+MEGA STRIKE
+YOUR BOARD
+all 64 gems
+FREEZE
+TIME SHIFT
+REWIND
+
+No clipping.
+No scrolling.
+No overlap.
+
+At 390 × 843 the board should approach its 368px maximum.
+
+At shorter heights the board should automatically become smaller.
+
+DO NOT manually change the board size for each viewport.
+
+ONE GRID.
+ONE BOARD ROW.
+ONE SOURCE OF TRUTH.
+
+After implementation, open the actual rendered game and verify the geometry visually.
