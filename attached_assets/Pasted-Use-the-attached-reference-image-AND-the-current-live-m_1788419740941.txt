@@ -1,0 +1,94 @@
+Use the attached reference image AND the current live match screenshot.
+
+This is a FINAL SURGICAL VISUAL PASS.
+
+DO NOT rebuild the game.
+DO NOT redesign the board.
+DO NOT change gameplay.
+DO NOT change gem artwork.
+DO NOT change the 8x8 grid.
+DO NOT change CPU/LOCKED behavior.
+DO NOT change Energy Burst, Mega Strike, Freeze, Time Shift or Rewind functionality.
+
+The current 8x8 board geometry is CORRECT.
+Keep it.
+
+The remaining problem is VISUAL DENSITY and HIERARCHY.
+
+Make these specific changes only:
+
+1. KEEP the existing compact top header.
+
+2. KEEP the YOU / VS / RIVAL row, but reduce unnecessary panel height and decorative padding so the row feels balanced rather than oversized.
+
+3. KEEP the ENERGY row directly below the player row.
+
+4. KEEP Energy Burst and Mega Strike side-by-side.
+   They must remain functional.
+   When disabled, make them visibly disabled but still readable.
+   Do not make the text/icons almost disappear.
+
+5. KEEP "YOUR BOARD" directly above the board.
+   Reduce the height/thickness of its metallic separator.
+   It should be a clean section label, not a large horizontal barrier.
+
+6. KEEP the existing 8x8 board EXACTLY 8 columns × 8 rows.
+   Keep all 64 gems.
+   Keep the current gem sizing/alignment because it is already correct.
+
+7. REDUCE ONLY THE EXCESSIVE OUTER BOARD FRAME THICKNESS.
+   Do not shrink the playable grid.
+   Do not alter the gem cells.
+   The frame should visually support the board instead of surrounding it with multiple heavy borders.
+
+8. REDUCE unnecessary vertical gaps between:
+   Energy → special attacks → YOUR BOARD → board.
+
+9. The board should remain the dominant element of the screen.
+
+10. FREEZE / TIME SHIFT / REWIND must remain below the board.
+    Give these three controls slightly more vertical presence than the current version while keeping all three completely visible.
+
+11. Remove visual dead space around the bottom controls.
+
+12. Do NOT add any new sections.
+
+13. Do NOT restore YOUR ATTACK or RIVAL ATTACK.
+
+14. Do NOT add additional borders, wrappers, gradients or decorative panels.
+
+FINAL VISUAL HIERARCHY:
+
+HEADER
+↓
+YOU / VS / RIVAL
+↓
+ENERGY
+↓
+ENERGY BURST / MEGA STRIKE
+↓
+YOUR BOARD
+↓
+8×8 BOARD
+↓
+FREEZE / TIME SHIFT / REWIND
+
+The board must visually dominate.
+
+The screen must remain:
+- exactly one viewport
+- no vertical scrolling
+- no horizontal scrolling
+- no overlap
+- no clipping
+- all 64 gems visible
+- all three bottom controls visible
+
+IMPORTANT:
+Modify the EXISTING ACTIVE CSS/components.
+Do not create another duplicate polish stylesheet.
+Do not simply report that existing CSS is correct.
+
+After editing, inspect the ACTUAL LIVE MATCH SCREEN at 390×700 and make sure the rendered result visibly changed.
+
+Do not finish based only on TypeScript/build tests.
