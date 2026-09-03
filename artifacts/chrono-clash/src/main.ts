@@ -700,7 +700,6 @@ function paintToggle(btn: HTMLElement, on: boolean): void {
 
 applySettings();
 session.begin(performance.now(), settings.introSeen || Boolean(returningGoogle));
-if (location.hash === "#visual-match") session.startMatch(performance.now());
 
 function armFirstGestureAudio(): void {
   const once = () => {
