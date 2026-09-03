@@ -5422,3 +5422,392 @@ html body #app #match #rewind .glyph {
     0 8px 14px rgba(0, 0, 0, 0.64),
     0 0 9px rgba(240, 68, 104, 0.18) !important;
 }
+
+/* =========================================================
+   PHYSICAL ARENA — TRUE 2.5D GEOMETRY
+   Presentation only: no layout dimensions or input contracts change.
+   ========================================================= */
+
+html body #app #match .match-stage {
+  perspective: 900px;
+  perspective-origin: 50% 36%;
+  transform-style: preserve-3d;
+}
+
+html body #app #match .match-hud,
+html body #app #match .attack-row,
+html body #app #match .boards,
+html body #app #match .powers,
+html body #app #match .hud-row,
+html body #app #match .fighter,
+html body #app #match .vs-column,
+html body #app #match .energy-wrap,
+html body #app #match .energy-options,
+html body #app #match .energy-attack,
+html body #app #match .player-side,
+html body #app #match .board-slot,
+html body #app #match .power {
+  transform-style: preserve-3d;
+}
+
+/* HUD hardware: the front plate is lifted above a visible lower chassis. */
+html body #app #match .fighter.you,
+html body #app #match .fighter.rival {
+  overflow: visible !important;
+  transform: translateZ(12px);
+  border-width: 2px !important;
+  border-bottom-color: #010306 !important;
+  box-shadow:
+    inset 0 2px 0 rgba(245, 255, 255, 0.32),
+    inset 0 -5px 0 rgba(0, 0, 0, 0.8),
+    inset 0 -14px 20px rgba(0, 0, 0, 0.72),
+    0 5px 0 #020509,
+    0 8px 0 rgba(12, 29, 37, 0.96),
+    0 10px 0 #010203,
+    0 17px 20px rgba(0, 0, 0, 0.82) !important;
+}
+
+html body #app #match .fighter.you::before,
+html body #app #match .fighter.rival::before {
+  inset: 3px 5px auto !important;
+  height: 9px !important;
+  border-radius: 9px 9px 2px 2px;
+  clip-path: polygon(3% 0, 97% 0, 100% 100%, 0 100%);
+  transform: translateZ(8px) rotateX(-5deg);
+  transform-origin: top;
+}
+
+html body #app #match .fighter.you::after,
+html body #app #match .fighter.rival::after {
+  inset: 6px !important;
+  border-width: 2px !important;
+  transform: translateZ(4px);
+  background: linear-gradient(112deg, rgba(255,255,255,.08), transparent 28% 78%, rgba(0,0,0,.2));
+}
+
+html body #app #match .fighter-copy,
+html body #app #match .avatar-ring {
+  position: relative;
+  z-index: 2;
+  transform: translateZ(15px);
+}
+
+html body #app #match .score-rail {
+  transform: translateZ(5px);
+  box-shadow:
+    inset 0 4px 7px rgba(0,0,0,.88),
+    inset 0 -1px 0 rgba(255,255,255,.1),
+    0 3px 0 rgba(0,0,0,.75),
+    0 6px 8px rgba(0,0,0,.48) !important;
+}
+
+/* Central mechanism, physically bridging both fighter housings. */
+html body #app #match .vs-column {
+  position: relative;
+  z-index: 4;
+  transform: translateZ(24px);
+}
+
+html body #app #match .vs-column::before {
+  inset: -5px -7px -7px !important;
+  border: 2px solid rgba(174, 228, 237, .34);
+  border-bottom-color: #010305;
+  border-radius: 12px;
+  transform: translateZ(-8px);
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,.28),
+    inset 0 -10px 10px rgba(0,0,0,.82),
+    0 5px 0 #071117,
+    0 9px 0 #010204,
+    0 15px 18px rgba(0,0,0,.78) !important;
+}
+
+html body #app #match .vs-badge,
+html body #app #match .vs-column .timer {
+  position: relative;
+  z-index: 2;
+  transform: translateZ(14px);
+}
+
+/* Attack and energy housings become deep machined channels. */
+html body #app #match .attack-meter,
+html body #app #match .energy-wrap {
+  overflow: visible !important;
+  transform: translateZ(9px);
+  border-width: 2px !important;
+  border-bottom-color: #010305 !important;
+  box-shadow:
+    inset 0 2px 0 rgba(235,253,255,.24),
+    inset 0 -7px 10px rgba(0,0,0,.78),
+    0 4px 0 #07131a,
+    0 7px 0 #010305,
+    0 12px 15px rgba(0,0,0,.68) !important;
+}
+
+html body #app #match .attack-meter span,
+html body #app #match .energy-wrap .energy {
+  position: relative;
+  transform: translateZ(-3px);
+  border: 2px solid rgba(0,0,0,.92) !important;
+  box-shadow:
+    inset 0 5px 8px rgba(0,0,0,.98),
+    inset 0 -1px 0 rgba(222,250,255,.14),
+    0 1px 0 rgba(255,255,255,.12),
+    0 3px 5px rgba(0,0,0,.58) !important;
+}
+
+html body #app #match .attack-meter i,
+html body #app #match .energy-wrap .energy > span {
+  transform: translateZ(4px);
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,.72),
+    inset 0 -2px 2px rgba(0,0,0,.48),
+    0 1px 4px currentColor !important;
+}
+
+/* Ability cartridges: raised shell, recessed glass, lifted icon and lettering. */
+html body #app #match .energy-attack {
+  overflow: visible !important;
+  transform: translateZ(13px);
+  border-width: 2px !important;
+  border-bottom-color: #010304 !important;
+  box-shadow:
+    inset 0 2px 0 rgba(245,255,255,.3),
+    inset 0 -8px 12px rgba(0,0,0,.82),
+    0 4px 0 #08130f,
+    0 8px 0 #010302,
+    0 14px 18px rgba(0,0,0,.74) !important;
+}
+
+html body #app #match .energy-attack.strike {
+  box-shadow:
+    inset 0 2px 0 rgba(255,239,244,.3),
+    inset 0 -8px 12px rgba(0,0,0,.84),
+    0 4px 0 #21060d,
+    0 8px 0 #030102,
+    0 14px 18px rgba(0,0,0,.74) !important;
+}
+
+html body #app #match .energy-attack::before {
+  inset: 5px !important;
+  height: auto !important;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 7px;
+  transform: translateZ(-2px);
+  box-shadow:
+    inset 0 5px 9px rgba(0,0,0,.8),
+    inset 0 -1px 0 rgba(255,255,255,.08);
+}
+
+html body #app #match .energy-attack-glyph {
+  position: relative;
+  z-index: 3;
+  transform: translateZ(19px) translateY(-1px);
+  filter:
+    drop-shadow(0 3px 0 rgba(0,0,0,.92))
+    drop-shadow(0 7px 5px rgba(0,0,0,.72))
+    brightness(1.18) !important;
+}
+
+html body #app #match .energy-attack-copy,
+html body #app #match .energy-attack-cost {
+  position: relative;
+  z-index: 2;
+  transform: translateZ(10px);
+}
+
+/* The board is a chassis, not a decorated rectangle. */
+html body #app #match .player-side {
+  perspective: 760px;
+  perspective-origin: 50% 42%;
+  transform: translateZ(18px);
+}
+
+html body #app #match .you-meta {
+  position: relative;
+  z-index: 5;
+  transform: translateZ(14px);
+  border: 1px solid rgba(71, 218, 238, .34);
+  border-bottom-color: #010406;
+  box-shadow:
+    inset 0 1px 0 rgba(237,255,255,.3),
+    inset 0 -5px 7px rgba(0,0,0,.74),
+    0 3px 0 #061217,
+    0 6px 8px rgba(0,0,0,.65) !important;
+}
+
+html body #app #match .player-side .board-slot {
+  isolation: isolate;
+  overflow: visible !important;
+  transform: rotateX(.75deg) translateZ(16px);
+  transform-origin: 50% 52%;
+  border: 7px solid #102d36 !important;
+  border-top-color: #7ad9e5 !important;
+  border-left-color: #299eb2 !important;
+  border-right-color: #063a49 !important;
+  border-bottom-color: #01131b !important;
+  border-radius: 21px !important;
+  background: #010407 !important;
+  box-shadow:
+    0 1px 0 #d9fcff,
+    0 4px 0 #18788b,
+    0 8px 0 #082f3a,
+    0 12px 0 #011218,
+    0 17px 0 #000508,
+    -5px 8px 0 #052934,
+    5px 8px 0 #001018,
+    0 24px 18px rgba(0,0,0,.9),
+    0 34px 38px rgba(0,0,0,.78),
+    inset 0 0 0 3px #00070a,
+    inset 0 8px 12px rgba(0,0,0,.98),
+    inset 0 -3px 0 rgba(41,177,197,.36) !important;
+}
+
+/* Outer raised top face. */
+html body #app #match .player-side .board-slot::before {
+  content: "";
+  position: absolute;
+  z-index: -2;
+  inset: -12px -11px -18px;
+  border-radius: 27px;
+  border: 2px solid rgba(111, 224, 237, .48);
+  background:
+    linear-gradient(110deg, #70d2dc 0 2%, #123d48 9%, #04151c 32%, #0a2933 70%, #021017 100%) !important;
+  clip-path: polygon(3% 0, 97% 0, 100% 4%, 100% 96%, 97% 100%, 3% 100%, 0 96%, 0 4%);
+  transform: translateZ(-12px);
+  box-shadow:
+    inset 0 2px 0 rgba(246,255,255,.62),
+    inset 0 -9px 0 #00080c,
+    inset 8px 0 8px rgba(38,191,211,.2),
+    0 16px 0 #00080c,
+    0 25px 30px rgba(0,0,0,.9) !important;
+}
+
+/* Inner wall sits above the canvas edges and makes the well unmistakable. */
+html body #app #match .player-side .board-slot::after {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  inset: 0 !important;
+  border: 5px solid rgba(0, 5, 8, .88);
+  border-top-color: rgba(0, 3, 5, .98);
+  border-bottom-color: rgba(57, 202, 220, .34);
+  border-radius: 13px !important;
+  pointer-events: none;
+  transform: translateZ(12px);
+  background: none !important;
+  box-shadow:
+    inset 0 9px 13px rgba(0,0,0,.98),
+    inset 7px 0 10px rgba(0,0,0,.82),
+    inset -5px 0 8px rgba(0,0,0,.72),
+    inset 0 -2px 0 rgba(205,250,255,.23) !important;
+}
+
+html body #app #match .board-canvas {
+  position: relative;
+  z-index: 1;
+  transform: translateZ(-5px) scale(.992);
+  border-radius: 10px;
+  filter:
+    saturate(1.18)
+    contrast(1.2)
+    brightness(1.05)
+    drop-shadow(0 5px 3px rgba(0,0,0,.94)) !important;
+}
+
+/* Gem art is canvas-rendered; directional filters make the existing crystals
+   read above the renderer's sockets while the deep frame anchors the layer. */
+html body #app #match #playerGems {
+  box-shadow:
+    inset 0 8px 12px rgba(0,0,0,.88),
+    inset 0 -2px 0 rgba(129,230,240,.14),
+    0 6px 0 rgba(0,0,0,.52);
+}
+
+/* Foreground control consoles. */
+html body #app #match .powers {
+  position: relative;
+  z-index: 8;
+  transform: translateZ(24px);
+}
+
+html body #app #match .power {
+  overflow: visible !important;
+  transform: translateZ(10px);
+  border-width: 2px !important;
+  border-bottom-color: #010304 !important;
+  box-shadow:
+    inset 0 2px 0 rgba(244,255,255,.3),
+    inset 0 -9px 13px rgba(0,0,0,.84),
+    0 4px 0 #0a171d,
+    0 8px 0 #010305,
+    0 14px 17px rgba(0,0,0,.78) !important;
+}
+
+html body #app #match .power::before {
+  inset: 5px !important;
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 9px;
+  transform: translateZ(-3px);
+  background: rgba(0,3,6,.42) !important;
+  box-shadow:
+    inset 0 7px 10px rgba(0,0,0,.74),
+    inset 0 -1px 0 rgba(255,255,255,.07) !important;
+}
+
+html body #app #match .power .glyph {
+  position: relative;
+  z-index: 3;
+  transform: translateZ(19px) translateY(-2px);
+  border: 2px solid rgba(221,251,255,.28);
+  box-shadow:
+    inset 0 4px 5px rgba(255,255,255,.34),
+    inset 0 -7px 9px rgba(0,0,0,.78),
+    0 4px 0 #010407,
+    0 9px 10px rgba(0,0,0,.68) !important;
+}
+
+html body #app #match .power b,
+html body #app #match .power .cost {
+  position: relative;
+  z-index: 2;
+  transform: translateZ(11px);
+  text-shadow: 0 2px 0 #000, 0 4px 5px rgba(0,0,0,.75);
+}
+
+html body #app #match .power:active {
+  transform: translateZ(3px) translateY(5px) scale(.98) !important;
+  box-shadow:
+    inset 0 7px 13px rgba(0,0,0,.92),
+    0 2px 0 #010305,
+    0 5px 8px rgba(0,0,0,.66) !important;
+}
+
+@media (max-width: 430px) {
+  html body #app #match .match-stage {
+    perspective: 760px;
+  }
+
+  html body #app #match .player-side .board-slot {
+    transform: rotateX(.6deg) translateZ(12px);
+    border-width: 6px !important;
+  }
+
+  html body #app #match .player-side .board-slot::before {
+    inset: -9px -8px -14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body #app #match .fighter,
+  html body #app #match .vs-column,
+  html body #app #match .attack-meter,
+  html body #app #match .energy-wrap,
+  html body #app #match .energy-attack,
+  html body #app #match .player-side,
+  html body #app #match .board-slot,
+  html body #app #match .powers,
+  html body #app #match .power {
+    transition: none !important;
+  }
+}

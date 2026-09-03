@@ -1,0 +1,624 @@
+CHRONO CLASH — DO NOT MAKE ANOTHER MINOR POLISH PASS.
+I WANT A VISIBLE, DRAMATIC 2.5D VISUAL TRANSFORMATION.
+
+IMPORTANT:
+LOOK AT THE ACTUAL RUNNING GAME BEFORE AND AFTER THIS CHANGE.
+
+The previous passes only changed glow, lighting, borders and shadows.
+THAT IS NOT ENOUGH.
+
+The current game still looks like a flat 2D web interface.
+
+I want the ENTIRE GAME SCREEN to visually read as a PREMIUM 2.5D SCI-FI GAME ARENA.
+
+DO NOT CREATE AN IMAGE.
+DO NOT REBUILD GAMEPLAY.
+DO NOT CHANGE GAME LOGIC.
+
+==================================================
+NON-NEGOTIABLE VISUAL TARGET
+==================================================
+
+Transform the existing presentation from:
+
+FLAT 2D WEB UI
+→
+PHYSICAL 2.5D SCI-FI GAME HARDWARE
+
+The difference MUST be obvious in a screenshot.
+
+If someone sees the screenshot without knowing the project, they should immediately think:
+
+"3D/2.5D mobile game"
+
+NOT:
+
+"CSS website."
+
+==================================================
+1. USE REAL CSS 2.5D TECHNIQUES
+==================================================
+
+Do not rely primarily on gradients.
+
+Use actual visual depth techniques:
+
+- perspective
+- transform-style: preserve-3d
+- translateZ()
+- rotateX()
+- rotateY()
+- layered pseudo-elements
+- multiple shadows
+- inset shadows
+- directional highlights
+- physical bevels
+- recessed surfaces
+- raised surfaces
+- depth layers
+- contact shadows
+- specular highlights
+
+Where appropriate, use CSS 3D transforms on visual containers.
+
+Do NOT rotate the whole screen excessively.
+
+The effect must remain elegant and readable on mobile.
+
+==================================================
+2. THE BOARD MUST BECOME A PHYSICAL 2.5D OBJECT
+==================================================
+
+THIS IS THE MOST IMPORTANT CHANGE.
+
+The current board looks like a flat rectangle.
+
+Change it so it looks like a THICK FUTURISTIC HARDWARE PLATFORM.
+
+Create a visual structure like:
+
+             TOP LIGHT
+                ↓
+       ┌──────────────────┐
+       │  RAISED BEVELED   │
+       │      FRAME        │
+       │ ┌──────────────┐  │
+       │ │  RECESSED    │  │
+       │ │  PLAYFIELD   │  │
+       │ │              │  │
+       │ └──────────────┘  │
+       └──────────────────┘
+             ↓
+       DARK SIDE WALL
+             ↓
+       CONTACT SHADOW
+
+The outer frame needs visible THICKNESS.
+
+Use layered pseudo-elements to simulate:
+
+TOP FACE
+SIDE FACE
+INNER WALL
+BOTTOM SHADOW
+
+The board should appear to physically sit above the background.
+
+==================================================
+3. BOARD PERSPECTIVE
+==================================================
+
+Give the board a VERY SUBTLE 2.5D perspective.
+
+Do NOT make it dramatically tilted.
+
+Use a restrained perspective treatment so the upper/lower edges communicate depth.
+
+The board must remain rectangular enough that all 8x8 cells remain perfectly usable.
+
+Do not distort the gameplay grid.
+
+The perspective should be primarily perceived through:
+
+- bevel
+- side walls
+- shadows
+- highlights
+- layered depth
+
+==================================================
+4. RECESS THE GEM PLAYFIELD
+==================================================
+
+The current gems appear to sit directly on a flat surface.
+
+Make the playfield look physically recessed.
+
+The board frame must sit ABOVE the playfield.
+
+Add:
+
+- inner dark wall
+- inset shadow
+- lower cavity
+- inner bevel
+- subtle reflective edge
+
+There must be an obvious visual separation between:
+
+BOARD FRAME
+and
+PLAYFIELD.
+
+==================================================
+5. EVERY GEM MUST HAVE PHYSICAL DEPTH
+==================================================
+
+KEEP THE EXISTING GEM ARTWORK.
+
+Do NOT replace the gem graphics.
+
+Make each existing gem appear to be a small physical crystal mounted inside a socket.
+
+Each cell should visually have:
+
+1. recessed socket
+2. dark cavity
+3. inner bevel
+4. contact shadow
+5. raised crystal
+6. crystal edge highlight
+7. crystal internal glow
+
+The gem should appear to rise out of the board.
+
+Use layered shadows rather than simply adding glow.
+
+The bottom of the gem should be darker where it meets the socket.
+
+The upper/forward edge should catch the light.
+
+==================================================
+6. CREATE GEM SOCKETS
+==================================================
+
+Every one of the 64 cells needs a visible recessed socket.
+
+The socket must NOT look like another flat CSS square.
+
+Make it feel like:
+
+[METAL SOCKET]
+    ↓
+[RECESSED CAVITY]
+    ↓
+[CRYSTAL GEM]
+
+Use:
+
+inset box-shadow
++
+dark inner edge
++
+subtle outer bevel
++
+contact shadow.
+
+Keep all 64 cells perfectly aligned.
+
+==================================================
+7. GEMS MUST CAST CONTACT SHADOWS
+==================================================
+
+This is essential.
+
+A gem should visually cast a small shadow onto its socket.
+
+The shadow must be:
+
+- subtle
+- localized
+- directly beneath/around the gem
+- consistent across all gem types
+
+This is one of the main things that will create the 2.5D illusion.
+
+==================================================
+8. PLAYER / RIVAL PANELS
+==================================================
+
+The YOU and RIVAL panels must also become physical 2.5D modules.
+
+Currently they look like flat rectangles with glowing borders.
+
+Change them into:
+
+THICK OUTER HOUSING
++
+BEVELED FRONT PLATE
++
+RECESSED DARK GLASS
++
+RAISED EMBLEM
++
+RAISED SCORE DISPLAY
+
+Create visible side/bottom depth.
+
+YOU = cyan physical module.
+
+RIVAL = red physical module.
+
+The emblem should appear to sit above the glass surface.
+
+The glass should appear slightly recessed.
+
+==================================================
+9. VS MODULE
+==================================================
+
+The VS section must look like a physical central mechanism.
+
+It should appear positioned BETWEEN the two player modules.
+
+Give it:
+
+- rear depth
+- metallic side edges
+- bevel
+- dark recessed center
+- illuminated VS lettering
+- shadow beneath it
+
+It must no longer look like floating text.
+
+==================================================
+10. ATTACK BARS
+==================================================
+
+Turn the attack bars into physical recessed channels.
+
+Current appearance:
+flat bar + border.
+
+Desired appearance:
+
+THICK OUTER HOUSING
+→ RECESSED CHANNEL
+→ ENERGY INSIDE CHANNEL
+→ INNER REFLECTION
+
+The energy bar must look like it is physically inside the channel.
+
+==================================================
+11. ENERGY BAR
+==================================================
+
+The Energy reservoir must become a physical power conduit.
+
+Use:
+
+raised outer metal frame
++
+deep inner cavity
++
+energy core
++
+upper specular highlight
++
+lower shadow
+
+The cyan energy must appear to occupy the cavity rather than simply being a glowing rectangle.
+
+==================================================
+12. ENERGY BURST / MEGA STRIKE
+==================================================
+
+These two modules must also have physical depth.
+
+ENERGY BURST:
+
+- thick green housing
+- recessed glass
+- raised lightning icon
+- raised text
+- internal green energy
+- contact shadow
+- bevel
+
+MEGA STRIKE:
+
+- thick red housing
+- recessed glass
+- raised crystal icon
+- raised text
+- internal red energy
+- contact shadow
+- bevel
+
+The icons must visually sit ABOVE the panel.
+
+==================================================
+13. BOTTOM POWER CONTROLS
+==================================================
+
+Freeze / Time Shift / Rewind must become physical control consoles.
+
+Give each:
+
+- thick housing
+- top bevel
+- dark recessed surface
+- raised circular control
+- icon depth
+- contact shadow
+- lower side wall
+
+They should look like hardware modules attached to the arena.
+
+==================================================
+14. ENTIRE SCREEN DEPTH HIERARCHY
+==================================================
+
+Create a clear front-to-back hierarchy.
+
+BACK:
+cosmic arena
+
+↓
+atmospheric light
+
+↓
+rear structures
+
+↓
+HUD modules
+
+↓
+board housing
+
+↓
+recessed board
+
+↓
+gem sockets
+
+↓
+raised gems
+
+↓
+foreground controls
+
+Everything should NOT exist on one Z-plane.
+
+Use visual Z-depth aggressively enough that the difference is obvious.
+
+==================================================
+15. LIGHTING MUST FOLLOW THE GEOMETRY
+==================================================
+
+Stop putting identical neon outlines around everything.
+
+Use a consistent virtual light source.
+
+Primary light:
+upper-left/front, cyan-white.
+
+Secondary light:
+upper-right, controlled red.
+
+Objects facing the light:
+bright highlight.
+
+Objects facing away:
+darker.
+
+Objects touching other objects:
+contact shadow.
+
+This should make the fake 3D geometry readable.
+
+==================================================
+16. METAL MUST LOOK LIKE METAL
+==================================================
+
+Board and HUD housings should NOT be simple colored gradients.
+
+Give metal:
+
+- sharp highlight strips
+- dark reflection
+- bevel transitions
+- edge falloff
+- directional specular response
+
+Cyan/red should be illumination around/within the metal, not the entire material.
+
+==================================================
+17. GLASS MUST LOOK LIKE GLASS
+==================================================
+
+Player panels and ability panels should have:
+
+dark translucent depth
++
+subtle reflection
++
+inner shadow
++
+highlight along one edge.
+
+Avoid flat transparent gradients.
+
+==================================================
+18. CRYSTALS MUST LOOK LIKE CRYSTALS
+==================================================
+
+Keep the existing crystal artwork.
+
+Enhance its physical appearance using:
+
+- facet highlights
+- directional lighting
+- dark lower edges
+- contact shadows
+- controlled emission
+
+Do NOT cover the crystals in excessive bloom.
+
+Their geometry must remain readable.
+
+==================================================
+19. BACKGROUND DEPTH
+==================================================
+
+The cosmic background should NOT compete with the board.
+
+Create multiple atmospheric layers:
+
+deep space
++
+nebula
++
+faint distant particles
++
+large soft light volumes
++
+very subtle foreground atmospheric haze
+
+This creates depth behind the physical game hardware.
+
+==================================================
+20. DO NOT USE THESE AS A SUBSTITUTE FOR 2.5D
+==================================================
+
+DO NOT simply:
+
+- increase glow
+- increase saturation
+- add more gradients
+- add more cyan borders
+- add more red borders
+- add random shadows
+- add more bloom
+
+Those are NOT the requested transformation.
+
+The previous version already has plenty of those.
+
+The required change is:
+
+PHYSICAL DEPTH.
+
+==================================================
+21. MOBILE SCREEN COMPOSITION
+==================================================
+
+Keep the successful current composition.
+
+Do not introduce scrolling.
+
+Do not shrink the board.
+
+Do not hide controls.
+
+Do not clip gems.
+
+Exactly:
+
+8 columns
+8 rows
+64 visible gems
+
+All controls remain touch-friendly.
+
+The board remains the largest visual element.
+
+==================================================
+22. PERFORMANCE
+==================================================
+
+This must remain smooth on a mobile device.
+
+Do not use expensive continuous effects on every frame if avoidable.
+
+Prefer CSS layered effects and static depth treatments.
+
+Do not introduce unnecessary animation.
+
+==================================================
+23. ACTIVE GAME TEST
+==================================================
+
+After implementation:
+
+RUN THE ACTUAL GAME.
+
+Do NOT only inspect source code.
+
+Do NOT only report that TypeScript passes.
+
+Take/inspect the running mobile viewport.
+
+Check:
+
+- board depth
+- gem depth
+- socket depth
+- HUD depth
+- Energy Burst depth
+- Mega Strike depth
+- bottom-control depth
+- lighting consistency
+- readability
+- touch accessibility
+
+==================================================
+24. FAILURE CONDITION
+==================================================
+
+THIS IS CRITICAL.
+
+If the new screenshot still looks like:
+
+"2D website with neon CSS"
+
+THE TASK IS NOT COMPLETE.
+
+Continue refining the visual presentation until the physical 2.5D illusion is clearly visible.
+
+Do not report completion merely because the build passes.
+
+==================================================
+25. PRESERVE FUNCTIONALITY
+==================================================
+
+ONLY change visual presentation.
+
+DO NOT modify:
+
+gameplay
+matching
+scoring
+timer
+energy calculations
+attacks
+powers
+Freeze
+Time Shift
+Rewind
+networking
+game state
+touch logic
+gem movement
+8x8 board logic
+
+The game must function exactly as before.
+
+FINAL QUALITY BAR:
+
+I WANT THE SCREEN TO LOOK LIKE A PREMIUM 2.5D SCI-FI MOBILE GAME.
+
+NOT A WEBSITE.
+
+The transformation must be VISUALLY OBVIOUS in the next screenshot.
