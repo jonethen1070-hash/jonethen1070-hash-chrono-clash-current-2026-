@@ -1,0 +1,80 @@
+FIX CHRONO CLASH ABILITY FUNCTIONALITY — DO NOT REDESIGN THE UI
+
+The current Chrono Clash build has two ability buttons that are visually displayed but do nothing when tapped:
+
+1. ENERGY BURST — costs 40 energy
+2. MEGA STRIKE — costs 50 energy
+
+Make both abilities fully functional.
+
+IMPORTANT:
+- Preserve the existing gameplay and match-3 mechanics.
+- Preserve the current 8×8 board and all 64 gems.
+- Preserve the current visual design, HUD, sizing and responsive layout.
+- Do NOT replace the board or rebuild the UI.
+- Do NOT remove or simplify existing functionality.
+- This is a functionality repair.
+
+ENERGY BURST:
+- Make the existing ENERGY BURST button respond to touch/click.
+- Require at least 40 energy.
+- If the player has less than 40 energy, do nothing except provide a clear visual/audio feedback that the ability is unavailable.
+- When activated, subtract exactly 40 energy.
+- Trigger the game's existing player attack/damage system.
+- Apply the intended Energy Burst effect to the rival/opponent.
+- Update the rival HP/score/attack state immediately.
+- Play a noticeable futuristic energy VFX and existing/premium attack SFX if the project already has them.
+- Add a short button press/activation animation.
+- Prevent double activation while the attack animation is running.
+- Update the energy display immediately after activation.
+
+MEGA STRIKE:
+- Make the existing MEGA STRIKE button respond to touch/click.
+- Require at least 50 energy.
+- If the player has less than 50 energy, do nothing except provide clear unavailable feedback.
+- When activated, subtract exactly 50 energy.
+- Trigger the game's existing player attack/damage system.
+- Apply the intended Mega Strike effect to the rival/opponent.
+- Update the rival HP/score/attack state immediately.
+- Play a stronger futuristic VFX/SFX than Energy Burst.
+- Add a short button press/activation animation.
+- Prevent double activation while the attack animation is running.
+- Update the energy display immediately after activation.
+
+GAME STATE:
+- Make sure the ability handlers are connected to the actual live game state, not a visual/mock state.
+- Do not create duplicate game-state variables that can become out of sync.
+- Use the existing energy value and existing rival/player health or attack values wherever possible.
+- If the project already contains ability functions, repair and connect those functions instead of creating redundant systems.
+- Make sure the abilities work on real mobile touch input, not only desktop mouse clicks.
+- Make sure event propagation does not prevent the buttons from receiving touches.
+- If an overlay, board touch handler, or pointer handler is intercepting the button taps, fix the event handling.
+
+VALIDATION:
+After implementing, actually test both abilities in the running game.
+
+Test:
+1. Start a match.
+2. Confirm Energy Burst is disabled/unavailable below 40 energy.
+3. Give/use enough energy to reach 40+.
+4. Tap Energy Burst.
+5. Confirm energy decreases by exactly 40.
+6. Confirm the rival/game state changes from the attack.
+7. Confirm VFX/SFX/feedback occurs.
+8. Repeat with Mega Strike at 50+ energy.
+9. Confirm energy decreases by exactly 50.
+10. Confirm the rival/game state changes.
+11. Confirm neither button is merely cosmetic.
+12. Confirm normal gem swiping/matching still works afterward.
+13. Confirm no browser console errors.
+14. Confirm no scrolling or layout overflow at the existing 390×700 target size.
+
+Do not report "implemented" unless you have verified the buttons actually work in the running Chrono Clash build.
+
+At the end, report:
+- What was wrong with the ability buttons
+- What code/state was fixed
+- Exact Energy Burst behavior
+- Exact Mega Strike behavior
+- How you tested both buttons
+- Any remaining issues

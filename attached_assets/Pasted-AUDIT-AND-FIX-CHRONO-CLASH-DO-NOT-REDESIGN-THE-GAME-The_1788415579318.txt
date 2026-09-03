@@ -1,0 +1,76 @@
+AUDIT AND FIX CHRONO CLASH — DO NOT REDESIGN THE GAME
+
+The current Chrono Clash build has become visually and functionally inconsistent with the intended 390x700 mobile composition.
+
+DO NOT rebuild the game.
+DO NOT replace the gem artwork.
+DO NOT change the 8x8 board.
+DO NOT change the core match-3 mechanics.
+DO NOT create a new UI system.
+
+First inspect the EXISTING code and identify why the current mobile layout and game state are inconsistent.
+
+Problems visible in the current build:
+
+1. The 390x700 mobile layout is being squeezed/clipped.
+2. The bottom Freeze / Time Shift / Rewind controls are partially cut off.
+3. HUD spacing and proportions are inconsistent.
+4. Game-state values displayed by the HUD do not match the intended live game state.
+5. Energy Burst and Mega Strike appear visually but are not reliably connected to the live game state.
+6. Energy display can show 0/100 while the ability UI exists.
+7. Player/rival values and VS display appear inconsistent.
+8. The overall vertical hierarchy needs to fit the complete game cleanly inside the 390x700 viewport.
+
+REFERENCE COMPOSITION:
+
+CHRONO CLASH
+↓
+YOU VS RIVAL
+↓
+YOUR ATTACK / RIVAL ATTACK
+↓
+ENERGY 100/100
+↓
+USE ENERGY
+↓
+ENERGY BURST / MEGA STRIKE
+↓
+YOUR BOARD
+↓
+FULL 8x8 BOARD
+↓
+FREEZE / TIME SHIFT / REWIND
+
+Fix the existing responsive layout so ALL of these elements fit cleanly inside the 390x700 game viewport without scrolling or clipping.
+
+IMPORTANT:
+- Preserve the current premium sci-fi visual style.
+- Preserve the current gem artwork.
+- Preserve the 8x8 board.
+- Preserve touch/swipe functionality.
+- Preserve existing gameplay.
+- Use the existing game-state variables rather than creating duplicate state.
+- Make sure HUD values are bound to the actual live game state.
+- Make Energy Burst and Mega Strike actual functional buttons.
+- Make all bottom ability buttons actual touch targets.
+- Do not use hard-coded fake/demo values for the HUD.
+- Do not randomly change gameplay numbers.
+
+Before making changes, inspect the existing implementation and identify the root causes.
+
+Then make ONLY the minimum necessary fixes.
+
+TEST AT EXACTLY 390x700:
+- No page scrolling.
+- No clipped bottom controls.
+- Full 8x8 board visible.
+- All HUD elements visible.
+- Energy Burst visible and tappable.
+- Mega Strike visible and tappable.
+- Freeze visible and tappable.
+- Time Shift visible and tappable.
+- Rewind visible and tappable.
+- Touch/swipe board still works.
+- No browser console errors.
+
+Do not report success until you have tested the running 390x700 version.
