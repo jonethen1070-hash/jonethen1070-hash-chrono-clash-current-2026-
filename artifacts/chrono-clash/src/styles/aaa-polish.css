@@ -5880,7 +5880,6 @@ html body #app #match.match-screen {
   --section-gap: clamp(2px, 0.55dvh, 6px);
   --brand-height: clamp(25px, 4.4dvh, 38px);
   --battle-height: clamp(67px, 10.1dvh, 88px);
-  --attack-height: clamp(25px, 4.1dvh, 34px);
   --energy-height: clamp(27px, 4.2dvh, 36px);
   --ability-height: clamp(43px, 6.8dvh, 58px);
   --board-label-height: clamp(17px, 2.5dvh, 22px);
@@ -5889,7 +5888,6 @@ html body #app #match.match-screen {
     calc(
       var(--brand-height) +
       var(--battle-height) +
-      var(--attack-height) +
       var(--energy-height) +
       var(--ability-height) +
       var(--board-label-height) +
@@ -5995,15 +5993,6 @@ html body #app #match .vs-column .timer small {
 
 html body #app #match .vs-column .timer b {
   font-size: clamp(14px, 2.35dvh, 20px) !important;
-}
-
-html body #app #match .attack-row {
-  flex: 0 0 var(--attack-height) !important;
-  height: var(--attack-height) !important;
-  min-height: 0 !important;
-  margin: 0 !important;
-  gap: clamp(4px, 1.5vw, 8px) !important;
-  align-items: stretch !important;
 }
 
 html body #app #match .attack-meter {
@@ -6161,7 +6150,6 @@ html body #app #match .power .cost {
   html body #app #match.match-screen {
     --brand-height: clamp(23px, 3.8dvh, 29px);
     --battle-height: clamp(62px, 9.4dvh, 72px);
-    --attack-height: clamp(23px, 3.7dvh, 28px);
     --energy-height: clamp(25px, 3.8dvh, 29px);
     --ability-height: clamp(41px, 6.1dvh, 47px);
     --board-label-height: clamp(16px, 2.3dvh, 18px);
@@ -6181,7 +6169,6 @@ html body #app #match .power .cost {
     --game-pad-bottom: 4px;
     --brand-height: 23px;
     --battle-height: 62px;
-    --attack-height: 23px;
     --energy-height: 25px;
     --ability-height: 41px;
     --board-label-height: 16px;
@@ -7067,7 +7054,6 @@ html body #app #match .power#rewind {
         430px
       );
     --battle-height: 58px;
-    --attack-height: 21px;
     --energy-height: 24px;
     --ability-height: 43px;
     --control-height: 60px;

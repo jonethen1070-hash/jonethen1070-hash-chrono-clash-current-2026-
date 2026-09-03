@@ -287,11 +287,6 @@ app.innerHTML = `
           </div>
         </div>
       </div>
-      <div class="attack-row">
-        <div class="attack-meter you"><small>YOUR ATTACK</small><span><i id="playerAttack"></i></span></div>
-        <div class="attack-meter rival"><small>RIVAL ATTACK</small><span><i id="oppAttack"></i></span></div>
-        <div class="incoming-banner hidden" id="incomingBanner">INCOMING</div>
-      </div>
       <div class="boards">
         <div class="energy-wrap">
           <small>ENERGY</small>
@@ -462,9 +457,6 @@ const ui = {
   playerScoreFill: $("#playerScoreFill"),
   oppScoreFill: $("#oppScoreFill"),
   comboDamage: $("#comboDamage"),
-  playerAttack: $("#playerAttack"),
-  oppAttack: $("#oppAttack"),
-  incomingBanner: $("#incomingBanner"),
   comboBurst: $("#comboBurst"),
   energyBurst: $("#energyBurst"),
   overlay: $("#overlay"),
@@ -525,8 +517,6 @@ const photoFlow = mountAvatarPhotoFlow(document.body, {
   },
 });
 
-const playerAttackMeter = ui.playerAttack.closest(".attack-meter");
-const oppAttackMeter = ui.oppAttack.closest(".attack-meter");
 const energyWrap = ui.energyFill.closest(".energy-wrap");
 
 const SCREEN_NODES: [HTMLElement, string][] = [
@@ -1959,13 +1949,6 @@ function frame(now: number): void {
     setText(ui.energyLabel, `${Math.round(snap.player.energy)} / ${ENERGY_MAX}`);
     energyWrap?.classList.toggle("low", snap.player.energy < ENERGY_FREEZE);
     energyWrap?.classList.toggle("hot", snap.player.energy >= 70);
-    setWidth(ui.playerAttack, `${Math.min(100, snap.playerAttack)}%`);
-    setWidth(ui.oppAttack, `${Math.min(100, snap.opponentAttack)}%`);
-    playerAttackMeter?.classList.toggle("charging", snap.playerAttack >= 70);
-    oppAttackMeter?.classList.toggle("charging", snap.opponentAttack >= 70);
-    const incoming = snap.fx.some((f) => f.kind === "attack" && f.side === "opponent" && now - f.born < 720);
-    ui.playerCard.classList.toggle("incoming", incoming);
-    ui.incomingBanner.classList.toggle("hidden", !incoming);
     const playing = snap.phase === "playing";
     ui.freeze.disabled = !session.canUsePower("freeze", now);
     ui.timeshift.disabled = !session.canUsePower("timeshift", now);
