@@ -7,7 +7,15 @@ import { clampDrag, neighborFromSwipe } from "./engine/input";
 import { GameSettings, applyMatchAudioMute, isMatchAudioMuted, loadSettings, saveSettings } from "./engine/settings";
 import { unlockGameAudio } from "./audio/unlock";
 import { canSkipIntro } from "./engine/intro";
-import { ENERGY_FREEZE, ENERGY_MAX, ENERGY_REWIND, ENERGY_TIMESHIFT, SCORE_TARGETS } from "./engine/types";
+import {
+  ENERGY_BURST,
+  ENERGY_FREEZE,
+  ENERGY_MAX,
+  ENERGY_MEGA_STRIKE,
+  ENERGY_REWIND,
+  ENERGY_TIMESHIFT,
+  SCORE_TARGETS,
+} from "./engine/types";
 import { GAME_MODES, modeInfo } from "./engine/catalog";
 import { comboBurstText } from "./engine/combat";
 import { GameSession } from "./engine/session";
@@ -291,22 +299,22 @@ app.innerHTML = `
           <b id="energyLabel">0 / 100</b>
         </div>
         <section class="energy-options" aria-label="Energy attack options">
-          <article class="energy-attack burst">
+          <button type="button" class="energy-attack burst" id="energyBurstAttack" data-power-id="burst">
             <span class="energy-attack-glyph" aria-hidden="true"></span>
             <span class="energy-attack-copy">
               <b>ENERGY BURST</b>
               <small>Destroy 3x3 area</small>
             </span>
-            <span class="energy-attack-cost"><i aria-hidden="true"></i>40</span>
-          </article>
-          <article class="energy-attack strike">
+             <span class="energy-attack-cost"><i aria-hidden="true"></i>${ENERGY_BURST}</span>
+          </button>
+          <button type="button" class="energy-attack strike" id="megaStrikeAttack" data-power-id="megaStrike">
             <span class="energy-attack-glyph" aria-hidden="true"></span>
             <span class="energy-attack-copy">
               <b>MEGA STRIKE</b>
               <small>Destroy all gems of a color</small>
             </span>
-            <span class="energy-attack-cost"><i aria-hidden="true"></i>50</span>
-          </article>
+             <span class="energy-attack-cost"><i aria-hidden="true"></i>${ENERGY_MEGA_STRIKE}</span>
+          </button>
         </section>
         <div class="player-side">
           <div class="you-meta">
@@ -467,6 +475,8 @@ const ui = {
   freeze: $("#freeze") as HTMLButtonElement,
   timeshift: $("#timeshift") as HTMLButtonElement,
   rewind: $("#rewind") as HTMLButtonElement,
+  energyBurstAttack: $("#energyBurstAttack") as HTMLButtonElement,
+  megaStrikeAttack: $("#megaStrikeAttack") as HTMLButtonElement,
   freezeQty: $("#freezeQty"),
   shiftQty: $("#shiftQty"),
   powerArmory: $("#powerArmory"),
@@ -1380,7 +1390,7 @@ ui.timerBtn.addEventListener("click", () => {
 });
 let castTimer = 0;
 function flashCast(matchClass: string, btn?: HTMLButtonElement): void {
-  ui.match.classList.remove("cast-freeze", "cast-shift", "cast-rewind", "clash-in");
+  ui.match.classList.remove("cast-freeze", "cast-shift", "cast-rewind", "cast-burst", "cast-mega", "clash-in");
   ui.match.classList.add(matchClass);
   if (btn) restartAnim(btn, "cast");
   window.clearTimeout(castTimer);
@@ -1433,6 +1443,19 @@ ui.rewind.addEventListener("click", () => {
     sendOnlineAction({ type: "power", id: "rewind" });
   }
 });
+function useEnergyAttack(id: "burst" | "megaStrike", button: HTMLButtonElement): void {
+  if (session.usePower(id)) {
+    ping(button);
+    flashCast(id === "burst" ? "cast-burst" : "cast-mega", button);
+    juiceHaptic(id === "burst" ? "freeze" : "rewind");
+    sendOnlineAction({ type: "power", id });
+  } else {
+    restartAnim(button, "unavailable");
+    audio.play("ui");
+  }
+}
+ui.energyBurstAttack.addEventListener("click", () => useEnergyAttack("burst", ui.energyBurstAttack));
+ui.megaStrikeAttack.addEventListener("click", () => useEnergyAttack("megaStrike", ui.megaStrikeAttack));
 document.querySelector(".powers")?.addEventListener("pointerdown", (e) => {
   const point = e as PointerEvent;
   const x = point.clientX;
@@ -1947,6 +1970,14 @@ function frame(now: number): void {
     ui.freeze.disabled = !session.canUsePower("freeze", now);
     ui.timeshift.disabled = !session.canUsePower("timeshift", now);
     ui.rewind.disabled = !session.canUsePower("rewind", now);
+    const burstReady = session.canUsePower("burst", now);
+    const megaStrikeReady = session.canUsePower("megaStrike", now);
+    ui.energyBurstAttack.disabled = !burstReady;
+    ui.megaStrikeAttack.disabled = !megaStrikeReady;
+    ui.energyBurstAttack.classList.toggle("ready", burstReady);
+    ui.megaStrikeAttack.classList.toggle("ready", megaStrikeReady);
+    ui.energyBurstAttack.classList.toggle("unavailable", !burstReady);
+    ui.megaStrikeAttack.classList.toggle("unavailable", !megaStrikeReady);
     const freezeQty = matchPowerQty(session.progress, "freeze", `${ENERGY_FREEZE} ENERGY`);
     const shiftQty = matchPowerQty(session.progress, "timeshift", `${ENERGY_TIMESHIFT} ENERGY`);
     setText(ui.freezeQty, freezeQty);
@@ -1980,6 +2011,8 @@ function frame(now: number): void {
         else if (t.includes("TIME") || t.includes("TEMPO") || t.includes("SHIFT")) {
           flashCast("cast-shift", t.startsWith("RIVAL") ? undefined : ui.timeshift);
         }
+        else if (t.includes("ENERGY BURST")) flashCast("cast-burst", t.startsWith("RIVAL") ? undefined : ui.energyBurstAttack);
+        else if (t.includes("MEGA STRIKE")) flashCast("cast-mega", t.startsWith("RIVAL") ? undefined : ui.megaStrikeAttack);
       }
       if (fx.kind === "rewind") flashCast("cast-rewind", ui.rewind);
       if (fx.kind === "combo" || fx.kind === "power" || fx.kind === "rewind" || fx.kind === "attack" || fx.kind === "finale" || fx.kind === "urgent") {

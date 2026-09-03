@@ -71,5 +71,5 @@ export function powerMaxCharges(id: string, catalog: readonly PowerDefinition[] 
 }
 
 export function isKnownPowerId(id: string): id is PowerId {
-  return id === "freeze" || id === "timeshift" || id === "rewind";
+  return id === "freeze" || id === "timeshift" || id === "rewind" || id === "burst" || id === "megaStrike";
 }

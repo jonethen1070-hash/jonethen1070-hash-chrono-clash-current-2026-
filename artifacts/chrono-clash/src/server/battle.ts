@@ -1,5 +1,5 @@
 import { AuthError } from "./auth-config";
-import { createSeededRng, generateBoard, trySwap } from "../engine/board";
+import { applyGravity, createSeededRng, generateBoard, trySwap } from "../engine/board";
 import { fillAttack } from "../engine/combat";
 import { seatForPlayer, seatSeed } from "../engine/online";
 import { powerConsumesCharge } from "../engine/powers";
@@ -7,14 +7,18 @@ import {
   ATTACK_MAX,
   Board,
   Cell,
+  COLS,
+  ENERGY_BURST,
   ENERGY_FREEZE,
   ENERGY_MAX,
+  ENERGY_MEGA_STRIKE,
   ENERGY_REWIND,
   ENERGY_TIMESHIFT,
   FREEZE_MS,
   MATCH_SECONDS,
   PRESSURE_MS,
   PowerId,
+  ROWS,
   TIME_STEAL_MS,
 } from "../engine/types";
 
@@ -221,6 +225,36 @@ function applyPower(
   now: number,
   ledger?: PowerLedger,
 ): boolean {
+  if (id === "burst" || id === "megaStrike") {
+    const cost = id === "burst" ? ENERGY_BURST : ENERGY_MEGA_STRIKE;
+    if (actor.energy < cost || now < actor.lockUntil) return false;
+    actor.energy -= cost;
+    const cells =
+      id === "burst"
+        ? Array.from({ length: 9 }, (_, index) => ({
+            r: Math.floor(ROWS / 2) - 1 + Math.floor(index / 3),
+            c: Math.floor(COLS / 2) - 1 + (index % 3),
+          }))
+        : (() => {
+            const counts = new Map<number, number>();
+            for (const row of other.board) {
+              for (const piece of row) {
+                if (piece) counts.set(piece.color, (counts.get(piece.color) ?? 0) + 1);
+              }
+            }
+            const color = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? 1;
+            return other.board.flatMap((row, r) =>
+              row.flatMap((piece, c) => (piece?.color === color ? [{ r, c }] : [])),
+            );
+          })();
+    for (const cell of cells) other.board[cell.r]![cell.c] = null;
+    applyGravity(other.board, other.rng);
+    other.attack = Math.max(0, other.attack - (id === "burst" ? 22 : 48));
+    other.combo = 0;
+    other.lockUntil = Math.max(other.lockUntil, now + (id === "burst" ? PRESSURE_MS : PRESSURE_MS * 2));
+    actor.lockUntil = Math.max(actor.lockUntil, now + 620);
+    return true;
+  }
   if (id === "freeze") {
     if (actor.energy < ENERGY_FREEZE) return false;
     if (powerConsumesCharge(id) && ledger && !ledger.spendCharge(actor.playerId, id)) return false;
@@ -365,7 +399,14 @@ export class BattleDirector {
     if (input.type !== "swap" && input.type !== "power" && input.type !== "heartbeat") {
       throw new AuthError("Unknown action.", 400);
     }
-    if (input.type === "power" && input.id !== "freeze" && input.id !== "timeshift" && input.id !== "rewind") {
+    if (
+      input.type === "power" &&
+      input.id !== "freeze" &&
+      input.id !== "timeshift" &&
+      input.id !== "rewind" &&
+      input.id !== "burst" &&
+      input.id !== "megaStrike"
+    ) {
       throw new AuthError("Unknown power.", 400);
     }
     if (clientSeq <= you.lastClientSeq) {

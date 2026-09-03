@@ -111,6 +111,8 @@ function clampProgress(parsed: Partial<LocalProgress>): LocalProgress {
       freeze: Number(parsed.powersUsed?.freeze) || 0,
       timeshift: Number(parsed.powersUsed?.timeshift) || 0,
       rewind: Number(parsed.powersUsed?.rewind) || 0,
+      burst: Number(parsed.powersUsed?.burst) || 0,
+      megaStrike: Number(parsed.powersUsed?.megaStrike) || 0,
     },
     lastPowers: Array.isArray(parsed.lastPowers) ? parsed.lastPowers : [],
     unlocked: Array.isArray(parsed.unlocked) && parsed.unlocked.length ? parsed.unlocked : [...base.unlocked],
@@ -159,7 +161,11 @@ export function saveProgress(progress: LocalProgress): void {
 export function resetProgress(): LocalProgress {
   clearAvatarPhoto();
   const next = applyEconomy(
-    { ...EMPTY_PROGRESS, unlocked: [...EMPTY_PROGRESS.unlocked], powersUsed: { freeze: 0, timeshift: 0, rewind: 0 } },
+    {
+      ...EMPTY_PROGRESS,
+      unlocked: [...EMPTY_PROGRESS.unlocked],
+      powersUsed: { freeze: 0, timeshift: 0, rewind: 0, burst: 0, megaStrike: 0 },
+    },
     { winningCoins: 0, powerCharges: {}, claimedAdReceipts: [] },
   );
   saveProgress(next);

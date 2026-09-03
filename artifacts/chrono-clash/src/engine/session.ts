@@ -41,10 +41,13 @@ import {
   ATTACK_MAX,
   Board,
   COMBO_HOLD_MS,
+  COLS,
   Coord,
   COUNTDOWN_SECONDS,
+  ENERGY_BURST,
   ENERGY_FREEZE,
   ENERGY_MAX,
+  ENERGY_MEGA_STRIKE,
   ENERGY_REWIND,
   ENERGY_TIMESHIFT,
   FINALE_MS,
@@ -61,6 +64,7 @@ import {
   ResolveResult,
   REWIND_HISTORY,
   RIVAL_FREEZE_MS,
+  ROWS,
   SCORE_SURGE_MS,
   SCORE_TARGET,
   TIME_STEAL_MS,
@@ -641,6 +645,8 @@ export class GameSession {
       return this.player.energy >= ENERGY_TIMESHIFT && now >= this.timeshiftUntil && now >= this.timeshiftCoolUntil;
     }
     if (id === "rewind") return this.player.energy >= ENERGY_REWIND && this.lastPlayerSnap.length >= 2;
+    if (id === "burst") return this.player.energy >= ENERGY_BURST;
+    if (id === "megaStrike") return this.player.energy >= ENERGY_MEGA_STRIKE;
     return false;
   }
 
@@ -960,6 +966,28 @@ export class GameSession {
   usePower(id: PowerId, now = performance.now()): boolean {
     if (!this.canUsePower(id, now)) return false;
 
+    if (id === "burst" || id === "megaStrike") {
+      const cost = id === "burst" ? ENERGY_BURST : ENERGY_MEGA_STRIKE;
+      this.player.energy = Math.max(0, this.player.energy - cost);
+      this.applyEnergyAttack(id, now);
+      this.powerLockUntil = now + 620;
+      this.busyUntil = Math.max(this.busyUntil, now + 620);
+      this.notePower(id);
+      this.pushFx("power", id === "burst" ? "ENERGY BURST" : "MEGA STRIKE", now, {
+        side: "player",
+        combo: id === "burst" ? 3 : 6,
+      });
+      this.pushFx("attack", id === "burst" ? "ENERGY BURST HIT" : "MEGA STRIKE HIT", now, {
+        side: "player",
+        combo: id === "burst" ? 3 : 6,
+      });
+      this.pushFx("pressure", id === "burst" ? "RIVAL BLAST" : "RIVAL OBLITERATED", now, {
+        side: "opponent",
+        combo: id === "burst" ? 3 : 6,
+      });
+      return true;
+    }
+
     if (id === "freeze") {
       if (this.player.energy < ENERGY_FREEZE) return false;
       if (!this.consumeCharge(id)) return false;
@@ -1010,6 +1038,37 @@ export class GameSession {
       return true;
     }
     return false;
+  }
+
+  private applyEnergyAttack(id: "burst" | "megaStrike", now: number): void {
+    const cells =
+      id === "burst"
+        ? Array.from({ length: 9 }, (_, index) => ({
+            r: Math.floor(ROWS / 2) - 1 + Math.floor(index / 3),
+            c: Math.floor(COLS / 2) - 1 + (index % 3),
+          }))
+        : (() => {
+            const counts = new Map<number, number>();
+            for (const row of this.opponent.board) {
+              for (const piece of row) {
+                if (piece) counts.set(piece.color, (counts.get(piece.color) ?? 0) + 1);
+              }
+            }
+            const color = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? 1;
+            return this.opponent.board.flatMap((row, r) =>
+              row.flatMap((piece, c) => (piece?.color === color ? [{ r, c }] : [])),
+            );
+          })();
+
+    for (const cell of cells) this.opponent.board[cell.r]![cell.c] = null;
+    applyGravity(this.opponent.board, this.rng);
+    this.bumpOppBoard();
+    this.opponent.attack = Math.max(0, this.opponent.attack - (id === "burst" ? 22 : 48));
+    this.opponent.combo = 0;
+    this.rivalPressureUntil = Math.max(
+      this.rivalPressureUntil,
+      now + (id === "burst" ? PRESSURE_MS : PRESSURE_MS * 2),
+    );
   }
 
   remainingMs(now: number): number {

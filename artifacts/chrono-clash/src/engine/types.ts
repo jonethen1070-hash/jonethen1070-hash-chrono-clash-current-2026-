@@ -13,6 +13,8 @@ export const ENERGY_MAX = 100;
 export const ENERGY_FREEZE = 12;
 export const ENERGY_TIMESHIFT = 18;
 export const ENERGY_REWIND = 26;
+export const ENERGY_BURST = 40;
+export const ENERGY_MEGA_STRIKE = 50;
 
 export const FREEZE_MS = 5000;
 export const TIMESHIFT_MS = 5000;
@@ -41,7 +43,7 @@ export const COLORS = [
 export type PieceKind = "normal" | "lineH" | "lineV" | "bomb";
 export type MatchShape = "three" | "four" | "five" | "tee";
 export type GameMode = "time" | "score";
-export type PowerId = "freeze" | "timeshift" | "rewind";
+export type PowerId = "freeze" | "timeshift" | "rewind" | "burst" | "megaStrike";
 export type Outcome = "win" | "loss" | "tie";
 export type Intensity = "high" | "medium" | "low";
 export type MatchState =
@@ -160,7 +162,7 @@ export const EMPTY_PROGRESS: LocalProgress = {
   totalScore: 0,
   winStreak: 0,
   bestStreak: 0,
-  powersUsed: { freeze: 0, timeshift: 0, rewind: 0 },
+  powersUsed: { freeze: 0, timeshift: 0, rewind: 0, burst: 0, megaStrike: 0 },
   lastPowers: [],
   unlocked: ["frame-pulse", "board-void", "tile-lumen", "title-newcomer", "void", "lumen", "NEWCOMER", "core", "avatar-0", "avatar-1", "avatar-2"],
   tutorialDone: false,

@@ -3069,6 +3069,33 @@ html body #app #match .energy-wrap {
   overflow: hidden;
 }
 
+#match button.energy-attack {
+  width: 100%;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
+}
+
+#match button.energy-attack:disabled {
+  cursor: not-allowed;
+  filter: saturate(0.55);
+  opacity: 0.5;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    inset 0 -10px 14px rgba(0,0,0,0.6),
+    0 5px 9px rgba(0,0,0,0.35);
+}
+
+#match button.energy-attack.ready {
+  border-color: color-mix(in srgb, var(--attack-color) 92%, white);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.2),
+    inset 0 -10px 14px rgba(0,0,0,0.35),
+    0 0 14px var(--attack-soft),
+    0 7px 12px rgba(0,0,0,0.42);
+}
+
 #match .energy-attack::after {
   content: "";
   position: absolute;
@@ -3174,6 +3201,14 @@ html body #app #match .energy-wrap {
   background: currentColor;
   clip-path: polygon(52% 0, 100% 0, 68% 38%, 100% 38%, 30% 100%, 44% 55%, 10% 55%);
   filter: drop-shadow(0 0 3px currentColor);
+}
+
+#match.cast-burst {
+  box-shadow: inset 0 0 90px rgba(34, 211, 238, 0.2);
+}
+
+#match.cast-mega {
+  box-shadow: inset 0 0 110px rgba(244, 63, 94, 0.24);
 }
 
 html body #app #match .player-side {
