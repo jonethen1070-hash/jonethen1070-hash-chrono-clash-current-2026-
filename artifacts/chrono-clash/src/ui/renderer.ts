@@ -458,7 +458,39 @@ export class BoardRenderer {
     ctx.save();
     ctx.translate(sx, sy);
 
+    const slabEdge = isPlayer ? "#007A9E" : "#8E1740";
+    const slabFace = isPlayer ? "#062B39" : "#32101C";
+    ctx.save();
+    roundRect(ctx, ox + 7, oy + 10, size, size, 22);
+    ctx.fillStyle = "rgba(0, 2, 8, 0.82)";
+    ctx.fill();
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.9)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.save();
+    roundRect(ctx, ox + 3, oy + 5, size, size, 22);
+    ctx.fillStyle = slabFace;
+    ctx.fill();
+    ctx.strokeStyle = colorWithAlpha(slabEdge, 0.62);
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.restore();
+
     this.blitWells(ctx, ox, oy, size, cell, isPlayer);
+
+    ctx.save();
+    roundRect(ctx, ox + FRAME, oy + FRAME, size - FRAME * 2, size - FRAME * 2, 14);
+    ctx.clip();
+    const cavity = ctx.createLinearGradient(ox + FRAME, oy + FRAME, ox + size - FRAME, oy + size - FRAME);
+    cavity.addColorStop(0, "rgba(0, 2, 8, 0.1)");
+    cavity.addColorStop(0.55, "rgba(0, 2, 8, 0.2)");
+    cavity.addColorStop(1, "rgba(0, 2, 8, 0.42)");
+    ctx.fillStyle = cavity;
+    ctx.fillRect(ox + FRAME, oy + FRAME, size - FRAME * 2, size - FRAME * 2);
+    ctx.restore();
+
     this.drawBoardEnergy(ctx, ox, oy, size, isPlayer, boosted, frozen, now);
 
     ctx.save();
@@ -474,11 +506,11 @@ export class BoardRenderer {
     ctx.restore();
 
     const bevel = ctx.createLinearGradient(ox, oy, ox + size, oy + size);
-    bevel.addColorStop(0, isPlayer ? "#EAFBFF4A" : "#FFE1EA35");
-    bevel.addColorStop(0.16, isPlayer ? "#6FEAFF18" : "#FF6B9114");
+    bevel.addColorStop(0, isPlayer ? "#EAFBFF60" : "#FFE1EA4A");
+    bevel.addColorStop(0.16, isPlayer ? "#6FEAFF22" : "#FF6B9120");
     bevel.addColorStop(0.52, "#FFFFFF00");
     bevel.addColorStop(0.84, "#01050A18");
-    bevel.addColorStop(1, "#01050A9C");
+    bevel.addColorStop(1, "#01050AC4");
     roundRect(ctx, ox + 2, oy + 2, size - 4, size - 4, 20);
     ctx.strokeStyle = bevel;
     ctx.lineWidth = 1.8;
