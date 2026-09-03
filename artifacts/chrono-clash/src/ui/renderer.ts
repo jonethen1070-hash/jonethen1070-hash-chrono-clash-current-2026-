@@ -461,6 +461,29 @@ export class BoardRenderer {
     this.blitWells(ctx, ox, oy, size, cell, isPlayer);
     this.drawBoardEnergy(ctx, ox, oy, size, isPlayer, boosted, frozen, now);
 
+    ctx.save();
+    roundRect(ctx, ox + 1, oy + 1, size - 2, size - 2, 21);
+    ctx.clip();
+    const plane = ctx.createLinearGradient(ox, oy, ox + size, oy + size);
+    plane.addColorStop(0, isPlayer ? "#B9F8FF0D" : "#FFD6E20B");
+    plane.addColorStop(0.3, "#FFFFFF03");
+    plane.addColorStop(0.7, "#0000000A");
+    plane.addColorStop(1, "#01050A8F");
+    ctx.fillStyle = plane;
+    ctx.fillRect(ox, oy, size, size);
+    ctx.restore();
+
+    const bevel = ctx.createLinearGradient(ox, oy, ox + size, oy + size);
+    bevel.addColorStop(0, isPlayer ? "#EAFBFF4A" : "#FFE1EA35");
+    bevel.addColorStop(0.16, isPlayer ? "#6FEAFF18" : "#FF6B9114");
+    bevel.addColorStop(0.52, "#FFFFFF00");
+    bevel.addColorStop(0.84, "#01050A18");
+    bevel.addColorStop(1, "#01050A9C");
+    roundRect(ctx, ox + 2, oy + 2, size - 4, size - 4, 20);
+    ctx.strokeStyle = bevel;
+    ctx.lineWidth = 1.8;
+    ctx.stroke();
+
     const rim = boosted
       ? "#6FEAFFF0"
       : frozen
@@ -1648,6 +1671,22 @@ export class BoardRenderer {
     ctx.fillStyle = volume;
     ctx.fillRect(dx, dy, dest, dest);
     paintCrystalOptics(ctx, cx, cy, s, colorIndex, color);
+
+    const bevel = ctx.createLinearGradient(cx - s * 0.46, cy - s * 0.46, cx + s * 0.46, cy + s * 0.46);
+    bevel.addColorStop(0, "rgba(255,255,255,0.08)");
+    bevel.addColorStop(0.32, "rgba(255,255,255,0)");
+    bevel.addColorStop(0.72, "rgba(0,0,0,0.04)");
+    bevel.addColorStop(1, "rgba(0,5,14,0.42)");
+    ctx.fillStyle = bevel;
+    ctx.fillRect(dx, dy, dest, dest);
+    const edgeShade = ctx.createLinearGradient(cx - s * 0.48, cy - s * 0.48, cx + s * 0.48, cy + s * 0.48);
+    edgeShade.addColorStop(0, "rgba(255,255,255,0)");
+    edgeShade.addColorStop(0.62, "rgba(0,0,0,0)");
+    edgeShade.addColorStop(1, "rgba(0,8,18,0.55)");
+    jewelPath(ctx, cx, cy, s * 0.97, colorIndex);
+    ctx.strokeStyle = edgeShade;
+    ctx.lineWidth = Math.max(1, s * 0.024);
+    ctx.stroke();
 
     ctx.globalCompositeOperation = "lighter";
     const core = ctx.createRadialGradient(cx - s * 0.04, cy - s * 0.08, s * 0.006, cx, cy + s * 0.02, s * 0.26);
