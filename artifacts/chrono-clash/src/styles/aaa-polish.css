@@ -5811,3 +5811,385 @@ html body #app #match .power:active {
     transition: none !important;
   }
 }
+
+/* =========================================================
+   RESPONSIVE FULL-SCREEN GAME VIEWPORT
+   One fluid system for short, narrow, standard and tall phones.
+   ========================================================= */
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  min-height: 100svh;
+  overflow: hidden !important;
+}
+
+html body #app,
+html body #app .shell {
+  width: 100%;
+  height: 100dvh;
+  min-height: 100svh;
+  max-height: 100lvh;
+  overflow: hidden !important;
+}
+
+html body #app #match.match-screen {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --game-pad-x: clamp(3px, 1.6vw, 10px);
+  --game-pad-top: clamp(4px, 0.8dvh, 8px);
+  --game-pad-bottom: clamp(5px, 0.9dvh, 9px);
+  --section-gap: clamp(2px, 0.55dvh, 6px);
+  --brand-height: clamp(25px, 4.4dvh, 38px);
+  --battle-height: clamp(67px, 10.1dvh, 88px);
+  --attack-height: clamp(25px, 4.1dvh, 34px);
+  --energy-height: clamp(27px, 4.2dvh, 36px);
+  --ability-height: clamp(43px, 6.8dvh, 58px);
+  --board-label-height: clamp(17px, 2.5dvh, 22px);
+  --control-height: clamp(64px, 9.7dvh, 82px);
+  --vertical-chrome:
+    calc(
+      var(--brand-height) +
+      var(--battle-height) +
+      var(--attack-height) +
+      var(--energy-height) +
+      var(--ability-height) +
+      var(--board-label-height) +
+      var(--control-height) +
+      (var(--section-gap) * 8) +
+      var(--game-pad-top) +
+      var(--game-pad-bottom) +
+      var(--safe-top) +
+      var(--safe-bottom) +
+      18px
+    );
+  --board-size:
+    min(
+      calc(100vw - var(--safe-left) - var(--safe-right) - (var(--game-pad-x) * 2) - 16px),
+      calc(100dvh - var(--vertical-chrome)),
+      430px
+    );
+
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100dvh !important;
+  min-height: 100svh !important;
+  max-height: 100lvh !important;
+  padding:
+    calc(var(--game-pad-top) + var(--safe-top))
+    calc(var(--game-pad-x) + var(--safe-right))
+    calc(var(--game-pad-bottom) + var(--safe-bottom))
+    calc(var(--game-pad-x) + var(--safe-left)) !important;
+  overflow: hidden !important;
+  contain: layout paint;
+}
+
+html body #app #match .match-stage {
+  width: min(100%, 480px) !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  margin-inline: auto;
+  gap: var(--section-gap) !important;
+  overflow: visible !important;
+  justify-content: flex-start;
+}
+
+html body #app #match .match-brand-row {
+  flex: 0 0 var(--brand-height) !important;
+  min-height: 0 !important;
+  height: var(--brand-height) !important;
+}
+
+html body #app #match .match-brand {
+  font-size: clamp(8px, 2.5vw, 12px) !important;
+}
+
+html body #app #match .match-brand-actions {
+  height: 100%;
+  align-items: center;
+}
+
+html body #app #match .hud-icon,
+html body #app #match .hud-mute {
+  height: clamp(25px, 3.9dvh, 34px) !important;
+  min-height: 0 !important;
+}
+
+html body #app #match .match-top {
+  flex: 0 0 var(--battle-height) !important;
+  height: var(--battle-height) !important;
+  min-height: 0 !important;
+  gap: clamp(4px, 1.5vw, 8px) !important;
+}
+
+html body #app #match .fighter {
+  height: 100% !important;
+  min-height: 0 !important;
+  padding: clamp(3px, 0.8dvh, 7px) clamp(4px, 1.6vw, 8px) !important;
+  gap: clamp(3px, 1.2vw, 7px) !important;
+}
+
+html body #app #match .avatar-ring,
+html body #app #match .fighter .avatar {
+  width: clamp(29px, 5.1dvh, 41px) !important;
+  height: clamp(29px, 5.1dvh, 41px) !important;
+}
+
+html body #app #match .score-rail b,
+html body #app #match .fighter-copy b {
+  font-size: clamp(14px, 2.65dvh, 21px) !important;
+}
+
+html body #app #match .vs-badge {
+  font-size: clamp(18px, 3.1dvh, 25px) !important;
+  line-height: 1 !important;
+}
+
+html body #app #match .vs-column .timer {
+  min-height: 0 !important;
+  padding: clamp(2px, 0.55dvh, 5px) clamp(5px, 1.6vw, 9px) !important;
+  gap: clamp(1px, 0.4dvh, 4px) !important;
+}
+
+html body #app #match .vs-column .timer small {
+  font-size: clamp(5px, 0.9dvh, 8px) !important;
+}
+
+html body #app #match .vs-column .timer b {
+  font-size: clamp(14px, 2.35dvh, 20px) !important;
+}
+
+html body #app #match .attack-row {
+  flex: 0 0 var(--attack-height) !important;
+  height: var(--attack-height) !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  gap: clamp(4px, 1.5vw, 8px) !important;
+  align-items: stretch !important;
+}
+
+html body #app #match .attack-meter {
+  height: 100% !important;
+  min-height: 0 !important;
+  padding: clamp(2px, 0.5dvh, 5px) clamp(5px, 1.6vw, 8px) !important;
+  gap: clamp(2px, 0.5dvh, 5px) !important;
+}
+
+html body #app #match .boards {
+  display: grid !important;
+  flex: 0 0 auto !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  grid-template-rows:
+    var(--energy-height)
+    var(--ability-height)
+    calc(var(--board-size) + var(--board-label-height)) !important;
+  gap: var(--section-gap) !important;
+  margin: 0 !important;
+  align-content: start !important;
+  justify-items: center;
+}
+
+html body #app #match .energy-wrap {
+  width: 100% !important;
+  height: var(--energy-height) !important;
+  min-height: 0 !important;
+  padding: clamp(2px, 0.55dvh, 5px) clamp(6px, 2vw, 10px) !important;
+  gap: clamp(4px, 1.6vw, 9px) !important;
+}
+
+html body #app #match .energy-options {
+  width: 100% !important;
+  height: var(--ability-height) !important;
+  min-height: 0 !important;
+  gap: clamp(4px, 1.5vw, 8px) !important;
+}
+
+html body #app #match .energy-attack {
+  width: 100% !important;
+  height: var(--ability-height) !important;
+  min-height: 0 !important;
+  padding: clamp(3px, 0.65dvh, 7px) clamp(5px, 1.7vw, 8px) !important;
+  grid-template-columns: clamp(18px, 5.8vw, 28px) minmax(0, 1fr) !important;
+  column-gap: clamp(4px, 1.3vw, 7px) !important;
+}
+
+html body #app #match .energy-attack-glyph {
+  width: clamp(17px, 5.3vw, 25px) !important;
+  height: clamp(23px, 4.1dvh, 34px) !important;
+}
+
+html body #app #match .energy-attack-copy b {
+  font-size: clamp(6px, 1.9vw, 8px) !important;
+}
+
+html body #app #match .energy-attack-copy small {
+  font-size: clamp(5px, 1.55vw, 7px) !important;
+  line-height: 1 !important;
+}
+
+html body #app #match .player-side {
+  width: var(--board-size) !important;
+  height: calc(var(--board-size) + var(--board-label-height)) !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: 100% !important;
+  flex: 0 0 auto !important;
+  justify-self: center;
+}
+
+html body #app #match .player-side .you-meta {
+  width: 100% !important;
+  height: var(--board-label-height) !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding-block: 0 !important;
+  flex: 0 0 var(--board-label-height) !important;
+}
+
+html body #app #match .player-side .board-slot {
+  width: var(--board-size) !important;
+  height: var(--board-size) !important;
+  min-width: var(--board-size) !important;
+  min-height: var(--board-size) !important;
+  max-width: var(--board-size) !important;
+  max-height: var(--board-size) !important;
+  flex: 0 0 var(--board-size) !important;
+  aspect-ratio: 1 / 1 !important;
+}
+
+html body #app #match .board-canvas,
+html body #app #match #playerGems {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+}
+
+html body #app #match .powers {
+  flex: 0 0 var(--control-height) !important;
+  width: min(100%, 480px) !important;
+  height: var(--control-height) !important;
+  min-height: 0 !important;
+  margin: 0 auto !important;
+  padding: 0 1px !important;
+  gap: clamp(4px, 1.5vw, 8px) !important;
+}
+
+html body #app #match .power {
+  width: 100% !important;
+  height: var(--control-height) !important;
+  min-height: 0 !important;
+  padding: clamp(4px, 0.8dvh, 8px) clamp(2px, 1vw, 5px) !important;
+  gap: clamp(1px, 0.3dvh, 3px) !important;
+}
+
+html body #app #match .power .glyph,
+html body #app #match #freeze .glyph,
+html body #app #match #timeshift .glyph,
+html body #app #match #rewind .glyph {
+  width: clamp(25px, 4.4dvh, 34px) !important;
+  height: clamp(25px, 4.4dvh, 34px) !important;
+  font-size: clamp(13px, 2.3dvh, 17px) !important;
+}
+
+html body #app #match .power b {
+  font-size: clamp(7px, 1.15dvh, 10px) !important;
+}
+
+html body #app #match .power .cost {
+  padding: 2px clamp(4px, 1.5vw, 7px) !important;
+  font-size: clamp(8px, 1.35dvh, 11px) !important;
+}
+
+/* The long help copy remains available to assistive technology and larger
+   layouts, but it must not displace playable controls on phone screens. */
+@media (max-width: 600px) {
+  html body #app #match .power .need {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+  }
+}
+
+/* Short phones compact secondary chrome first. The board continues to be
+   calculated from remaining height instead of being tied to viewport width. */
+@media (max-height: 780px) {
+  html body #app #match.match-screen {
+    --brand-height: clamp(23px, 3.8dvh, 29px);
+    --battle-height: clamp(62px, 9.4dvh, 72px);
+    --attack-height: clamp(23px, 3.7dvh, 28px);
+    --energy-height: clamp(25px, 3.8dvh, 29px);
+    --ability-height: clamp(41px, 6.1dvh, 47px);
+    --board-label-height: clamp(16px, 2.3dvh, 18px);
+    --control-height: clamp(61px, 9dvh, 69px);
+    --section-gap: clamp(2px, 0.42dvh, 4px);
+  }
+
+  html body #app #match .fighter-copy em,
+  html body #app #match .energy-attack-copy small {
+    display: none !important;
+  }
+}
+
+@media (max-height: 720px) {
+  html body #app #match.match-screen {
+    --game-pad-top: 3px;
+    --game-pad-bottom: 4px;
+    --brand-height: 23px;
+    --battle-height: 62px;
+    --attack-height: 23px;
+    --energy-height: 25px;
+    --ability-height: 41px;
+    --board-label-height: 16px;
+    --control-height: 61px;
+    --section-gap: 2px;
+  }
+
+  html body #app #match .fighter {
+    padding-block: 3px !important;
+  }
+
+  html body #app #match .energy-attack-cost {
+    font-size: 8px !important;
+  }
+}
+
+@media (max-width: 370px) {
+  html body #app #match.match-screen {
+    --game-pad-x: 2px;
+  }
+
+  html body #app #match .match-top {
+    gap: 3px !important;
+  }
+
+  html body #app #match .fighter {
+    padding-inline: 3px !important;
+  }
+
+  html body #app #match .fighter-copy small,
+  html body #app #match .attack-meter small {
+    letter-spacing: 0.04em !important;
+  }
+}
+
+/* Taller phones spend extra room on controlled breathing space, never on
+   stretching the board away from square. */
+@media (min-height: 880px) {
+  html body #app #match.match-screen {
+    --section-gap: clamp(4px, 0.7dvh, 7px);
+  }
+
+  html body #app #match .match-stage {
+    justify-content: center;
+  }
+}

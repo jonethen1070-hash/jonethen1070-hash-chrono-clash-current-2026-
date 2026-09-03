@@ -1,0 +1,559 @@
+CHRONO CLASH — RESPONSIVE FULL-SCREEN MOBILE FIT
+================================================
+
+STOP.
+
+The current game is still using a composition that is too dependent on one fixed
+viewport size.
+
+I need Chrono Clash to fit BEAUTIFULLY FROM TOP TO BOTTOM on EVERY PHONE.
+
+This is NOT a gameplay change.
+This is NOT a game-logic change.
+This is NOT a board-size change.
+This is a RESPONSIVE VISUAL/LAYOUT correction.
+
+DO NOT create an image.
+
+================================================
+PRIMARY REQUIREMENT
+================================================
+
+The ENTIRE GAME SCREEN must adapt to the actual device viewport.
+
+It must fit from:
+
+TOP OF GAME
+↓
+HEADER
+↓
+YOU / VS / RIVAL
+↓
+ATTACK BARS
+↓
+ENERGY
+↓
+ENERGY BURST / MEGA STRIKE
+↓
+YOUR BOARD
+↓
+BOTTOM CONTROLS
+↓
+BOTTOM SAFE AREA
+
+WITHOUT:
+
+- clipping
+- overlap
+- scrolling
+- hidden controls
+- cropped board
+- cropped gems
+- controls falling below the viewport
+- browser-height assumptions
+- fixed 390×844 assumptions
+
+The game must look intentionally designed for each phone.
+
+================================================
+1. REMOVE FIXED-VIEWPORT DEPENDENCY
+================================================
+
+Find and eliminate any layout rules that assume:
+
+390px × 844px
+
+or another specific phone size.
+
+Do NOT simply scale the entire game with one giant transform.
+
+Instead make the individual sections responsive.
+
+The game should calculate available vertical space dynamically.
+
+Use modern viewport units where appropriate:
+
+100dvh
+100svh
+100lvh
+
+and account for:
+
+env(safe-area-inset-top)
+env(safe-area-inset-bottom)
+env(safe-area-inset-left)
+env(safe-area-inset-right)
+
+Do not rely exclusively on 100vh because mobile browser UI can make it inaccurate.
+
+================================================
+2. CREATE A REAL GAME VIEWPORT
+================================================
+
+The game root should occupy the available screen:
+
+width: 100%;
+height: 100dvh;
+min-height: 100svh;
+
+and:
+
+overflow: hidden;
+
+The page itself must NOT scroll.
+
+The game must remain inside the visible viewport.
+
+Do not allow the browser document to become taller than the device.
+
+================================================
+3. SAFE AREA
+================================================
+
+Respect phone safe areas.
+
+Use:
+
+padding-top: env(safe-area-inset-top);
+padding-bottom: env(safe-area-inset-bottom);
+
+where necessary.
+
+But DO NOT create huge empty spaces.
+
+The playable composition should use the remaining space efficiently.
+
+================================================
+4. RESPONSIVE VERTICAL COMPOSITION
+================================================
+
+The screen should be treated as a flexible vertical layout.
+
+Use something equivalent to:
+
+GAME ROOT
+├── HEADER
+├── BATTLE HEADER
+├── ATTACK
+├── ENERGY
+├── ABILITIES
+├── BOARD
+└── BOTTOM CONTROLS
+
+The board must receive the largest amount of available space.
+
+The other sections should shrink slightly when the device is shorter.
+
+Do NOT shrink the board first.
+
+================================================
+5. BOARD MUST SCALE RESPONSIVELY
+================================================
+
+The 8×8 board remains EXACTLY 8×8.
+
+Never change the number of rows or columns.
+
+The board width should be:
+
+min(
+  availableWidth,
+  availableHeight-based-size
+)
+
+The board must remain square.
+
+The board must NEVER extend beyond:
+
+left viewport edge
+right viewport edge
+top/bottom available game area.
+
+On narrow phones:
+
+reduce board size just enough to fit.
+
+On wider/taller phones:
+
+allow the board to become larger.
+
+The board should use the maximum beautiful size that fits.
+
+================================================
+6. GEM SIZE MUST FOLLOW BOARD SIZE
+================================================
+
+Every gem must scale proportionally with the board.
+
+Do NOT keep fixed gem dimensions while shrinking the board.
+
+Do NOT let gems overflow their cells.
+
+For every viewport:
+
+8 columns × 8 rows
+=
+perfectly square grid.
+
+All 64 gems must remain completely visible.
+
+================================================
+7. BOARD FRAME MUST FIT PERFECTLY
+================================================
+
+This is important.
+
+The board frame must wrap the entire 8×8 grid perfectly.
+
+No:
+
+extra bottom gap
+floating lower frame
+cropped lower frame
+uneven left/right spacing
+gem touching frame
+frame overlapping bottom controls
+
+The frame must have symmetrical visual spacing around the complete grid.
+
+The bottom of the board must end cleanly before the bottom control row.
+
+================================================
+8. BOTTOM CONTROLS
+================================================
+
+Freeze / Time Shift / Rewind MUST ALWAYS BE FULLY VISIBLE.
+
+They must never be pushed below the screen.
+
+They should occupy the remaining space after the board.
+
+Keep them touch-friendly.
+
+If the device is short:
+
+reduce their vertical height.
+
+Do NOT push them offscreen.
+
+Do NOT hide their labels.
+
+Do NOT make them microscopic.
+
+================================================
+9. SHORT PHONES
+================================================
+
+Explicitly test short-height phones.
+
+For example:
+
+390×700
+390×750
+390×780
+390×844
+
+The complete game must fit.
+
+On shorter devices:
+
+- compact header slightly
+- compact player panels slightly
+- compact attack bars slightly
+- compact energy section slightly
+- compact ability buttons slightly
+- preserve board readability
+- preserve all 64 gems
+- preserve bottom controls
+
+Do NOT allow the board to consume space needed by the bottom controls.
+
+================================================
+10. TALL PHONES
+================================================
+
+On taller phones:
+
+Do NOT simply stretch everything vertically.
+
+Instead:
+
+increase breathing room
++
+increase board size where appropriate
++
+preserve proportions.
+
+The game should look premium rather than stretched.
+
+================================================
+11. WIDE PHONES
+================================================
+
+On wider devices:
+
+center the complete game composition.
+
+Do not stretch the board horizontally.
+
+The board remains perfectly square.
+
+Do not allow excessive empty horizontal space inside the board.
+
+================================================
+12. VERY NARROW PHONES
+================================================
+
+For narrow phones:
+
+reduce horizontal padding.
+
+The board should use almost all available width while maintaining:
+
+small but deliberate edge margins.
+
+Never crop the cyan frame.
+
+Never crop gems.
+
+================================================
+13. DYNAMIC CSS VARIABLES
+================================================
+
+Create a responsive sizing system using CSS variables.
+
+For example conceptually:
+
+--game-width
+--game-height
+--board-size
+--cell-size
+--hud-height
+--ability-height
+--control-height
+--section-gap
+
+These values should respond to the viewport.
+
+Do NOT hardcode one set of pixel values for all phones.
+
+Use:
+
+clamp()
+min()
+max()
+vw
+vh
+dvh
+svh
+
+where appropriate.
+
+================================================
+14. DO NOT USE A GIANT SCALE TRANSFORM
+================================================
+
+IMPORTANT.
+
+Do NOT solve this by doing:
+
+transform: scale(...)
+
+on the entire game.
+
+That creates blurry text, bad touch coordinates and poor responsiveness.
+
+Resize the actual layout elements.
+
+Touch hit areas must continue matching the visual controls.
+
+================================================
+15. 2.5D MUST REMAIN
+================================================
+
+The responsive correction must NOT remove the 2.5D presentation.
+
+Keep:
+
+- thick board housing
+- recessed playfield
+- gem sockets
+- raised crystals
+- contact shadows
+- bevels
+- metallic surfaces
+- glass surfaces
+- directional lighting
+- physical depth
+- cosmic arena
+
+The layout changes responsively,
+but the visual identity remains premium 2.5D.
+
+================================================
+16. VISUAL PRIORITY
+================================================
+
+Use this priority when available vertical space becomes limited:
+
+1. ALL 64 GEMS
+2. COMPLETE BOARD FRAME
+3. BOTTOM CONTROLS
+4. ENERGY BURST / MEGA STRIKE
+5. ENERGY
+6. ATTACK BARS
+7. PLAYER / RIVAL PANELS
+8. HEADER DECORATION
+
+Never sacrifice the playable board to preserve decorative HUD spacing.
+
+================================================
+17. DO NOT CREATE VERTICAL SCROLLING
+================================================
+
+Absolutely no page scrolling during gameplay.
+
+The game must behave like a native mobile game viewport.
+
+The browser page must remain fixed.
+
+================================================
+18. TEST ACTUAL DEVICES / VIEWPORTS
+================================================
+
+After implementation, test at minimum:
+
+390×844
+390×780
+390×750
+390×700
+375×812
+360×800
+393×852
+412×915
+
+Also test a wider mobile viewport.
+
+For EACH test:
+
+- complete header visible
+- player panels visible
+- VS visible
+- attack bars visible
+- energy visible
+- Energy Burst visible
+- Mega Strike visible
+- complete 8×8 board visible
+- complete cyan board frame visible
+- all 64 gems visible
+- Freeze visible
+- Time Shift visible
+- Rewind visible
+- no clipping
+- no overlap
+- no scrolling
+- no horizontal overflow
+- no vertical overflow
+
+================================================
+19. IMPORTANT SCREENSHOT VALIDATION
+================================================
+
+Do NOT only run TypeScript.
+
+Do NOT only run production build.
+
+Open the ACTUAL GAME.
+
+Inspect the rendered mobile viewport.
+
+The screenshot must show the ENTIRE GAME.
+
+If the bottom controls are even slightly cropped:
+
+THE TASK IS NOT COMPLETE.
+
+If the board frame is cropped:
+
+THE TASK IS NOT COMPLETE.
+
+If any gem is cropped:
+
+THE TASK IS NOT COMPLETE.
+
+If the page scrolls:
+
+THE TASK IS NOT COMPLETE.
+
+================================================
+20. ACTIVE GAME TEST
+================================================
+
+Test while the game is actively running.
+
+Do not validate only a static/loading/LOCKED state.
+
+The responsive layout must remain correct during:
+
+normal gameplay
+gem movement
+matching
+energy changes
+attack animations
+temporary overlays
+ability states
+
+================================================
+21. PRESERVE GAMEPLAY
+================================================
+
+DO NOT MODIFY:
+
+matching logic
+gem movement
+scoring
+timer
+energy calculations
+attack logic
+Energy Burst
+Mega Strike
+Freeze
+Time Shift
+Rewind
+networking
+game state
+touch logic
+8×8 board logic
+
+ONLY adjust responsive visual layout and presentation.
+
+================================================
+FINAL REQUIREMENT
+================================================
+
+I want ONE responsive Chrono Clash layout that intelligently adapts to the
+actual device.
+
+It must look like:
+
+A PREMIUM 2.5D MOBILE GAME
+
+that was DESIGNED for the phone,
+
+not a desktop/web layout squeezed into a phone.
+
+The entire screen must fit END-TO-END.
+
+TOP → BOTTOM.
+
+NO CROPPING.
+NO SCROLLING.
+NO OVERFLOW.
+NO FIXED 390×844 ASSUMPTION.
+
+And the board must remain the HERO element while still leaving the
+three bottom controls completely visible.
+
+Do not report success based only on build/test results.
+
+SUCCESS = THE ACTUAL GAME SCREEN FITS BEAUTIFULLY FROM TOP TO BOTTOM.
