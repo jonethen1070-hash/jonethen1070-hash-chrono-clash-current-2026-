@@ -7108,11 +7108,11 @@ html body #app #match .power#rewind {
     --game-pad-bottom: 0px;
     --section-gap: 0px;
     --brand-height: 36px;
-    --battle-height: 58px;
-    --energy-height: 24px;
-    --ability-height: 43px;
-    --board-label-height: 22px;
-    --control-height: 68px;
+    --battle-height: 66px;
+    --energy-height: 29px;
+    --ability-height: 52px;
+    --board-label-height: 17px;
+    --control-height: 78px;
     --vertical-chrome:
       calc(
         var(--brand-height) +
@@ -7129,9 +7129,74 @@ html body #app #match .power#rewind {
       );
     --board-size:
       min(
-        calc(100vw - var(--safe-left) - var(--safe-right) - (var(--game-pad-x) * 2) - 10px),
+        calc(100vw - var(--safe-left) - var(--safe-right) - (var(--game-pad-x) * 2) - 20px),
         calc(100dvh - var(--vertical-chrome)),
         430px
       );
+
+    html body #app #match .fighter {
+      padding: 4px 7px !important;
+      gap: 6px !important;
+    }
+
+    html body #app #match .avatar-ring,
+    html body #app #match .fighter .avatar {
+      width: 39px !important;
+      height: 39px !important;
+    }
+
+    html body #app #match .energy-wrap {
+      padding: 4px 8px !important;
+    }
+
+    html body #app #match .energy-wrap .energy {
+      height: 8px !important;
+      margin-block: 2px !important;
+    }
+
+    html body #app #match .energy-attack {
+      padding: 5px 6px !important;
+    }
+
+    html body #app #match .energy-attack-glyph {
+      width: 22px !important;
+      height: 30px !important;
+    }
+
+    html body #app #match .energy-attack-copy b {
+      font-size: 8px !important;
+    }
+
+    html body #app #match .energy-attack-copy small {
+      font-size: 6px !important;
+    }
+
+    html body #app #match .board-outer-rail {
+      inset: -3px !important;
+    }
+
+    html body #app #match .powers {
+      padding: 3px 1px 2px !important;
+    }
+
+    html body #app #match .power {
+      padding: 6px 4px !important;
+    }
+
+    html body #app #match .power .glyph,
+    html body #app #match #freeze .glyph,
+    html body #app #match #timeshift .glyph,
+    html body #app #match #rewind .glyph {
+      width: 32px !important;
+      height: 32px !important;
+    }
+
+    html body #app #match .power b {
+      font-size: 9px !important;
+    }
+
+    html body #app #match .power .cost {
+      font-size: 10px !important;
+    }
   }
 }
