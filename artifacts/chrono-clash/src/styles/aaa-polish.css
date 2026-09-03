@@ -117,6 +117,77 @@ body {
   letter-spacing: 0.04em;
 }
 
+.menu-kicker {
+  margin: 0;
+  color: var(--cyan-hot);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.24em;
+  text-align: center;
+}
+
+.identity-list {
+  display: grid;
+  gap: 8px;
+  width: min(100%, 360px);
+  margin: 2px auto 0;
+}
+
+.identity-list .game-ctl {
+  min-height: 48px;
+}
+
+.identity-list .identity-facebook {
+  border-color: rgba(94, 246, 255, 0.46);
+}
+
+.identity-list .identity-guest {
+  min-height: 42px;
+  color: #a9bac9;
+  background: rgba(6, 12, 22, 0.72);
+}
+
+.menu-status {
+  min-height: 1.2em;
+  margin: 0;
+  color: #ffb4c5;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.battle-choice {
+  min-height: 86px;
+  border-radius: 20px;
+  transition: transform var(--ease-press), box-shadow var(--ease-press), border-color var(--ease-press);
+}
+
+.battle-choice:first-child {
+  border-color: rgba(0, 212, 255, 0.42);
+}
+
+.battle-choice:first-child small {
+  color: var(--cyan-hot);
+}
+
+.battle-choice:last-child {
+  border-color: rgba(255, 0, 76, 0.36);
+}
+
+.battle-choice:last-child small {
+  color: var(--rival-hot);
+}
+
+.battle-choice:hover {
+  transform: translateY(-2px);
+}
+
+#online .mode-list {
+  margin-top: 18px;
+}
+
 button {
   transform: translateZ(0);
 }

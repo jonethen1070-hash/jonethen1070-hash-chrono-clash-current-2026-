@@ -31,9 +31,9 @@ import { hasAvatarPhoto } from "./engine/avatarPhoto";
 import { startArenaParallax } from "./ui/arenaParallax";
 import { ChronoClient, isAuthFailure } from "./net/client";
 import type { BattleActionInput } from "./server/battle";
-import { detectPlatform, guestDeviceToken, loadOnlineSession, visibleAuthProviders } from "./net/identity";
+import { detectPlatform, guestDeviceToken } from "./net/identity";
 import { consumeOAuthRedirect, obtainProviderCredential, takeRedirectIdToken } from "./net/oauth-web";
-import { AuthProvider, PublicAuthConfig } from "./server/types";
+import { AuthProvider } from "./server/types";
 import { resolveRewardedAdPort } from "./engine/ads";
 import { economyFromProgress } from "./engine/economy";
 import { DAILY_LIFE_AD_PLACEMENT, DAILY_LIVES_MAX, dailyRunFromProgress } from "./engine/dailyRun";
@@ -717,7 +717,11 @@ armFirstGestureAudio();
 audio.prefetch();
 if (returningGoogle) {
   session.openOnline();
-  void signInWith("google", returningGoogle);
+  void signInWith("google", returningGoogle).then((signedIn) => {
+    if (signedIn) {
+      enterBattleSelect();
+    }
+  });
 }
 
   announcer.onSpeak = (id: VoiceLineId) => {
@@ -941,17 +945,6 @@ function paintMenuAccount(): void {
     : "Sign in to save your Player ID, progression and trophies.";
 }
 
-function allowedAuth(config: PublicAuthConfig | null): AuthProvider[] {
-  return visibleAuthProviders(config, detectPlatform());
-}
-
-function providerHint(provider: AuthProvider, config: PublicAuthConfig | null): string {
-  if (provider === "guest") return "Play the public two-phone test without Google, Apple, or Facebook.";
-  if (provider === "google") return config?.google.enabled ? "Verify with Google." : "Needs GOOGLE_CLIENT_ID on the server.";
-  if (provider === "apple") return config?.apple.enabled ? "Verify with Apple." : "Needs APPLE_CLIENT_ID on the server.";
-  return config?.facebook.enabled ? "Verify with Facebook." : "Needs FACEBOOK credentials on the server.";
-}
-
 async function paintOnline(): Promise<void> {
   const me = net.player;
   ui.onlineSub.textContent = "SELECT A MATCH TYPE";
@@ -969,12 +962,6 @@ async function paintOnline(): Promise<void> {
     </button>
   `;
   ui.onlineStatus.textContent = "";
-}
-
-function onlineSignedInHtml(providerLabel: string, playerId: string, note: string): string {
-  const id = playerId.replace(/[^\w-]/g, "");
-  const ready = id ? `Player ID ${id} is ready.` : "Player ID is ready.";
-  return `<button class="mode-card" id="findOnlineMatch"><small>ONLINE</small><b>FIND MATCH</b><span>${ready}</span></button><button class="mode-card" id="signOutOnline"><small>${providerLabel}</small><b>SIGN OUT</b><span>${note}</span></button>`;
 }
 
 let matchPoll: ReturnType<typeof setInterval> | null = null;
@@ -1108,7 +1095,9 @@ async function startOnlineMatch(): Promise<void> {
     if (isAuthFailure(err)) {
       stopMatchPoll();
       await net.signOut();
-      await paintOnline();
+      session.toMenu();
+      syncScreenNow();
+      paintMenuPilot();
     }
     ui.onlineStatus.textContent = message;
   }
