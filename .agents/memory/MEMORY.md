@@ -1,1 +1,2 @@
 - [Responsive match layout](responsive-match-layout.md) — legacy grid-row and absolute-label rules can override the explicit mobile match layout.
+- [Palette rendering and cascade](palette-rendering.md) — exact colors can be masked by disabled-state specificity and atlas artwork.

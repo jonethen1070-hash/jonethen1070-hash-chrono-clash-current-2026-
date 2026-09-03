@@ -8721,3 +8721,35 @@ html body #app #match.energy-wrap.hot {
     0 4px 0 #01050ABD,
     0 0 22px #00D9FF52 !important;
 }
+
+/* Restate exact disabled materials after the legacy high-specificity rule. */
+html body #app #match .power:disabled {
+  opacity: .94 !important;
+  filter: saturate(.94) brightness(.96) !important;
+  border-color: #173344 !important;
+}
+
+html body #app #match .power#freeze:disabled {
+  border-top-color: #00D9FF !important;
+}
+
+html body #app #match .power#timeshift:disabled {
+  border-top-color: #A855F7 !important;
+}
+
+html body #app #match .power#rewind:disabled {
+  border-top-color: #FF174F !important;
+}
+
+html body #app #match button.energy-attack:disabled {
+  opacity: .98 !important;
+  filter: saturate(.98) brightness(.98) !important;
+}
+
+html body #app #match button.energy-attack:disabled .energy-attack-copy b {
+  color: #F3FAFF !important;
+}
+
+html body #app #match button.energy-attack:disabled .energy-attack-copy small {
+  color: #91A8B8 !important;
+}

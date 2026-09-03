@@ -1619,6 +1619,12 @@ export class BoardRenderer {
     ctx.drawImage(atlas, sx, sy, GEM_CELL, GEM_CELL, dx, dy, dest, dest);
 
     ctx.globalCompositeOperation = "source-atop";
+    // The atlas supplies the approved silhouettes and reflections, but its
+    // baked colors can otherwise overpower the live palette. A restrained
+    // exact-primary tint makes each crystal read as its gameplay color while
+    // preserving the atlas material detail.
+    ctx.fillStyle = colorWithAlpha(color, 0.34);
+    ctx.fillRect(dx, dy, dest, dest);
     const occlude = ctx.createRadialGradient(cx + s * 0.14, cy + s * 0.24, s * 0.02, cx, cy, s * 0.52);
     occlude.addColorStop(0, "rgba(0, 4, 12, 0.4)");
     occlude.addColorStop(0.42, "rgba(0,0,0,0)");
