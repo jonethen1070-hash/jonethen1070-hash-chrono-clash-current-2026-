@@ -3297,6 +3297,9 @@ html body #app #match .powers {
   }
 
   html body #app #match .boards {
+    grid-template-rows: max-content max-content max-content !important;
+    flex: 0 0 auto !important;
+    align-content: start !important;
     gap: 4px !important;
     margin-top: 2px !important;
     margin-bottom: 1px !important;
@@ -3333,7 +3336,9 @@ html body #app #match .powers {
   }
 
   html body #app #match .player-side {
-    min-height: 0 !important;
+    height: calc(100vw + 13px) !important;
+    min-height: calc(100vw + 13px) !important;
+    flex: 0 0 auto !important;
   }
 
   html body #app #match .player-side .you-meta {
@@ -3342,7 +3347,7 @@ html body #app #match .powers {
 
   html body #app #match .player-side .board-slot {
     width: 100% !important;
-    height: auto !important;
+    height: calc(100vw - 4px) !important;
     max-width: 100% !important;
     max-height: none !important;
     aspect-ratio: 1 / 1 !important;
@@ -3352,7 +3357,7 @@ html body #app #match .powers {
   html body #app #match .powers {
     gap: 5px !important;
     padding: 3px 1px 2px !important;
-    margin-top: 2px !important;
+    margin-top: 10px !important;
   }
 
   html body #app #match .power {
