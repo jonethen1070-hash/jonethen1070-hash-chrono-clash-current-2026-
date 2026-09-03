@@ -7052,11 +7052,11 @@ html body #app #match .power#rewind {
     --game-pad-bottom: 0px;
     --section-gap: 0px;
     --brand-height: 36px;
-    --battle-height: 84px;
-    --energy-height: 37px;
-    --ability-height: 60px;
+    --battle-height: 58px;
+    --energy-height: 24px;
+    --ability-height: 43px;
     --board-label-height: 28px;
-    --control-height: 90px;
+    --control-height: 60px;
     --vertical-chrome:
       calc(
         var(--brand-height) +
