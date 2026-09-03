@@ -1775,6 +1775,96 @@ function markLayoutDirty(): void {
   renderer.invalidateLayout();
 }
 
+const STAGE_STARS = [
+  [0.06, 0.12, 1.1, 0.58],
+  [0.16, 0.28, 0.8, 0.46],
+  [0.27, 0.08, 0.7, 0.4],
+  [0.38, 0.34, 0.9, 0.42],
+  [0.5, 0.16, 0.65, 0.34],
+  [0.62, 0.29, 0.9, 0.4],
+  [0.74, 0.1, 0.75, 0.48],
+  [0.86, 0.24, 1.15, 0.56],
+  [0.94, 0.44, 0.7, 0.42],
+  [0.08, 0.73, 0.8, 0.42],
+  [0.2, 0.58, 0.65, 0.34],
+  [0.34, 0.84, 1.05, 0.48],
+  [0.66, 0.76, 0.75, 0.4],
+  [0.82, 0.9, 0.95, 0.5],
+] as const;
+
+function drawStageBackdrop(
+  stageCtx: CanvasRenderingContext2D,
+  stageRect: DOMRect,
+  boardRect: DOMRect,
+): void {
+  const w = stageCtx.canvas.clientWidth;
+  const h = stageCtx.canvas.clientHeight;
+  if (w < 2 || h < 2 || boardRect.width < 8 || boardRect.height < 8) return;
+
+  const boardX = boardRect.left - stageRect.left;
+  const boardY = boardRect.top - stageRect.top;
+  const boardW = boardRect.width;
+  const boardH = boardRect.height;
+  const bandTop = Math.max(0, boardY - boardH * 0.4);
+  const bandBottom = Math.min(h, boardY + boardH * 1.16);
+  const bandHeight = bandBottom - bandTop;
+  if (bandHeight < 8) return;
+
+  const boardPad = 10;
+  stageCtx.save();
+  stageCtx.globalCompositeOperation = "destination-over";
+  stageCtx.beginPath();
+  stageCtx.rect(0, bandTop, w, bandHeight);
+  stageCtx.rect(boardX - boardPad, boardY - boardPad, boardW + boardPad * 2, boardH + boardPad * 2);
+  stageCtx.clip("evenodd");
+
+  const starY = (ratio: number) => bandTop + bandHeight * ratio;
+  for (const [x, y, radius, alpha] of STAGE_STARS) {
+    stageCtx.beginPath();
+    stageCtx.fillStyle = `rgba(214, 242, 255, ${alpha * 0.34})`;
+    stageCtx.arc(w * x, starY(y), radius, 0, Math.PI * 2);
+    stageCtx.fill();
+  }
+
+  const centerCavity = stageCtx.createRadialGradient(w * 0.5, boardY + boardH * 0.42, 0, w * 0.5, boardY + boardH * 0.42, w * 0.58);
+  centerCavity.addColorStop(0, "rgba(0, 2, 10, 0.7)");
+  centerCavity.addColorStop(0.42, "rgba(2, 5, 20, 0.42)");
+  centerCavity.addColorStop(1, "rgba(2, 5, 20, 0)");
+  stageCtx.fillStyle = centerCavity;
+  stageCtx.fillRect(0, bandTop, w, bandHeight);
+
+  const leftNebula = stageCtx.createRadialGradient(-w * 0.04, boardY + boardH * 0.44, 0, w * 0.08, boardY + boardH * 0.44, w * 0.72);
+  leftNebula.addColorStop(0, "rgba(0, 185, 245, 0.34)");
+  leftNebula.addColorStop(0.26, "rgba(0, 125, 190, 0.2)");
+  leftNebula.addColorStop(0.62, "rgba(0, 72, 125, 0.08)");
+  leftNebula.addColorStop(1, "rgba(0, 22, 46, 0)");
+  stageCtx.fillStyle = leftNebula;
+  stageCtx.fillRect(0, bandTop, w * 0.68, bandHeight);
+
+  const rightNebula = stageCtx.createRadialGradient(w * 1.04, boardY + boardH * 0.46, 0, w * 0.92, boardY + boardH * 0.46, w * 0.72);
+  rightNebula.addColorStop(0, "rgba(246, 24, 112, 0.3)");
+  rightNebula.addColorStop(0.26, "rgba(164, 18, 94, 0.18)");
+  rightNebula.addColorStop(0.62, "rgba(84, 18, 80, 0.08)");
+  rightNebula.addColorStop(1, "rgba(23, 6, 28, 0)");
+  stageCtx.fillStyle = rightNebula;
+  stageCtx.fillRect(w * 0.32, bandTop, w * 0.68, bandHeight);
+
+  const purpleTransition = stageCtx.createRadialGradient(w * 0.5, boardY + boardH * 0.38, 0, w * 0.5, boardY + boardH * 0.38, w * 0.42);
+  purpleTransition.addColorStop(0, "rgba(94, 58, 156, 0.14)");
+  purpleTransition.addColorStop(0.48, "rgba(74, 34, 122, 0.08)");
+  purpleTransition.addColorStop(1, "rgba(34, 15, 72, 0)");
+  stageCtx.fillStyle = purpleTransition;
+  stageCtx.fillRect(w * 0.12, bandTop, w * 0.76, bandHeight);
+
+  const base = stageCtx.createLinearGradient(0, bandTop, 0, bandBottom);
+  base.addColorStop(0, "rgba(2, 8, 20, 0.9)");
+  base.addColorStop(0.5, "rgba(1, 4, 13, 0.76)");
+  base.addColorStop(1, "rgba(0, 2, 8, 0.92)");
+  stageCtx.fillStyle = base;
+  stageCtx.fillRect(0, bandTop, w, bandHeight);
+  stageCtx.restore();
+}
+
 function syncAppViewport(): void {
   const height = Math.max(1, Math.round(window.visualViewport?.height ?? window.innerHeight));
   document.documentElement.style.setProperty("--app-vh", `${height}px`);
@@ -2207,6 +2297,7 @@ function frame(now: number): void {
     const fade = snap.screen === "results" ? Math.max(0, 1 - (now - resultAt) / 700) : 1;
     refreshLayout();
     renderer.draw(snap, layout.player, layout.opp, now, fade);
+    drawStageBackdrop(ctx, layout.canvas, layout.player);
     boardsDrawn = true;
   } else if (boardsDrawn && !showBoards) {
     renderer.clear();
