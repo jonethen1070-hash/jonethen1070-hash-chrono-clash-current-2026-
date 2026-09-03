@@ -1,0 +1,173 @@
+FINAL 2.5D DEPTH POLISH — DO NOT CHANGE GAMEPLAY
+
+The current layout is correct. Do NOT rearrange the screen again.
+
+Now make the ENTIRE VISUAL SYSTEM consistently 2.5D.
+
+The board and gems already have good dimensionality. Bring EVERY OTHER visual element up to the same 2.5D quality.
+
+DO NOT CHANGE:
+- gameplay
+- match-3 logic
+- gem movement
+- scoring
+- timer
+- energy calculations
+- attacks
+- power-up behavior
+- controls
+- networking
+- game state
+- existing functionality
+
+DO NOT rebuild the project.
+
+2.5D REQUIREMENT:
+
+Every major element must visually have a physical position and depth:
+
+COSMIC BACKGROUND
+→ ARENA LAYERS
+→ HUD
+→ ENERGY/ABILITY MODULES
+→ BOARD HOUSING
+→ RECESSED PLAYFIELD
+→ 3D GEMS
+→ FOREGROUND POWER CONTROLS
+
+Make the depth hierarchy obvious.
+
+YOU / RIVAL:
+- dimensional glass panels
+- beveled/thick outer frames
+- recessed interior
+- raised score area
+- physical-looking player emblems
+- inner shadows
+- edge highlights
+- cyan/red light spill
+- subtle reflections
+
+VS + TIMER:
+- raised holographic centerpiece
+- layered depth
+- glass/metal construction
+- subtle extrusion
+- glow behind the element
+- shadow separating it from the arena
+
+ATTACK BARS:
+- physically recessed energy channels
+- raised metal frames
+- inner glass
+- illuminated energy material
+- depth shadows
+
+ENERGY BAR:
+- recessed futuristic reservoir
+- thick dimensional frame
+- glass interior
+- luminous energy material
+- highlights/reflections
+
+ENERGY BURST + MEGA STRIKE:
+- dimensional ability modules
+- raised/beveled frames
+- recessed glass interiors
+- physical icons
+- internal lighting
+- subtle shadows beneath each card
+- green/cyan energy lighting for Energy Burst
+- crimson/red lighting for Mega Strike
+
+MAIN BOARD:
+Keep the current large 8x8 board.
+Keep all 64 gems.
+Keep the existing crystal gem artwork.
+Make the board feel like a heavy physical futuristic machine:
+- thick outer housing
+- layered frame
+- recessed playfield
+- inner rim
+- contact shadows
+- reflected cyan light
+- depth between frame, sockets and gems
+
+GEMS:
+Keep their current size and positions.
+Increase the perception of physical volume:
+- stronger faceted highlights
+- internal illumination
+- edge reflections
+- subtle contact shadows
+- slight separation from the socket behind each gem
+
+FREEZE / TIME SHIFT / REWIND:
+Keep the current compact size.
+Make them dimensional physical controls:
+- raised glass/metal surface
+- beveled edges
+- recessed icon area
+- internal glow
+- shadows beneath controls
+- cyan/purple/red lighting respectively
+
+LIGHTING:
+Create ONE coherent 2.5D lighting system.
+
+Cyan light should subtly illuminate nearby surfaces.
+Red light should subtly illuminate nearby surfaces.
+Gem glow should interact with nearby board surfaces.
+Board lighting should illuminate its housing.
+HUD should receive subtle environmental lighting.
+
+Do NOT give every element a separate random neon glow.
+
+MATERIALS:
+Use a consistent premium material language:
+- dark metal
+- smoked glass
+- polished edges
+- crystalline surfaces
+- controlled emissive lighting
+- subtle reflections
+
+Avoid:
+- flat cards
+- flat icons
+- cheap gradients
+- excessive bloom
+- cartoon styling
+- excessive neon
+- unrelated visual styles
+
+IMPORTANT:
+The game should look like ONE physical 2.5D sci-fi arena.
+
+It must NOT look like:
+"2D webpage + glowing CSS."
+
+It must look like:
+"a premium futuristic 2.5D mobile game."
+
+KEEP THE CURRENT COMPOSITION:
+Top HUD
+→ attack bars
+→ energy
+→ Energy Burst + Mega Strike
+→ large 8x8 board
+→ compact Freeze + Time Shift + Rewind
+
+Do not change the layout unless absolutely necessary for visual depth.
+
+Finally test at 390x844:
+- complete board visible
+- all 64 gems visible
+- complete board frame visible
+- all three bottom controls visible
+- no clipping
+- no overlap
+- no scrolling
+- touch interaction works
+- production build passes
+- gameplay remains unchanged
