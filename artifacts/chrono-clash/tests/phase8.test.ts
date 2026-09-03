@@ -11,26 +11,26 @@ import {
 } from "../src/ui/haptics";
 
 describe("phase 8 event haptics", () => {
-  it("uses distinct patterns for swipe, match, combo, power, attack, victory, and defeat", () => {
+  it("uses restrained patterns for input, matches, abilities, and outcomes", () => {
     expect(hapticPattern("swap")).toBe(12);
     expect(hapticPattern("tap")).toBe(12);
     expect(hapticPattern("invalid")).toEqual([10, 20, 14]);
-    expect(hapticPattern("match")).toBe(26);
-    expect(hapticPattern("combo", 2)).toEqual([26, 32, 40]);
-    expect(hapticPattern("combo", 5)).toEqual([32, 30, 46, 32, 60]);
-    expect(hapticPattern("combo", 8)).toEqual([40, 28, 56, 28, 72, 30, 96]);
-    expect(hapticPattern("power")).toEqual([36, 32, 58, 36, 72]);
-    expect(hapticPattern("freeze")).toEqual([24, 28, 24, 28, 52]);
-    expect(hapticPattern("timeshift")).toEqual([34, 24, 56, 24, 34]);
-    expect(hapticPattern("rewind")).toEqual([28, 22, 28, 22, 56]);
-    expect(hapticPattern("incoming")).toEqual([32, 38, 32, 38, 58]);
+    expect(hapticPattern("match")).toBe(20);
+    expect(hapticPattern("combo", 2)).toBe(32);
+    expect(hapticPattern("combo", 5)).toBe(42);
+    expect(hapticPattern("combo", 8)).toBe(62);
+    expect(hapticPattern("power")).toBe(58);
+    expect(hapticPattern("freeze")).toBe(24);
+    expect(hapticPattern("timeshift")).toBe(28);
+    expect(hapticPattern("rewind")).toBe(30);
+    expect(hapticPattern("incoming")).toBe(28);
     expect(hapticPattern("start")).toEqual([50, 36, 110]);
-    expect(hapticPattern("draw")).toEqual([48, 46, 56]);
-    expect(hapticPattern("attack")).toEqual([48, 32, 78]);
-    expect(hapticPattern("attackHit")).toEqual([36, 24, 110]);
-    expect(hapticPattern("block")).toEqual([22, 40, 26, 32]);
-    expect(hapticPattern("victory")).toEqual([24, 28, 40, 28, 56, 32, 88, 28, 36]);
-    expect(hapticPattern("defeat")).toEqual([32, 24, 48, 22, 72]);
+    expect(hapticPattern("draw")).toBe(42);
+    expect(hapticPattern("attack")).toBe(40);
+    expect(hapticPattern("attackHit")).toBe(48);
+    expect(hapticPattern("block")).toBe(24);
+    expect(hapticPattern("victory")).toEqual([24, 28, 44]);
+    expect(hapticPattern("defeat")).toBe(30);
     expect(hapticPattern("combo", 8)).not.toEqual(hapticPattern("combo", 2));
     expect(hapticPattern("attack")).not.toEqual(hapticPattern("incoming"));
     expect(hapticPattern("freeze")).not.toEqual(hapticPattern("timeshift"));
@@ -50,15 +50,11 @@ describe("phase 8 event haptics", () => {
     expect(hapticCuesFromFx({ kind: "power", text: "TIME SHIFT" })).toEqual([{ kind: "timeshift" }]);
     expect(hapticCuesFromFx({ kind: "rewind", text: "BOARD RESTORED" })).toEqual([{ kind: "rewind" }]);
     expect(hapticCuesFromFx({ kind: "power", text: "RIVAL FREEZE" })).toEqual([{ kind: "block" }]);
-    expect(hapticCuesFromFx({ kind: "attack", text: "ATTACK!", side: "player", combo: 3 })).toEqual([
-      { kind: "attack", combo: 3 },
-      { kind: "attackHit", combo: 3, delayMs: 420 },
-    ]);
-    expect(hapticCuesFromFx({ kind: "attack", text: "RIVAL PULSE", side: "opponent", combo: 2 })).toEqual([
-      { kind: "incoming", combo: 2 },
-      { kind: "attackHit", combo: 2, delayMs: 420 },
-    ]);
-    expect(hapticCuesFromFx({ kind: "attack", text: "TIME STRIKE", side: "player", combo: 5 })[1]?.delayMs).toBe(420);
+    expect(hapticCuesFromFx({ kind: "power", text: "ENERGY BURST" })).toEqual([{ kind: "power" }]);
+    expect(hapticCuesFromFx({ kind: "power", text: "MEGA STRIKE" })).toEqual([{ kind: "power" }]);
+    expect(hapticCuesFromFx({ kind: "attack", text: "ATTACK!", side: "player", combo: 3 })).toEqual([]);
+    expect(hapticCuesFromFx({ kind: "attack", text: "RIVAL PULSE", side: "opponent", combo: 2 })).toEqual([]);
+    expect(hapticCuesFromFx({ kind: "attack", text: "TIME STRIKE", side: "player", combo: 5 })).toEqual([]);
     expect(hapticCuesFromFx({ kind: "attack", text: "FINAL STRIKE", side: "player", combo: 5 })).toEqual([]);
     expect(hapticCuesFromFx({ kind: "attack", text: "RIVAL FINALE", side: "opponent", combo: 5 })).toEqual([]);
     expect(hapticCuesFromFx({ kind: "finale", text: "VICTORY" })).toEqual([{ kind: "victory" }]);
@@ -93,6 +89,8 @@ describe("phase 8 event haptics", () => {
     const vibrate = vi.fn(() => true);
     const bus = new HapticBus(vibrate);
     bus.dispatch([{ kind: "attack" }, { kind: "attackHit", delayMs: 420 }], 10);
+    expect(vibrate).toHaveBeenCalledTimes(0);
+    vi.advanceTimersByTime(0);
     expect(vibrate).toHaveBeenCalledTimes(1);
     bus.cancel();
     const afterCancel = vibrate.mock.calls.length;
@@ -106,9 +104,10 @@ describe("phase 8 event haptics", () => {
     const vibrate = vi.fn(() => true);
     const bus = new HapticBus(vibrate);
     bus.dispatch([{ kind: "incoming", combo: 5 }, { kind: "attackHit", combo: 5, delayMs: 420 }], 8000);
+    vi.advanceTimersByTime(0);
     expect(bus.play("urgent", 2, 9000)).toBe(true);
     expect(bus.play("defeat", 1, 9000)).toBe(true);
-    expect(vibrate).toHaveBeenLastCalledWith([32, 24, 48, 22, 72]);
+    expect(vibrate).toHaveBeenLastCalledWith(30);
     expect(bus.play("incoming", 5, 9000)).toBe(false);
     const afterDefeat = vibrate.mock.calls.length;
     vi.advanceTimersByTime(500);
@@ -116,15 +115,16 @@ describe("phase 8 event haptics", () => {
 
     expect(bus.play("start", 1, 11900)).toBe(true);
     expect(bus.play("victory", 1, 12000)).toBe(true);
-    expect(vibrate).toHaveBeenLastCalledWith([24, 28, 40, 28, 56, 32, 88, 28, 36]);
+    expect(vibrate).toHaveBeenLastCalledWith([24, 28, 44]);
     expect(bus.play("victory", 1, 12100)).toBe(false);
     expect(bus.play("start", 1, 14800)).toBe(true);
     expect(bus.play("draw", 1, 15000)).toBe(true);
-    expect(vibrate).toHaveBeenLastCalledWith([48, 46, 56]);
+    expect(vibrate).toHaveBeenLastCalledWith(42);
     vi.useRealTimers();
   });
 
   it("plays the match-end sting for a real session finale, not the cinematic attack", () => {
+    vi.useFakeTimers();
     const vibrate = vi.fn(() => true);
     const bus = new HapticBus(vibrate);
     const loss = new GameSession();
@@ -142,7 +142,8 @@ describe("phase 8 event haptics", () => {
     expect(audio).not.toContain("rivalAttack");
     expect(audio).not.toContain("attack");
     for (const fx of endFx) bus.dispatch(hapticCuesFromFx(fx), endBorn);
-    expect(vibrate.mock.calls.some((call) => JSON.stringify(call[0]) === JSON.stringify([32, 24, 48, 22, 72]))).toBe(true);
+    vi.advanceTimersByTime(0);
+    expect(vibrate.mock.calls.some((call) => call[0] === 30)).toBe(true);
 
     const draw = new GameSession();
     draw.progress = { ...draw.progress, tutorialDone: true, matchesSeen: 8 };
@@ -154,5 +155,6 @@ describe("phase 8 event haptics", () => {
     draw.tick(64_200);
     expect(battleCuesFromFx(draw.fx.find((f) => f.kind === "finale")!)).toEqual(["draw"]);
     expect(hapticCuesFromFx(draw.fx.find((f) => f.kind === "finale")!)).toEqual([{ kind: "draw" }]);
+    vi.useRealTimers();
   });
 });

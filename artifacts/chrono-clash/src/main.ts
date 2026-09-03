@@ -704,10 +704,6 @@ function feelHaptic(kind: Parameters<HapticBus["play"]>[0], combo = 1): void {
   haptics.defer(kind, combo);
 }
 
-function juiceHaptic(kind: Parameters<HapticBus["play"]>[0], combo = 1): void {
-  haptics.defer(kind, combo);
-}
-
 function pressUi(cue: "ui" | "confirm" = "ui"): void {
   audio.play(cue);
   feelHaptic("tap");

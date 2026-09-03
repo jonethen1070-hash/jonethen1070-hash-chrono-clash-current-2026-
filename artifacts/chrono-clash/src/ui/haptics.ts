@@ -201,7 +201,7 @@ export class HapticBus {
   dispatch(cues: HapticCue[], now?: number): void {
     for (const cue of cues) {
       if (cue.delayMs && cue.delayMs > 0) this.playDelayed(cue.kind, cue.delayMs, cue.combo ?? 1);
-      else this.play(cue.kind, cue.combo ?? 1, now);
+      else this.defer(cue.kind, cue.combo ?? 1, now);
     }
   }
 
@@ -211,7 +211,7 @@ export class HapticBus {
   }
 
   /** Queue a vibration outside the animation-frame call stack. */
-  defer(kind: HapticEvent, combo = 1): void {
+  defer(kind: HapticEvent, combo = 1, _now?: number): void {
     if (!this.enabled || this.pending.size >= 4) return;
     const id = setTimeout(() => {
       this.pending.delete(id);

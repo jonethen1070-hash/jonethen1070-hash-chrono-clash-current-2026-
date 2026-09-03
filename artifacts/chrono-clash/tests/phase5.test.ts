@@ -51,8 +51,8 @@ describe("phase 5 juice helpers", () => {
     expect(particleBudget("high", true)).toBe(0);
     expect(feelMul("high", false)).toBeGreaterThan(feelMul("medium", false));
     expect(hapticPattern("swap")).toBe(12);
-    expect(Array.isArray(hapticPattern("power"))).toBe(true);
-    expect(Array.isArray(hapticPattern("combo", 6))).toBe(true);
+    expect(Array.isArray(hapticPattern("power"))).toBe(false);
+    expect(Array.isArray(hapticPattern("combo", 6))).toBe(false);
   });
 
   it("lets settings mute sound, music, announcer, and vibration independently", () => {
