@@ -1,0 +1,352 @@
+CHRONO CLASH — VISUAL ARCHITECTURE UNLOCK + PREMIUM 2.5D PASS
+
+We need to fix the previous visual pass.
+
+IMPORTANT: The previous attempt barely changed the appearance because the implementation was treated as CSS-only. That restriction is now REMOVED.
+
+You ARE ALLOWED to modify the visual/UI component structure and DOM hierarchy when necessary to achieve the requested result.
+
+You may:
+- Modify React/UI components that control presentation.
+- Add visual-only wrapper/container elements.
+- Add new visual-only components.
+- Reorganize the visual hierarchy of the HUD, board frame and arena.
+- Modify CSS and layout structure.
+- Add pseudo-elements and layered visual surfaces.
+- Add perspective, depth, bevels, lighting and visual overlays.
+- Add lightweight visual effects and animations.
+- Modify visual asset presentation and positioning.
+
+BUT:
+
+DO NOT modify gameplay functionality or game rules.
+
+Absolutely preserve:
+- gem matching logic
+- gem movement logic
+- scoring
+- timers
+- energy calculations
+- abilities
+- Freeze
+- Time Shift
+- Rewind
+- player/rival gameplay state
+- turn/game flow
+- touch/swipe detection
+- touch coordinate calculations
+- board dimensions/8x8 gameplay grid
+- networking/gameplay communication
+- randomization/gameplay algorithms
+
+The goal is to change HOW THE GAME LOOKS, not HOW THE GAME PLAYS.
+
+==================================================
+PRIMARY OBJECTIVE
+==================================================
+
+Transform the current Chrono Clash screen into a visibly premium AAA-inspired 2.5D sci-fi mobile game presentation.
+
+This must be a REAL visual transformation.
+
+Do not simply add a gradient, shadow or slightly brighter border.
+
+The screenshot after implementation must visibly look different from the current screenshot.
+
+==================================================
+1. BUILD A REAL 2.5D ARENA ENVIRONMENT
+==================================================
+
+The area surrounding the board currently feels like a flat webpage.
+
+Change the visual structure so the game appears to exist inside a futuristic sci-fi arena.
+
+Create multiple visual depth layers:
+
+BACKGROUND:
+- deep black/blue sci-fi environment
+- subtle atmospheric depth
+- very restrained cyan and crimson illumination
+- distant futuristic structures
+- subtle perspective grid
+- faint particles/energy atmosphere
+
+MIDGROUND:
+- large dark metallic/glass surfaces behind the game board
+- layered panels
+- subtle perspective
+- environmental lighting
+- depth shadows
+
+FOREGROUND:
+- the physical board housing
+- HUD panels
+- energy systems
+- bottom ability controls
+
+The layers should visually overlap and create depth.
+
+Do NOT make the background busy.
+The board must remain the main focal point.
+
+==================================================
+2. REBUILD THE BOARD HOUSING VISUALLY
+==================================================
+
+The existing board should look like a physical futuristic device rather than a flat rectangular webpage element.
+
+Create a layered board housing:
+
+OUTER:
+- dark gunmetal structural frame
+- visible thickness
+- beveled edges
+- cyan illuminated perimeter
+
+MIDDLE:
+- dark glass/energy layer
+- inner rim
+- subtle reflections
+- controlled glow
+
+INNER:
+- existing 8x8 gameplay grid
+
+The existing 64 gems must remain exactly functional.
+
+Do NOT replace the gameplay grid with a fake image.
+
+The actual interactive board must remain underneath the new visual presentation.
+
+Use visual wrappers/overlays if necessary.
+
+==================================================
+3. GIVE THE BOARD REAL DEPTH
+==================================================
+
+Use CSS 3D/perspective techniques where appropriate:
+
+- perspective
+- transform-style: preserve-3d
+- translateZ
+- layered pseudo-elements
+- inset shadows
+- outer shadows
+- bevel effects
+- glass surfaces
+- emissive edges
+
+The board should feel slightly elevated inside the arena.
+
+Do not rotate it so aggressively that touch interaction or readability is affected.
+
+Keep the gameplay surface readable and responsive.
+
+==================================================
+4. IMPROVE GEM DEPTH
+==================================================
+
+KEEP THE EXISTING GEM DESIGNS.
+
+Do not redesign the gems.
+
+Instead make each gem feel physically seated inside the board:
+
+- dark recessed socket behind each gem
+- subtle contact shadow
+- small inner glow
+- controlled reflection
+- slight depth separation
+
+The gems should look like premium crystalline game pieces.
+
+Avoid excessive glow.
+
+Gem colors must remain extremely readable.
+
+==================================================
+5. REBUILD THE HUD VISUALLY
+==================================================
+
+The existing HUD currently looks like separate interface boxes.
+
+Make the entire HUD feel like one futuristic combat system.
+
+YOU panel:
+- dimensional glass/metal housing
+- cyan energy lighting
+- stronger depth
+- premium bevels
+
+RIVAL panel:
+- same structure
+- crimson/red energy lighting
+
+VS panel:
+- make it feel like a central holographic reactor/display
+- dimensional layered construction
+- cyan/red opposing energy accents
+
+Energy bar:
+- make it feel physically embedded into the HUD
+- metallic housing
+- glowing energy core
+
+Attack buttons:
+- retain current functionality
+- visually integrate them into the arena system
+- add depth and premium material treatment
+
+Do not change text or gameplay values.
+
+==================================================
+6. BOTTOM ABILITY CONTROLS
+==================================================
+
+Freeze / Time Shift / Rewind should look like physical futuristic control modules.
+
+Use:
+- glass
+- dark metal
+- beveled edges
+- subtle internal lighting
+- dimensional separators
+- restrained cyan/purple/crimson accents
+
+The active/available state should remain obvious.
+
+Do not change their logic or behavior.
+
+==================================================
+7. MAKE THE WHOLE SCREEN COHESIVE
+==================================================
+
+The current problem is that the board, HUD and background look like separate pieces.
+
+Create one unified visual language:
+
+DARK METAL
++
+BLACK GLASS
++
+CRYSTALLINE ENERGY
++
+CYAN PLAYER ENERGY
++
+CRIMSON RIVAL ENERGY
++
+SUBTLE PURPLE TIME ENERGY
+
+Everything should appear to belong to the same futuristic machine.
+
+==================================================
+8. ANIMATION / VFX
+==================================================
+
+Add lightweight visual polish only.
+
+Possible effects:
+- subtle ambient particles
+- slow energy pulses
+- tiny HUD glow pulses
+- board perimeter energy movement
+- subtle glass reflections
+- restrained gem idle shimmer
+- energy bar glow
+
+Do NOT create expensive continuously running effects.
+
+Mobile performance is important.
+
+==================================================
+9. RESPONSIVE SAFETY
+==================================================
+
+The game must remain fully usable at exactly:
+
+390 x 700
+
+Requirements:
+
+- all 64 gems visible
+- complete 8x8 board visible
+- full HUD visible
+- all three bottom abilities visible
+- no horizontal scrolling
+- no vertical scrolling
+- no clipping
+- no broken touch alignment
+- adjacent gem swipe must still work correctly
+
+Visual layers must NEVER intercept touch events.
+
+Use pointer-events: none for decorative overlays whenever appropriate.
+
+==================================================
+10. VERY IMPORTANT — DO NOT FAKE THE RESULT
+==================================================
+
+Do not create a static screenshot or fake board.
+
+Do not replace the actual game with an image.
+
+The real interactive game must remain underneath the visual presentation.
+
+==================================================
+11. IMPLEMENTATION FREEDOM
+==================================================
+
+If the existing component structure prevents the visual transformation, change the presentation structure.
+
+You have permission to:
+
+- create visual wrapper components
+- split existing UI components
+- add arena/background components
+- add board-frame components
+- add HUD presentation layers
+- add decorative visual elements
+- restructure JSX used only for presentation
+
+Again:
+
+GAMEPLAY LOGIC = PROTECTED.
+
+VISUAL ARCHITECTURE = OPEN FOR MODIFICATION.
+
+==================================================
+12. VALIDATION
+==================================================
+
+After implementation:
+
+1. Run TypeScript validation.
+2. Run production build.
+3. Inspect the actual running game.
+4. Test exactly 390x700.
+5. Verify all 64 gems.
+6. Verify all HUD elements.
+7. Verify all three bottom controls.
+8. Test an adjacent gem swipe.
+9. Confirm no console errors.
+10. Confirm no scrolling.
+11. Confirm gameplay behavior remains unchanged.
+
+MOST IMPORTANT:
+
+Compare the new visual result against the previous screenshot.
+
+If the screen still looks essentially identical, DO NOT report the task as complete.
+
+Continue iterating on the visual implementation until there is a clearly visible improvement in:
+- arena depth
+- board physicality
+- HUD depth
+- overall 2.5D presentation
+- visual cohesion
+
+At completion, report:
+A) which visual components/files were changed
+B) what structural visual changes were made
+C) what gameplay files/logic were intentionally left untouched
+D) validation results

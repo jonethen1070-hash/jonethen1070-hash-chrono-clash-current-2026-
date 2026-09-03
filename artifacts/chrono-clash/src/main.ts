@@ -217,6 +217,12 @@ app.innerHTML = `
 
     <section id="match" class="screen match-screen">
       <div class="match-stage">
+      <div class="arena-architecture" aria-hidden="true">
+        <div class="arena-backplane"></div>
+        <div class="arena-pylon arena-pylon-left"><i></i><i></i><i></i></div>
+        <div class="arena-pylon arena-pylon-right"><i></i><i></i><i></i></div>
+        <div class="arena-deck"></div>
+      </div>
       <div class="match-brand-row">
         <div class="match-brand" aria-hidden="true">CHRONO CLASH</div>
         <div class="match-brand-actions">
@@ -230,6 +236,8 @@ app.innerHTML = `
         </div>
       </div>
       <div class="match-top">
+        <div class="hud-conduit hud-conduit-left" aria-hidden="true"></div>
+        <div class="hud-conduit hud-conduit-right" aria-hidden="true"></div>
         <div class="fighter you" id="playerCard">
           <div class="avatar-ring you">
             <div class="avatar" id="youAvatar">◈</div>
@@ -246,6 +254,11 @@ app.innerHTML = `
         <div class="vs-column">
           <div class="vs-arcs" aria-hidden="true"></div>
           <div class="vs-clash" aria-hidden="true"></div>
+          <div class="vs-reactor" aria-hidden="true">
+            <i class="vs-reactor-ring outer"></i>
+            <i class="vs-reactor-ring inner"></i>
+            <i class="vs-reactor-core"></i>
+          </div>
           <div class="vs-badge">VS</div>
           <button class="timer ghost" id="timerBtn">
             <small id="timerLabel">TIME REMAINING</small>
@@ -302,10 +315,23 @@ app.innerHTML = `
             <span class="combo" id="playerCombo"></span>
             <span class="combo-damage" id="comboDamage"></span>
           </div>
-          <div id="playerBoard" class="board-slot"><canvas id="playerGems" class="board-canvas" aria-hidden="true"></canvas></div>
+          <div id="playerBoard" class="board-slot">
+            <div class="board-hardware" aria-hidden="true">
+              <div class="board-outer-rail"></div>
+              <div class="board-energy-glass"></div>
+              <div class="board-socket-bed"></div>
+              <i class="board-fastener tl"></i><i class="board-fastener tr"></i>
+              <i class="board-fastener bl"></i><i class="board-fastener br"></i>
+            </div>
+            <canvas id="playerGems" class="board-canvas" aria-hidden="true"></canvas>
+          </div>
         </div>
       </div>
       <div class="powers">
+        <div class="ability-deck" aria-hidden="true">
+          <i class="ability-deck-rail"></i>
+          <i class="ability-deck-core"></i>
+        </div>
         <button class="power" id="freeze"><span class="glyph" aria-hidden="true">❄</span><i class="ability-fx" aria-hidden="true"></i><b>FREEZE</b><span class="cost" id="freezeQty">0/5</span><span class="need">${ENERGY_FREEZE} ENERGY · Pauses rival board for 5 seconds.</span></button>
         <button class="power" id="timeshift"><span class="glyph" aria-hidden="true">⏱</span><i class="ability-fx" aria-hidden="true"></i><b>TIME SHIFT</b><span class="cost" id="shiftQty">0/5</span><span class="need">${ENERGY_TIMESHIFT} ENERGY · Steals 5s in TIME BATTLE, or grants a tempo surge.</span></button>
         <button class="power" id="rewind"><span class="glyph" aria-hidden="true">↺</span><i class="ability-fx" aria-hidden="true"></i><b>REWIND</b><span class="cost">${ENERGY_REWIND} ENERGY</span><span class="need">Restores your last valid move.</span></button>
