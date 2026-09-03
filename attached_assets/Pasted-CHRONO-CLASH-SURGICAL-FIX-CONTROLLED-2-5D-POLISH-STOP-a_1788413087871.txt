@@ -1,0 +1,294 @@
+CHRONO CLASH — SURGICAL FIX + CONTROLLED 2.5D POLISH
+
+STOP and inspect the CURRENT running build before changing anything.
+
+The previous visual pass introduced a layout regression: the top HUD is now clipped at the mobile viewport. The goal of this task is to FIX THAT FIRST and then apply ONLY safe visual improvements.
+
+DO NOT start a new redesign.
+DO NOT rewrite the game.
+DO NOT change gameplay.
+
+==================================================
+PHASE 1 — RESTORE CORRECT MOBILE GEOMETRY
+==================================================
+
+Target viewport:
+
+390 x 700
+
+The following elements MUST be completely visible inside the viewport:
+
+- CHRONO CLASH title
+- chat button
+- AUDIO ON button
+- settings button
+- YOU panel
+- VS panel
+- RIVAL panel
+- YOUR ATTACK
+- RIVAL ATTACK
+- ENERGY bar
+- ENERGY BURST
+- MEGA STRIKE
+- YOUR BOARD label
+- complete 8x8 board
+- all 64 gems
+- FREEZE
+- TIME SHIFT
+- REWIND
+
+There must be:
+
+- no clipping
+- no elements extending outside the viewport
+- no overlapping HUD controls
+- no horizontal scrolling
+- no vertical scrolling
+- no accidental hidden content
+
+IMPORTANT:
+
+The previous screenshot showed:
+
+- CHRONO CLASH clipped at the top
+- top-right controls partially hidden/overlapping
+- AUDIO ON partially obscured
+
+FIX THESE ISSUES FIRST.
+
+Do NOT solve this by shrinking everything dramatically.
+
+Instead, restore the original successful mobile layout proportions and positioning.
+
+Use the existing working layout as the baseline.
+
+==================================================
+PHASE 2 — LOCK THE GAMEPLAY GEOMETRY
+==================================================
+
+Once the 390x700 layout is correct, LOCK these functional geometry constraints:
+
+- 8x8 grid remains exactly 8x8
+- gem positions remain aligned to the actual interactive cells
+- board remains touchable
+- touch/swipe coordinates remain correct
+- bottom controls remain usable
+- HUD controls remain clickable
+
+Do NOT change:
+
+- game logic
+- matching
+- scoring
+- timers
+- energy
+- abilities
+- Freeze
+- Time Shift
+- Rewind
+- gem movement
+- randomization
+- networking
+- touch/swipe calculations
+
+==================================================
+PHASE 3 — CONTROLLED 2.5D VISUAL POLISH
+==================================================
+
+ONLY after Phase 1 and Phase 2 pass.
+
+Do NOT move the actual gameplay layout to create the visual effect.
+
+Instead, add visual depth around the EXISTING geometry.
+
+SAFE VISUAL IMPROVEMENTS:
+
+1. BOARD FRAME
+
+Make the existing board frame appear physically thicker.
+
+Use:
+- layered borders
+- inset shadows
+- subtle outer shadows
+- beveled edges
+- dark gunmetal material
+- restrained cyan edge lighting
+
+Do NOT change the board's actual width, height or cell coordinates.
+
+2. BOARD DEPTH
+
+Add decorative layers behind/around the board using pseudo-elements or visual-only wrappers.
+
+These layers must:
+
+- use pointer-events: none
+- never cover gems
+- never intercept touch
+- remain inside the viewport
+
+Create the illusion that the board is mounted into a futuristic machine.
+
+3. ARENA BACKGROUND
+
+Improve ONLY the empty space around the game.
+
+Add subtle:
+
+- dark metallic panels
+- perspective grid
+- atmospheric depth
+- very faint cyan/red illumination
+- restrained particles
+
+Do NOT make the background brighter than the board.
+
+4. HUD MATERIALS
+
+Keep the existing HUD positions.
+
+Do NOT reposition the HUD.
+
+Improve its appearance using:
+
+- glass layering
+- dark metallic surfaces
+- bevels
+- subtle inner highlights
+- restrained cyan player illumination
+- restrained crimson rival illumination
+
+5. VS PANEL
+
+Give the existing VS panel a slightly more dimensional holographic/reactor appearance.
+
+Do not change its size enough to affect surrounding layout.
+
+6. BOTTOM CONTROLS
+
+Keep Freeze / Time Shift / Rewind exactly where they currently work.
+
+Improve only:
+
+- bevel
+- depth
+- glass/metal material
+- subtle illumination
+- separators
+
+==================================================
+PHASE 4 — IMPORTANT MOBILE SAFETY
+==================================================
+
+The decorative visual layers MUST NOT affect layout flow.
+
+Prefer:
+
+- position: absolute
+- pseudo-elements
+- pointer-events: none
+- transform
+- opacity
+- box-shadow
+- background layers
+
+Avoid adding large elements that increase document height or width.
+
+Do NOT use large negative margins to force elements into position.
+
+Do NOT use transforms that move functional controls outside their layout boxes.
+
+Do NOT use excessive blur/filter effects.
+
+Do NOT introduce expensive continuous animations.
+
+==================================================
+PHASE 5 — DO NOT CLAIM SUCCESS WITHOUT VISUAL INSPECTION
+==================================================
+
+After making changes, inspect the ACTUAL RUNNING GAME at exactly:
+
+390 x 700
+
+Do not rely only on source code or CSS calculations.
+
+Verify visually:
+
+[ ] CHRONO CLASH fully visible
+[ ] chat fully visible
+[ ] AUDIO ON fully visible
+[ ] settings fully visible
+[ ] YOU fully visible
+[ ] VS fully visible
+[ ] RIVAL fully visible
+[ ] attack bars fully visible
+[ ] energy bar fully visible
+[ ] attack buttons fully visible
+[ ] YOUR BOARD fully visible
+[ ] complete 8x8 board visible
+[ ] all 64 gems visible
+[ ] Freeze visible
+[ ] Time Shift visible
+[ ] Rewind visible
+[ ] no clipping
+[ ] no scrolling
+[ ] no overlapping controls
+[ ] adjacent gem swipe still works
+[ ] decorative layers do not intercept input
+[ ] no console errors
+
+==================================================
+PHASE 6 — VISUAL COMPARISON
+==================================================
+
+Compare the current result against the screenshot from BEFORE the previous visual pass.
+
+The new result must satisfy TWO conditions:
+
+1. It must NOT have the previous clipping regression.
+2. It must show a REAL but restrained improvement in:
+   - board physical depth
+   - frame material
+   - HUD material quality
+   - surrounding arena depth
+   - overall 2.5D appearance
+
+Do not count a different gem arrangement, score, energy value or game state as a visual improvement.
+
+If the screen is still clipped, overlapping or incorrectly positioned:
+
+DO NOT report completion.
+Fix the layout first and inspect again.
+
+If the visual changes are barely noticeable:
+
+Continue improving the visual layers without touching gameplay.
+
+==================================================
+FINAL PROTECTION
+==================================================
+
+Gameplay logic is LOCKED.
+
+Visual presentation is editable.
+
+The correct priority is:
+
+1. FUNCTIONAL MOBILE LAYOUT
+2. TOUCH ALIGNMENT
+3. READABILITY
+4. 2.5D VISUAL DEPTH
+5. PREMIUM MATERIAL/VFX POLISH
+
+Never sacrifice 1–3 for 4–5.
+
+At the end, report:
+
+- exact visual files/components changed
+- layout regression fixed
+- visual improvements made
+- confirmation that gameplay logic was not changed
+- 390x700 validation result
+- touch/swipe validation result
+- build/type-check result
