@@ -8984,3 +8984,152 @@ html body #app #match .power b,
 html body #app #match .power .cost {
   text-shadow: 0 2px 0 #01050AF0 !important;
 }
+
+/* =========================================================
+   TRUE 2.5D MATCH PRESENTATION
+   Visual depth only: preserve the locked match geometry while
+   separating the arena plane, hardware surfaces, and crystals.
+   ========================================================= */
+
+html body #app #match.active {
+  isolation: isolate;
+  perspective: 1200px;
+  perspective-origin: 50% 38%;
+  background:
+    radial-gradient(ellipse 82% 54% at 50% 45%, #0A2B401F, transparent 72%),
+    linear-gradient(180deg, #01030A70 0%, #000106E6 100%),
+    var(--art-battle) center 42% / cover no-repeat !important;
+}
+
+html body #app #match.active .match-stage,
+html body #app #match.active .match-top,
+html body #app #match.active .boards,
+html body #app #match.active .powers {
+  transform-style: preserve-3d;
+}
+
+html body #app #match.active .match-stage {
+  background:
+    radial-gradient(ellipse 44% 28% at 50% 52%, #123B4A2B, transparent 76%),
+    radial-gradient(ellipse 34% 48% at 4% 46%, #00BFFF12, transparent 74%),
+    radial-gradient(ellipse 34% 48% at 96% 46%, #FF174F10, transparent 74%),
+    repeating-linear-gradient(90deg, transparent 0 63px, #58D9F508 64px),
+    repeating-linear-gradient(0deg, transparent 0 63px, #58D9F505 64px),
+    linear-gradient(180deg, #07131E2B, #01050AC7 72%);
+  background-blend-mode: screen, screen, screen, normal, normal, normal;
+}
+
+html body #app #match.active .fighter.you,
+html body #app #match.active .fighter.rival {
+  box-shadow:
+    inset 0 1px 0 #EAFBFF4A,
+    inset 1px 0 0 #EAFBFF18,
+    inset 0 -9px 12px #01050ADE,
+    0 2px 0 #01050AF0,
+    0 7px 0 #020912,
+    0 16px 24px #01050ACC !important;
+}
+
+html body #app #match.active .fighter.you {
+  background:
+    linear-gradient(135deg, #B9F8FF12, transparent 34%),
+    linear-gradient(180deg, #0D2C3C, #04121A 66%, #01050A) !important;
+  border-top-color: #6FEAFF !important;
+  border-left-color: #00CFFF !important;
+}
+
+html body #app #match.active .fighter.rival {
+  background:
+    linear-gradient(135deg, #FFD6E20D, transparent 34%),
+    linear-gradient(180deg, #2A0D1B, #11050C 66%, #01050A) !important;
+  border-top-color: #FF6B91 !important;
+  border-right-color: #E91E55 !important;
+}
+
+html body #app #match.active .energy-wrap,
+html body #app #match.active .energy-attack,
+html body #app #match.active .power,
+html body #app #match.active .vs-column .timer,
+html body #app #match.active .hud-icon,
+html body #app #match.active .hud-mute {
+  box-shadow:
+    inset 0 1px 0 #EAFBFF42,
+    inset 1px 0 0 #EAFBFF14,
+    inset 0 -8px 12px #01050AD1,
+    0 2px 0 #01050AE8,
+    0 7px 0 #020912,
+    0 14px 20px #01050AB8 !important;
+}
+
+html body #app #match.active .energy-attack.burst {
+  border-top-color: #A7FFD1 !important;
+  box-shadow:
+    inset 0 1px 0 #E4FFF15C,
+    inset 0 -8px 12px #01050AD1,
+    0 2px 0 #01050AE8,
+    0 7px 0 #020912,
+    0 14px 20px #01050AB8,
+    0 0 14px #39FF8826 !important;
+}
+
+html body #app #match.active .energy-attack.strike {
+  border-top-color: #FF9EB7 !important;
+  box-shadow:
+    inset 0 1px 0 #FFE1EA5C,
+    inset 0 -8px 12px #01050AD1,
+    0 2px 0 #01050AE8,
+    0 7px 0 #020912,
+    0 14px 20px #01050AB8,
+    0 0 14px #FF174F26 !important;
+}
+
+html body #app #match.active .power .glyph,
+html body #app #match.active .energy-attack-glyph {
+  filter:
+    drop-shadow(0 2px 0 #01050AF2)
+    drop-shadow(0 4px 5px #01050AB8)
+    drop-shadow(0 0 6px currentColor) !important;
+}
+
+html body #app #match.active .player-side .board-slot {
+  box-shadow:
+    0 0 0 1px #01050A,
+    0 0 0 3px #007A9E5C,
+    0 2px 0 #DDF8FF4D,
+    0 6px 0 #033847,
+    0 13px 0 #04101A,
+    0 24px 38px #01050AF2,
+    0 0 18px #00D9FF29,
+    inset 0 4px 13px #01050AF5,
+    inset 0 0 0 3px #005B7847,
+    inset 0 -10px 17px #01050AC7 !important;
+}
+
+html body #app #match.active .board-outer-rail {
+  box-shadow:
+    0 3px 0 #007A9E,
+    0 8px 0 #033847,
+    0 15px 0 #04101A,
+    0 23px 22px #01050AF7,
+    inset 0 1px 0 #EAFBFF5C,
+    inset 8px 0 12px #00BFFF1C,
+    inset -10px 0 14px #01050AC7 !important;
+}
+
+html body #app #match.active #playerGems {
+  filter:
+    saturate(1.12)
+    contrast(1.12)
+    brightness(1.02)
+    drop-shadow(2px 7px 5px #01050AF2)
+    drop-shadow(0 0 7px #00D9FF1C) !important;
+}
+
+html body #app #match.active .you-meta {
+  box-shadow:
+    inset 0 1px 0 #EAFBFF42,
+    inset 0 -7px 11px #01050AD1,
+    0 2px 0 #01050AE8,
+    0 7px 0 #020912,
+    0 14px 20px #01050AB8 !important;
+}

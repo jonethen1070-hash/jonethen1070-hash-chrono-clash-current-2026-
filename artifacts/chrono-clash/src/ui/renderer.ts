@@ -1461,6 +1461,14 @@ export class BoardRenderer {
     ctx.beginPath();
     ctx.ellipse(cx, cy + s * 0.36, s * 0.22, s * 0.07, 0, 0, Math.PI * 2);
     ctx.fill();
+    ctx.save();
+    jewelPath(ctx, cx + s * 0.032, cy + s * 0.09, s * 0.95, tile.color);
+    ctx.fillStyle = "rgba(0, 3, 10, 0.78)";
+    ctx.fill();
+    ctx.strokeStyle = colorWithAlpha(color, 0.24);
+    ctx.lineWidth = Math.max(1, s * 0.024);
+    ctx.stroke();
+    ctx.restore();
     ctx.beginPath();
     ctx.arc(cx, cy + s * 0.04, s * 0.4, 0, Math.PI * 2);
     const halo = ctx.createRadialGradient(cx, cy - s * 0.04, s * 0.04, cx, cy + s * 0.06, s * 0.4);
