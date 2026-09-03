@@ -1,0 +1,149 @@
+USE THE ATTACHED IMAGE AS THE PRIMARY VISUAL REFERENCE FOR CHRONO CLASH.
+
+IMPORTANT: Compare the attached reference image directly against the current running Chrono Clash screen before making changes.
+
+The goal is to make the CURRENT GAME visually match the reference's CLEANNESS, SPACING, PROPORTIONS, VISUAL HIERARCHY and PREMIUM PRESENTATION.
+
+DO NOT COPY THE IMAGE AS A FLAT SCREENSHOT.
+DO NOT replace the game with an image.
+DO NOT rebuild the game from the reference.
+The current game must remain a real interactive game.
+
+MAIN PROBLEM TO FIX:
+The current Chrono Clash screen feels too full, crowded and visually messy. Too many large UI panels, thick borders, excessive glow, padding and decorative elements compete with the 8x8 board.
+
+The attached reference demonstrates the desired visual balance.
+
+MATCH THE REFERENCE'S:
+- overall vertical composition
+- amount of whitespace
+- HUD density
+- panel proportions
+- spacing between sections
+- board prominence
+- compact ability controls
+- clean visual hierarchy
+- premium futuristic sci-fi appearance
+
+The 8x8 board should be the visual HERO.
+
+Keep the hierarchy approximately:
+
+CHRONO CLASH
+↓
+YOU VS RIVAL
+↓
+ATTACK STATUS
+↓
+ENERGY
+↓
+ENERGY BURST / MEGA STRIKE
+↓
+YOUR BOARD
+↓
+FULL 8x8 BOARD
+↓
+FREEZE / TIME SHIFT / REWIND
+
+VISUAL CHANGES:
+
+1. TOP PLAYER/RIVAL
+- Reduce panel height.
+- Remove unnecessary empty space.
+- Keep scores and player/rival identity readable.
+- Reduce excessive borders and glow.
+
+2. VS/TIMER
+- Keep VS and timer.
+- Make them compact.
+- Do not let them dominate the screen.
+
+3. ATTACK BARS
+- Keep both attack bars.
+- Make them thinner and cleaner.
+- Reduce decorative framing.
+
+4. ENERGY
+- Keep the existing 0–100 energy system.
+- Keep the + button.
+- Make the entire energy section compact.
+- Remove unnecessary visual clutter.
+
+5. ENERGY BURST / MEGA STRIKE
+- Keep both abilities.
+- Keep their existing costs and functionality.
+- Make the buttons shorter and more compact.
+- Keep the important text readable.
+- Reduce oversized borders, padding and glow.
+
+6. BOARD
+- KEEP THE EXISTING 8x8 BOARD.
+- KEEP ALL 64 GEMS.
+- KEEP THE EXISTING GEM ARTWORK.
+- Do not shrink the board excessively.
+- Make the board feel like the centerpiece of the screen.
+- Reduce unnecessary frame thickness and glow.
+
+7. BOTTOM ABILITIES
+Keep:
+- FREEZE
+- TIME SHIFT
+- REWIND
+
+Make them more compact while keeping:
+- icon
+- name
+- cost
+- touch target
+
+8. GLOBAL CLEANUP
+Reduce visual noise from:
+- oversized panels
+- thick borders
+- excessive glow
+- duplicate divider lines
+- excessive padding
+- unnecessary labels
+- oversized empty spaces
+
+IMPORTANT:
+Do NOT simply scale the entire screen down.
+
+Instead, reduce the individual component heights, padding, borders and decorative effects so the layout naturally becomes cleaner.
+
+FUNCTIONALITY MUST NOT CHANGE.
+
+Preserve:
+- match-3 gameplay
+- 8x8 board
+- gem swapping
+- scoring
+- energy system
+- player/rival system
+- attacks
+- Energy Burst
+- Mega Strike
+- Freeze
+- Time Shift
+- Rewind
+- touch controls
+- audio
+- existing game logic
+
+Do not introduce fake/demo values.
+
+TARGET:
+At 390x700, the game should feel approximately 20–30% less crowded than the current version while retaining every important gameplay element.
+
+After making the changes:
+1. Run the game.
+2. Compare the running 390x700 screen against the ATTACHED REFERENCE IMAGE.
+3. Check the entire screen from top to bottom.
+4. Confirm the full 8x8 board is visible.
+5. Confirm all controls remain usable.
+6. Confirm there is no scrolling or clipping.
+7. Confirm there are no console errors.
+
+Only make the minimum changes necessary to bring the current game visually toward the attached reference.
+
+DO NOT redesign the game from scratch.
