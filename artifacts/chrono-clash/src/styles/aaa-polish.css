@@ -4221,7 +4221,7 @@ html body #app #match .energy-wrap .energy {
 html body #app #match .energy-options {
   position: relative;
   z-index: 5;
-  transform: translateZ(24px);
+  transform: translateZ(4px);
 }
 
 html body #app #match .energy-attack {
@@ -5568,7 +5568,7 @@ html body #app #match .vs-column .timer {
 html body #app #match .attack-meter,
 html body #app #match .energy-wrap {
   overflow: visible !important;
-  transform: translateZ(9px);
+  transform: translateZ(2px);
   border-width: 2px !important;
   border-bottom-color: #010305 !important;
   box-shadow:
@@ -5603,7 +5603,7 @@ html body #app #match .energy-wrap .energy > span {
 /* Ability cartridges: raised shell, recessed glass, lifted icon and lettering. */
 html body #app #match .energy-attack {
   overflow: visible !important;
-  transform: translateZ(13px);
+  transform: translateZ(2px);
   border-width: 2px !important;
   border-bottom-color: #010304 !important;
   box-shadow:
@@ -5655,13 +5655,13 @@ html body #app #match .energy-attack-cost {
 html body #app #match .player-side {
   perspective: 760px;
   perspective-origin: 50% 42%;
-  transform: translateZ(18px);
+  transform: translateZ(0);
 }
 
 html body #app #match .you-meta {
   position: relative;
   z-index: 5;
-  transform: translateZ(14px);
+  transform: translateZ(0);
   border: 1px solid rgba(71, 218, 238, .34);
   border-bottom-color: #010406;
   box-shadow:
@@ -5763,12 +5763,12 @@ html body #app #match #playerGems {
 html body #app #match .powers {
   position: relative;
   z-index: 8;
-  transform: translateZ(24px);
+  transform: translateY(24px);
 }
 
 html body #app #match .power {
   overflow: visible !important;
-  transform: translateZ(10px);
+  transform: translateZ(2px);
   border-width: 2px !important;
   border-bottom-color: #010304 !important;
   box-shadow:
@@ -5824,7 +5824,7 @@ html body #app #match .power:active {
   }
 
   html body #app #match .player-side .board-slot {
-    transform: rotateX(.6deg) translateZ(12px);
+    transform: rotateX(.6deg) translateZ(4px);
     border-width: 6px !important;
   }
 
