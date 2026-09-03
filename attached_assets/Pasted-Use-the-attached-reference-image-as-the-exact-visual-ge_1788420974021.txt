@@ -1,0 +1,165 @@
+Use the attached reference image as the exact visual geometry reference.
+
+I have compared the current live 390x700 match screen directly against the reference.
+
+The current version is NOT proportionally correct because the top battle area has been compressed too much in order to preserve the board.
+
+DO NOT redesign the game.
+DO NOT change gameplay.
+DO NOT change gem artwork.
+DO NOT change the 8x8 grid logic.
+DO NOT restore YOUR ATTACK or RIVAL ATTACK.
+
+I need a precise proportional correction.
+
+REFERENCE GEOMETRY — TOP TO BOTTOM:
+
+1. YOU / VS / RIVAL BATTLE HEADER
+
+The YOU and RIVAL panels in the reference are larger and taller than the current implementation.
+
+Make the left YOU panel and right RIVAL panel:
+- equal width
+- equal height
+- vertically aligned
+- comfortably padded internally
+- large enough for avatar, player name and score
+- visually substantial like the reference
+
+The central VS + timer area must remain centered between them.
+
+Do NOT make the player panels so short that the score/name/avatar become cramped.
+
+The three areas should visually read as ONE strong battle header:
+YOU | VS + TIMER | RIVAL
+
+2. ENERGY ROW
+
+The reference has a clearly defined ENERGY section beneath the battle header.
+
+Increase the ENERGY row slightly from the current compressed version.
+
+It needs enough height for:
+- ENERGY label
+- visible energy bar
+- 0 / 100 value
+- proper vertical centering
+
+Do not make it huge.
+
+3. ENERGY BURST + MEGA STRIKE
+
+This is especially important.
+
+The current cards are too compressed compared with the reference.
+
+Make Energy Burst and Mega Strike:
+- equal height
+- equal visual weight
+- side-by-side
+- properly aligned
+- comfortably padded
+- large enough for icon + title + description + energy cost
+- clearly separated from the ENERGY row
+- clearly separated from YOUR BOARD
+
+The two cards should look like deliberate premium ability cards, not thin strips.
+
+Keep their existing functionality and costs.
+
+4. YOUR BOARD LABEL
+
+Place YOUR BOARD directly above the board.
+
+Use only a small controlled vertical gap between:
+ABILITY CARDS
+↓
+YOUR BOARD
+↓
+BOARD
+
+The label should remain centered.
+
+5. 8x8 BOARD
+
+The board is still the dominant element, but it currently receives TOO MUCH of the total vertical budget.
+
+Do NOT make the board taller.
+
+Instead, reduce the board height just enough to give the battle header, ENERGY row and ability cards the proper proportions seen in the reference.
+
+IMPORTANT:
+The board must remain a true 8x8 square-cell grid.
+
+Do NOT vertically stretch individual cells.
+
+All 64 gems must remain visible.
+
+Reduce excess outer board-frame/chrome before reducing gem size.
+
+6. BOTTOM CONTROLS
+
+Freeze / Time Shift / Rewind should remain one equal-width horizontal row.
+
+Keep them fully visible and tappable.
+
+Maintain a small deliberate gap between:
+BOARD
+↓
+BOTTOM CONTROLS
+
+Do not push them against the board.
+
+OVERALL VERTICAL PRIORITY:
+
+The reference should feel approximately like:
+
+COMPACT HEADER
+↓
+LARGE / CLEAR YOU-VS-RIVAL BATTLE ROW
+↓
+CLEAR ENERGY ROW
+↓
+PROPER-SIZED ABILITY CARDS
+↓
+YOUR BOARD LABEL
+↓
+LARGE 8x8 BOARD
+↓
+SEPARATED BOTTOM CONTROLS
+
+The important correction is:
+
+TAKE A SMALL AMOUNT OF HEIGHT AWAY FROM THE CURRENT BOARD
+AND GIVE THAT HEIGHT BACK TO:
+- YOU/RIVAL panels
+- VS/timer area
+- ENERGY row
+- Energy Burst/Mega Strike cards
+
+Do NOT simply scale the entire screen.
+
+Do NOT use transform: scale().
+
+Do NOT solve this with overflow:hidden.
+
+Do NOT add scrolling.
+
+Do NOT create another set of unused CSS variables.
+
+Find the ACTUAL CSS/layout rules controlling these rendered elements and modify those rules.
+
+TARGET:
+At exactly 390x700, the rendered composition must visually resemble the attached reference in PROPORTION, not merely have everything visible.
+
+After making the changes:
+1. Restart the workflow.
+2. Open the actual live match.
+3. Inspect the rendered 390x700 screen.
+4. Compare the actual visual proportions against the reference.
+5. Make a correction if the YOU/RIVAL panels or ability cards are still too compressed.
+6. Verify no overlap or clipping.
+7. Verify all 64 gems and all three bottom controls remain visible.
+
+Do not report success based only on build/typecheck.
+The rendered visual result is the acceptance test.
