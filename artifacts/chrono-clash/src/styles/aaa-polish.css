@@ -6869,3 +6869,207 @@ html body #app #match .power#rewind {
     filter: none;
   }
 }
+
+/* =========================================================
+   REFERENCE DENSITY PASS
+   Keep the real board and controls intact while removing the
+   visual mass that competes with the board on short phones.
+   ========================================================= */
+
+@media (max-width: 600px) {
+  html body #app #match .match-brand {
+    font-size: clamp(11px, 3.7vw, 16px) !important;
+    letter-spacing: .14em !important;
+  }
+
+  html body #app #match .match-top {
+    gap: 5px !important;
+  }
+
+  html body #app #match .fighter {
+    border-radius: 9px !important;
+    box-shadow:
+      inset 2px 0 0 currentColor,
+      inset 0 1px 0 rgba(239, 255, 255, .14),
+      inset 0 -6px 10px rgba(0, 0, 0, .76),
+      0 4px 9px rgba(0, 0, 0, .55) !important;
+  }
+
+  html body #app #match .fighter .avatar {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, .62) !important;
+  }
+
+  html body #app #match .vs-reactor {
+    opacity: .34;
+    filter: drop-shadow(0 5px 5px rgba(0, 0, 0, .68));
+  }
+
+  html body #app #match .vs-arcs,
+  html body #app #match .vs-clash {
+    opacity: .22 !important;
+  }
+
+  html body #app #match .attack-meter {
+    border-radius: 7px !important;
+    border-width: 1px !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .12),
+      inset 0 -5px 8px rgba(0, 0, 0, .8) !important;
+  }
+
+  html body #app #match .attack-meter small {
+    font-size: 7px !important;
+    letter-spacing: .11em !important;
+  }
+
+  html body #app #match .attack-meter span {
+    height: 4px !important;
+    border-width: 1px !important;
+  }
+
+  html body #app #match .energy-wrap {
+    border-radius: 8px !important;
+    border-width: 1px !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .14),
+      inset 0 -6px 10px rgba(0, 0, 0, .78),
+      0 4px 9px rgba(0, 0, 0, .52) !important;
+  }
+
+  html body #app #match .energy-wrap > small {
+    font-size: 7px !important;
+    letter-spacing: .13em !important;
+  }
+
+  html body #app #match .energy-wrap .energy {
+    height: 7px !important;
+    margin-block: 2px !important;
+  }
+
+  html body #app #match .energy-wrap b {
+    font-size: 9px !important;
+  }
+
+  html body #app #match .energy-options {
+    gap: 6px !important;
+  }
+
+  html body #app #match .energy-attack {
+    border-radius: 7px !important;
+    border-width: 1px !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .12),
+      inset 0 -7px 10px rgba(0, 0, 0, .72),
+      0 4px 8px rgba(0, 0, 0, .48) !important;
+  }
+
+  html body #app #match .energy-attack::after {
+    inset: 2px !important;
+    opacity: .55;
+  }
+
+  html body #app #match .energy-attack-glyph {
+    filter: none !important;
+  }
+
+  html body #app #match .energy-attack-copy b {
+    font-size: 8px !important;
+  }
+
+  html body #app #match .energy-attack-copy small {
+    display: block !important;
+    font-size: 6px !important;
+    color: #9fb5b5 !important;
+  }
+
+  html body #app #match .energy-attack-cost {
+    font-size: 9px !important;
+    text-shadow: none !important;
+  }
+
+  html body #app #match .boards {
+    gap: 3px !important;
+  }
+
+  html body #app #match .player-side .you-meta {
+    font-size: 8px !important;
+    letter-spacing: .12em !important;
+  }
+
+  html body #app #match .player-side .board-slot {
+    border-radius: 16px !important;
+    box-shadow:
+      0 2px 0 #285b64,
+      0 6px 0 #0b2c34,
+      0 11px 12px rgba(0, 0, 0, .88),
+      inset 0 0 0 3px #00070a,
+      inset 0 0 0 4px rgba(32, 147, 164, .16),
+      inset 0 7px 12px rgba(0, 0, 0, .96) !important;
+  }
+
+  html body #app #match .board-outer-rail {
+    inset: -4px !important;
+    border-width: 2px !important;
+    border-bottom-width: 5px !important;
+    box-shadow:
+      0 3px 0 #285b64,
+      0 7px 0 #0b2c34,
+      0 13px 14px rgba(0, 0, 0, .88),
+      inset 0 1px 0 rgba(241, 255, 255, .18) !important;
+  }
+
+  html body #app #match .board-energy-glass {
+    inset: 3px !important;
+    border-width: 1px !important;
+    box-shadow: inset 0 0 7px rgba(20, 192, 209, .1) !important;
+  }
+
+  html body #app #match .board-socket-bed {
+    inset: 6px !important;
+    box-shadow:
+      inset 0 8px 14px rgba(0, 0, 0, .98),
+      inset 0 0 0 2px #000 !important;
+  }
+
+  html body #app #match .ability-deck {
+    inset: -2px -2px -4px !important;
+    border-bottom-width: 4px !important;
+    opacity: .7;
+    box-shadow: 0 8px 10px rgba(0, 0, 0, .7) !important;
+  }
+
+  html body #app #match .power {
+    border-radius: 9px !important;
+    box-shadow:
+      inset 0 1px 0 rgba(239, 255, 255, .13),
+      inset 0 -7px 10px rgba(0, 0, 0, .76),
+      0 4px 8px rgba(0, 0, 0, .52) !important;
+  }
+
+  html body #app #match .power .glyph,
+  html body #app #match #freeze .glyph,
+  html body #app #match #timeshift .glyph,
+  html body #app #match #rewind .glyph {
+    filter: none !important;
+  }
+
+  html body #app #match .power .need {
+    display: none !important;
+  }
+}
+
+@media (max-width: 600px) and (max-height: 720px) {
+  html body #app #match.match-screen {
+    --board-size:
+      min(
+        calc(100vw - var(--safe-left) - var(--safe-right) - (var(--game-pad-x) * 2) - 10px),
+        calc(100dvh - var(--vertical-chrome)),
+        430px
+      );
+    --battle-height: 58px;
+    --attack-height: 21px;
+    --energy-height: 24px;
+    --ability-height: 43px;
+    --control-height: 60px;
+  }
+}
