@@ -6686,3 +6686,151 @@ html body #app #match .match-brand-actions .hud-mute {
     letter-spacing: .06em !important;
   }
 }
+
+/* =========================================================
+   CRYSTAL SHARPNESS + SELECTIVE CONTRAST
+   Presentation-only finish: preserve the existing atlas art and geometry.
+   ========================================================= */
+
+html body #app #match #playerGems,
+html body #app #match #oppGems {
+  image-rendering: auto;
+  filter: contrast(1.12) saturate(1.1);
+}
+
+html body #app #match .board-socket-bed {
+  background:
+    radial-gradient(ellipse 42% 32% at 50% 0%, rgba(56, 157, 171, .09), transparent 72%),
+    repeating-radial-gradient(circle at center, rgba(0, 0, 0, .86) 0 25%, rgba(32, 110, 122, .16) 27% 30%, rgba(0, 0, 0, .92) 34% 100%) 0 0 / 12.5% 12.5%,
+    repeating-linear-gradient(90deg, transparent 0 calc(12.5% - 1px), rgba(116, 219, 228, .065) calc(12.5% - 1px) 12.5%),
+    repeating-linear-gradient(0deg, transparent 0 calc(12.5% - 1px), rgba(116, 219, 228, .05) calc(12.5% - 1px) 12.5%),
+    #000204;
+  box-shadow:
+    inset 0 12px 20px rgba(0, 0, 0, .98),
+    inset 0 0 0 2px #000,
+    inset 0 -1px 0 rgba(96, 206, 217, .16);
+}
+
+html body #app #match .board-energy-glass {
+  border-width: 2px;
+  border-top-color: rgba(222, 253, 255, .86);
+  border-left-color: rgba(74, 206, 220, .62);
+  border-right-color: rgba(12, 87, 100, .74);
+  border-bottom-color: rgba(28, 138, 151, .66);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .25),
+    inset 0 0 9px rgba(20, 192, 209, .12),
+    0 0 5px rgba(35, 197, 216, .12);
+}
+
+html body #app #match .board-outer-rail {
+  border-width: 3px;
+  border-top-color: rgba(194, 239, 243, .88);
+  border-left-color: rgba(53, 142, 157, .82);
+  border-right-color: #031016;
+  border-bottom-color: #000508;
+  box-shadow:
+    0 3px 0 #285b64,
+    0 8px 0 #0b2c34,
+    0 14px 0 #020b0f,
+    0 22px 20px rgba(0, 0, 0, .94),
+    inset 0 1px 0 rgba(241, 255, 255, .22),
+    inset 8px 0 10px rgba(51, 160, 174, .08),
+    inset -9px 0 13px rgba(0, 0, 0, .72);
+}
+
+html body #app #match .fighter.you,
+html body #app #match .fighter.rival,
+html body #app #match .attack-meter,
+html body #app #match .energy-wrap,
+html body #app #match .energy-attack,
+html body #app #match .power {
+  background-color: #03090d !important;
+  box-shadow:
+    inset 0 1px 0 rgba(239, 255, 255, .16),
+    inset 0 -8px 12px rgba(0, 0, 0, .72),
+    0 3px 0 rgba(0, 0, 0, .74),
+    0 9px 14px rgba(0, 0, 0, .54) !important;
+}
+
+html body #app #match .fighter.you {
+  border-color: rgba(55, 224, 241, .82) !important;
+  box-shadow:
+    inset 3px 0 0 #18d8e8,
+    inset 0 1px 0 rgba(239, 255, 255, .2),
+    inset 0 -8px 12px rgba(0,0,0,.72),
+    0 3px 0 rgba(0,0,0,.74),
+    0 0 8px rgba(24, 214, 232, .16) !important;
+}
+
+html body #app #match .fighter.rival {
+  border-color: rgba(237, 47, 88, .8) !important;
+  box-shadow:
+    inset -3px 0 0 #ed3158,
+    inset 0 1px 0 rgba(255, 239, 243, .18),
+    inset 0 -8px 12px rgba(0,0,0,.74),
+    0 3px 0 rgba(0,0,0,.74),
+    0 0 8px rgba(228, 37, 79, .14) !important;
+}
+
+html body #app #match .attack-meter.you {
+  border-color: rgba(40, 187, 204, .48) !important;
+  box-shadow: inset 0 2px 0 rgba(104, 231, 239, .28), inset 0 -7px 9px #000, 0 4px 9px rgba(0,0,0,.6) !important;
+}
+
+html body #app #match .attack-meter.rival {
+  border-color: rgba(190, 33, 67, .48) !important;
+  box-shadow: inset 0 2px 0 rgba(236, 76, 105, .24), inset 0 -7px 9px #000, 0 4px 9px rgba(0,0,0,.6) !important;
+}
+
+html body #app #match .energy-wrap,
+html body #app #match .energy-options {
+  filter: contrast(1.08);
+}
+
+html body #app #match .energy-wrap .energy {
+  background: #000204 !important;
+  box-shadow:
+    inset 0 3px 5px rgba(0, 0, 0, .98),
+    inset 0 -1px 0 rgba(117, 222, 231, .17),
+    0 0 0 1px rgba(84, 188, 199, .18) !important;
+}
+
+html body #app #match .energy-wrap .energy span {
+  background:
+    linear-gradient(180deg, #d7ffff 0, #3df3f4 20%, #00afcb 56%, #07556b 100%) !important;
+  box-shadow:
+    0 0 5px rgba(32, 225, 238, .54),
+    inset 0 1px 0 rgba(255, 255, 255, .72) !important;
+}
+
+html body #app #match .player-side .you-meta > span:first-child,
+html body #app #match .power b,
+html body #app #match .energy-attack-copy b {
+  text-shadow:
+    1px 1px 0 rgba(0, 0, 0, .96),
+    0 0 5px currentColor !important;
+}
+
+html body #app #match .power {
+  border-color: rgba(101, 166, 177, .4) !important;
+}
+
+html body #app #match .power#freeze {
+  border-top-color: rgba(80, 214, 231, .64) !important;
+}
+
+html body #app #match .power#timeshift {
+  border-top-color: rgba(177, 116, 222, .64) !important;
+}
+
+html body #app #match .power#rewind {
+  border-top-color: rgba(225, 55, 94, .64) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body #app #match #playerGems,
+  html body #app #match #oppGems {
+    filter: none;
+  }
+}
