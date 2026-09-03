@@ -1,0 +1,310 @@
+CHRONO CLASH — LIGHTING PASS 2: STRONGER 2.5D PHYSICAL LIGHTING
+
+The previous lighting pass improved the scene, but the lighting is still too flat/subtle.
+
+NOW make the lighting visibly communicate 2.5D DEPTH.
+
+VISUAL ONLY.
+DO NOT CHANGE GAMEPLAY OR GAME LOGIC.
+
+DO NOT change:
+- 8x8 grid
+- gem positions/logic
+- scoring
+- timer
+- attacks
+- energy calculations
+- Energy Burst
+- Mega Strike
+- Freeze
+- Time Shift
+- Rewind
+- touch behavior
+- networking
+
+==================================================
+MAIN PROBLEM TO FIX
+==================================================
+
+The current screen still looks like illuminated UI panels.
+
+I want it to look like:
+
+PHYSICAL SCI-FI HARDWARE
+inside
+A DARK COSMIC ARENA.
+
+Lighting must make every layer visibly separate.
+
+==================================================
+1. STRONGER DIRECTIONAL LIGHT
+==================================================
+
+Create a clear lighting direction.
+
+Use a cool cyan key light coming from the left/player side.
+
+Use a controlled crimson key light coming from the right/rival side.
+
+Use a subtle neutral/white overhead or central fill light.
+
+The three lights must blend naturally.
+
+Do NOT flood the entire screen with neon.
+
+==================================================
+2. DEPTH THROUGH SHADOW
+==================================================
+
+Strengthen contact shadows between physical layers.
+
+Especially:
+
+YOU panel → background
+
+RIVAL panel → background
+
+VS module → background
+
+Attack bars → background
+
+Energy reservoir → background
+
+Ability modules → background
+
+Board housing → background
+
+Board housing → playfield
+
+Gem → individual socket
+
+Bottom controls → background
+
+The shadow should sit immediately behind objects and make them appear raised.
+
+==================================================
+3. BOARD
+==================================================
+
+The board is the hero object.
+
+Make its depth much more obvious.
+
+Light the outer cyan bevel strongly enough to reveal its thickness.
+
+Keep the interior playfield darker.
+
+Create a subtle shadow under the inner playfield.
+
+Each gem socket should be darker than the gem.
+
+Each gem should catch a highlight along its upper/outer edges.
+
+The board should visually read as:
+
+THICK OUTER FRAME
+↓
+RECESSED PLAYFIELD
+↓
+DEEP GEM SOCKETS
+↓
+RAISED CRYSTAL GEMS
+
+==================================================
+4. GEMS
+==================================================
+
+Do NOT replace the current gem artwork.
+
+Make the existing crystals look more physically illuminated.
+
+Use:
+
+internal emission
++
+edge highlight
++
+specular highlight
++
+subtle contact shadow
++
+very small local light spill
+
+The important part is LOCAL light.
+
+A blue gem should slightly illuminate its immediate socket.
+
+A gold gem should create a tiny warm reflection around itself.
+
+A purple gem should create a subtle violet reflection.
+
+Do NOT create a large glow halo around every gem.
+
+==================================================
+5. YOU / RIVAL
+==================================================
+
+Make the top player modules more dimensional.
+
+The outer bevel should catch light.
+
+The inner glass should remain dark.
+
+The score/emblem area should appear raised.
+
+Add subtle shadow beneath the raised emblem.
+
+YOU receives cyan edge light.
+
+RIVAL receives red edge light.
+
+The center of each panel should remain darker than its illuminated edges.
+
+This will make the panels look like physical glass/metal modules.
+
+==================================================
+6. ENERGY BURST / MEGA STRIKE
+==================================================
+
+These should have stronger internal lighting.
+
+ENERGY BURST:
+- green energy source
+- brighter lightning core
+- green reflection on nearby frame
+- darker recessed glass around it
+
+MEGA STRIKE:
+- red energy source
+- brighter crystal core
+- red reflection on nearby frame
+- darker recessed glass around it
+
+The icon must look raised above the surface.
+
+==================================================
+7. BOTTOM CONTROLS
+==================================================
+
+Give Freeze, Time Shift and Rewind stronger dimensional lighting.
+
+Their upper bevels should catch light.
+
+Their lower edges should fall into shadow.
+
+Icons should appear physically raised.
+
+Keep the controls dark enough that they don't compete with the board.
+
+==================================================
+8. ATMOSPHERIC LIGHT
+==================================================
+
+Add subtle volumetric-looking atmospheric depth to the cosmic background.
+
+Behind the board:
+
+dark → slightly illuminated → dark
+
+Do not use a flat uniform glow.
+
+Create a soft cyan atmospheric region on the left and a soft red atmospheric region on the right.
+
+==================================================
+9. SPECULAR HIGHLIGHTS
+==================================================
+
+Add controlled highlights to:
+
+- metal bevels
+- glass edges
+- board frame
+- gem facets
+- ability module edges
+- player panel edges
+
+Highlights should be narrow and directional.
+
+Avoid making everything glossy.
+
+==================================================
+10. IMPORTANT — DO NOT OVERDO BLOOM
+==================================================
+
+The current crystals are already bright.
+
+Do NOT solve the problem by simply increasing glow.
+
+The priority is:
+
+SHADOW
+→ BEVEL
+→ REFLECTION
+→ SPECULAR HIGHLIGHT
+→ LOCAL EMISSION
+→ subtle glow
+
+Depth is more important than brightness.
+
+==================================================
+11. ACTIVE GAMEPLAY TEST
+==================================================
+
+Do NOT validate only while the game is LOCKED.
+
+Test a normal active match.
+
+Capture/inspect the screen while:
+
+- board is active
+- gems are visible
+- Energy Burst and Mega Strike are visible
+- bottom controls are visible
+- normal gameplay HUD is visible
+
+The 2.5D lighting must work during normal gameplay.
+
+==================================================
+12. 390x844
+==================================================
+
+Test at exactly 390x844.
+
+Do not change the successful composition.
+
+All 64 gems must remain visible.
+
+No scrolling.
+
+No clipping.
+
+No overlap.
+
+All controls remain touch accessible.
+
+==================================================
+FINAL QUALITY TEST
+==================================================
+
+Turn the brightness/glow mentally down.
+
+If the scene still clearly shows:
+
+RAISED
+RECESSED
+THICK
+SHADOWED
+REFLECTIVE
+PHYSICAL
+
+objects, the lighting is successful.
+
+If it still looks like flat CSS panels with neon outlines, continue working.
+
+DO NOT declare completion just because the build passes.
+
+Actually inspect the running ACTIVE GAME.
+
+PRESERVE ALL GAMEPLAY AND FUNCTIONALITY.
+
+ONLY IMPROVE THE 2.5D LIGHTING, SHADOWS, REFLECTIONS, SPECULAR HIGHLIGHTS, AND LIGHT FALLoff.
