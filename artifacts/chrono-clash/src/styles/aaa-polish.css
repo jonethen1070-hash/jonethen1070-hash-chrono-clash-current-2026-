@@ -2995,6 +2995,14 @@ html body #app #match .power:disabled {
    removed so the player board can become the visual centerpiece.
    ========================================================= */
 
+#match .match-stage {
+  display: flex !important;
+  flex: 1 1 auto !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+  width: 100%;
+}
+
 #match .opponent-render-reserve {
   position: absolute !important;
   left: -10000px !important;
@@ -3014,8 +3022,11 @@ html body #app #match .power:disabled {
 
 html body #app #match .boards {
   grid-template-rows: max-content max-content minmax(0, 1fr) !important;
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
   gap: 7px !important;
   margin: 5px 0 3px !important;
+  overflow: visible !important;
 }
 
 html body #app #match .energy-wrap {
@@ -3167,13 +3178,24 @@ html body #app #match .energy-wrap {
 
 html body #app #match .player-side {
   order: 2;
+  display: flex !important;
+  flex-direction: column !important;
   min-height: 0 !important;
+  overflow: visible !important;
 }
 
 html body #app #match .player-side .board-slot {
   width: 100%;
   max-width: 100%;
+  height: auto;
+  max-height: 100%;
   aspect-ratio: 1 / 1;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  align-self: center;
+}
+
+html body #app #match .powers {
   flex: 0 0 auto !important;
   min-height: 0 !important;
 }
@@ -3190,6 +3212,7 @@ html body #app #match .powers {
 
   html body #app #match .boards {
     grid-template-rows: max-content max-content minmax(0, 1fr) !important;
+    flex-basis: 0 !important;
     gap: 5px !important;
     margin-top: 3px !important;
   }
