@@ -7110,7 +7110,7 @@ html body #app #match .power#rewind {
     --brand-height: 36px;
     --battle-height: 66px;
     --energy-height: 29px;
-    --ability-height: 52px;
+    --ability-height: 74px;
     --board-label-height: 17px;
     --control-height: 78px;
     --vertical-chrome:
@@ -7168,7 +7168,7 @@ html body #app #match .power#rewind {
     }
 
     html body #app #match .energy-attack-copy small {
-      font-size: 6px !important;
+      font-size: 7px !important;
     }
 
     html body #app #match .board-outer-rail {

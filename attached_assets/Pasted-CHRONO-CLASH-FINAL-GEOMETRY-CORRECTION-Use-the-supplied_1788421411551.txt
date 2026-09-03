@@ -1,0 +1,273 @@
+CHRONO CLASH — FINAL GEOMETRY CORRECTION
+
+Use the supplied reference image as the visual geometry authority.
+
+I inspected your latest actual 390x700 live match render against the reference.
+
+Your latest version is closer, but the proportions are STILL WRONG.
+
+IMPORTANT:
+Do NOT keep shrinking the 8x8 board.
+The current board is approximately 368x367 and that is acceptable.
+
+The problem is the TOP UI proportions, especially the ability cards.
+
+DO NOT CHANGE:
+- gameplay
+- match-3 logic
+- CPU behavior
+- gem artwork
+- gem sizes unless absolutely required to preserve the board
+- touch/swipe behavior
+- scores
+- energy mechanics
+- Freeze
+- Time Shift
+- Rewind
+- board logic
+- 8x8 grid
+- attack removal
+
+Do NOT restore YOUR ATTACK or RIVAL ATTACK.
+
+Do NOT use transform:scale().
+Do NOT use overflow:hidden as a layout fix.
+Do NOT add scrolling.
+
+TARGET VIEWPORT:
+390px × 700px
+
+==================================================
+VERTICAL COMPOSITION
+==================================================
+
+Build the screen as one deliberate vertical layout:
+
+1. CHRONO CLASH HEADER
+2. YOU / VS / RIVAL
+3. ENERGY
+4. ENERGY BURST + MEGA STRIKE
+5. YOUR BOARD LABEL
+6. 8x8 BOARD
+7. FREEZE / TIME SHIFT / REWIND
+
+Every section must have its own allocated vertical space.
+
+No section may overlap another section.
+
+==================================================
+1 — YOU / VS / RIVAL
+==================================================
+
+Increase the visual height of the YOU and RIVAL panels.
+
+They must:
+- have equal height
+- align perfectly
+- have comfortable internal padding
+- keep avatar, name and score clearly separated
+- visually resemble the supplied reference
+
+Keep VS exactly centered.
+
+Keep the timer directly beneath/within the VS area as shown in the reference.
+
+The battle row should feel like a substantial HUD component, NOT a thin strip.
+
+==================================================
+2 — ENERGY
+==================================================
+
+Make the ENERGY section a proper HUD row.
+
+It must contain:
+ENERGY label
++
+full-width energy bar
++
+numeric value
+
+Vertically center all of these.
+
+Do not compress the energy row into a 20-ish-pixel separator.
+
+==================================================
+3 — ENERGY BURST / MEGA STRIKE
+==================================================
+
+THIS IS THE MOST IMPORTANT CORRECTION.
+
+The current cards are approximately 384x52.
+
+That is too short.
+
+Increase their height substantially so they have the visual proportions of the reference.
+
+Target approximately:
+
+ABILITY SECTION:
+width ≈ 384px total
+
+two cards:
+approximately 184–188px wide each
+
+height:
+approximately 70–80px
+
+Use the available vertical space intelligently.
+
+Each card needs enough room for:
+
+ICON
+TITLE
+DESCRIPTION
+ENERGY COST
+
+The icon must not collide with the title.
+
+The title must not collide with the description.
+
+The description must remain readable.
+
+The energy cost must remain inside the card.
+
+Both cards must have identical height and aligned top/bottom edges.
+
+==================================================
+4 — YOUR BOARD LABEL
+==================================================
+
+Place:
+
+ABILITY CARDS
+↓
+small controlled gap
+↓
+YOUR BOARD
+↓
+small controlled gap
+↓
+BOARD
+
+The label must be centered.
+
+Do not allow the label to overlap the board frame.
+
+==================================================
+5 — BOARD
+==================================================
+
+KEEP THE BOARD APPROXIMATELY:
+
+368px × 367px
+
+Do not significantly increase its height.
+
+Do not significantly decrease its height either.
+
+The 8x8 grid must remain square.
+
+All 64 gems must remain visible.
+
+Do not vertically stretch the cells.
+
+The board should remain the dominant gameplay element.
+
+==================================================
+6 — BOTTOM CONTROLS
+==================================================
+
+Keep:
+
+FREEZE | TIME SHIFT | REWIND
+
+as three equal horizontal controls.
+
+Current approximately 382x78 is acceptable.
+
+Keep them fully visible and tappable.
+
+Do not let them overlap the board.
+
+==================================================
+CRITICAL LAYOUT RULE
+==================================================
+
+Do NOT solve the problem by continuously shrinking the board.
+
+Instead calculate the available 700px viewport height and explicitly allocate vertical space to each section.
+
+The total height of:
+
+HEADER
++ BATTLE ROW
++ ENERGY
++ ABILITY CARDS
++ BOARD LABEL
++ BOARD
++ BOTTOM CONTROLS
++ small intentional gaps
+
+MUST fit inside the 390x700 viewport.
+
+Use CSS flex/grid with explicit min/max constraints where appropriate.
+
+Avoid uncontrolled content-driven heights.
+
+==================================================
+REFERENCE PROPORTION
+==================================================
+
+The reference should visually read:
+
+HEADER
+       ↓
+YOU       VS       RIVAL
+       ↓
+ENERGY
+       ↓
+ENERGY BURST   MEGA STRIKE
+       ↓
+YOUR BOARD
+       ↓
+████████████
+█ 8 x 8     █
+█ BOARD     █
+████████████
+       ↓
+FREEZE  TIME SHIFT  REWIND
+
+The current implementation is making the ability cards too thin and consequently the entire upper HUD feels compressed.
+
+Fix that.
+
+==================================================
+VALIDATION
+==================================================
+
+After implementation:
+
+1. Restart the workflow.
+2. Open the actual live match.
+3. Set/inspect viewport at exactly 390x700.
+4. Visually inspect the rendered screen.
+5. Compare against the supplied reference.
+6. Confirm YOU/VS/RIVAL has proper height.
+7. Confirm ENERGY has proper height.
+8. Confirm both ability cards are approximately 70–80px tall.
+9. Confirm YOUR BOARD label does not overlap anything.
+10. Confirm board remains approximately 368x367.
+11. Confirm all 64 gems are visible.
+12. Confirm bottom controls remain visible.
+13. Confirm no scrolling.
+14. Confirm no clipping.
+15. Confirm no overlap.
+16. Confirm no horizontal overflow.
+17. Confirm no browser console errors.
+
+MOST IMPORTANT:
+Do not report success merely because TypeScript/build passes.
+
+The rendered 390x700 visual composition is the acceptance test.
+
+If the result does not visually match the supplied reference proportions, continue adjusting the actual layout CSS before reporting completion.
