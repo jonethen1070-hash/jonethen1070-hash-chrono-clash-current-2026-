@@ -1,0 +1,438 @@
+CHRONO CLASH — FINAL GEOMETRY CORRECTION
+USE EXPLICIT PIXEL/GRID TARGETS — DO NOT GUESS
+
+I have now compared the actual CURRENT WEB RENDER directly against the supplied FULL-SCREEN REFERENCE at the same approximately 390px game width.
+
+The current implementation is horizontally close.
+
+The remaining problem is VERTICAL GEOMETRY.
+
+The current Energy Burst / Mega Strike cards are TOO TALL.
+The current battle area is slightly too tall.
+The board is consuming too much of the remaining vertical space.
+The bottom controls are therefore being pushed toward/out of the viewport.
+
+DO NOT make another general "responsive polish" pass.
+
+Implement the following explicit geometry system.
+
+====================================================
+IMPORTANT: REFERENCE VS WEB VIEWPORT
+====================================================
+
+The supplied reference is a full-screen game composition.
+
+The current game is inside a web page/mobile browser.
+
+Therefore:
+
+REFERENCE = visual proportion target.
+
+ACTUAL WEB VIEWPORT = available height.
+
+Do NOT compare the browser's total screenshot height with the reference.
+
+Do NOT include Safari's browser controls in the game geometry.
+
+====================================================
+TARGET WIDTH
+====================================================
+
+At 390px game width:
+
+Horizontal game padding:
+approximately 8px
+
+Available content width:
+approximately 374px
+
+Board outer width:
+approximately 368–372px maximum.
+
+The board must remain centered.
+
+====================================================
+VERTICAL LAYOUT
+====================================================
+
+Create these explicit vertical sections:
+
+1. HEADER
+2. BATTLE
+3. ENERGY
+4. ABILITIES
+5. BOARD LABEL
+6. BOARD
+7. CONTROLS
+
+Do not let arbitrary content height determine the layout.
+
+Use CSS grid/flex with explicit reserved rows.
+
+====================================================
+NORMAL / TALL MOBILE TARGET
+====================================================
+
+When the game viewport has sufficient height:
+
+HEADER:
+40px
+
+BATTLE:
+70px
+
+ENERGY:
+32px
+
+ABILITIES:
+60px
+
+BOARD LABEL + GAP:
+28px
+
+CONTROLS:
+80px
+
+Total fixed UI:
+310px approximately.
+
+The BOARD gets the remaining height.
+
+====================================================
+SHORT WEB VIEWPORT
+====================================================
+
+When the actual game viewport is short:
+
+HEADER:
+36px
+
+BATTLE:
+64px
+
+ENERGY:
+30px
+
+ABILITIES:
+56px
+
+BOARD LABEL + GAP:
+24px
+
+CONTROLS:
+64px
+
+Total fixed UI:
+274px approximately.
+
+The board receives whatever square size can fit into the remaining space.
+
+====================================================
+MOST IMPORTANT RULE
+====================================================
+
+BOTTOM CONTROLS MUST BE RESERVED BEFORE BOARD SIZE IS CALCULATED.
+
+Calculate conceptually:
+
+remainingHeight =
+actualGameViewportHeight
+- header
+- battle
+- energy
+- abilities
+- boardLabel
+- controls
+- gaps
+- safe-area insets
+
+Then:
+
+boardSize =
+min(
+    availableWidth,
+    remainingHeight
+)
+
+The board cannot consume space belonging to the controls.
+
+====================================================
+ABILITY CARDS — CRITICAL
+====================================================
+
+The CURRENT ability cards are too tall.
+
+Fix them.
+
+Energy Burst and Mega Strike:
+
+height:
+60px normal
+
+height:
+54–58px short viewport
+
+width:
+approximately 184px each at 390px width
+
+gap:
+approximately 6px
+
+Both cards must have identical dimensions.
+
+Content must fit inside the 60px height.
+
+Do NOT use 70–90px cards.
+
+Do NOT create large empty vertical areas.
+
+Keep:
+
+icon
+title
+description
+energy cost
+
+compactly aligned.
+
+====================================================
+BATTLE ROW
+====================================================
+
+YOU / VS / RIVAL currently consumes slightly too much vertical space.
+
+Use:
+
+70px normal
+64px short viewport
+
+Keep all three sections on one row.
+
+YOU and RIVAL equal height.
+
+VS centered.
+
+Timer directly under VS.
+
+Do not create unnecessary vertical spacing.
+
+====================================================
+ENERGY
+====================================================
+
+Use:
+
+32px normal
+30px short.
+
+ENERGY label, bar and 100/100 stay on one row.
+
+====================================================
+YOUR BOARD LABEL
+====================================================
+
+Approximately:
+
+24px height
+
+with only a few pixels of spacing.
+
+Do not create a large gap.
+
+====================================================
+BOARD
+====================================================
+
+The board remains the dominant element.
+
+It must be a true square.
+
+8 columns × 8 rows.
+
+All 64 gems visible.
+
+No cropping.
+
+No stretching.
+
+No scrolling.
+
+Use:
+
+aspect-ratio: 1 / 1;
+
+The board width may approach 368–372px at 390px game width.
+
+But the board MUST shrink when the available vertical height is insufficient.
+
+Do not force a fixed 368px board height.
+
+The board is:
+
+min(available width, remaining available height)
+
+====================================================
+BOTTOM CONTROLS
+====================================================
+
+FREEZE
+TIME SHIFT
+REWIND
+
+must always remain completely visible.
+
+At normal height:
+
+80px.
+
+At short height:
+
+64px minimum.
+
+All three cards remain equal width.
+
+Each card must show:
+
+icon
+label
+status/cost
+
+The lower cost/status area must NEVER be clipped.
+
+Reserve this section BEFORE calculating board height.
+
+====================================================
+RESPONSIVE BREAKPOINT
+====================================================
+
+Do not rely only on width.
+
+Use AVAILABLE HEIGHT.
+
+For example:
+
+if available game height >= 750px:
+use normal geometry.
+
+if available game height < 750px:
+use compact geometry.
+
+if available game height < 600px:
+use the most compact geometry.
+
+The board absorbs the majority of height changes.
+
+====================================================
+DO NOT DO
+====================================================
+
+DO NOT:
+
+transform: scale()
+zoom
+negative positioning
+force elements outside their containers
+hide overflow to conceal clipping
+vertical page scrolling
+crop the board
+hide bottom controls
+
+====================================================
+DO NOT CHANGE GAMEPLAY
+====================================================
+
+Do not modify:
+
+gameplay
+CPU
+gem logic
+scores
+energy mechanics
+abilities
+Freeze
+Time Shift
+Rewind
+touch/swipe
+audio
+VFX
+
+Do NOT restore:
+
+YOUR ATTACK
+RIVAL ATTACK
+
+====================================================
+VISUAL PRIORITY
+====================================================
+
+Match the reference's visual hierarchy:
+
+HEADER
+↓
+YOU / VS / RIVAL
+↓
+ENERGY
+↓
+COMPACT BUT SUBSTANTIAL ABILITY CARDS
+↓
+YOUR BOARD
+↓
+LARGE 8x8 BOARD
+↓
+COMPLETE THREE BOTTOM CONTROLS
+
+====================================================
+FINAL TEST
+====================================================
+
+Test the actual rendered game at 390px width.
+
+Test available heights:
+
+550px
+650px
+750px
+843px
+
+At every height:
+
+ALL of these must be visible:
+
+✓ Header
+✓ YOU
+✓ VS
+✓ RIVAL
+✓ Timer
+✓ Energy
+✓ Energy Burst
+✓ Mega Strike
+✓ YOUR BOARD
+✓ 8x8 board
+✓ all 64 gems
+✓ Freeze
+✓ Time Shift
+✓ Rewind
+✓ bottom costs/status
+
+The board must shrink before the bottom controls disappear.
+
+====================================================
+SUCCESS CONDITION
+====================================================
+
+Do not report success because the build passes.
+
+Do not report success because CSS compiles.
+
+Open the actual rendered game and visually inspect it.
+
+The final screenshot must prove:
+
+1. ability cards are approximately 60px tall rather than oversized;
+2. board remains dominant;
+3. board is fully visible;
+4. all three bottom controls are fully visible;
+5. no scrolling;
+6. no clipping.
+
+This is a GEOMETRY TASK ONLY.
