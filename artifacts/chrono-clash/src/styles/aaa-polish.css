@@ -5926,7 +5926,7 @@ html body #app #match .match-stage {
   min-height: 0 !important;
   margin-inline: auto;
   gap: var(--section-gap) !important;
-  overflow: visible !important;
+  overflow: hidden !important;
   justify-content: flex-start;
 }
 
@@ -6975,7 +6975,7 @@ html body #app #match .power#rewind {
   }
 
   html body #app #match .boards {
-    gap: 3px !important;
+    gap: 2px !important;
   }
 
   html body #app #match .player-side .you-meta {
@@ -7055,7 +7055,7 @@ html body #app #match .power#rewind {
     --battle-height: 58px;
     --energy-height: 24px;
     --ability-height: 43px;
-    --board-label-height: 28px;
+    --board-label-height: 22px;
     --control-height: 60px;
     --vertical-chrome:
       calc(
