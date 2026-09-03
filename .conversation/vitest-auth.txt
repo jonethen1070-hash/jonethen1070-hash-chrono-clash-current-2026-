@@ -1,0 +1,16 @@
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mC:/Users/hp/Downloads/chrono-clash-fixed/chrono-clash-arena-polish-a2e0[39m
+
+ [32m✓[39m tests/online-sync.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 194[2mms[22m[39m
+ [32m✓[39m tests/guest-auth.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 373[2mms[22m[39m
+ [32m✓[39m tests/production-auth.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 1046[2mms[22m[39m
+   [33m[2m✓[22m[39m production authentication readiness[2m > [22mrestores Player ID after a refresh via /v1/me [33m 397[2mms[22m[39m
+   [33m[2m✓[22m[39m production authentication readiness[2m > [22mSIGN OUT revokes the server session and clears local storage [33m 404[2mms[22m[39m
+ [32m✓[39m tests/menu-audio-hud.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 27[2mms[22m[39m
+ [32m✓[39m tests/matchmaking.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 165[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m5 passed[39m[22m[90m (5)[39m
+[2m      Tests [22m [1m[32m39 passed[39m[22m[90m (39)[39m
+[2m   Start at [22m 06:02:22
+[2m   Duration [22m 5.45s[2m (transform 2.09s, setup 0ms, collect 5.04s, tests 1.81s, environment 3ms, prepare 2.98s)[22m
+

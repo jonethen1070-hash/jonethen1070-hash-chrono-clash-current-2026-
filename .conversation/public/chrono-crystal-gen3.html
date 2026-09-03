@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Chrono-Crystal Gen-3 preview (not live audio)</title>
+    <style>
+      :root { color-scheme: dark; --bg: #070b16; --ink: #e7f3ff; --muted: #8aa0b8; --cyan: #4de4ff; --crimson: #ff4d6d; }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; min-height: 100dvh;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        background: radial-gradient(1200px 800px at 50% -10%, #123056 0%, var(--bg) 55%);
+        color: var(--ink); padding: 24px 18px 48px;
+      }
+      h1 { font-size: 1.28rem; margin: 0 0 8px; letter-spacing: 0.04em; }
+      p { color: var(--muted); line-height: 1.45; margin: 0.4em 0; }
+      .card { max-width: 460px; margin: 0 auto; display: grid; gap: 12px; }
+      button {
+        appearance: none; border: 0; border-radius: 16px; padding: 16px 18px;
+        font-size: 1.02rem; font-weight: 700; color: #041018;
+        background: linear-gradient(180deg, var(--cyan), #2bb8d6);
+        text-align: left;
+      }
+      button .meta { display: block; font-size: 0.78rem; font-weight: 600; opacity: 0.72; margin-top: 4px; }
+      button.stop { background: linear-gradient(180deg, #c9d6e4, #8aa0b8); }
+      button.victory { background: linear-gradient(180deg, #ffe08a, #f0b429); }
+      button.defeat { background: linear-gradient(180deg, var(--crimson), #b42348); color: #fff; }
+      button.sfx { background: linear-gradient(180deg, #d4b8ff, #9b6dff); }
+      .now { min-height: 1.4em; color: var(--cyan); font-variant-numeric: tabular-nums; }
+      small { color: var(--muted); display: block; }
+      .warn { color: #ffe08a; font-size: 0.92rem; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Chrono-Crystal Gen-3</h1>
+      <p class="warn">Third-generation prototype only. Live Chrono Clash audio is unchanged. Gen-2 Defeat is the sonic reference — the other cues are recomposed from that same sound, not copied from Defeat.</p>
+      <p>Same palette, four jobs. Instrumental Chrono Clash motif (A–E–C–D). Play on iPhone speakers. Gameplay does not loop — listen through the drop around 0:38.</p>
+      <button id="lobby" type="button">Lobby — welcoming version of the Defeat DNA<span class="meta">intro + groove · catchy hook · loops</span></button>
+      <button id="battle" type="button">Gameplay — competitive build / groove / drop<span class="meta">~88s · does not loop · drop around 0:38</span></button>
+      <button id="victory" class="victory" type="button">Victory — same DNA, bright payoff<span class="meta">~12s · powerful, not a loop</span></button>
+      <button id="defeat" class="defeat" type="button">Defeat — the premium dark reference<span class="meta">~17s · stylish rematch, not sad</span></button>
+      <button id="swipe" class="sfx" type="button">Crystal gem swipe<span class="meta">two hard gems + short shimmer</span></button>
+      <button id="stop" class="stop" type="button">Stop</button>
+      <div class="now" id="now">Stopped</div>
+      <small>Hard-refresh Safari if you still hear Gen-2. Files: /chrono-crystal-preview-gen3/</small>
+    </div>
+    <script>
+      const el = document.getElementById("now");
+      let current = null;
+      let timer = null;
+      function fmt(t) {
+        t = Math.max(0, t || 0);
+        const m = Math.floor(t / 60);
+        const s = Math.floor(t % 60);
+        return m + ":" + String(s).padStart(2, "0");
+      }
+      function stop() {
+        if (timer) { clearInterval(timer); timer = null; }
+        if (current) { current.pause(); current = null; }
+        el.textContent = "Stopped";
+      }
+      function play(url, label, loop) {
+        stop();
+        const audio = new Audio(url);
+        audio.loop = Boolean(loop);
+        current = audio;
+        el.textContent = "Playing " + label + "…";
+        audio.play().catch((err) => { el.textContent = String(err); });
+        timer = setInterval(() => {
+          if (!current) return;
+          const d = isFinite(current.duration) ? fmt(current.duration) : "…";
+          el.textContent = label + "  " + fmt(current.currentTime) + " / " + d;
+        }, 250);
+        audio.onended = () => { if (current === audio) { el.textContent = label + " ended"; if (timer) clearInterval(timer); } };
+      }
+      const base = "/chrono-crystal-preview-gen3";
+      document.getElementById("lobby").onclick = () => play(base + "/proto-lobby.mp3", "Lobby", true);
+      document.getElementById("battle").onclick = () => play(base + "/proto-battle.mp3", "Gameplay", false);
+      document.getElementById("victory").onclick = () => play(base + "/proto-victory.mp3", "Victory", false);
+      document.getElementById("defeat").onclick = () => play(base + "/proto-defeat.mp3", "Defeat", false);
+      document.getElementById("swipe").onclick = () => play(base + "/proto-swipe.wav", "Gem swipe", false);
+      document.getElementById("stop").onclick = stop;
+    </script>
+  </body>
+</html>

@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Chrono Clash"
+description = "A mobile-first cosmic puzzle battle game where players chain crystalline gems, outscore a rival, and spend Chrono Power in cinematic matches."
+version = "1.0.0"
+id = "artifacts/chrono-clash"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21676
+
+[services.development]
+run = "pnpm --filter @workspace/chrono-clash run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/chrono-clash", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/chrono-clash/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21676"
+BASE_PATH = "/"

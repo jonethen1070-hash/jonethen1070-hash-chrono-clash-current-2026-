@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Chrono-Crystal prototype (not live audio)</title>
+    <style>
+      :root { color-scheme: dark; --bg: #070b16; --ink: #e7f3ff; --muted: #8aa0b8; --cyan: #4de4ff; --crimson: #ff4d6d; }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; min-height: 100dvh;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        background: radial-gradient(1200px 800px at 50% -10%, #123056 0%, var(--bg) 55%);
+        color: var(--ink); padding: 24px 18px 48px;
+      }
+      h1 { font-size: 1.28rem; margin: 0 0 8px; letter-spacing: 0.04em; }
+      p { color: var(--muted); line-height: 1.45; }
+      .card { max-width: 440px; margin: 0 auto; display: grid; gap: 12px; }
+      button {
+        appearance: none; border: 0; border-radius: 16px; padding: 16px 18px;
+        font-size: 1.02rem; font-weight: 700; color: #041018;
+        background: linear-gradient(180deg, var(--cyan), #2bb8d6);
+      }
+      button.stop { background: linear-gradient(180deg, #c9d6e4, #8aa0b8); }
+      button.victory { background: linear-gradient(180deg, #ffe08a, #f0b429); }
+      button.defeat { background: linear-gradient(180deg, var(--crimson), #b42348); color: #fff; }
+      button.sfx { background: linear-gradient(180deg, #d4b8ff, #9b6dff); }
+      .now { min-height: 1.4em; color: var(--cyan); }
+      small { color: var(--muted); display: block; }
+      .warn { color: #ffe08a; font-size: 0.92rem; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Chrono-Crystal prototype</h1>
+      <p class="warn">Temporary direction test only. This is not the live game soundtrack. The four cues share one A–E–C–D motif.</p>
+      <p>Instrumental. No vocals. Defeat is dark/energetic, not sad. Tap once, then play on iPhone speakers.</p>
+      <button id="lobby" type="button">Lobby — cool pulse, catchy motif</button>
+      <button id="battle" type="button">Gameplay — same world, tighter groove</button>
+      <button id="victory" class="victory" type="button">Victory — motif lifts</button>
+      <button id="defeat" class="defeat" type="button">Defeat — rematch heat</button>
+      <button id="swipe" class="sfx" type="button">Crystal gem swipe</button>
+      <button id="stop" class="stop" type="button">Stop</button>
+      <div class="now" id="now">Stopped</div>
+      <small>Prototype renderer only. Live Chrono Clash audio is unchanged.</small>
+    </div>
+    <script>
+      const el = document.getElementById("now");
+      let current = null;
+      function play(url, label, loop) {
+        if (current) { current.pause(); current = null; }
+        const audio = new Audio(url);
+        audio.loop = Boolean(loop);
+        current = audio;
+        el.textContent = "Playing " + label + "…";
+        audio.play().catch((err) => { el.textContent = String(err); });
+        audio.onended = () => { if (current === audio) el.textContent = label + " ended"; };
+      }
+      const base = "/chrono-crystal-preview";
+      document.getElementById("lobby").onclick = () => play(base + "/proto-lobby.mp3", "Lobby", true);
+      document.getElementById("battle").onclick = () => play(base + "/proto-battle.mp3", "Gameplay", true);
+      document.getElementById("victory").onclick = () => play(base + "/proto-victory.mp3", "Victory", false);
+      document.getElementById("defeat").onclick = () => play(base + "/proto-defeat.mp3", "Defeat", false);
+      document.getElementById("swipe").onclick = () => play(base + "/proto-swipe.wav", "Gem swipe", false);
+      document.getElementById("stop").onclick = () => {
+        if (current) current.pause();
+        current = null;
+        el.textContent = "Stopped";
+      };
+    </script>
+  </body>
+</html>
