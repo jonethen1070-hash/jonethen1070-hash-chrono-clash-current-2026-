@@ -1,5 +1,5 @@
 import { AuthError } from "./auth-config";
-import { applyGravity, createSeededRng, generateBoard, trySwap } from "../engine/board";
+import { createSeededRng, generateBoard, resolveBoard, trySwap } from "../engine/board";
 import { fillAttack } from "../engine/combat";
 import { seatForPlayer, seatSeed } from "../engine/online";
 import { powerConsumesCharge } from "../engine/powers";
@@ -247,8 +247,7 @@ function applyPower(
               row.flatMap((piece, c) => (piece?.color === color ? [{ r, c }] : [])),
             );
           })();
-    for (const cell of cells) other.board[cell.r]![cell.c] = null;
-    applyGravity(other.board, other.rng);
+    resolveBoard(other.board, other.rng, cells);
     other.attack = Math.max(0, other.attack - (id === "burst" ? 22 : 48));
     other.combo = 0;
     other.lockUntil = Math.max(other.lockUntil, now + (id === "burst" ? PRESSURE_MS : PRESSURE_MS * 2));

@@ -5,6 +5,7 @@ import {
   findAnyValidSwap,
   generateBoard,
   matchingNeighbors,
+  resolveBoard,
   snapshotBoard,
   trySwap,
 } from "./board";
@@ -1060,8 +1061,7 @@ export class GameSession {
             );
           })();
 
-    for (const cell of cells) this.opponent.board[cell.r]![cell.c] = null;
-    applyGravity(this.opponent.board, this.rng);
+    resolveBoard(this.opponent.board, this.rng, cells);
     this.bumpOppBoard();
     this.opponent.attack = Math.max(0, this.opponent.attack - (id === "burst" ? 22 : 48));
     this.opponent.combo = 0;
