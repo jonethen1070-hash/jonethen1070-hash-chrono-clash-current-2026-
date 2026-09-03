@@ -8117,3 +8117,607 @@ html body #app #match .energy-wrap.hot {
     animation: none !important;
   }
 }
+
+/* =========================================================
+   EXACT COLOR + MATERIAL SYSTEM
+   Presentation-only palette layer. Match geometry is locked.
+   ========================================================= */
+
+html body #app #match {
+  --cc-bg: #020611;
+  --cc-deep-navy: #061322;
+  --cc-depth: #081A2A;
+  --cc-player: #00D9FF;
+  --cc-player-deep: #006B8F;
+  --cc-player-secondary: #009BC2;
+  --cc-player-highlight: #7CF5FF;
+  --cc-player-bright: #EAFBFF;
+  --cc-player-panel: #06151F;
+  --cc-player-panel-secondary: #0A2634;
+  --cc-player-border: #00BFE8;
+  --cc-player-inner: #007A9E;
+  --cc-rival: #FF174F;
+  --cc-rival-deep: #8A1235;
+  --cc-rival-secondary: #C51A4C;
+  --cc-rival-highlight: #FF6B91;
+  --cc-rival-bright: #FFD6E2;
+  --cc-rival-panel: #190812;
+  --cc-rival-panel-secondary: #300D1C;
+  --cc-rival-border: #E91E55;
+  --cc-rival-inner: #8F163D;
+  --cc-purple: #A855F7;
+  --cc-purple-deep: #4C1D95;
+  --cc-purple-secondary: #7C3AED;
+  --cc-purple-highlight: #D8B4FE;
+  --cc-purple-bright: #F3E8FF;
+  --cc-center: #080B18;
+  --cc-frame: #06131D;
+  --cc-frame-highlight: #173344;
+  --cc-frame-edge: #00CFFF;
+  --cc-frame-edge-secondary: #007A9E;
+  --cc-frame-deep: #033847;
+  --cc-metal-highlight: #6FEAFF;
+  --cc-shadow: #01050A;
+  --cc-board-inner: #04101A;
+  --cc-playfield: #020812;
+  --cc-playfield-secondary: #061321;
+  --cc-board-glow: #005B78;
+  --cc-cell: #02060D;
+  --cc-cell-secondary: #06111C;
+  --cc-cell-border: #0A2635;
+  --cc-cell-highlight: #12394A;
+  --cc-energy: #00BFFF;
+  --cc-energy-bright: #49F6FF;
+  --cc-energy-highlight: #B9F8FF;
+  --cc-text: #F3FAFF;
+  --cc-text-secondary: #91A8B8;
+  --cc-text-muted: #526B79;
+}
+
+html #app:has(#match.active) .space-nebula {
+  background:
+    radial-gradient(ellipse 34% 24% at 17% 21%, #006B8F55, transparent 72%),
+    radial-gradient(ellipse 32% 25% at 84% 26%, #8A123544, transparent 74%),
+    radial-gradient(ellipse 52% 34% at 50% 61%, #1234483d, transparent 76%),
+    radial-gradient(ellipse 72% 48% at 50% 116%, #01050AE6, transparent 75%),
+    linear-gradient(180deg, #02061147, #020611D1),
+    var(--art-battle) !important;
+  background-blend-mode: screen, screen, screen, multiply, normal, normal;
+  filter: saturate(1.08) contrast(1.12) brightness(.78) !important;
+}
+
+html #app:has(#match.active) .space-stars {
+  filter: brightness(1.24) contrast(1.14) drop-shadow(0 0 4px #7CF5FF38);
+}
+
+html body #app #match.match-screen {
+  background:
+    radial-gradient(ellipse 48% 28% at 10% 38%, #006B8F26, transparent 72%),
+    radial-gradient(ellipse 44% 28% at 90% 38%, #8A12351F, transparent 74%),
+    radial-gradient(ellipse 68% 24% at 50% 74%, #1234481A, transparent 78%),
+    linear-gradient(180deg, #0206112E, #01050AC7) !important;
+  color: var(--cc-text);
+}
+
+html body #app #match .match-stage::before {
+  background:
+    linear-gradient(90deg, #006B8F1F, transparent 10% 90%, #8A12351A),
+    linear-gradient(180deg, #17334447, #06131D2E 42%, #01050AAD),
+    repeating-linear-gradient(90deg, transparent 0 46px, #1234480B 47px 48px) !important;
+  box-shadow:
+    inset 20px 0 36px #006B8F12,
+    inset -20px 0 36px #8A12350E,
+    0 24px 52px #01050AAD !important;
+}
+
+html body #app #match .arena-backplane {
+  background:
+    radial-gradient(ellipse 42% 26% at 50% 38%, #006B8F24, transparent 72%),
+    linear-gradient(116deg, #6FEAFF1A, transparent 20% 76%, #FF174F16),
+    repeating-linear-gradient(90deg, transparent 0 46px, #DDF8FF0B 47px 48px),
+    linear-gradient(180deg, #173344, #06131D 30%, #01050A 73%, #081A2A 100%);
+  border-color: #173344;
+  box-shadow:
+    inset 0 28px 46px #6FEAFF0D,
+    inset 0 -60px 70px #01050AE0,
+    0 30px 60px #01050AC7;
+}
+
+html body #app #match .arena-pylon-left {
+  border-left-color: #00BFE8A3;
+  box-shadow:
+    inset 5px 0 8px #7CF5FF1C,
+    0 0 16px #00D9FF1C,
+    inset -7px 0 10px #01050AB3,
+    0 15px 20px #01050AC7;
+}
+
+html body #app #match .arena-pylon-right {
+  border-right-color: #E91E558A;
+  box-shadow:
+    inset -5px 0 8px #FF6B911A,
+    0 0 16px #FF174F1A,
+    inset 7px 0 10px #01050AB3,
+    0 15px 20px #01050AC7;
+}
+
+html body #app #match .arena-pylon i {
+  border-top-color: #DDF8FF4D;
+  background:
+    linear-gradient(90deg, #00CFFF1A, transparent 45%, #FFFFFF0F),
+    linear-gradient(180deg, #FFFFFF12, #01050A47);
+  box-shadow: 0 0 8px #00BFFF14;
+}
+
+html body #app #match .arena-deck {
+  background:
+    linear-gradient(90deg, #00CFFF1C, transparent 30% 70%, #FF174F1A),
+    repeating-linear-gradient(90deg, transparent 0 30px, #1234481C 31px 32px),
+    repeating-linear-gradient(0deg, transparent 0 20px, #12344817 21px 22px),
+    linear-gradient(180deg, #173344, #01050A);
+  border-top-color: #6FEAFF45;
+  box-shadow: 0 -8px 24px #006B8F12;
+}
+
+html body #app #match .match-brand {
+  background: linear-gradient(180deg, #FFFFFF 0%, #EAFBFF 38%, #7CF5FF 72%, #006B8F 100%);
+  filter: drop-shadow(0 0 8px #00D9FF99) drop-shadow(0 2px 0 #01050AF2);
+  text-shadow: 0 2px 0 #01050AE6;
+}
+
+html body #app #match .hud-icon,
+html body #app #match .hud-mute {
+  background:
+    linear-gradient(180deg, #EAFBFF24, transparent 32%),
+    linear-gradient(180deg, #0A2634, #020611) !important;
+  border-color: #00BFE875 !important;
+  box-shadow:
+    inset 0 1px 0 #EAFBFF33,
+    inset 0 -5px 8px #01050AA3,
+    0 3px 0 #01050AB3,
+    0 0 12px #00D9FF1F !important;
+}
+
+html body #app #match .match-brand-actions .hud-mute.off {
+  border-color: #E91E5599 !important;
+  box-shadow:
+    inset 0 1px 0 #FFD6E22E,
+    inset 0 -5px 8px #01050AAD,
+    0 3px 0 #01050AB3,
+    0 0 12px #FF174F24 !important;
+}
+
+html body #app #match .fighter.you,
+html body #app #match .fighter.rival {
+  box-shadow:
+    inset 0 1px 0 #EAFBFF3D,
+    inset 0 -11px 15px #01050ACC,
+    0 4px 0 #01050AC2,
+    0 10px 18px #01050A9E !important;
+}
+
+html body #app #match .fighter.you {
+  background:
+    linear-gradient(90deg, #00D9FF2E, transparent 34%),
+    linear-gradient(180deg, #0A2634, #06151F) !important;
+  border-color: #00BFE8 !important;
+}
+
+html body #app #match .fighter.rival {
+  background:
+    linear-gradient(270deg, #FF174F29, transparent 34%),
+    linear-gradient(180deg, #300D1C, #190812) !important;
+  border-color: #E91E55 !important;
+}
+
+html body #app #match .avatar-ring {
+  box-shadow:
+    0 0 0 2px #01050AA3,
+    0 0 16px #00D9FFA8,
+    inset 0 2px 0 #EAFBFF57 !important;
+}
+
+html body #app #match .avatar-ring.rival {
+  box-shadow:
+    0 0 0 2px #01050AA3,
+    0 0 16px #FF174F94,
+    inset 0 2px 0 #FFD6E247 !important;
+}
+
+html body #app #match .fighter .avatar {
+  border-color: #EAFBFF6B !important;
+  text-shadow: 0 2px 0 #01050AB8, 0 0 10px currentColor;
+}
+
+html body #app #match .score-rail {
+  background: #020611B8;
+  border-color: #173344 !important;
+  box-shadow:
+    inset 0 2px 7px #01050AB8,
+    inset 0 -1px 0 #EAFBFF14,
+    0 2px 4px #01050A75;
+}
+
+html body #app #match .score-track {
+  background:
+    repeating-linear-gradient(90deg, #FFFFFF0E 0 8px, #01050A4D 8px 10px),
+    #02070D;
+  border-color: #173344 !important;
+  box-shadow: inset 0 2px 4px #01050AB3;
+}
+
+html body #app #match .fighter.you .score-track i {
+  background: linear-gradient(180deg, #EAFBFF 0%, #49F6FF 24%, #009BC2 64%, #006B8F 100%) !important;
+  box-shadow: 0 0 8px #00D9FFEB, inset 0 1px 0 #FFFFFFD1;
+}
+
+html body #app #match .fighter.rival .score-track i {
+  background: linear-gradient(180deg, #FFD6E2 0%, #FF6B91 24%, #C51A4C 64%, #8A1235 100%) !important;
+  box-shadow: 0 0 8px #FF174FDC, inset 0 1px 0 #FFFFFFB8;
+}
+
+html body #app #match .vs-column::before {
+  background:
+    radial-gradient(circle at 50% 16%, #F3E8FF2E, transparent 38%),
+    linear-gradient(90deg, #00D9FF3D, #A855F724 48%, #FF174F3A),
+    linear-gradient(180deg, #4C1D95, #080B18) !important;
+  border-color: #D8B4FE47 !important;
+  box-shadow:
+    inset 0 1px 0 #F3E8FF42,
+    inset 0 -10px 12px #01050AA8,
+    0 9px 15px #01050AB8,
+    -5px 0 15px #00D9FF29,
+    5px 0 15px #FF174F21 !important;
+}
+
+html body #app #match .vs-reactor-ring.outer {
+  border-top-color: #D8B4FE;
+  border-left-color: #00D9FF;
+  border-right-color: #FF174F;
+  box-shadow:
+    inset 0 0 0 2px #01050A,
+    inset 0 3px 5px #F3E8FF47,
+    0 0 14px #A855F73D,
+    0 0 14px #FF174F24;
+}
+
+html body #app #match .vs-reactor-core {
+  background:
+    radial-gradient(circle at 34% 28%, #F3E8FF 0 4%, #D8B4FE 12%, transparent 24%),
+    radial-gradient(circle at 38% 32%, #A855F7, #4C1D95 19%, #8A1235 55%, #080B18 76%);
+  box-shadow: 0 0 11px #D8B4FE6B, 0 0 14px #FF174F2E;
+}
+
+html body #app #match .vs-badge {
+  filter:
+    drop-shadow(0 2px 0 #01050AF5)
+    drop-shadow(0 0 12px #A855F7B3)
+    drop-shadow(0 0 12px #FF174F8C) !important;
+}
+
+html body #app #match .vs-column .timer {
+  background:
+    linear-gradient(180deg, #EAFBFF24, transparent 36%),
+    linear-gradient(180deg, #0A2634, #020611) !important;
+  border-color: #00BFE875 !important;
+  box-shadow:
+    inset 0 1px 0 #EAFBFF38,
+    inset 0 -5px 8px #01050AB3,
+    0 4px 0 #01050AAD,
+    0 0 12px #00D9FF29 !important;
+}
+
+html body #app #match .vs-column .timer b {
+  color: #EAFBFF;
+  text-shadow: 0 2px 0 #01050ADC, 0 0 10px #49F6FF9E;
+}
+
+html body #app #match .energy-wrap {
+  background:
+    linear-gradient(180deg, #EAFBFF29 0 1px, transparent 38%),
+    linear-gradient(180deg, #173344 0%, #071521 54%, #02070D 100%) !important;
+  border-color: #00BFE8AD !important;
+  box-shadow:
+    inset 0 1px 0 #EAFBFF3D,
+    inset 0 -7px 11px #01050AB8,
+    0 4px 0 #01050ABD,
+    0 0 16px #00D9FF29 !important;
+}
+
+html body #app #match .energy-wrap small {
+  color: #B9F8FF;
+  text-shadow: 0 0 8px #00D9FFA3;
+}
+
+html body #app #match .energy-wrap b {
+  color: #EAFBFF;
+  text-shadow: 0 2px 0 #01050AF2, 0 0 8px #49F6FF70;
+}
+
+html body #app #match .energy-wrap .energy {
+  background: linear-gradient(180deg, #02070D, #071521 62%, #01050A) !important;
+  border-color: #173344 !important;
+  box-shadow:
+    inset 0 3px 5px #01050AF7,
+    inset 0 -1px 0 #EAFBFF24,
+    0 0 8px #00BFFF29 !important;
+}
+
+html body #app #match .energy-wrap .energy > span {
+  background: linear-gradient(180deg, #B9F8FF 0%, #49F6FF 24%, #00BFFF 61%, #006B8F 100%) !important;
+  box-shadow:
+    0 0 8px #00D9FFC7,
+    inset 0 1px 0 #FFFFFFDC,
+    inset 0 -2px 3px #006B8F80 !important;
+}
+
+html body #app #match .energy-attack {
+  background:
+    linear-gradient(180deg, #EAFBFF29 0 1px, transparent 30%),
+    linear-gradient(180deg, #0A2634, #020611) !important;
+  border-color: #173344 !important;
+  box-shadow:
+    inset 0 1px 0 #EAFBFF3B,
+    inset 0 -9px 13px #01050AB8,
+    0 4px 0 #01050ABD,
+    0 0 13px #00BFFF1A !important;
+}
+
+html body #app #match .energy-attack.burst {
+  --attack-color: #39FF88;
+  background:
+    linear-gradient(180deg, #E4FFF133 0 1px, transparent 32%),
+    radial-gradient(circle at 10% 48%, #39FF8852, transparent 38%),
+    linear-gradient(180deg, #087A42, #04130C 54%, #01050A 100%) !important;
+  border-color: #16894E !important;
+  box-shadow:
+    inset 0 1px 0 #E4FFF147,
+    inset 0 -9px 13px #01050AB3,
+    0 4px 0 #01050ABD,
+    0 0 16px #1DFF8633 !important;
+}
+
+html body #app #match .energy-attack.strike {
+  --attack-color: #FF174F;
+  background:
+    linear-gradient(180deg, #FFE1EA30 0 1px, transparent 32%),
+    radial-gradient(circle at 10% 48%, #FF174F57, transparent 38%),
+    linear-gradient(180deg, #8A1235, #180710 54%, #01050A 100%) !important;
+  border-color: #B7194A !important;
+  box-shadow:
+    inset 0 1px 0 #FFE1EA45,
+    inset 0 -9px 13px #01050ABD,
+    0 4px 0 #01050ABD,
+    0 0 16px #FF174F38 !important;
+}
+
+html body #app #match .energy-attack-glyph {
+  filter: drop-shadow(0 2px 0 #01050AC2) drop-shadow(0 0 7px currentColor) !important;
+}
+
+html body #app #match .energy-attack-copy b {
+  color: #F3FAFF !important;
+  text-shadow: 0 2px 0 #01050AF2, 0 0 8px currentColor;
+}
+
+html body #app #match .energy-attack-copy small {
+  color: #91A8B8 !important;
+}
+
+html body #app #match .you-meta {
+  background:
+    linear-gradient(180deg, #EAFBFF2E 0 1px, transparent 34%),
+    linear-gradient(180deg, #0A2634, #06151F) !important;
+  border-color: #00BFE8AD !important;
+  box-shadow:
+    inset 0 1px 0 #EAFBFF3D,
+    inset 0 -5px 8px #01050AAD,
+    0 4px 0 #01050AA6,
+    0 0 13px #00D9FF24 !important;
+}
+
+html body #app #match .player-side .board-slot {
+  background:
+    linear-gradient(135deg, #EAFBFF1A, transparent 17% 82%, #007A9E14),
+    radial-gradient(ellipse 56% 48% at 50% 40%, #005B783D, transparent 72%),
+    linear-gradient(180deg, #04101A 0%, #01050A 100%) !important;
+  border-color: #00CFFF !important;
+  box-shadow:
+    0 0 0 1px #01050A,
+    0 0 0 3px #007A9E5C,
+    0 2px 0 #DDF8FF4D,
+    0 15px 0 #01050A94,
+    0 24px 38px #01050ADC,
+    0 0 28px #00D9FF4D,
+    inset 0 4px 13px #01050AF5,
+    inset 0 0 0 3px #005B7847,
+    inset 0 -10px 17px #01050AC7 !important;
+}
+
+html body #app #match .board-outer-rail {
+  border-top-color: #6FEAFF;
+  border-left-color: #00CFFF;
+  border-right-color: #033847;
+  border-bottom-color: #01050A;
+  box-shadow:
+    0 3px 0 #007A9E,
+    0 8px 0 #033847,
+    0 15px 0 #04101A,
+    0 23px 22px #01050AF7,
+    inset 0 1px 0 #EAFBFF4D,
+    inset 10px 0 12px #00BFFF1C,
+    inset -10px 0 14px #01050AC7;
+}
+
+html body #app #match .board-energy-glass {
+  border-top-color: #EAFBFF;
+  border-left-color: #00CFFF;
+  border-right-color: #007A9E;
+  border-bottom-color: #005B78;
+  box-shadow:
+    inset 0 1px 0 #FFFFFF52,
+    inset 0 0 12px #00BFFF2E,
+    0 0 8px #00D9FF33 !important;
+}
+
+html body #app #match .board-socket-bed {
+  background:
+    radial-gradient(ellipse 48% 34% at 50% 0%, #005B7821, transparent 72%),
+    repeating-radial-gradient(circle at center, #01050AF0 0 25%, #0A263433 27% 30%, #01050AF7 34% 100%) 0 0 / 12.5% 12.5%,
+    repeating-linear-gradient(90deg, transparent 0 calc(12.5% - 1px), #12394A17 calc(12.5% - 1px) 12.5%),
+    repeating-linear-gradient(0deg, transparent 0 calc(12.5% - 1px), #12394A12 calc(12.5% - 1px) 12.5%),
+    #020812;
+  box-shadow:
+    inset 0 13px 22px #01050AFD,
+    inset 0 0 0 3px #01050A,
+    inset 0 -1px 0 #6FEAFF33;
+}
+
+html body #app #match .board-fastener {
+  background: radial-gradient(circle at 32% 28%, #EAFBFF 0 10%, #91A8B8 24%, #06111C 65%, #01050A 71%);
+  box-shadow: 0 1px 2px #01050A, 0 0 5px #6FEAFF33;
+}
+
+html body #app #match #playerGems {
+  filter:
+    saturate(1.12)
+    contrast(1.12)
+    brightness(1.02)
+    drop-shadow(0 5px 8px #01050AF0)
+    drop-shadow(0 0 8px #00D9FF26) !important;
+}
+
+html body #app #match .ability-deck {
+  background:
+    linear-gradient(112deg, #00D9FF24, transparent 24% 72%, #FF174F1C),
+    linear-gradient(180deg, #173344, #06151F 40%, #01050A) !important;
+  border-color: #007A9E9E !important;
+  border-top-color: #6FEAFF94 !important;
+  box-shadow:
+    0 13px 16px #01050AD1,
+    inset 0 1px 0 #EAFBFF2E,
+    inset 0 -12px 16px #01050A9E !important;
+}
+
+html body #app #match .ability-deck-rail {
+  background: linear-gradient(90deg, #00D9FF, #7CF5FF5C 34%, #A855F752 57%, #FF174F);
+  box-shadow: 0 0 8px #00D9FF52;
+}
+
+html body #app #match .power {
+  background:
+    linear-gradient(180deg, #EAFBFF29 0 1px, transparent 28%),
+    linear-gradient(180deg, #0A2634 0%, #06151F 52%, #01050A 100%) !important;
+  border-color: #173344 !important;
+  box-shadow:
+    inset 0 1px 0 #EAFBFF3B,
+    inset 0 -9px 14px #01050AB8,
+    0 4px 0 #01050AC2,
+    0 11px 18px #01050AB3 !important;
+}
+
+html body #app #match .power:hover:not(:disabled) {
+  border-color: #7CF5FFBD !important;
+  box-shadow:
+    inset 0 1px 0 #FFFFFF4D,
+    inset 0 -9px 14px #01050AAD,
+    0 4px 0 #01050AC2,
+    0 0 18px #00D9FF33 !important;
+}
+
+html body #app #match #freeze {
+  border-color: #00BFE8 !important;
+}
+
+html body #app #match #timeshift {
+  border-color: #7C3AED !important;
+}
+
+html body #app #match #rewind {
+  border-color: #E91E55 !important;
+}
+
+html body #app #match .power .glyph {
+  border-color: #EAFBFF70 !important;
+  background:
+    radial-gradient(circle at 35% 24%, #FFFFFF7A, transparent 43%),
+    linear-gradient(180deg, #0A2634, #06151F) !important;
+  box-shadow:
+    inset 0 3px 7px #EAFBFF4D,
+    inset 0 -7px 10px #01050AB8,
+    0 3px 0 #01050A9E,
+    0 0 15px currentColor !important;
+}
+
+html body #app #match #freeze .glyph {
+  color: #7CF5FF;
+  background:
+    radial-gradient(circle at 35% 24%, #EAFBFF85, transparent 43%),
+    linear-gradient(180deg, #006B8F, #03121A 75%, #020611) !important;
+}
+
+html body #app #match #timeshift .glyph {
+  color: #D8B4FE;
+  background:
+    radial-gradient(circle at 35% 24%, #F3E8FF7A, transparent 43%),
+    linear-gradient(180deg, #4C1D95, #090516 75%, #020611) !important;
+}
+
+html body #app #match #rewind .glyph {
+  color: #FF6B91;
+  background:
+    radial-gradient(circle at 35% 24%, #FFD6E270, transparent 43%),
+    linear-gradient(180deg, #8A1235, #190812 62%, #4C1D95 100%) !important;
+}
+
+html body #app #match .power b {
+  color: #F3FAFF;
+  text-shadow: 0 2px 0 #01050AF5, 0 0 8px currentColor !important;
+}
+
+html body #app #match .power .cost {
+  color: #B9F8FF !important;
+  text-shadow: 0 2px 0 #01050AF0, 0 0 7px currentColor;
+}
+
+html body #app #match .shift-clock,
+html body #app #match .combo,
+html body #app #match .combo-damage {
+  text-shadow: 0 2px 0 #01050AF0, 0 0 8px currentColor !important;
+}
+
+html body #app #match.cast-freeze .player-side .board-slot {
+  box-shadow:
+    0 0 0 1px #01050A,
+    0 0 0 3px #7CF5FF6B,
+    0 0 32px #00D9FF6B,
+    0 24px 38px #01050ADC,
+    inset 0 0 0 3px #00BFFF52 !important;
+}
+
+html body #app #match.cast-shift .player-side .board-slot {
+  box-shadow:
+    0 0 0 1px #01050A,
+    0 0 0 3px #D8B4FE6B,
+    0 0 32px #A855F756,
+    0 24px 38px #01050ADC,
+    inset 0 0 0 3px #7C3AED4D !important;
+}
+
+html body #app #match.cast-rewind .player-side .board-slot {
+  box-shadow:
+    0 0 0 1px #01050A,
+    0 0 0 3px #FF6B9175,
+    0 0 32px #FF174F61,
+    0 24px 38px #01050ADC,
+    inset 0 0 0 3px #8A123552 !important;
+}
+
+html body #app #match.energy-wrap.hot {
+  border-color: #49F6FF !important;
+  box-shadow:
+    inset 0 1px 0 #FFFFFF57,
+    inset 0 -7px 11px #01050AB3,
+    0 4px 0 #01050ABD,
+    0 0 22px #00D9FF52 !important;
+}

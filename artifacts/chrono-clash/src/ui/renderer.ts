@@ -187,7 +187,7 @@ export class BoardRenderer {
       tile.x + cell / 2,
       tile.y + cell / 2,
       cell * 0.16,
-      "#a5f3fc",
+      "#7CF5FF",
       260,
       1.7,
     );
@@ -295,7 +295,7 @@ export class BoardRenderer {
     );
     this.consumeAttacks(snap, now);
     if (snap.freezeUntil > now) {
-      this.combatFloats = this.combatFloats.filter((f) => f.color !== "#ddd6fe");
+      this.combatFloats = this.combatFloats.filter((f) => f.color !== "#E9D5FF");
     }
     this.drawBolts(
       opponentRect.left - parent.left + opponentRect.width / 2,
@@ -462,17 +462,17 @@ export class BoardRenderer {
     this.drawBoardEnergy(ctx, ox, oy, size, isPlayer, boosted, frozen, now);
 
     const rim = boosted
-      ? "rgba(94, 246, 255, 0.92)"
+      ? "#6FEAFFF0"
       : frozen
-        ? "rgba(0, 212, 255, 0.55)"
+        ? "#00D9FF8C"
         : isPlayer
-          ? "rgba(0, 212, 255, 0.78)"
-          : "rgba(255, 0, 76, 0.78)";
+          ? "#00D9FFC7"
+          : "#FF174FC7";
     roundRect(ctx, ox, oy, size, size, 22);
     ctx.strokeStyle = rim;
     ctx.lineWidth = boosted ? 2.8 : isPlayer ? 2.2 : 1.8;
     ctx.stroke();
-    ctx.strokeStyle = isPlayer ? "rgba(186, 230, 253, 0.22)" : "rgba(254, 205, 211, 0.18)";
+    ctx.strokeStyle = isPlayer ? "#B9F8FF38" : "#FFD6E22E";
     ctx.lineWidth = 1;
     roundRect(ctx, ox + 3, oy + 3, size - 6, size - 6, 18);
     ctx.stroke();
@@ -585,7 +585,7 @@ export class BoardRenderer {
               }
               if (Math.abs(tile.fromY - tile.toY) > cell * 0.4) {
                 this.impactSpark(view, tile.x + cell / 2, tile.y + cell / 2, tile.color, cell);
-                this.addShockwave(view, tile.x + cell / 2, tile.y + cell / 2, cell * 0.12, isPlayer ? "#67e8f9" : "#fb7185", 220, 1.2);
+                this.addShockwave(view, tile.x + cell / 2, tile.y + cell / 2, cell * 0.12, isPlayer ? "#00D9FF" : "#FF174F", 220, 1.2);
               }
             }
           }
@@ -665,7 +665,7 @@ export class BoardRenderer {
           px,
           py,
           cell * (combo >= 5 ? 1.55 : combo >= 3 ? 1.28 : 1),
-          isPlayer ? (combo >= 5 ? "#e0f2fe" : "#67e8f9") : (combo >= 5 ? "#ffe4e6" : "#fb7185"),
+          isPlayer ? (combo >= 5 ? "#EAFBFF" : "#00D9FF") : (combo >= 5 ? "#FFD6E2" : "#FF174F"),
           combo >= 5 ? 520 : 380,
           combo >= 5 ? 3.4 : 2.2,
         );
@@ -674,7 +674,7 @@ export class BoardRenderer {
           y: py,
           text: fxEvent.text,
           born: now,
-          color: combo >= 4 || pts >= 400 ? (isPlayer ? "#c8f6ff" : "#ffd0dc") : "#f4fbff",
+          color: combo >= 4 || pts >= 400 ? (isPlayer ? "#EAFBFF" : "#FFD6E2") : "#F3FAFF",
           size: 14 + Math.min(18, Math.log10(pts + 12) * 7 + combo),
           rise: 24 + combo * 5 + Math.min(18, pts / 80),
           life: 640 + Math.min(280, combo * 40 + pts / 12),
@@ -689,7 +689,7 @@ export class BoardRenderer {
             y: oy + size * 0.32,
             text: fxEvent.text,
             born: now,
-            color: combo >= 5 ? "#ffe8ee" : combo >= 4 ? "#ffb3c6" : "#ffd0dc",
+            color: combo >= 5 ? "#FFE1EA" : combo >= 4 ? "#FF6B91" : "#FFD6E2",
             size: 13 + Math.min(14, combo * 2.4),
             rise: 22 + combo * 5,
             life: 700 + Math.min(280, combo * 50),
@@ -704,7 +704,7 @@ export class BoardRenderer {
             ox + size / 2,
             oy + size / 2,
             cell * (combo >= 8 ? 2.7 : combo >= 5 ? 2.2 : 1.8),
-            combo >= 8 ? "#fff3b0" : combo >= 5 ? "#7dd3fc" : "#a5f3fc",
+            combo >= 8 ? "#FFF2B0" : combo >= 5 ? "#7CF5FF" : "#00D9FF",
             combo >= 8 ? 900 : 680,
             combo >= 8 ? 4.2 : 2.8,
           );
@@ -784,16 +784,16 @@ export class BoardRenderer {
         view.flash = Math.max(view.flash, 0.28);
       }
       roundRect(ctx, ox, oy, size, size, 22);
-      ctx.fillStyle = "rgba(160, 220, 255, 0.16)";
+      ctx.fillStyle = "#7CF5FF29";
       ctx.fill();
-      ctx.strokeStyle = "rgba(180, 230, 255, 0.85)";
+      ctx.strokeStyle = "#7CF5FFD9";
       ctx.lineWidth = 2.4;
       ctx.stroke();
       ctx.save();
       ctx.beginPath();
       ctx.rect(ox + 8, oy + 8, size - 16, size - 16);
       ctx.clip();
-      ctx.strokeStyle = "rgba(224, 242, 254, 0.45)";
+      ctx.strokeStyle = "#EAFBFF73";
       ctx.lineWidth = 1.1;
       for (let i = 0; i < 6; i++) {
         const px = ox + 10 + ((i * 53) % (size - 20));
@@ -814,10 +814,10 @@ export class BoardRenderer {
       const secs = Math.max(1, Math.ceil(freezeLeftMs / 1000));
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillStyle = "rgba(8, 24, 40, 0.55)";
+      ctx.fillStyle = "#03121A8C";
       roundRect(ctx, ox + size * 0.18, oy + size * 0.34, size * 0.64, size * 0.32, 16);
       ctx.fill();
-      ctx.fillStyle = "#e8f9ff";
+      ctx.fillStyle = "#EAFBFF";
       ctx.font = "800 12px Outfit, Trebuchet MS, sans-serif";
       ctx.fillText("FREEZE", ox + size / 2, oy + size * 0.42);
       ctx.font = "900 36px Outfit, Trebuchet MS, sans-serif";
@@ -826,24 +826,24 @@ export class BoardRenderer {
 
     if (shiftLeftMs > 0 && !frozen) {
       roundRect(ctx, ox, oy, size, size, 22);
-      ctx.fillStyle = "rgba(56, 189, 248, 0.12)";
+      ctx.fillStyle = "#A855F71F";
       ctx.fill();
-      ctx.strokeStyle = "rgba(125, 211, 252, 0.78)";
+      ctx.strokeStyle = "#D8B4FEC7";
       ctx.lineWidth = 2.2;
       ctx.stroke();
       if (this.fx.quality !== "low" && !this.fx.reducedMotion) {
         const scan = ((now / 28) % (size * 0.7)) - size * 0.1;
-        ctx.fillStyle = "rgba(186, 230, 253, 0.1)";
+        ctx.fillStyle = "#D8B4FE1A";
         roundRect(ctx, ox + 6, oy + scan, size - 12, size * 0.1, 8);
         ctx.fill();
       }
       const secs = Math.max(1, Math.ceil(shiftLeftMs / 1000));
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillStyle = "rgba(8, 24, 40, 0.55)";
+      ctx.fillStyle = "#080B188C";
       roundRect(ctx, ox + size * 0.16, oy + size * 0.36, size * 0.68, size * 0.28, 16);
       ctx.fill();
-      ctx.fillStyle = "#e0f2fe";
+      ctx.fillStyle = "#EAFBFF";
       ctx.font = "800 12px Outfit, Trebuchet MS, sans-serif";
       ctx.fillText("TIME STOLEN", ox + size / 2, oy + size * 0.44);
       ctx.font = "900 28px Outfit, Trebuchet MS, sans-serif";
@@ -852,7 +852,7 @@ export class BoardRenderer {
         const cx = ox + size / 2;
         const cy = oy + size / 2;
         const spin = now / 180;
-        ctx.strokeStyle = "rgba(186, 230, 253, 0.7)";
+        ctx.strokeStyle = "#D8B4FEB3";
         ctx.lineWidth = 1.4;
         for (let i = 0; i < 8; i++) {
           const a = spin + (Math.PI * 2 * i) / 8;
@@ -866,11 +866,11 @@ export class BoardRenderer {
 
     if (lockLeftMs > 0) {
       roundRect(ctx, ox, oy, size, size, 22);
-      ctx.fillStyle = "rgba(255, 80, 110, 0.14)";
+      ctx.fillStyle = "#FF174F24";
       ctx.fill();
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillStyle = "#fecdd3";
+      ctx.fillStyle = "#FFD6E2";
       ctx.font = "800 13px Outfit, Trebuchet MS, sans-serif";
       ctx.fillText("LOCKED", ox + size / 2, oy + size * 0.5);
     }
@@ -883,15 +883,15 @@ export class BoardRenderer {
       const freeze = label.includes("FREEZE");
       const rewind = label.includes("REWIND") || label.includes("BOARD RESTORED");
       const fill = freeze
-        ? `rgba(125, 211, 252, ${0.18 * t})`
+        ? colorWithAlpha("#00D9FF", 0.18 * t)
         : rewind
-          ? `rgba(244, 63, 94, ${0.16 * t})`
-          : `rgba(56, 189, 248, ${0.16 * t})`;
+          ? colorWithAlpha("#FF174F", 0.16 * t)
+          : colorWithAlpha("#A855F7", 0.16 * t);
       const stroke = freeze
-        ? `rgba(186, 230, 253, ${0.9 * t})`
+        ? colorWithAlpha("#7CF5FF", 0.9 * t)
         : rewind
-          ? `rgba(253, 164, 175, ${0.85 * t})`
-          : `rgba(186, 230, 253, ${0.85 * t})`;
+          ? colorWithAlpha("#FF6B91", 0.85 * t)
+          : colorWithAlpha("#D8B4FE", 0.85 * t);
       roundRect(ctx, ox, oy, size, size, 22);
       ctx.fillStyle = fill;
       ctx.fill();
@@ -902,7 +902,7 @@ export class BoardRenderer {
         const cx = ox + size / 2;
         const cy = oy + size / 2;
         const spin = -now / 90;
-        ctx.strokeStyle = `rgba(253, 164, 175, ${0.75 * t})`;
+        ctx.strokeStyle = colorWithAlpha("#FF6B91", 0.75 * t);
         ctx.lineWidth = 1.6;
         ctx.beginPath();
         ctx.arc(cx, cy, size * 0.28, spin, spin + 1.8);
@@ -913,10 +913,10 @@ export class BoardRenderer {
       }
       if (!frozen && !(shiftLeftMs > 0)) {
         ctx.fillStyle = freeze
-          ? `rgba(224, 242, 254, ${0.92 * t})`
+          ? colorWithAlpha("#EAFBFF", 0.92 * t)
           : rewind
-            ? `rgba(254, 205, 211, ${0.9 * t})`
-            : `rgba(224, 242, 254, ${0.9 * t})`;
+            ? colorWithAlpha("#FFD6E2", 0.9 * t)
+            : colorWithAlpha("#F3E8FF", 0.9 * t);
         ctx.font = "800 13px Outfit, Trebuchet MS, sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -925,12 +925,12 @@ export class BoardRenderer {
     } else if (rewindFx && now - rewindFx.born < 720) {
       const t = 1 - (now - rewindFx.born) / 720;
       roundRect(ctx, ox, oy, size, size, 22);
-      ctx.fillStyle = `rgba(244, 63, 94, ${0.16 * t})`;
+      ctx.fillStyle = colorWithAlpha("#FF174F", 0.16 * t);
       ctx.fill();
-      ctx.strokeStyle = `rgba(253, 164, 175, ${0.85 * t})`;
+      ctx.strokeStyle = colorWithAlpha("#FF6B91", 0.85 * t);
       ctx.lineWidth = 2.4;
       ctx.stroke();
-      ctx.fillStyle = `rgba(254, 205, 211, ${0.9 * t})`;
+      ctx.fillStyle = colorWithAlpha("#FFD6E2", 0.9 * t);
       ctx.font = "800 13px Outfit, Trebuchet MS, sans-serif";
       ctx.textAlign = "center";
       ctx.fillText("REWIND", ox + size / 2, oy + size * 0.5);
@@ -939,8 +939,8 @@ export class BoardRenderer {
     if (view.flash > 0.02) {
       roundRect(ctx, ox, oy, size, size, 22);
       ctx.fillStyle = isPlayer
-        ? `rgba(186, 230, 253, ${view.flash * 0.28})`
-        : `rgba(254, 205, 211, ${view.flash * 0.24})`;
+        ? colorWithAlpha("#EAFBFF", view.flash * 0.28)
+        : colorWithAlpha("#FFD6E2", view.flash * 0.24);
       ctx.fill();
     }
     ctx.restore();
@@ -978,7 +978,7 @@ export class BoardRenderer {
     const active = boosted || frozen || isPlayer;
     if (!active) return;
     const pulse = 0.5 + Math.sin(now / (boosted ? 150 : 420)) * 0.5;
-    const color = frozen ? "#bae6fd" : isPlayer ? "#22d3ee" : "#fb7185";
+    const color = frozen ? "#7CF5FF" : isPlayer ? "#00D9FF" : "#FF174F";
     const alpha = (boosted || frozen ? 0.16 : 0.055) + pulse * (boosted || frozen ? 0.13 : 0.035);
     ctx.save();
     ctx.globalAlpha = alpha;
@@ -1052,11 +1052,11 @@ export class BoardRenderer {
     const hex = COLORS[color - 1] ?? "#fff";
     const accent =
       this.fx.vfxTheme === "nova-fx"
-        ? "#fff3b0"
+        ? "#FFD447"
         : this.fx.vfxTheme === "aurora-fx"
-          ? "#7dd3fc"
+          ? "#7CF5FF"
           : this.fx.vfxTheme === "ember-fx"
-            ? "#fb923c"
+            ? "#FF9D00"
             : hex;
     for (let i = 0; i < n; i++) {
       const a = (Math.PI * 2 * i) / n + Math.random() * 0.35;
@@ -1069,7 +1069,7 @@ export class BoardRenderer {
         life: 0.82,
         max: 0.82,
         size: cell * (0.038 + Math.random() * 0.04),
-        color: i % 3 === 0 ? "#f8fdff" : i % 2 === 0 ? hex : accent,
+        color: i % 3 === 0 ? "#EAFBFF" : i % 2 === 0 ? hex : accent,
       });
     }
     this.capParticles(view);
@@ -1077,7 +1077,7 @@ export class BoardRenderer {
 
   private impactSpark(view: BoardView, x: number, y: number, color: number, cell: number): void {
     if (this.fx.quality === "low" || this.fx.reducedMotion) return;
-    const hex = COLORS[color - 1] ?? "#e8ffff";
+    const hex = COLORS[color - 1] ?? "#EAFBFF";
     const n = this.fx.quality === "medium" ? 4 : 6;
     for (let i = 0; i < n; i++) {
       const a = (Math.PI * 2 * i) / n + Math.random() * 0.2;
@@ -1090,7 +1090,7 @@ export class BoardRenderer {
         life: 0.72,
         max: 0.72,
         size: cell * (0.028 + Math.random() * 0.022),
-        color: i % 2 === 0 ? "#f8fdff" : hex,
+        color: i % 2 === 0 ? "#EAFBFF" : hex,
         g: 0.04,
       });
     }
@@ -1154,7 +1154,7 @@ export class BoardRenderer {
     const rewind = t.includes("REWIND") || t.includes("BOARD RESTORED");
     const burst = t.includes("ENERGY BURST");
     const mega = t.includes("MEGA STRIKE");
-    const powerColor = freeze ? "#bae6fd" : rewind ? "#fb7185" : mega ? "#fb7185" : burst ? "#22d3ee" : "#7dd3fc";
+    const powerColor = freeze ? "#00D9FF" : rewind ? "#FF174F" : mega ? "#FF174F" : burst ? "#39FF88" : "#A855F7";
     view.flash = Math.max(view.flash, (freeze ? 0.32 : rewind ? 0.26 : mega ? 0.38 : 0.24) * Math.max(0.35, mul));
     view.shake = Math.max(view.shake, (freeze ? 4.6 : rewind ? 3.8 : mega ? 6.2 : 3.4) * mul);
     this.addShockwave(view, x, y, cell * (mega ? 3.7 : burst ? 2.8 : freeze ? 2.2 : 2.4), powerColor, mega ? 900 : 660, mega ? 4.8 : 3.2);
@@ -1170,7 +1170,7 @@ export class BoardRenderer {
           life: 1,
           max: 1,
           size: cell * (0.08 + Math.random() * 0.08),
-          color: i % 2 ? "#e0f2fe" : "#7dd3fc",
+          color: i % 2 ? "#EAFBFF" : "#7CF5FF",
           g: 0.16,
         });
       }
@@ -1187,7 +1187,7 @@ export class BoardRenderer {
           life: 1,
           max: 1,
           size: cell * 0.09,
-          color: i % 2 ? "#fecdd3" : "#fb7185",
+          color: i % 2 ? "#E9D5FF" : "#FF174F",
           g: 0,
         });
       }
@@ -1203,7 +1203,7 @@ export class BoardRenderer {
           life: 1,
           max: 1,
           size: cell * 0.08,
-          color: i % 2 ? (mega ? "#ffe4e6" : "#e0f2fe") : powerColor,
+          color: i % 2 ? (mega ? "#FFE1EA" : "#EAFBFF") : powerColor,
           g: 0.03,
         });
       }
@@ -1214,7 +1214,7 @@ export class BoardRenderer {
   private ringBurst(view: BoardView, x: number, y: number, cell: number, combo: number): void {
     if (this.fx.quality === "low" || this.fx.reducedMotion) return;
     const n = this.fx.quality === "medium" ? 5 : combo >= 8 ? 8 : combo >= 5 ? 7 : 6;
-    const energy = combo >= 8 ? "#e8ffff" : combo >= 5 ? "#7aecf4" : "#9ee8f4";
+    const energy = combo >= 8 ? "#EAFBFF" : combo >= 5 ? "#7CF5FF" : "#00D9FF";
     for (let i = 0; i < n; i++) {
       const a = (Math.PI * 2 * i) / n;
       const sp = 1.8 + combo * 0.18;
@@ -1308,8 +1308,8 @@ export class BoardRenderer {
     glow.addColorStop(
       1,
       last10
-        ? `rgba(255, 50, 80, ${(0.12 + pulse * 0.12) * Math.max(0.45, mul)})`
-        : `rgba(255, 80, 90, ${(0.07 + pulse * 0.07) * Math.max(0.45, mul)})`,
+        ? colorWithAlpha("#FF174F", (0.12 + pulse * 0.12) * Math.max(0.45, mul))
+        : colorWithAlpha("#8A1235", (0.07 + pulse * 0.07) * Math.max(0.45, mul)),
     );
     ctx.fillStyle = glow;
     ctx.fillRect(0, 0, w, h);
@@ -1356,9 +1356,9 @@ export class BoardRenderer {
       const strong = bolt.combo >= 4;
       if (this.fx.quality !== "low" && t < 1 && !this.fx.reducedMotion) {
         ctx.save();
-        const hue = bolt.fromPlayer ? "#38bdf8" : "#fb7185";
-        const core = bolt.fromPlayer ? "#e0f2fe" : "#ffe4e6";
-        ctx.strokeStyle = bolt.fromPlayer ? "rgba(125, 211, 252, 0.85)" : "rgba(251, 113, 133, 0.85)";
+        const hue = bolt.fromPlayer ? "#00D9FF" : "#FF174F";
+        const core = bolt.fromPlayer ? "#EAFBFF" : "#FFD6E2";
+        ctx.strokeStyle = bolt.fromPlayer ? "#7CF5FFD9" : "#FF6B91D9";
         ctx.lineWidth = strong ? 6 : 3.6;
         ctx.globalAlpha = 0.8;
         ctx.beginPath();
@@ -1366,7 +1366,7 @@ export class BoardRenderer {
         ctx.quadraticCurveTo((x0 + x) / 2 + (bolt.fromPlayer ? 18 : -18), (y0 + y) / 2, x, y);
         ctx.stroke();
         const orb = ctx.createRadialGradient(x - 3, y - 3, 1, x, y, strong ? 16 : 11);
-        orb.addColorStop(0, "#ffffff");
+        orb.addColorStop(0, "#FFFFFF");
         orb.addColorStop(0.35, core);
         orb.addColorStop(0.7, hue);
         orb.addColorStop(1, "rgba(0,0,0,0)");
@@ -1388,7 +1388,7 @@ export class BoardRenderer {
             y: bolt.fromPlayer ? y1 : y0,
             text: bolt.text,
             born: now,
-            color: bolt.fromPlayer ? "#ddd6fe" : "#fecdd3",
+         color: bolt.fromPlayer ? "#E9D5FF" : "#FFD6E2",
             size: bolt.fromPlayer ? (bolt.combo >= 5 ? 15 : 12) : 11,
             rise: 16,
             life: 520,
@@ -1412,7 +1412,7 @@ export class BoardRenderer {
       ctx.globalAlpha = Math.max(0, 1 - t);
       ctx.font = `800 ${f.size}px Orbitron, Outfit, Trebuchet MS, sans-serif`;
       const tw = ctx.measureText(f.text).width;
-      ctx.fillStyle = "rgba(8, 10, 22, 0.55)";
+      ctx.fillStyle = "#080B188C";
       roundRect(ctx, f.x - tw / 2 - 8, f.y - t * f.rise - f.size, tw + 16, f.size + 10, 8);
       ctx.fill();
       ctx.fillStyle = f.color;
@@ -1433,7 +1433,7 @@ export class BoardRenderer {
     dragging = false,
   ): void {
     const ctx = this.ctx;
-    const color = COLORS[tile.color - 1] ?? "#fff";
+    const color = COLORS[tile.color - 1] ?? "#FFFFFF";
     const pulse =
       selected && this.fx.animation !== "low" && !this.fx.reducedMotion ? 1 + Math.sin(now / 140) * 0.03 : 1;
     const visScale = tile.dying ? tile.scale : Math.min(tile.scale, 1.04);
@@ -1528,15 +1528,15 @@ export class BoardRenderer {
       const ring = Math.max(5, size * 0.2);
       roundRect(ctx, x + 1.6, y + 1.6, size - 3.2, size - 3.2, ring);
       if (selected) {
-        ctx.strokeStyle = "#7eeaff";
+        ctx.strokeStyle = "#7CF5FF";
         ctx.lineWidth = 2.1;
-        ctx.shadowColor = "rgba(126, 234, 255, 0.96)";
+        ctx.shadowColor = "#7CF5FFF5";
         ctx.shadowBlur = 10;
       } else {
         const hintPulse = 0.62 + Math.sin(now / 180) * 0.38;
-        ctx.strokeStyle = `rgba(186, 230, 253, ${0.55 + hintPulse * 0.3})`;
+        ctx.strokeStyle = colorWithAlpha("#7CF5FF", 0.55 + hintPulse * 0.3);
         ctx.lineWidth = 1.8;
-        ctx.shadowColor = "rgba(186, 230, 253, 0.7)";
+        ctx.shadowColor = "#7CF5FFB3";
         ctx.shadowBlur = 6;
       }
       ctx.stroke();
@@ -1763,17 +1763,17 @@ function boardLayout(x: number, y: number, w: number, h: number): {
 function crystalAccent(colorIndex: number): { core: string; edge: string; bloom: string } {
   switch (colorIndex) {
     case 1:
-      return { core: "rgba(255, 128, 168, 0.92)", edge: "rgba(255, 86, 132, 1)", bloom: "rgba(255, 32, 88, 0.26)" };
+      return { core: "#FF48C8", edge: "#FFE1F4", bloom: "#FF167F55" };
     case 2:
-      return { core: "rgba(255, 242, 168, 0.94)", edge: "rgba(255, 214, 64, 1)", bloom: "rgba(255, 196, 32, 0.24)" };
+      return { core: "#FFD447", edge: "#FFF2B0", bloom: "#FF9D0055" };
     case 3:
-      return { core: "rgba(140, 255, 196, 0.9)", edge: "rgba(48, 255, 150, 1)", bloom: "rgba(16, 220, 120, 0.22)" };
+      return { core: "#35FFB0", edge: "#D9FFF1", bloom: "#00B86B55" };
     case 4:
-      return { core: "rgba(176, 248, 255, 0.94)", edge: "rgba(96, 232, 255, 1)", bloom: "rgba(0, 176, 255, 0.26)" };
+      return { core: "#28C8FF", edge: "#DDF8FF", bloom: "#126BFF55" };
     case 5:
-      return { core: "rgba(236, 156, 255, 0.9)", edge: "rgba(214, 96, 255, 1)", bloom: "rgba(176, 48, 255, 0.22)" };
+      return { core: "#D94CFF", edge: "#F3D9FF", bloom: "#8A20FF55" };
     default:
-      return { core: "rgba(150, 255, 248, 0.94)", edge: "rgba(32, 255, 232, 1)", bloom: "rgba(0, 232, 220, 0.24)" };
+      return { core: "#49F6FF", edge: "#EAFBFF", bloom: "#00BFFF55" };
   }
 }
 
@@ -1786,40 +1786,40 @@ function paintDeviceBoard(
 ): void {
   const ember = theme === "ember";
   const aurora = theme === "aurora";
-  const rim = isPlayer ? "#00d4ff" : "#ff004c";
-  const rimHot = isPlayer ? "#e8ffff" : "#ffd0dc";
-  const rimSoft = isPlayer ? "rgba(0, 196, 220, 0.62)" : "rgba(220, 24, 72, 0.58)";
-  const rimDim = isPlayer ? "rgba(0, 170, 200, 0.12)" : "rgba(200, 30, 70, 0.1)";
+  const rim = isPlayer ? "#00CFFF" : "#E91E55";
+  const rimHot = isPlayer ? "#6FEAFF" : "#FFD6E2";
+  const rimSoft = isPlayer ? "#007A9E9E" : "#8F163D94";
+  const rimDim = isPlayer ? "#005B7833" : "#8F163D26";
   const body = g.createLinearGradient(0, 0, 0, size);
   if (ember) {
-    body.addColorStop(0, "#241016");
-    body.addColorStop(0.5, "#12080c");
+    body.addColorStop(0, "#300D1C");
+    body.addColorStop(0.5, "#190812");
     body.addColorStop(1, "#080204");
   } else if (aurora) {
-    body.addColorStop(0, "#102028");
-    body.addColorStop(0.5, "#0a141c");
-    body.addColorStop(1, "#04080c");
+    body.addColorStop(0, "#0A2634");
+    body.addColorStop(0.5, "#06151F");
+    body.addColorStop(1, "#020611");
   } else if (isPlayer) {
-    body.addColorStop(0, "#142838");
-    body.addColorStop(0.22, "#0a1a26");
-    body.addColorStop(0.55, "#061018");
-    body.addColorStop(1, "#02080c");
+    body.addColorStop(0, "#173344");
+    body.addColorStop(0.22, "#0A2634");
+    body.addColorStop(0.55, "#06131D");
+    body.addColorStop(1, "#01050A");
   } else {
-    body.addColorStop(0, "#2a1018");
-    body.addColorStop(0.22, "#18080c");
-    body.addColorStop(0.55, "#100408");
-    body.addColorStop(1, "#060204");
+    body.addColorStop(0, "#300D1C");
+    body.addColorStop(0.22, "#190812");
+    body.addColorStop(0.55, "#180710");
+    body.addColorStop(1, "#01050A");
   }
   roundRect(g, 0, 0, size, size, 22);
   g.fillStyle = body;
   g.fill();
 
   const metal = g.createLinearGradient(0, 0, size, size);
-  metal.addColorStop(0, isPlayer ? "rgba(170, 210, 230, 0.16)" : "rgba(210, 130, 150, 0.12)");
-  metal.addColorStop(0.22, "rgba(255,255,255,0.08)");
-  metal.addColorStop(0.48, "rgba(8, 14, 22, 0.18)");
-  metal.addColorStop(0.72, "rgba(0,0,0,0.22)");
-  metal.addColorStop(1, "rgba(0,0,0,0.58)");
+  metal.addColorStop(0, isPlayer ? "#DDF8FF29" : "#FFD6E21F");
+  metal.addColorStop(0.22, "#FFFFFF14");
+  metal.addColorStop(0.48, "#0613222E");
+  metal.addColorStop(0.72, "#01050A38");
+  metal.addColorStop(1, "#01050A94");
   g.fillStyle = metal;
   g.fill();
 
@@ -1852,14 +1852,14 @@ function paintDeviceBoard(
   g.fill();
 
   const edgeLite = g.createLinearGradient(0, 0, size, 0);
-  edgeLite.addColorStop(0, isPlayer ? "rgba(0, 212, 255, 0.3)" : "rgba(255, 0, 76, 0.12)");
-  edgeLite.addColorStop(0.45, "rgba(255,255,255,0)");
-  edgeLite.addColorStop(1, isPlayer ? "rgba(0, 212, 255, 0.12)" : "rgba(255, 0, 76, 0.26)");
+  edgeLite.addColorStop(0, isPlayer ? "#00CFFF4D" : "#FF174F1F");
+  edgeLite.addColorStop(0.45, "#FFFFFF00");
+  edgeLite.addColorStop(1, isPlayer ? "#00CFFF1F" : "#FF174F42");
   g.fillStyle = edgeLite;
   g.fill();
 
   roundRect(g, 0.7, 0.7, size - 1.4, size - 1.4, 21);
-  g.strokeStyle = "#010208";
+   g.strokeStyle = "#01050A";
   g.lineWidth = 1.4;
   g.stroke();
 
@@ -1869,7 +1869,7 @@ function paintDeviceBoard(
   g.stroke();
 
   roundRect(g, 3.15, 3.15, size - 6.3, size - 6.3, 18);
-  g.strokeStyle = "rgba(255,255,255,0.16)";
+  g.strokeStyle = "#FFFFFF29";
   g.lineWidth = 0.9;
   g.stroke();
 
@@ -1879,10 +1879,10 @@ function paintDeviceBoard(
   g.stroke();
 
   roundRect(g, 6.2, 6.2, size - 12.4, size - 12.4, 14);
-  g.fillStyle = isPlayer ? "#01050a" : "#090104";
+   g.fillStyle = isPlayer ? "#04101A" : "#190812";
   g.fill();
   const pit = g.createRadialGradient(size * 0.5, size * 0.38, size * 0.05, size * 0.5, size * 0.52, size * 0.76);
-  pit.addColorStop(0, isPlayer ? "rgba(0, 42, 68, 0.32)" : "rgba(68, 8, 22, 0.24)");
+  pit.addColorStop(0, isPlayer ? "#005B7852" : "#8A12353D");
   pit.addColorStop(0.5, "rgba(0,0,0,0.22)");
   pit.addColorStop(1, "rgba(0,0,0,0.7)");
   g.fillStyle = pit;
@@ -1891,11 +1891,11 @@ function paintDeviceBoard(
   g.lineWidth = 1;
   g.stroke();
   roundRect(g, 6.9, 6.9, size - 13.8, size - 13.8, 13);
-  g.strokeStyle = "rgba(0,0,0,0.55)";
+  g.strokeStyle = "#01050A8C";
   g.lineWidth = 2.2;
   g.stroke();
   roundRect(g, 5.05, 5.05, size - 10.1, size - 10.1, 15);
-  g.strokeStyle = isPlayer ? "rgba(210, 240, 255, 0.16)" : "rgba(255, 200, 214, 0.12)";
+  g.strokeStyle = isPlayer ? "#DDF8FF29" : "#FFD6E21F";
   g.lineWidth = 0.9;
   g.stroke();
 
@@ -1945,21 +1945,21 @@ function paintDeviceBoard(
   for (const [rx, ry] of rivets) {
     g.beginPath();
     g.arc(rx, ry, 1.55, 0, Math.PI * 2);
-    g.fillStyle = isPlayer ? "#071820" : "#1a060a";
+   g.fillStyle = isPlayer ? "#061321" : "#300D1C";
     g.fill();
     g.strokeStyle = rim;
     g.lineWidth = 0.85;
     g.stroke();
     g.beginPath();
     g.arc(rx - 0.4, ry - 0.45, 0.55, 0, Math.PI * 2);
-    g.fillStyle = "rgba(255,255,255,0.62)";
+    g.fillStyle = "#FFFFFF9E";
     g.fill();
   }
   g.restore();
 
   const wellR = Math.max(3.2, cell * 0.15);
   const pad = Math.max(1.8, cell * 0.11);
-  const lipFill = isPlayer ? "#06121a" : "#160508";
+  const lipFill = isPlayer ? "#06111C" : "#190812";
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       const wx = FRAME + GAP + c * (cell + GAP);
@@ -1968,18 +1968,18 @@ function paintDeviceBoard(
       g.fillStyle = lipFill;
       g.fill();
       const well = g.createLinearGradient(wx, wy, wx, wy + cell);
-      well.addColorStop(0, isPlayer ? "rgba(0, 42, 64, 0.28)" : "rgba(64, 8, 20, 0.22)");
-      well.addColorStop(0.42, "rgba(0,0,0,0)");
-      well.addColorStop(1, "rgba(0,0,0,0.78)");
+      well.addColorStop(0, isPlayer ? "#005B7847" : "#8A123538");
+      well.addColorStop(0.42, "#01050A00");
+      well.addColorStop(1, "#01050AC7");
       g.fillStyle = well;
       g.fill();
       roundRect(g, wx + pad, wy + pad, cell - pad * 2, cell - pad * 2, Math.max(2, wellR - 1.5));
-      g.fillStyle = (r + c) % 2 === 0 ? "#01060c" : "#000104";
+       g.fillStyle = (r + c) % 2 === 0 ? "#02060D" : "#06111C";
       g.fill();
       const dent = g.createLinearGradient(wx, wy, wx, wy + cell);
-      dent.addColorStop(0, "rgba(255,255,255,0.05)");
-      dent.addColorStop(0.32, "rgba(0,0,0,0)");
-      dent.addColorStop(1, "rgba(0,0,0,0.42)");
+      dent.addColorStop(0, "#FFFFFF0D");
+      dent.addColorStop(0.32, "#01050A00");
+      dent.addColorStop(1, "#01050A6B");
       g.fillStyle = dent;
       g.fill();
       const pocket = g.createRadialGradient(
@@ -1990,18 +1990,18 @@ function paintDeviceBoard(
         wy + cell * 0.58,
         cell * 0.46,
       );
-      pocket.addColorStop(0, "rgba(0,0,0,0.62)");
-      pocket.addColorStop(1, "rgba(0,0,0,0)");
+      pocket.addColorStop(0, "#01050A9E");
+      pocket.addColorStop(1, "#01050A00");
       g.fillStyle = pocket;
       g.fill();
       const lip = g.createLinearGradient(wx, wy, wx + cell * 0.62, wy + cell * 0.28);
-      lip.addColorStop(0, "rgba(255,255,255,0.1)");
-      lip.addColorStop(0.45, "rgba(255,255,255,0.03)");
-      lip.addColorStop(1, "rgba(255,255,255,0)");
+      lip.addColorStop(0, "#FFFFFF1A");
+      lip.addColorStop(0.45, "#FFFFFF08");
+      lip.addColorStop(1, "#FFFFFF00");
       g.fillStyle = lip;
       roundRect(g, wx + pad, wy + pad, cell - pad * 2, Math.max(4, (cell - pad * 2) * 0.38), Math.max(2, wellR - 1.5));
       g.fill();
-      g.strokeStyle = "rgba(0,0,0,0.48)";
+      g.strokeStyle = "#01050A7A";
       g.lineWidth = 1;
       roundRect(g, wx + 0.8, wy + 0.8, cell - 1.6, cell - 1.6, wellR);
       g.stroke();
@@ -2009,7 +2009,7 @@ function paintDeviceBoard(
       g.lineWidth = 0.55;
       roundRect(g, wx + 0.5, wy + 0.5, cell - 1, cell - 1, wellR);
       g.stroke();
-      g.strokeStyle = isPlayer ? "rgba(160, 200, 220, 0.06)" : "rgba(200, 150, 170, 0.05)";
+       g.strokeStyle = isPlayer ? "#12394A2E" : "#8F163D22";
       g.lineWidth = 0.55;
       roundRect(g, wx + pad * 0.45, wy + pad * 0.45, cell - pad * 0.9, cell - pad * 0.9, Math.max(2, wellR - 1));
       g.stroke();
@@ -2020,15 +2020,15 @@ function paintDeviceBoard(
   roundRect(g, FRAME, FRAME, size - FRAME * 2, size - FRAME * 2, 13);
   g.clip();
   const sheen = g.createLinearGradient(FRAME, FRAME, size * 0.7, FRAME + (size - FRAME * 2) * 0.4);
-  sheen.addColorStop(0, isPlayer ? "rgba(190, 230, 255, 0.055)" : "rgba(255, 190, 210, 0.04)");
-  sheen.addColorStop(0.3, "rgba(255,255,255,0.02)");
-  sheen.addColorStop(0.58, "rgba(255,255,255,0)");
-  sheen.addColorStop(1, "rgba(0,0,0,0.12)");
+  sheen.addColorStop(0, isPlayer ? "#DDF8FF0E" : "#FFD6E20A");
+  sheen.addColorStop(0.3, "#FFFFFF05");
+  sheen.addColorStop(0.58, "#FFFFFF00");
+  sheen.addColorStop(1, "#01050A1F");
   g.fillStyle = sheen;
   g.fillRect(FRAME, FRAME, size - FRAME * 2, size - FRAME * 2);
   const innerLit = g.createLinearGradient(FRAME, FRAME, FRAME, FRAME + 16);
-  innerLit.addColorStop(0, "rgba(255,255,255,0.07)");
-  innerLit.addColorStop(1, "rgba(255,255,255,0)");
+  innerLit.addColorStop(0, "#FFFFFF12");
+  innerLit.addColorStop(1, "#FFFFFF00");
   g.fillStyle = innerLit;
   g.fillRect(FRAME, FRAME, size - FRAME * 2, 16);
   g.restore();
@@ -2050,6 +2050,13 @@ function roundRect(
   ctx.arcTo(x, y + h, x, y, rr);
   ctx.arcTo(x, y, x + w, y, rr);
   ctx.closePath();
+}
+
+function colorWithAlpha(hex: string, opacity: number): string {
+  const alpha = Math.round(Math.max(0, Math.min(1, opacity)) * 255)
+    .toString(16)
+    .padStart(2, "0");
+  return `${hex}${alpha}`;
 }
 
 function shade(hex: string, mul: number): string {
@@ -2118,21 +2125,21 @@ function paintCrystalOptics(
     ctx.lineTo(cx - r * 0.58, cy - r * 0.4);
     ctx.lineTo(cx, cy + r * 0.68);
     ctx.closePath();
-    ctx.fillStyle = "rgba(80, 0, 24, 0.34)";
+    ctx.fillStyle = "#8F084857";
     ctx.fill();
     ctx.beginPath();
     ctx.moveTo(cx, cy - r * 0.18);
     ctx.lineTo(cx + r * 0.58, cy - r * 0.4);
     ctx.lineTo(cx, cy + r * 0.68);
     ctx.closePath();
-    ctx.fillStyle = "rgba(255, 230, 240, 0.28)";
+    ctx.fillStyle = "#FFE1F447";
     ctx.fill();
     ctx.beginPath();
     ctx.moveTo(cx, cy + r * 0.22);
     ctx.lineTo(cx - r * 0.3, cy - r * 0.16);
     ctx.lineTo(cx + r * 0.3, cy - r * 0.16);
     ctx.closePath();
-    ctx.fillStyle = "rgba(255, 120, 160, 0.28)";
+    ctx.fillStyle = "#FF48C847";
     ctx.fill();
   } else if (colorIndex === 2) {
     for (let i = 0; i < 5; i++) {
@@ -2143,11 +2150,11 @@ function paintCrystalOptics(
       ctx.lineTo(cx + Math.cos(a0) * r * 0.74, cy + Math.sin(a0) * r * 0.74);
       ctx.lineTo(cx + Math.cos(a1) * r * 0.74, cy + Math.sin(a1) * r * 0.74);
       ctx.closePath();
-      ctx.fillStyle = i % 2 === 0 ? "rgba(255, 220, 90, 0.28)" : "rgba(255, 255, 255, 0.14)";
+      ctx.fillStyle = i % 2 === 0 ? "#FFD44747" : "#FFF2B024";
       ctx.fill();
     }
     ctx.beginPath();
-    ctx.strokeStyle = "rgba(230, 240, 255, 0.35)";
+    ctx.strokeStyle = "#FFF2B059";
     ctx.lineWidth = Math.max(1.4, s * 0.03);
     polygonPath(ctx, cx, cy, r * 0.78, 5, -Math.PI / 2);
     ctx.stroke();
@@ -2157,14 +2164,14 @@ function paintCrystalOptics(
     ctx.lineTo(cx - r * 0.46, cy + r * 0.34);
     ctx.lineTo(cx, cy + r * 0.18);
     ctx.closePath();
-    ctx.fillStyle = "rgba(0, 40, 18, 0.28)";
+    ctx.fillStyle = "#005C3847";
     ctx.fill();
     ctx.beginPath();
     ctx.moveTo(cx, cy - r * 0.5);
     ctx.lineTo(cx + r * 0.46, cy + r * 0.34);
     ctx.lineTo(cx, cy + r * 0.18);
     ctx.closePath();
-    ctx.fillStyle = "rgba(210, 255, 230, 0.26)";
+    ctx.fillStyle = "#D9FFF142";
     ctx.fill();
     ctx.beginPath();
     ctx.moveTo(cx, cy - r * 0.36);
@@ -2184,7 +2191,7 @@ function paintCrystalOptics(
     ctx.lineTo(cx + t, cy - t);
     ctx.lineTo(cx - t, cy - t);
     ctx.closePath();
-    ctx.fillStyle = "rgba(255,255,255,0.26)";
+    ctx.fillStyle = "#DDF8FF42";
     ctx.fill();
     ctx.beginPath();
     ctx.moveTo(cx + r * 0.64, cy - r * 0.64);
@@ -2192,7 +2199,7 @@ function paintCrystalOptics(
     ctx.lineTo(cx + t, cy + t);
     ctx.lineTo(cx + t, cy - t);
     ctx.closePath();
-    ctx.fillStyle = "rgba(0, 30, 80, 0.22)";
+    ctx.fillStyle = "#073A9E38";
     ctx.fill();
     ctx.beginPath();
     ctx.moveTo(cx - r * 0.64, cy + r * 0.64);
@@ -2200,7 +2207,7 @@ function paintCrystalOptics(
     ctx.lineTo(cx + t, cy + t);
     ctx.lineTo(cx - t, cy + t);
     ctx.closePath();
-    ctx.fillStyle = "rgba(0, 10, 40, 0.18)";
+    ctx.fillStyle = "#073A9E2E";
     ctx.fill();
   } else if (colorIndex === 5) {
     ctx.beginPath();
@@ -2221,18 +2228,18 @@ function paintCrystalOptics(
     ctx.lineTo(cx, cy + r * 0.42);
     ctx.lineTo(cx - r * 0.28, cy);
     ctx.closePath();
-    ctx.fillStyle = "rgba(255, 200, 255, 0.22)";
+    ctx.fillStyle = "#F3D9FF38";
     ctx.fill();
   } else {
-    ctx.fillStyle = "rgba(160, 255, 255, 0.12)";
+    ctx.fillStyle = "#49F6FF1F";
     ctx.beginPath();
     ctx.arc(cx, cy, r * 0.58, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = "rgba(200, 255, 255, 0.16)";
+    ctx.fillStyle = "#EAFBFF29";
     ctx.beginPath();
     ctx.arc(cx, cy, r * 0.34, 0, Math.PI * 2);
     ctx.fill();
-    ctx.strokeStyle = "rgba(210, 255, 255, 0.38)";
+    ctx.strokeStyle = "#EAFBFF61";
     ctx.lineWidth = Math.max(1.6, s * 0.028);
     ctx.beginPath();
     ctx.arc(cx, cy, r * 0.5, 0, Math.PI * 2);
@@ -2247,7 +2254,7 @@ function paintCrystalOptics(
       ctx.lineTo(cx + Math.cos(a) * r * 0.62, cy + Math.sin(a) * r * 0.62);
       ctx.lineTo(cx + Math.cos(a + 0.38) * r * 0.5, cy + Math.sin(a + 0.38) * r * 0.5);
       ctx.closePath();
-      ctx.fillStyle = i % 2 === 0 ? "rgba(180, 255, 255, 0.1)" : "rgba(0, 80, 120, 0.1)";
+      ctx.fillStyle = i % 2 === 0 ? "#49F6FF1A" : "#005C731A";
       ctx.fill();
     }
   }
@@ -2262,7 +2269,7 @@ function paintCrystalOptics(
   ctx.ellipse(cx - s * 0.06, cy - s * 0.02, s * 0.13, s * 0.19, -0.4, 0, Math.PI * 2);
   ctx.fill();
   ctx.globalAlpha = 0.12;
-  ctx.strokeStyle = "rgba(255,255,255,0.55)";
+  ctx.strokeStyle = "#FFFFFF8C";
   ctx.lineWidth = Math.max(0.6, s * 0.012);
   ctx.beginPath();
   ctx.moveTo(cx - s * 0.18, cy - s * 0.16);
