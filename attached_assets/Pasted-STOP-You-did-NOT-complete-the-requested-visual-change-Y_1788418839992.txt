@@ -1,0 +1,277 @@
+STOP. You did NOT complete the requested visual change.
+
+Your previous response explicitly says:
+"No additional code changes were made."
+
+That is NOT acceptable.
+
+The attached reference image is a TARGET LAYOUT, not background context.
+
+I need you to ACTUALLY MODIFY the existing active game layout now.
+
+DO NOT simply inspect it.
+DO NOT tell me the current CSS is already compact.
+DO NOT make a report.
+DO NOT create another CSS file.
+DO NOT only run tests.
+DO NOT claim success without changing the rendered screen.
+
+==================================================
+REFERENCE = TARGET
+==================================================
+
+Use the attached reference image as the exact visual geometry target.
+
+The final LIVE GAME should visibly move toward the reference.
+
+Keep:
+- existing 8x8 board
+- existing 64 gems
+- existing gem artwork
+- existing gameplay
+- existing CPU
+- existing LOCKED state
+- existing Energy Burst
+- existing Mega Strike
+- existing Freeze
+- existing Time Shift
+- existing Rewind
+- existing score
+- existing timer
+- existing audio/settings
+
+ONLY CHANGE THE SCREEN LAYOUT AND SPACING.
+
+==================================================
+REMOVE THE CROWDING
+==================================================
+
+The current screen is too vertically crowded because every section has large decorative containers, borders and spacing.
+
+Create a compact, controlled mobile composition.
+
+TOP → BOTTOM MUST BE:
+
+1. CHRONO CLASH HEADER
+2. YOU / VS / RIVAL
+3. ENERGY
+4. ENERGY BURST / MEGA STRIKE
+5. YOUR BOARD LABEL
+6. 8x8 BOARD
+7. FREEZE / TIME SHIFT / REWIND
+
+IMPORTANT:
+YOUR ATTACK and RIVAL ATTACK bars have already been intentionally removed.
+DO NOT RESTORE THEM.
+
+==================================================
+FIX THE ACTUAL GEOMETRY
+==================================================
+
+Find the REAL active match-screen container and its children.
+
+Do not blindly append CSS.
+
+Inspect which selectors actually control the rendered elements.
+
+Then modify those selectors/components.
+
+The match screen must use:
+
+height: 100dvh;
+max-height: 100dvh;
+overflow: hidden;
+
+Respect:
+
+env(safe-area-inset-top)
+env(safe-area-inset-bottom)
+
+No vertical scrolling.
+No horizontal scrolling.
+
+==================================================
+HEADER
+==================================================
+
+Keep CHRONO CLASH at the top-left.
+
+Keep Audio and Settings at the top-right.
+
+One compact horizontal row.
+
+No overlap.
+
+==================================================
+PLAYER ROW
+==================================================
+
+YOU | VS/TIMER | RIVAL
+
+Use a controlled 3-column layout.
+
+The two player panels must have equal height.
+
+VS/timer remains centered.
+
+Do not let any panel push another element downward.
+
+==================================================
+ENERGY
+==================================================
+
+Immediately below the player row.
+
+Compact single row:
+
+ENERGY | progress bar | 100/100
+
+Do not give it unnecessary vertical height.
+
+==================================================
+SPECIAL ATTACKS
+==================================================
+
+Immediately below ENERGY:
+
+ENERGY BURST | MEGA STRIKE
+
+Two equal columns.
+
+No YOUR ATTACK/RIVAL ATTACK bars.
+
+Do not restore them.
+
+Buttons must remain readable when disabled.
+
+==================================================
+BOARD LABEL
+==================================================
+
+Place:
+
+YOUR BOARD
+
+directly above the board.
+
+Keep only a small amount of spacing.
+
+==================================================
+8x8 BOARD
+==================================================
+
+THIS IS THE MAIN PRIORITY.
+
+Exactly 8 columns × 8 rows.
+
+Use the available width efficiently.
+
+The board must remain the dominant central element.
+
+The grid itself controls cell dimensions.
+
+Do NOT let gem image dimensions control the grid.
+
+Each gem must fit completely inside its cell.
+
+No clipping.
+No overlapping gems.
+No horizontal overflow.
+
+If the total screen height is insufficient:
+
+REDUCE BOARD HEIGHT.
+
+DO NOT push the bottom controls off-screen.
+
+A slightly shorter board is acceptable.
+
+==================================================
+BOTTOM CONTROLS
+==================================================
+
+Freeze | Time Shift | Rewind
+
+Three equal columns.
+
+They must be completely visible.
+
+They must sit below the board.
+
+They must NEVER overlap the board.
+
+They must NEVER be cut off.
+
+Keep all existing functionality and counters.
+
+==================================================
+CRITICAL VISUAL RULE
+==================================================
+
+Do NOT add more borders, panels, wrappers or decorative spacing.
+
+The current problem is TOO MUCH CHROME.
+
+Reduce:
+- excessive vertical padding
+- excessive margins
+- oversized section heights
+- oversized board frame
+- unnecessary gaps
+
+Keep the premium sci-fi appearance, but make the hierarchy clean:
+
+HEADER
+↓
+PLAYER
+↓
+ENERGY
+↓
+SPECIAL ATTACKS
+↓
+BOARD
+↓
+ABILITIES
+
+The BOARD should visually dominate.
+
+==================================================
+ACTUAL IMPLEMENTATION REQUIREMENT
+==================================================
+
+You MUST make actual code changes.
+
+Before finishing:
+
+1. Find the active match-screen component.
+2. Find the CSS actually affecting it.
+3. Modify the active layout.
+4. Start/restart the application.
+5. Open the LIVE match screen.
+6. Compare the rendered screen against the attached reference.
+7. Make another adjustment if necessary.
+
+Do NOT finish after only TypeScript/build validation.
+
+The final proof must be the LIVE rendered game.
+
+==================================================
+SUCCESS CONDITION
+==================================================
+
+I should be able to open the game and SEE a real layout difference.
+
+The screen must show:
+
+- compact header
+- clean YOU/VS/RIVAL row
+- compact energy row
+- Energy Burst + Mega Strike
+- YOUR BOARD
+- full 8x8 board
+- all 64 gems
+- Freeze / Time Shift / Rewind fully visible
+
+with ZERO overlapping and ZERO scrolling.
+
+If you make no visual code changes, the task is NOT complete.
