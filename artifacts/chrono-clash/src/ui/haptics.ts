@@ -66,38 +66,39 @@ export function hapticPattern(kind: HapticEvent, combo = 1): number | number[] {
   if (kind === "tap") return 12;
   if (kind === "invalid") return [10, 20, 14];
   if (kind === "swap") return 12;
-  if (kind === "match") return 26;
+  if (kind === "match") return 20;
   if (kind === "countdown") return 40;
   if (kind === "combo") {
-    if (combo >= 8) return [40, 28, 56, 28, 72, 30, 96];
-    if (combo >= 6) return [36, 28, 50, 28, 68];
-    if (combo >= 4) return [32, 30, 46, 32, 60];
-    return [26, 32, 40];
+    if (combo >= 8) return 62;
+    if (combo >= 6) return 50;
+    if (combo >= 4) return 42;
+    return 32;
   }
-  if (kind === "power") return [36, 32, 58, 36, 72];
-  if (kind === "freeze") return [24, 28, 24, 28, 52];
-  if (kind === "timeshift") return [34, 24, 56, 24, 34];
-  if (kind === "rewind") return [28, 22, 28, 22, 56];
-  if (kind === "incoming") return [32, 38, 32, 38, 58];
-  if (kind === "attack") return [48, 32, 78];
-  if (kind === "attackHit") return [36, 24, 110];
+  if (kind === "power") return 58;
+  if (kind === "freeze") return 24;
+  if (kind === "timeshift") return 28;
+  if (kind === "rewind") return 30;
+  if (kind === "incoming") return 28;
+  if (kind === "attack") return 40;
+  if (kind === "attackHit") return 48;
   if (kind === "start") return [50, 36, 110];
-  if (kind === "block") return [22, 40, 26, 32];
-  if (kind === "urgent") return combo >= 2 ? [38, 32, 38, 32, 62] : [32, 42, 40];
-  if (kind === "victory") return [24, 28, 40, 28, 56, 32, 88, 28, 36];
-  if (kind === "defeat") return [32, 24, 48, 22, 72];
-  if (kind === "draw") return [48, 46, 56];
+  if (kind === "block") return 24;
+  if (kind === "urgent") return combo >= 2 ? 42 : 32;
+  if (kind === "victory") return [24, 28, 44];
+  if (kind === "defeat") return 30;
+  if (kind === "draw") return 42;
   return 22;
 }
 
 export function hapticThrottleMs(kind: HapticEvent): number {
-  if (kind === "tap" || kind === "swap" || kind === "invalid") return 70;
-  if (kind === "match" || kind === "countdown") return 90;
-  if (kind === "combo") return 140;
-  if (kind === "incoming") return 280;
+  if (kind === "tap" || kind === "swap" || kind === "invalid") return 100;
+  if (kind === "match" || kind === "countdown") return 180;
+  if (kind === "combo") return 260;
+  if (kind === "incoming") return 360;
   if (kind === "urgent") return 900;
-  if (kind === "victory" || kind === "defeat" || kind === "draw" || kind === "start") return 600;
-  return 160;
+  if (kind === "victory" || kind === "defeat" || kind === "draw" || kind === "start") return 800;
+  if (kind === "freeze" || kind === "timeshift" || kind === "rewind" || kind === "power") return 420;
+  return 320;
 }
 
 /** Gameplay haptics follow the Haptics setting only — independent of announcer/SFX. */
@@ -121,22 +122,12 @@ export function hapticCuesFromFx(fx: BattleFx): HapticCue[] {
     const t = fx.text.toUpperCase();
     if (t.includes("FREEZE")) return [{ kind: "freeze" }];
     if (t.includes("TIME") || t.includes("TEMPO") || t.includes("SHIFT")) return [{ kind: "timeshift" }];
-    return [{ kind: "power" }];
+    if (t.includes("ENERGY BURST") || t.includes("MEGA STRIKE")) return [{ kind: "power" }];
+    return [];
   }
   if (fx.kind === "rewind") return [{ kind: "rewind" }];
   if (fx.kind === "attack") {
-    if (fx.text === "FINAL STRIKE" || fx.text === "RIVAL FINALE") return [];
-    const delayMs = attackBoltDelayMs(fx.text);
-    if (fx.side === "opponent") {
-      return [
-        { kind: "incoming", combo: fx.combo },
-        { kind: "attackHit", combo: fx.combo, delayMs },
-      ];
-    }
-    return [
-      { kind: "attack", combo: fx.combo },
-      { kind: "attackHit", combo: fx.combo, delayMs },
-    ];
+    return [];
   }
   if (fx.kind === "urgent") {
     return [{ kind: "urgent", combo: /FINAL|TIME/i.test(fx.text) ? 2 : 1 }];
@@ -217,6 +208,16 @@ export class HapticBus {
   private clearPending(): void {
     for (const id of this.pending) clearTimeout(id);
     this.pending.clear();
+  }
+
+  /** Queue a vibration outside the animation-frame call stack. */
+  defer(kind: HapticEvent, combo = 1): void {
+    if (!this.enabled || this.pending.size >= 4) return;
+    const id = setTimeout(() => {
+      this.pending.delete(id);
+      this.play(kind, combo);
+    }, 0);
+    this.pending.add(id);
   }
 
   cancel(): void {

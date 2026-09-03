@@ -1,0 +1,173 @@
+CHRONO CLASH — FIX EXCESSIVE PHONE HAPTIC VIBRATION
+
+The problem is NOT screen shake.
+
+The problem is the PHONE ITSELF is vibrating/haptically buzzing too much during gameplay.
+
+Fix the excessive device vibration immediately.
+
+IMPORTANT:
+Do NOT remove visual VFX.
+Do NOT change screen animations.
+Do NOT change the locked geometry.
+Do NOT change gameplay logic.
+
+ONLY fix DEVICE HAPTICS / VIBRATION.
+
+==================================================
+HAPTIC RULES
+==================================================
+
+The game currently triggers too much physical phone vibration.
+
+Reduce haptic feedback to a small number of important events.
+
+NORMAL GEM TAP:
+NO phone vibration.
+
+NORMAL GEM MATCH:
+ONE very short, subtle haptic.
+
+CASCADE:
+NO vibration for every falling gem.
+
+COMBO:
+Do NOT vibrate repeatedly for every matched gem.
+
+ENERGY GAIN:
+NO separate vibration.
+
+ENERGY BURST:
+ONE short, stronger haptic.
+
+MEGA STRIKE:
+ONE short, stronger haptic.
+
+FREEZE:
+ONE subtle haptic.
+
+TIME SHIFT:
+ONE subtle haptic.
+
+REWIND:
+ONE subtle haptic.
+
+VICTORY:
+ONE short celebratory haptic sequence maximum.
+
+DEFEAT:
+ONE subtle haptic maximum.
+
+==================================================
+CRITICAL
+==================================================
+
+NEVER trigger vibration for:
+
+- every gem
+- every particle
+- every cascade step
+- every animation frame
+- every combo particle
+- every falling gem
+- every UI animation
+- every energy particle
+
+Haptic feedback must NEVER be inside a requestAnimationFrame loop.
+
+Haptic feedback must NEVER be inside a particle loop.
+
+Haptic feedback must NEVER repeatedly trigger during cascade animation.
+
+==================================================
+CONSOLIDATE HAPTICS
+==================================================
+
+Find ALL existing calls to:
+
+navigator.vibrate()
+
+and any other device-haptic/vibration implementation.
+
+Audit them.
+
+Prevent multiple systems from triggering vibration for the same gameplay event.
+
+Create ONE centralized haptic helper if appropriate, for example:
+
+triggerHaptic(type)
+
+with controlled types such as:
+
+tap
+match
+ability
+victory
+defeat
+
+Add throttling/debouncing so two haptic calls cannot fire repeatedly within a very short interval.
+
+==================================================
+MOBILE-FIRST
+==================================================
+
+The physical device should feel:
+
+SUBTLE
+PREMIUM
+RESPONSIVE
+
+NOT:
+
+CONSTANTLY VIBRATING
+BUZZING
+RATTLING
+OVERSTIMULATING
+
+Visual VFX can remain energetic.
+
+Phone haptics should remain restrained.
+
+==================================================
+IMPORTANT
+==================================================
+
+Do NOT disable all haptics.
+
+Keep useful tactile feedback, but make it rare and intentional.
+
+Also respect:
+
+@media (prefers-reduced-motion: reduce)
+
+and any existing user/device haptic preference if the game already has one.
+
+If the browser/device does not support vibration, fail silently.
+
+==================================================
+FINAL TEST
+==================================================
+
+Actually test on a physical phone.
+
+Perform:
+
+1. normal gem tap
+2. normal match
+3. cascade
+4. Energy Burst
+5. Mega Strike
+6. Freeze
+7. Time Shift
+8. Rewind
+9. victory/defeat if possible
+
+Confirm that the phone does NOT vibrate repeatedly during cascades or VFX.
+
+The desired result:
+
+VISUAL VFX = ENERGETIC
+
+PHONE HAPTICS = SUBTLE AND CONTROLLED
+
+Do not change anything else.

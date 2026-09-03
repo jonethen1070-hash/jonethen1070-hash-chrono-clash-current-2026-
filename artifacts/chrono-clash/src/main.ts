@@ -701,11 +701,11 @@ function pulseUxEnter(id: string): void {
 }
 
 function feelHaptic(kind: Parameters<HapticBus["play"]>[0], combo = 1): void {
-  haptics.play(kind, combo);
+  haptics.defer(kind, combo);
 }
 
 function juiceHaptic(kind: Parameters<HapticBus["play"]>[0], combo = 1): void {
-  haptics.play(kind, combo);
+  haptics.defer(kind, combo);
 }
 
 function pressUi(cue: "ui" | "confirm" = "ui"): void {
@@ -1452,13 +1452,11 @@ $("#backMenu").addEventListener("click", () => {
 });
 $("#modeTime").addEventListener("click", () => {
   audio.play("clash");
-  feelHaptic("start");
   session.chooseMode("time");
   syncScreenNow();
 });
 $("#modeScore").addEventListener("click", () => {
   audio.play("clash");
-  feelHaptic("start");
   session.chooseMode("score");
   syncScreenNow();
 });
@@ -1568,7 +1566,6 @@ ui.freeze.addEventListener("click", () => {
   if (session.usePower("freeze")) {
     ping(ui.freeze);
     flashCast("cast-freeze", ui.freeze);
-    juiceHaptic("freeze");
     sendOnlineAction({ type: "power", id: "freeze" });
   }
 });
@@ -1576,7 +1573,6 @@ ui.timeshift.addEventListener("click", () => {
   if (session.usePower("timeshift")) {
     ping(ui.timeshift);
     flashCast("cast-shift", ui.timeshift);
-    juiceHaptic("timeshift");
     sendOnlineAction({ type: "power", id: "timeshift" });
   }
 });
@@ -1584,7 +1580,6 @@ ui.rewind.addEventListener("click", () => {
   if (session.usePower("rewind")) {
     ping(ui.rewind);
     flashCast("cast-rewind", ui.rewind);
-    juiceHaptic("rewind");
     sendOnlineAction({ type: "power", id: "rewind" });
   }
 });
@@ -1592,7 +1587,6 @@ function useEnergyAttack(id: "burst" | "megaStrike", button: HTMLButtonElement):
   if (session.usePower(id)) {
     ping(button);
     flashCast(id === "burst" ? "cast-burst" : "cast-mega", button);
-    juiceHaptic(id === "burst" ? "freeze" : "rewind");
     sendOnlineAction({ type: "power", id });
   } else {
     restartAnim(button, "unavailable");
@@ -1636,7 +1630,7 @@ $("#musicVolume").addEventListener("input", () => {
 $("#hapticsToggle").addEventListener("click", () => {
   settings.haptics = !settings.haptics;
   applySettings();
-  if (settings.haptics) haptics.play("tap");
+  if (settings.haptics) haptics.defer("tap");
 });
 $("#quitGame").addEventListener("click", () => {
   pressUi();
@@ -1859,7 +1853,6 @@ ui.playerBoard.addEventListener(
     session.setDrag(cell, 0, 0);
     renderer.flashSelect(cell, now);
     audio.play("place");
-    feelHaptic("tap");
     try {
       ui.playerBoard.setPointerCapture(e.pointerId);
     } catch {
@@ -1890,7 +1883,6 @@ ui.playerBoard.addEventListener(
     swipe = null;
     if (target && session.tryPlayerSwap(from, target, now)) {
       audio.play("swap");
-      feelHaptic("swap");
       renderer.flashSwap(from, target, now);
       sendOnlineAction({ type: "swap", a: from, b: target });
     } else {
@@ -1899,7 +1891,6 @@ ui.playerBoard.addEventListener(
       if (target) {
         renderer.flashInvalid(from, target, now);
         audio.play("invalid");
-        feelHaptic("invalid");
       }
     }
   },
@@ -1972,7 +1963,6 @@ function onScreenEnter(id: string, now: number): void {
     paintRewards(g);
     if (grantHasBounty(g)) {
       audio.play("confirm");
-      feelHaptic("victory");
     }
   }
   if (id !== "match" && id !== "ready") ui.callout.classList.add("hidden");
