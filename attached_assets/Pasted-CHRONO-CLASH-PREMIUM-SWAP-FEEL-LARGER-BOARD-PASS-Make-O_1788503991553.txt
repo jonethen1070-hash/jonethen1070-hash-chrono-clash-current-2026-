@@ -1,0 +1,263 @@
+CHRONO CLASH — PREMIUM SWAP FEEL + LARGER BOARD PASS
+
+Make ONLY the following changes.
+
+==================================================
+PART 1 — MAKE GEM SWAPPING ACTUALLY SATISFYING
+==================================================
+
+The current swipe implementation is technically working, but the actual visual/tactile result still feels flat and unsatisfying.
+
+Do NOT simply change animation duration.
+
+The target feeling is:
+
+GRAB → PULL → WHOOSH → SNAP → IMPACT → MATCH → CASCADE
+
+Think premium match-3 physicality, while keeping Chrono Clash's own sci-fi identity.
+
+IMPORTANT:
+Inspect the CURRENT implementation first.
+Do not create a second competing animation system.
+Use the existing gemMotion/renderer/session/input architecture.
+
+1. GRAB / PICKUP
+
+When a valid swipe direction is recognized:
+
+- Selected gem should visually respond immediately.
+- Give it a very subtle 2–3% lift/scale response.
+- Keep the response extremely short.
+- It should feel like the player has physically grabbed the crystal.
+- Do not make it float.
+
+2. SWIPE / PULL
+
+During the active swipe:
+
+- Gem movement should feel directly connected to the user's gesture.
+- Avoid a delayed "wait, then teleport" feeling.
+- Preserve the existing swipe threshold and gameplay rules.
+- Do not change board coordinates or match logic.
+
+3. COMMITTED SWAP
+
+When the swipe commits:
+
+- Make the two gems exchange positions with strong premium acceleration/deceleration.
+- Target approximately 110–140ms.
+- Do not use linear movement.
+- Avoid floaty movement.
+- The movement should have a clear sense of momentum.
+
+4. LANDING SNAP
+
+At the moment each gem reaches its destination:
+
+- Add a very short, subtle physical snap.
+- Tiny 2–3px positional settle.
+- Very subtle 1–2% scale compression/return.
+- The gem must finish EXACTLY centered in its target cell.
+- No large bounce.
+
+5. SOCKET IMPACT
+
+Add a very subtle localized visual reaction to the destination socket at the exact landing moment.
+
+Possible implementation using existing renderer/frame visuals:
+
+- tiny socket/rim brightness pulse
+- very short duration
+- localized only to the affected cell
+- approximately 40–80ms
+
+Do NOT create a large glow.
+Do NOT affect neighboring gems.
+Do NOT redesign the board frame.
+
+The purpose is to communicate:
+
+"GEM HAS LANDED."
+
+6. AUDIO / HAPTIC TIMING
+
+If existing audio/haptic systems support it:
+
+- Trigger a short, crisp crystal/tech snap exactly at landing.
+- Keep it subtle.
+- Successful match can have stronger existing match feedback.
+- Do not introduce loud or repetitive audio.
+
+If haptics already exist:
+- one short haptic pulse at committed landing
+- stronger existing feedback may remain for a successful match
+
+Do not add a new audio engine.
+
+7. MATCH TRANSITION
+
+For a successful swap:
+
+SWAP
+→ LANDING SNAP
+→ tiny impact
+→ matched gems react
+→ existing crystalline destruction
+→ existing cascade
+
+Do NOT destroy matched gems before the committed swap visually finishes.
+
+Preserve the existing 64ms minimum impact lock and existing cascade timing.
+
+8. INVALID SWAP
+
+Invalid swap must still feel physical:
+
+- smooth return
+- approximately 100–130ms
+- tiny landing settle
+- exact original cell positions
+- no stuck/intermediate gem positions
+
+==================================================
+PART 2 — MAKE THE BOARD AND GEMS MUCH LARGER
+==================================================
+
+The current mobile screen has unused vertical space above and below the board.
+
+Use that available space to make the 8×8 board substantially larger.
+
+TARGET:
+
+At 390×844:
+- maximize the playable board within the available safe area
+- make individual gems noticeably larger
+- maintain comfortable separation from:
+  - top HUD
+  - energy bar
+  - bottom power controls
+  - device safe areas
+
+Do NOT simply scale the whole page blindly.
+
+The BOARD itself should become larger.
+
+The 8×8 grid must remain perfectly square.
+
+The Canvas/gem rendering must scale with the board.
+
+Prioritize GEM READABILITY and physical presence.
+
+The gems should feel like substantial crystalline pieces rather than tiny icons.
+
+Use the available empty vertical space intelligently.
+
+Also test at:
+- 390×844
+- 360×740
+
+There must be:
+- NO overlap
+- NO clipping
+- NO horizontal scrolling
+- NO board overflow
+- NO control overlap
+- NO HUD collision
+
+Do not move or redesign the bottom power controls.
+
+Do not change the three-button bottom strip:
+Energy Burst / Mega Strike / Rewind.
+
+==================================================
+PART 3 — REMOVE "YOUR BOARD"
+==================================================
+
+Remove the visible "YOUR BOARD" label completely.
+
+Do not replace it with another label.
+
+The board should stand on its own visually.
+
+After removing the label, use the recovered vertical space to help position/enlarge the board.
+
+Do not leave an empty placeholder occupying the old label's layout space.
+
+==================================================
+IMPORTANT PRESERVATION RULES
+==================================================
+
+DO NOT change:
+- 8×8 board rules
+- match rules
+- cascade resolver
+- gem colors
+- gem artwork/material design
+- powers
+- Energy Burst behavior
+- Mega Strike behavior
+- Rewind behavior
+- networking
+- board frame design
+- corner-light treatment
+- bottom controls
+- HUD design except removing "YOUR BOARD"
+
+Do not generate images.
+
+Do not create a second animation framework.
+
+Reuse the existing renderer, gemMotion, input, audio and haptic systems.
+
+==================================================
+RUNTIME VERIFICATION
+==================================================
+
+Actually inspect the running game at 390×844.
+
+Verify visually:
+
+A) Swipe:
+- grab response is visible
+- swipe feels connected to finger
+- committed swap has momentum
+- landing has a clear but subtle SNAP
+- socket reacts briefly
+- successful match transitions naturally into destruction/cascade
+- invalid swap returns cleanly
+
+B) Board:
+- board is visibly larger than current version
+- gems are visibly larger
+- board remains square
+- no overlap with HUD
+- no overlap with bottom controls
+- no clipping
+- no scrolling
+
+C) Confirm "YOUR BOARD" is completely gone.
+
+Run:
+- typecheck
+- production build
+- focused motion/gameplay/render tests
+- mobile swipe Playwright
+- 390×844 layout verification
+- 360×740 layout verification
+- git diff --check
+
+MOST IMPORTANT:
+
+Do not report success based only on automated tests.
+
+Actually inspect the runtime result and report:
+- previous board dimensions
+- new board dimensions
+- previous approximate gem/cell size
+- new approximate gem/cell size
+- swap duration
+- whether landing snap/socket response is visibly perceptible
+- whether "YOUR BOARD" is gone
+- files changed
+
+Make NO unrelated changes.
