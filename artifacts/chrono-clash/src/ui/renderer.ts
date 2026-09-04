@@ -2265,21 +2265,14 @@ export class BoardRenderer {
       }
     }
 
-    if (selected || hinted) {
+    if (hinted && !selected) {
       const ring = Math.max(5, size * 0.2);
       roundRect(ctx, x + 1.6, y + 1.6, size - 3.2, size - 3.2, ring);
-      if (selected) {
-        ctx.strokeStyle = "#7CF5FF";
-        ctx.lineWidth = 2.1;
-        ctx.shadowColor = "#7CF5FFF5";
-        ctx.shadowBlur = 10;
-      } else {
-        const hintPulse = 0.62 + Math.sin(now / 180) * 0.38;
-        ctx.strokeStyle = colorWithAlpha("#7CF5FF", 0.55 + hintPulse * 0.3);
-        ctx.lineWidth = 1.8;
-        ctx.shadowColor = "#7CF5FFB3";
-        ctx.shadowBlur = 6;
-      }
+      const hintPulse = 0.62 + Math.sin(now / 180) * 0.38;
+      ctx.strokeStyle = colorWithAlpha("#7CF5FF", 0.55 + hintPulse * 0.3);
+      ctx.lineWidth = 1.8;
+      ctx.shadowColor = "#7CF5FFB3";
+      ctx.shadowBlur = 6;
       ctx.stroke();
       ctx.shadowBlur = 0;
     }
