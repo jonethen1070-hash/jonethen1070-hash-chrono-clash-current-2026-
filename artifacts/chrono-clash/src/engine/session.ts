@@ -181,6 +181,7 @@ export interface FxEvent {
   combo?: number;
   score?: number;
   at?: Coord;
+  cells?: Coord[];
 }
 
 interface PlayerSnap {
@@ -929,7 +930,7 @@ export class GameSession {
     this.lastPlayerSnap.push(pre);
     if (this.lastPlayerSnap.length > REWIND_HISTORY) this.lastPlayerSnap.shift();
     this.applyResolve(this.player, result, boost, now, "player");
-    this.busyUntil = now + Math.min(280, 100 + result.events.length * 22);
+    this.busyUntil = now + Math.min(360, 160 + result.events.length * 22);
     this.resolving = false;
     if (this.mode === "score" && this.player.score >= this.scoreTarget) this.endMatch(now);
     return true;
@@ -1263,12 +1264,27 @@ export class GameSession {
     fighter.lastClearAt = now;
     const charged = fillAttack(fighter.attack, result.comboPeak, result.cleared);
     fighter.attack = Math.max(0, Math.min(ATTACK_MAX, charged.meter));
-    if (result.cleared > 0) {
+    const clearWaves = result.events.filter((event) => event.type === "clear");
+    if (clearWaves.length) {
+      for (const wave of clearWaves) {
+        const waveScore = Math.round(wave.score * scoreMul);
+        const at = wave.cells?.[0];
+        this.pushFx("clear", `+${waveScore}`, now, {
+          side,
+          combo: wave.combo,
+          score: waveScore,
+          at,
+          cells: wave.cells,
+        });
+        if (wave.combo >= 2) {
+          this.pushFx("combo", comboFlavor(wave.combo), now, { side, combo: wave.combo, score: waveScore });
+        }
+      }
+    } else if (result.cleared > 0) {
       const at = result.events.find((e) => e.type === "clear" && e.cells?.length)?.cells?.[0];
       this.pushFx("clear", `+${score}`, now, { side, combo: result.comboPeak, score, at });
     }
     if (result.comboPeak >= 2) {
-      this.pushFx("combo", comboFlavor(result.comboPeak), now, { side, combo: result.comboPeak, score });
       this.pushFx("attack", side === "opponent" ? "RIVAL PULSE" : attackBanner(result.comboPeak), now, {
         side,
         combo: result.comboPeak,
@@ -1424,7 +1440,7 @@ export class GameSession {
     kind: FxEvent["kind"],
     text: string,
     now: number,
-    extra: Pick<FxEvent, "side" | "combo" | "score" | "at"> = {},
+    extra: Pick<FxEvent, "side" | "combo" | "score" | "at" | "cells"> = {},
   ): void {
     this.fx.push({ id: this.fxId++, kind, text, born: now, ...extra });
   }

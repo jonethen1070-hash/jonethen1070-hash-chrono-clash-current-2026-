@@ -17,6 +17,7 @@ export const BOARD_FRAME = 6;
 export { LIVE_GEM_MAX_IN_CELL_DROP, liveGemDrawOrigin } from "./gemMotion";
 const GAP = BOARD_GAP;
 const FRAME = BOARD_FRAME;
+const MATCH_IMPACT_MS = 64;
 
 export interface RenderFx {
   quality: Intensity;
@@ -52,6 +53,7 @@ interface VisualTile {
   moveKind: GemMoveKind | "idle";
   dieAge: number;
   glow: number;
+  burstEmitted: boolean;
 }
 
 interface Particle {
@@ -576,6 +578,7 @@ export class BoardRenderer {
             moveKind: populated ? "fall" : "idle",
             dieAge: 0,
             glow: populated ? 0.16 : 0,
+            burstEmitted: false,
           };
           view.tiles.set(piece.id, tile);
           if (populated && tile.moveKind === "fall") {
@@ -673,14 +676,35 @@ export class BoardRenderer {
     }
     this.capParticles(view);
 
+    let recentClearBorn = -Infinity;
+    const fxSide = isPlayer ? "player" : "opponent";
+    for (let i = fx.length - 1; i >= 0; i--) {
+      const fxEvent = fx[i]!;
+      if (
+        fxEvent.kind === "clear" &&
+        (!fxEvent.side || fxEvent.side === fxSide) &&
+        fxEvent.born <= now &&
+        now - fxEvent.born <= 240
+      ) {
+        recentClearBorn = fxEvent.born;
+        break;
+      }
+    }
+    const impactDelay = this.fx.reducedMotion ? 20 : MATCH_IMPACT_MS;
     for (const [id, tile] of view.tiles) {
       if (live.has(id) || tile.dying) continue;
       tile.dying = true;
-      tile.dieAge = 0;
+      const impactRemaining = Number.isFinite(recentClearBorn)
+        ? Math.max(0, impactDelay - (now - recentClearBorn))
+        : 0;
+      tile.dieAge = -impactRemaining / 1000;
       tile.moveKind = "idle";
-      tile.flash = reduced ? 0.28 : 1;
-      tile.glow = 1;
-      this.burst(view, tile.x + cell / 2, tile.y + cell / 2, tile.color, cell);
+      tile.flash = reduced ? 0.28 : recentClearBorn > -Infinity ? 0.78 : 1;
+      tile.glow = recentClearBorn > -Infinity ? 0.82 : 1;
+      tile.burstEmitted = impactRemaining <= 0;
+      if (tile.burstEmitted) {
+        this.burst(view, tile.x + cell / 2, tile.y + cell / 2, tile.color, cell);
+      }
       if (isPlayer) view.shake = Math.max(view.shake, 0.9);
     }
 
@@ -776,10 +800,20 @@ export class BoardRenderer {
     for (const tile of view.tiles.values()) {
       if (!tile.dying) continue;
       tile.dieAge += dt;
-      const pose = easeCrystalDie(tile.dieAge / dieDur);
+      if (!tile.burstEmitted && tile.dieAge >= 0) {
+        tile.burstEmitted = true;
+        this.burst(view, tile.x + cell / 2, tile.y + cell / 2, tile.color, cell);
+      }
+      const pose = easeCrystalDie(Math.max(0, tile.dieAge) / dieDur);
       if (reduced) {
         tile.alpha -= 0.28;
         tile.flash *= 0.7;
+      } else if (tile.dieAge < 0) {
+        // Hold the matched crystal in a tiny charged lock before the break.
+        tile.scale = 1.018;
+        tile.alpha = 1;
+        tile.flash = Math.max(tile.flash, 0.62);
+        tile.glow = Math.max(tile.glow, 0.55);
       } else {
         tile.scale = pose.scale;
         tile.alpha = pose.alpha;

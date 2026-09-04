@@ -103,6 +103,18 @@ describe("swapping", () => {
     const hits = matchingNeighbors(board, { r: 0, c: 0 });
     expect(hits.some((p) => p.r === 0 && p.c === 1)).toBe(true);
   });
+
+  it("resolves consecutive automatic cascade waves before returning", () => {
+    resetIds();
+    const rng = createSeededRng(4);
+    const board = generateBoard(rng);
+    const result = trySwap(board, { r: 0, c: 3 }, { r: 0, c: 4 }, rng);
+
+    expect(result).not.toBeNull();
+    expect(result!.events.filter((event) => event.type === "clear").map((event) => event.combo)).toEqual([1, 2]);
+    expect(findMatches(board)).toHaveLength(0);
+    expect(board.flat().filter(Boolean)).toHaveLength(ROWS * COLS);
+  });
 });
 
 describe("match session", () => {
@@ -150,5 +162,20 @@ describe("match session", () => {
     expect(next.wins).toBe(1);
     expect(next.bestScore).toBe(1200);
     expect(next.bestCombo).toBe(4);
+  });
+
+  it("publishes each automatic clear wave for escalating player feedback", () => {
+    const game = new GameSession();
+    game.progress = { ...game.progress, tutorialDone: true };
+    game.startMatch(1_000);
+    game.phase = "playing";
+    const rng = createSeededRng(4);
+    game.player.board = generateBoard(rng);
+    (game as unknown as { rng: () => number }).rng = rng;
+
+    expect(game.tryPlayerSwap({ r: 0, c: 3 }, { r: 0, c: 4 }, 1_000)).toBe(true);
+    expect(game.fx.filter((event) => event.kind === "clear" && event.side === "player").map((event) => event.combo)).toEqual([1, 2]);
+    expect(game.fx.filter((event) => event.kind === "combo" && event.side === "player").map((event) => event.combo)).toEqual([2]);
+    expect(game.player.board.flat().filter(Boolean)).toHaveLength(ROWS * COLS);
   });
 });
