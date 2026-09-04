@@ -1,0 +1,91 @@
+Create a premium AAA-quality sound-effect pack for a futuristic crystalline sci-fi match-3 mobile game called "Chrono Clash".
+
+SOUND DESIGN STYLE:
+Premium, sharp, tactile, futuristic, crystalline, energetic and satisfying.
+Think polished AAA mobile game sound design — NOT cartoonish, childish, generic arcade beeps, or cheap electronic sounds.
+
+CRITICAL:
+Create CLEAN, SHORT, INDIVIDUAL GAME SOUND EFFECTS with clear separation between each sound.
+No music.
+No melody.
+No vocals.
+No voice.
+No ambience.
+No background noise.
+
+SFX REQUIRED:
+
+1. GEM SWAP
+A very short tactile crystal snap + subtle polished metallic click.
+Bright, precise and satisfying.
+Approximately 80–120ms.
+
+2. GEM MATCH
+A single bright crystalline strike/chime with a tiny sparkling tail.
+It should feel rewarding and immediately communicate "MATCH".
+Approximately 180–250ms.
+ONE clear hit only — not multiple repeated hits.
+
+3. GEM BREAK
+Sharp crystalline fracture followed by tiny crystal shards/sparkles.
+Energetic but controlled.
+Approximately 200–350ms.
+No huge explosion and no cartoon glass-breaking sound.
+
+4. CASCADE
+A variation of the match sound designed for consecutive match waves.
+Keep the same Chrono Clash crystal identity, but progressively raise the pitch slightly for successive cascades.
+Each cascade should still be ONE clean sound.
+
+5. BIG COMBO
+A stronger crystalline impact with a deeper futuristic layer underneath and bright crystal sparkle on top.
+Powerful but premium.
+Reserved for significant combos.
+
+6. ENERGY BURST
+Futuristic energy charge followed by a powerful crystalline release.
+Short, energetic and impactful.
+
+7. MEGA STRIKE
+Heavy futuristic impact combined with a sharp crystalline energy strike.
+Powerful and dramatic without becoming noisy.
+
+8. REWIND
+Distinctive futuristic time-reversal sound:
+short reverse crystalline sweep + subtle temporal shimmer.
+Clean and recognizable.
+
+9. VICTORY
+Very short premium ascending crystalline fanfare.
+Triumphant and futuristic.
+No long musical composition.
+
+IMPORTANT AUDIO DESIGN RULES:
+- Every SFX must be short and clean.
+- Strong transient followed by controlled decay.
+- Preserve clarity on phone speakers.
+- Avoid excessive bass.
+- Avoid harsh high-frequency noise.
+- Avoid huge reverberation.
+- Avoid long tails that overlap other game sounds.
+- Sounds must remain recognizable when played at low volume.
+- Crystal sounds should feel physical and dimensional.
+- Use subtle futuristic electronic layers only where appropriate.
+- The overall sound palette must feel like ONE cohesive game.
+
+MOST IMPORTANT FOR GEM GAMEPLAY:
+Touching a gem = NO SOUND.
+Selecting a gem = NO SOUND.
+Dragging a gem = NO SOUND.
+Invalid swap = NO SOUND.
+
+Only:
+VALID SWAP → ONE swap sound.
+MATCH WAVE → ONE match sound.
+BREAK → break sound when appropriate.
+CASCADE → ONE sound per separate cascade wave.
+
+Do NOT create three match sounds because three gems matched.
+A 3-gem match must produce ONE match sound for the entire match event.
+
+Deliver clean isolated SFX suitable for implementation in a real mobile game.
