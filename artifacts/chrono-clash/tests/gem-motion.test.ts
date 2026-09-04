@@ -153,5 +153,10 @@ describe("landing feedback", () => {
     expect(renderer).toContain("tile.scale = 0.985");
     expect(renderer).toContain("primeSwapPose");
     expect(renderer).toContain("life: 64");
+    expect(renderer).toContain("const MATCH_IMPACT_MS = 80");
+    expect(renderer).toContain("const cascadeHold");
+    expect(renderer).toContain("life: 0.15");
+    expect(renderer).toContain("const charge =");
+    expect(renderer).toContain("cell * 0.42, accent, 150");
   });
 });

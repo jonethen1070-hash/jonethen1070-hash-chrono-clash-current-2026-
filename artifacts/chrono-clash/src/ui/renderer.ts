@@ -17,7 +17,7 @@ export const BOARD_FRAME = 6;
 export { LIVE_GEM_MAX_IN_CELL_DROP, liveGemDrawOrigin } from "./gemMotion";
 const GAP = BOARD_GAP;
 const FRAME = BOARD_FRAME;
-const MATCH_IMPACT_MS = 64;
+const MATCH_IMPACT_MS = 80;
 
 export interface RenderFx {
   quality: Intensity;
@@ -140,6 +140,8 @@ export interface BoardRenderInspection {
 class BoardView {
   tiles = new Map<number, VisualTile>();
   pendingSwapIds = new Set<number>();
+  pendingSwapTargets = new Map<number, { x: number; y: number }>();
+  pendingSwap: { from: Coord; to: Coord; dx: number; dy: number } | null = null;
   live = new Set<number>();
   particles: Particle[] = [];
   shockwaves: Shockwave[] = [];
@@ -152,6 +154,8 @@ class BoardView {
   reset(): void {
     this.tiles.clear();
     this.pendingSwapIds.clear();
+    this.pendingSwapTargets.clear();
+    this.pendingSwap = null;
     this.live.clear();
     this.particles = [];
     this.shockwaves = [];
@@ -244,10 +248,19 @@ export class BoardRenderer {
   }
 
   primeSwapPose(from: Coord, to: Coord, dx: number, dy: number, now: number): void {
+    this.playerView.pendingSwap = { from, to, dx, dy };
     const source = [...this.playerView.tiles.values()].find((t) => t.r === from.r && t.c === from.c && !t.dying);
     const destination = [...this.playerView.tiles.values()].find((t) => t.r === to.r && t.c === to.c && !t.dying);
-    if (source) this.playerView.pendingSwapIds.add(source.id);
-    if (destination) this.playerView.pendingSwapIds.add(destination.id);
+    const sourceRest = source ? { x: source.toX, y: source.toY } : null;
+    const destinationRest = destination ? { x: destination.toX, y: destination.toY } : null;
+    if (source && destinationRest) {
+      this.playerView.pendingSwapIds.add(source.id);
+      this.playerView.pendingSwapTargets.set(source.id, destinationRest);
+    }
+    if (destination && sourceRest) {
+      this.playerView.pendingSwapIds.add(destination.id);
+      this.playerView.pendingSwapTargets.set(destination.id, sourceRest);
+    }
     const tile = source;
     if (!tile) return;
     tile.x = tile.toX + dx;
@@ -268,9 +281,19 @@ export class BoardRenderer {
 
   flashSwap(a: Coord, b: Coord, now: number): void {
     this.playerView.flash = Math.max(this.playerView.flash, this.fx.reducedMotion ? 0.04 : 0.08);
+    const pending = this.playerView.pendingSwap;
+    if (!pending || pending.from.r !== a.r || pending.from.c !== a.c || pending.to.r !== b.r || pending.to.c !== b.c) {
+      this.playerView.pendingSwap = { from: a, to: b, dx: 0, dy: 0 };
+    }
     for (const at of [a, b]) {
       const tile = [...this.playerView.tiles.values()].find((t) => t.r === at.r && t.c === at.c && !t.dying);
       if (tile) this.playerView.pendingSwapIds.add(tile.id);
+    }
+    const source = [...this.playerView.tiles.values()].find((t) => t.r === a.r && t.c === a.c && !t.dying);
+    const destination = [...this.playerView.tiles.values()].find((t) => t.r === b.r && t.c === b.c && !t.dying);
+    if (source && destination) {
+      this.playerView.pendingSwapTargets.set(source.id, { x: destination.toX, y: destination.toY });
+      this.playerView.pendingSwapTargets.set(destination.id, { x: source.toX, y: source.toY });
     }
     const mul = feelMul(this.fx.quality, this.fx.reducedMotion);
     if (mul < 0.2) return;
@@ -682,6 +705,59 @@ export class BoardRenderer {
     const dt = this.animDt;
     const anim = this.fx.animation ?? this.fx.quality;
     const reduced = this.fx.reducedMotion;
+    const fxSide = isPlayer ? "player" : "opponent";
+    let recentClearBorn = -Infinity;
+    for (let i = fx.length - 1; i >= 0; i--) {
+      const fxEvent = fx[i]!;
+      if (
+        fxEvent.kind === "clear" &&
+        (!fxEvent.side || fxEvent.side === fxSide) &&
+        fxEvent.born <= now &&
+        now - fxEvent.born <= 240
+      ) {
+        recentClearBorn = fxEvent.born;
+        break;
+      }
+    }
+    const swapRemainingMs = [...view.tiles.values()].reduce((max, tile) => {
+      if (tile.moveKind !== "swap" || tile.moveDur <= 0) return max;
+      return Math.max(max, (tile.moveDur - tile.moveAge) * 1000);
+    }, 0);
+    if (isPlayer && view.pendingSwap) {
+      const pending = view.pendingSwap;
+      const source = [...view.tiles.values()].find((t) => t.r === pending.from.r && t.c === pending.from.c && !t.dying);
+      const destination = [...view.tiles.values()].find((t) => t.r === pending.to.r && t.c === pending.to.c && !t.dying);
+      if (source && destination) {
+        view.pendingSwapIds.add(source.id);
+        view.pendingSwapIds.add(destination.id);
+        view.pendingSwapTargets.set(source.id, { x: destination.toX, y: destination.toY });
+        view.pendingSwapTargets.set(destination.id, { x: source.toX, y: source.toY });
+        source.x = source.toX + pending.dx;
+        source.y = source.toY + pending.dy;
+        source.fromX = source.x;
+        source.fromY = source.y;
+        source.toX = source.x;
+        source.toY = source.y;
+        source.moveKind = "idle";
+        source.moveAge = 0;
+        source.moveDur = 0;
+        source.moveHold = 0;
+        source.scale = Math.max(source.scale, 1.035);
+        view.pendingSwap = null;
+      }
+    }
+    const pendingSwapMs = view.pendingSwapIds.size
+      ? gemTravelDuration(cell, cell, "swap", anim, reduced) * 1000
+      : 0;
+    const hadPendingSwap = view.pendingSwapIds.size > 0;
+    const hasMatchPresentation = Number.isFinite(recentClearBorn) || hadPendingSwap;
+    const swapWindowMs = Math.max(swapRemainingMs, pendingSwapMs);
+    const recognitionMs = reduced ? 20 : MATCH_IMPACT_MS;
+    const breakMs = gemDieDuration(anim, reduced) * 1000;
+    const clearAgeMs = Number.isFinite(recentClearBorn) ? Math.max(0, now - recentClearBorn) : 0;
+    const cascadeHold = hasMatchPresentation
+      ? Math.max(0, swapWindowMs + recognitionMs + breakMs - clearAgeMs) / 1000
+      : 0;
     const populated = view.tiles.size > 0;
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
@@ -713,7 +789,7 @@ export class BoardRenderer {
             toY: ty,
             moveAge: 0,
             moveDur: populated ? gemTravelDuration(Math.abs(ty - startY), cell, "fall", anim, reduced) : 0,
-            moveHold: populated ? gemFallDelay(c, Math.max(1, r), anim, reduced) : 0,
+            moveHold: populated ? gemFallDelay(c, Math.max(1, r), anim, reduced) + cascadeHold : 0,
             moveKind: populated ? "fall" : "idle",
             dieAge: 0,
             glow: populated ? 0.16 : 0,
@@ -761,13 +837,19 @@ export class BoardRenderer {
           tile.moveAge = 0;
           tile.moveKind = kind;
           tile.moveDur = gemTravelDuration(dist, cell, kind, anim, reduced);
-          tile.moveHold = kind === "fall" ? gemFallDelay(c, Math.abs(r - prevR), anim, reduced) : 0;
+          tile.moveHold =
+            kind === "fall"
+              ? gemFallDelay(c, Math.abs(r - prevR), anim, reduced) + cascadeHold
+              : 0;
           tile.glow = Math.max(tile.glow, kind === "swap" ? 0.28 : 0.12);
           tile.settleAge = 1;
           tile.settleDur = 0;
           tile.settleX = 0;
           tile.settleY = 0;
-          if (kind === "swap") this.playerView.pendingSwapIds.delete(piece.id);
+          if (kind === "swap") {
+            this.playerView.pendingSwapIds.delete(piece.id);
+            this.playerView.pendingSwapTargets.delete(piece.id);
+          }
         } else if (tile.moveKind === "idle") {
           tile.toX = tx;
           tile.toY = ty;
@@ -863,37 +945,31 @@ export class BoardRenderer {
     }
     this.capParticles(view);
 
-    let recentClearBorn = -Infinity;
-    const fxSide = isPlayer ? "player" : "opponent";
-    for (let i = fx.length - 1; i >= 0; i--) {
-      const fxEvent = fx[i]!;
-      if (
-        fxEvent.kind === "clear" &&
-        (!fxEvent.side || fxEvent.side === fxSide) &&
-        fxEvent.born <= now &&
-        now - fxEvent.born <= 240
-      ) {
-        recentClearBorn = fxEvent.born;
-        break;
-      }
-    }
-    const swapRemainingMs = [...view.tiles.values()].reduce((max, tile) => {
-      if (tile.moveKind !== "swap" || tile.moveDur <= 0) return max;
-      return Math.max(max, (tile.moveDur - tile.moveAge) * 1000);
-    }, 0);
     const impactDelay = this.fx.reducedMotion
       ? 20
-      : Math.max(MATCH_IMPACT_MS, swapRemainingMs);
+      : Math.max(MATCH_IMPACT_MS, swapWindowMs + MATCH_IMPACT_MS);
     for (const [id, tile] of view.tiles) {
       if (live.has(id) || tile.dying) continue;
       tile.dying = true;
-      const impactRemaining = Number.isFinite(recentClearBorn)
-        ? Math.max(0, impactDelay - (now - recentClearBorn))
+      const swapTarget = view.pendingSwapTargets.get(id);
+      if (swapTarget) {
+        tile.fromX = tile.x;
+        tile.fromY = tile.y;
+        tile.toX = swapTarget.x;
+        tile.toY = swapTarget.y;
+        tile.moveAge = 0;
+        tile.moveDur = gemTravelDuration(cell, cell, "swap", anim, reduced);
+        tile.moveHold = 0;
+        tile.moveKind = "swap";
+        view.pendingSwapTargets.delete(id);
+      }
+      const impactRemaining = hasMatchPresentation
+        ? Math.max(0, impactDelay - (Number.isFinite(recentClearBorn) ? now - recentClearBorn : 0))
         : 0;
       tile.dieAge = -impactRemaining / 1000;
-      tile.moveKind = "idle";
-      tile.flash = reduced ? 0.28 : recentClearBorn > -Infinity ? 0.78 : 1;
-      tile.glow = recentClearBorn > -Infinity ? 0.82 : 1;
+      if (!swapTarget) tile.moveKind = "idle";
+      tile.flash = reduced ? 0.28 : hasMatchPresentation ? 0.78 : 1;
+      tile.glow = hasMatchPresentation ? 0.82 : 1;
       tile.burstEmitted = impactRemaining <= 0;
       if (tile.burstEmitted) {
         this.burst(view, tile.x + cell / 2, tile.y + cell / 2, tile.color, cell);
@@ -992,6 +1068,18 @@ export class BoardRenderer {
     const dieDur = gemDieDuration(anim, reduced);
     for (const tile of view.tiles.values()) {
       if (!tile.dying) continue;
+      if (tile.moveKind === "swap" && tile.moveDur > 0) {
+        tile.moveAge += dt;
+        const swapT = Math.min(1, tile.moveAge / tile.moveDur);
+        const swapE = gemTravelEase("swap", swapT);
+        tile.x = tile.fromX + (tile.toX - tile.fromX) * swapE;
+        tile.y = tile.fromY + (tile.toY - tile.fromY) * swapE;
+        if (swapT >= 1) {
+          tile.moveKind = "idle";
+          tile.vx = 0;
+          tile.vy = 0;
+        }
+      }
       tile.dieAge += dt;
       if (!tile.burstEmitted && tile.dieAge >= 0) {
         tile.burstEmitted = true;
@@ -1003,10 +1091,11 @@ export class BoardRenderer {
         tile.flash *= 0.7;
       } else if (tile.dieAge < 0) {
         // Hold the matched crystal in a tiny charged lock before the break.
-        tile.scale = 1.018;
+        const charge = Math.max(0, Math.min(1, (tile.dieAge + MATCH_IMPACT_MS / 1000) / (MATCH_IMPACT_MS / 1000)));
+        tile.scale = 1.012 + charge * 0.018;
         tile.alpha = 1;
-        tile.flash = Math.max(tile.flash, 0.62);
-        tile.glow = Math.max(tile.glow, 0.55);
+        tile.flash = Math.max(tile.flash, 0.4 + charge * 0.24);
+        tile.glow = Math.max(tile.glow, 0.36 + charge * 0.22);
       } else {
         tile.scale = pose.scale;
         tile.alpha = pose.alpha;
@@ -1381,6 +1470,7 @@ export class BoardRenderer {
           : this.fx.vfxTheme === "ember-fx"
             ? "#FF9D00"
             : hex;
+    this.addShockwave(view, x, y, cell * 0.42, accent, 150, 1.4);
     for (let i = 0; i < n; i++) {
       const a = (Math.PI * 2 * i) / n + Math.random() * 0.35;
       const sp = 1.6 + Math.random() * 2.4;
@@ -1389,8 +1479,8 @@ export class BoardRenderer {
         y,
         vx: Math.cos(a) * sp,
         vy: Math.sin(a) * sp - 2.2,
-        life: 0.82,
-        max: 0.82,
+        life: 0.15,
+        max: 0.15,
         size: cell * (0.038 + Math.random() * 0.04),
         color: i % 3 === 0 ? "#EAFBFF" : i % 2 === 0 ? hex : accent,
       });
@@ -1933,6 +2023,10 @@ export class BoardRenderer {
     const cx = x + size / 2;
     const cy = y + size / 2;
     const crystal = crystalAccent(tile.color);
+    const charge =
+      tile.dying && tile.dieAge < 0
+        ? Math.max(0, Math.min(1, (tile.dieAge + MATCH_IMPACT_MS / 1000) / (MATCH_IMPACT_MS / 1000)))
+        : 0;
     ctx.save();
     ctx.globalAlpha *= tile.alpha;
     const atlas = gemAtlasCanvas();
@@ -1961,6 +2055,25 @@ export class BoardRenderer {
     halo.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = halo;
     ctx.fill();
+    if (charge > 0 && !this.fx.reducedMotion) {
+      ctx.save();
+      ctx.globalAlpha *= 0.13 + charge * 0.1;
+      ctx.strokeStyle = crystal.bloom;
+      ctx.lineWidth = Math.max(0.8, s * 0.018);
+      ctx.shadowColor = crystal.bloom;
+      ctx.shadowBlur = s * 0.06;
+      const spin = now / 380;
+      for (let i = 0; i < 4; i++) {
+        const angle = spin + i * (Math.PI / 2);
+        const outer = s * (0.42 - charge * 0.1);
+        const inner = s * (0.14 + charge * 0.04);
+        ctx.beginPath();
+        ctx.moveTo(cx + Math.cos(angle) * outer, cy + Math.sin(angle) * outer);
+        ctx.lineTo(cx + Math.cos(angle) * inner, cy + Math.sin(angle) * inner);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
     if (tile.glow > 0.05 && !tile.dying) {
       ctx.beginPath();
       ctx.arc(cx, cy - s * 0.12, s * 0.2, 0, Math.PI * 2);

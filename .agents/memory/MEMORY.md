@@ -6,3 +6,4 @@
 - [Swap motion visibility](swap-motion-visibility.md) — a mathematically smooth swap can look static if its first frames barely leave the source socket.
 - [Gravity fall visibility](gravity-fall-visibility.md) — multi-row cascades need distance-scaled travel, above-board spawns, and a small renderer-owned landing settle.
 - [Cascade regression checks](cascade-regression-checks.md) — transient Canvas motion needs deterministic fixtures, fast polling, and renderer pose assertions.
+- [Matched swap impact](matched-swap-impact.md) — synchronous resolves can remove swapped IDs before paint; preserve their socket targets in dying overlays.
