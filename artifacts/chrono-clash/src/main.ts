@@ -2046,7 +2046,13 @@ ui.playerBoard.addEventListener(
       }
       return;
     }
-    const target = neighborFromSwipe(from, e.clientX - swipe.x, e.clientY - swipe.y, swipeMin());
+    const rawDx = e.clientX - swipe.x;
+    const rawDy = e.clientY - swipe.y;
+    const finalDrag = clampDrag(rawDx, rawDy, cellSize());
+    swipe.dx = finalDrag.dx;
+    swipe.dy = finalDrag.dy;
+    session.updateDrag(swipe.dx, swipe.dy);
+    const target = neighborFromSwipe(from, rawDx, rawDy, swipeMin());
     const gestureDx = swipe.dx;
     const gestureDy = swipe.dy;
     swipe = null;

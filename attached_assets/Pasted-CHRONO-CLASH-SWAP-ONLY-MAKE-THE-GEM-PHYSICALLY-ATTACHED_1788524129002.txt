@@ -1,0 +1,294 @@
+CHRONO CLASH — SWAP ONLY: MAKE THE GEM PHYSICALLY ATTACHED TO THE FINGER
+
+Everything else is currently good.
+
+DO NOT CHANGE:
+- match VFX
+- gem destruction
+- falling/gravity
+- cascade
+- board
+- HUD
+- gem artwork
+- gem size
+- colors
+- CPU
+- powers
+- audio
+- layout
+- hint system
+
+NO IMAGE GENERATION.
+
+Fix ONLY the physical feel of the GEM SWIPE/SWAP.
+
+==================================================
+THE EXACT PROBLEM
+==================================================
+
+The swap still does not feel like the crystal is attached to my finger.
+
+It feels like:
+
+TOUCH → SWIPE → GAME ANIMATES GEM
+
+I need:
+
+TOUCH GEM → GEM IMMEDIATELY GRABS FINGER → FINGER MOVES → GEM STAYS WITH FINGER → RELEASE/THRESHOLD → GEM CONTINUES NATURALLY INTO NEIGHBOR SOCKET
+
+This must work for BOTH slow and fast swipes.
+
+==================================================
+1. TRUE DIRECT MANIPULATION
+==================================================
+
+During pointerdown:
+
+Immediately establish the selected gem's visual drag position.
+
+During EVERY pointermove/touchmove:
+
+The selected gem's rendered Canvas position must continuously follow the actual finger position.
+
+Do NOT wait for the swipe threshold before visually moving the gem.
+
+Do NOT run a pre-programmed animation while the finger is moving.
+
+Do NOT use a fixed-duration animation to simulate dragging.
+
+The finger is the source of truth.
+
+==================================================
+2. SLOW SWIPE
+==================================================
+
+Test an intentionally slow drag.
+
+Example:
+
+Touch the center of a gem.
+Move the finger slowly across approximately one cell.
+
+The crystal must visibly travel with the finger continuously.
+
+There should be:
+- no delay
+- no sudden jump
+- no catch-up
+- no teleport
+- no snapping before the intended swap
+
+The player should feel that they are physically holding the crystal.
+
+==================================================
+3. FAST SWIPE
+==================================================
+
+Test a very fast swipe.
+
+The crystal must respond immediately.
+
+Do NOT let the game wait for the pointerup event and then animate the gem.
+
+Capture the current finger-driven position at the moment the swap commits.
+
+==================================================
+4. IMPORTANT — NEIGHBORING GEM
+==================================================
+
+The neighboring crystal must also respond naturally as the selected crystal pushes toward its cell.
+
+Avoid the feeling that one gem moves while the other suddenly disappears/reappears.
+
+Both visual positions should interpolate continuously.
+
+==================================================
+5. SWAP THRESHOLD
+==================================================
+
+Keep the existing valid neighboring-cell rules.
+
+Do NOT change which moves are legal.
+
+When the finger crosses the existing swap threshold:
+
+Commit the board exchange.
+
+BUT:
+
+The visual animation must start from the CURRENT rendered finger-driven positions.
+
+Never restart the selected gem from the center of its original socket.
+
+BAD:
+
+original socket
+→ start fixed animation
+→ destination
+
+GOOD:
+
+original socket
+→ finger-driven movement
+→ current finger position
+→ smooth continuation
+→ destination socket
+
+==================================================
+6. FINAL MAGNETIC SETTLE
+==================================================
+
+After the actual finger-driven movement reaches the neighboring cell:
+
+Use only a very subtle final magnetic settle.
+
+Think:
+
+finger movement
+████████████████→
+
+      socket
+        ↓
+      [ GEM ]
+
+The final few pixels should gently pull into the exact socket.
+
+No aggressive snap.
+
+No sudden acceleration.
+
+No bounce.
+
+No overshoot.
+
+==================================================
+7. VERY LIGHT SMOOTHING
+==================================================
+
+If the raw pointer movement is visually too jittery, use only minimal interpolation.
+
+Target:
+- extremely low latency
+- no visible lag
+- no rubber-band effect
+
+The player must NOT be able to perceive the renderer chasing the finger.
+
+Do NOT use heavy smoothing.
+
+==================================================
+8. TOUCH OFFSET
+==================================================
+
+Make sure the gem follows the finger based on the original touch offset.
+
+If the player touches slightly off-center on the crystal, do not suddenly move the crystal's center directly underneath the finger.
+
+Preserve the natural grab point.
+
+This is important for making it feel physically attached.
+
+==================================================
+9. CANCELLED / INVALID SWIPE
+==================================================
+
+If the gesture does not cross the valid threshold:
+
+Return the gem smoothly to its original socket from its CURRENT finger-driven position.
+
+Do not teleport it back.
+
+Do not change the existing invalid-swap rules.
+
+==================================================
+10. DO NOT TOUCH MATCHING
+==================================================
+
+Once the swap completes, hand control back to the existing match system.
+
+Do NOT modify:
+- match detection
+- match VFX
+- destruction timing
+- falling
+
+We are fixing ONLY the swap manipulation.
+
+==================================================
+11. ACTUAL CODE PATH
+==================================================
+
+Inspect the existing path:
+
+pointerdown
+→ selected cell
+→ pointermove
+→ drag position
+→ swipe threshold
+→ swap commit
+→ Canvas visual position
+
+Use the existing renderer/motion architecture.
+
+Do NOT create a second renderer.
+
+Do NOT create a disconnected DOM overlay.
+
+The actual Canvas crystal must follow the finger.
+
+==================================================
+12. LIVE VERIFICATION — REQUIRED
+==================================================
+
+At 390×844 test:
+
+1. VERY SLOW swipe
+2. NORMAL swipe
+3. VERY FAST swipe
+4. INVALID swipe
+5. horizontal valid swap
+6. vertical valid swap
+
+Watch the actual crystal, not just internal state.
+
+SUCCESS CRITERIA:
+
+The instant I touch and move:
+
+THE GEM MOVES WITH MY FINGER.
+
+Slow finger:
+→ slow gem.
+
+Fast finger:
+→ fast gem.
+
+Change direction:
+→ gem follows the finger.
+
+Release:
+→ gem smoothly completes the neighboring-cell placement.
+
+The swap should feel like physically pushing a crystal across the board.
+
+It must NOT feel like selecting a gem and then watching an animation happen.
+
+==================================================
+VALIDATION
+==================================================
+
+Do NOT report success based only on unit tests.
+
+Actually test the live 390×844 game.
+
+Report:
+- exact files changed
+- how pointer position maps to Canvas gem position
+- whether touch offset is preserved
+- current swap threshold
+- final magnetic-settle duration
+- what you observed during slow and fast swipes
+
+ONE CHANGE ONLY.
+
+DO NOT TOUCH ANY OTHER SYSTEM.
