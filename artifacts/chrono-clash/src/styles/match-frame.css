@@ -67,7 +67,6 @@ html body #app #match .player-side .board-slot::after {
     inset 0 -2px 0 rgba(180, 245, 250, .3) !important;
   background:
     linear-gradient(90deg, transparent 7%, rgba(226, 255, 255, .84) 50%, transparent 93%) top / 42% 2px no-repeat,
-    linear-gradient(90deg, transparent 7%, rgba(45, 225, 241, .68) 50%, transparent 93%) bottom / 42% 2px no-repeat,
     linear-gradient(180deg, transparent 8%, rgba(94, 241, 250, .74) 50%, transparent 92%) left / 2px 42% no-repeat,
     linear-gradient(180deg, transparent 8%, rgba(94, 241, 250, .74) 50%, transparent 92%) right / 2px 42% no-repeat !important;
 }
