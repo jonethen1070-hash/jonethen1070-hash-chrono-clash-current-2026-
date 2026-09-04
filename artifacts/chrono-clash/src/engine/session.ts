@@ -5,7 +5,6 @@ import {
   findAnyValidSwap,
   generateBoard,
   matchingNeighbors,
-  resolveBoard,
   snapshotBoard,
   trySwap,
 } from "./board";
@@ -24,7 +23,7 @@ import {
   getCharge,
   spendCharge,
 } from "./economy";
-import { powerConsumesCharge } from "./powers";
+import { powerConsumesCharge, powerEnergyCost, resolveTargetedPower } from "./powers";
 import {
   applyDailyRun,
   applyDailyRunOutcome,
@@ -45,10 +44,8 @@ import {
   COLS,
   Coord,
   COUNTDOWN_SECONDS,
-  ENERGY_BURST,
   ENERGY_FREEZE,
   ENERGY_MAX,
-  ENERGY_MEGA_STRIKE,
   ENERGY_REWIND,
   ENERGY_TIMESHIFT,
   FINALE_MS,
@@ -641,13 +638,16 @@ export class GameSession {
     if (this.screen !== "match" || this.phase !== "playing" || this.ended) return false;
     if (now < this.powerLockUntil) return false;
     if (powerConsumesCharge(id) && getCharge(economyFromProgress(this.progress), id) <= 0) return false;
-    if (id === "freeze") return this.player.energy >= ENERGY_FREEZE;
+    if (id === "freeze") return this.player.energy >= powerEnergyCost(id);
     if (id === "timeshift") {
-      return this.player.energy >= ENERGY_TIMESHIFT && now >= this.timeshiftUntil && now >= this.timeshiftCoolUntil;
+      return (
+        this.player.energy >= powerEnergyCost(id) &&
+        now >= this.timeshiftUntil &&
+        now >= this.timeshiftCoolUntil
+      );
     }
-    if (id === "rewind") return this.player.energy >= ENERGY_REWIND && this.lastPlayerSnap.length >= 2;
-    if (id === "burst") return this.player.energy >= ENERGY_BURST;
-    if (id === "megaStrike") return this.player.energy >= ENERGY_MEGA_STRIKE;
+    if (id === "rewind") return this.player.energy >= powerEnergyCost(id) && this.lastPlayerSnap.length >= 2;
+    if (id === "burst" || id === "megaStrike") return this.player.energy >= powerEnergyCost(id);
     return false;
   }
 
@@ -984,7 +984,7 @@ export class GameSession {
       ) {
         return false;
       }
-      const cost = id === "burst" ? ENERGY_BURST : ENERGY_MEGA_STRIKE;
+      const cost = powerEnergyCost(id);
       const pre = this.capturePlayer();
       this.resolving = true;
       this.player.energy = Math.max(0, this.player.energy - cost);
@@ -1069,25 +1069,8 @@ export class GameSession {
   }
 
   private applyEnergyAttack(id: "burst" | "megaStrike", target: Coord): ResolveResult {
-    const targetPiece = this.player.board[target.r]![target.c]!;
-    const cells: Coord[] = [];
-    if (id === "burst") {
-      for (let dr = -1; dr <= 1; dr++) {
-        for (let dc = -1; dc <= 1; dc++) {
-          const r = target.r + dr;
-          const c = target.c + dc;
-          if (r >= 0 && r < ROWS && c >= 0 && c < COLS) cells.push({ r, c });
-        }
-      }
-    } else {
-      for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS; c++) {
-          if (this.player.board[r]![c]?.color === targetPiece.color) cells.push({ r, c });
-        }
-      }
-    }
-
-    const result = resolveBoard(this.player.board, this.rng, cells);
+    const result = resolveTargetedPower(this.player.board, this.rng, id, target);
+    if (!result) throw new Error(`Invalid ${id} target.`);
     this.opponent.attack = Math.max(0, this.opponent.attack - (id === "burst" ? 22 : 48));
     this.opponent.combo = 0;
     return result;

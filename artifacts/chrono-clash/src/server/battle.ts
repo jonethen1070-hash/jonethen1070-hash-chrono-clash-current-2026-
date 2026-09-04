@@ -1,18 +1,16 @@
 import { AuthError } from "./auth-config";
-import { createSeededRng, generateBoard, resolveBoard, trySwap } from "../engine/board";
+import { createSeededRng, generateBoard, trySwap } from "../engine/board";
 import { fillAttack } from "../engine/combat";
 import { seatForPlayer, seatSeed } from "../engine/online";
-import { powerConsumesCharge } from "../engine/powers";
+import { powerConsumesCharge, powerEnergyCost, resolveTargetedPower } from "../engine/powers";
 import {
   ATTACK_MAX,
   Board,
   Cell,
   COLS,
   Coord,
-  ENERGY_BURST,
   ENERGY_FREEZE,
   ENERGY_MAX,
-  ENERGY_MEGA_STRIKE,
   ENERGY_REWIND,
   ENERGY_TIMESHIFT,
   FREEZE_MS,
@@ -229,7 +227,7 @@ function applyPower(
   target?: Coord,
 ): boolean {
   if (id === "burst" || id === "megaStrike") {
-    const cost = id === "burst" ? ENERGY_BURST : ENERGY_MEGA_STRIKE;
+    const cost = powerEnergyCost(id);
     if (
       actor.energy < cost ||
       now < actor.lockUntil ||
@@ -244,24 +242,8 @@ function applyPower(
     }
     actor.energy -= cost;
     actor.lastSnap = cloneBoard(actor.board);
-    const targetPiece = actor.board[target.r]![target.c]!;
-    const cells: Coord[] = [];
-    if (id === "burst") {
-      for (let dr = -1; dr <= 1; dr++) {
-        for (let dc = -1; dc <= 1; dc++) {
-          const r = target.r + dr;
-          const c = target.c + dc;
-          if (r >= 0 && r < ROWS && c >= 0 && c < COLS) cells.push({ r, c });
-        }
-      }
-    } else {
-      for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS; c++) {
-          if (actor.board[r]![c]?.color === targetPiece.color) cells.push({ r, c });
-        }
-      }
-    }
-    const result = resolveBoard(actor.board, actor.rng, cells);
+    const result = resolveTargetedPower(actor.board, actor.rng, id, target);
+    if (!result) return false;
     actor.score += result.scoreDelta;
     actor.combo = result.comboPeak;
     actor.energy = Math.max(0, Math.min(ENERGY_MAX, actor.energy + result.energyDelta));

@@ -3,7 +3,7 @@ import { Announcer } from "./audio/announcer";
 import { playBattleCues } from "./audio/events";
 import { bedFromScene } from "./audio/scene";
 import { cuesFromFxBatch, VOICE, VoiceLineId } from "./audio/voice";
-import { neighborFromSwipe } from "./engine/input";
+import { clampDrag, neighborFromSwipe } from "./engine/input";
 import { GameSettings, applyMatchAudioMute, isMatchAudioMuted, loadSettings, saveSettings } from "./engine/settings";
 import { unlockGameAudio } from "./audio/unlock";
 import { canSkipIntro } from "./engine/intro";
@@ -2018,14 +2018,9 @@ ui.playerBoard.addEventListener(
     e.preventDefault();
     const dx = e.clientX - swipe.x;
     const dy = e.clientY - swipe.y;
-    const limit = cellSize() * 0.92;
-    if (Math.abs(dx) >= Math.abs(dy)) {
-      swipe.dx = Math.max(-limit, Math.min(limit, dx));
-      swipe.dy = 0;
-    } else {
-      swipe.dx = 0;
-      swipe.dy = Math.max(-limit, Math.min(limit, dy));
-    }
+    const drag = clampDrag(dx, dy, cellSize());
+    swipe.dx = drag.dx;
+    swipe.dy = drag.dy;
     session.updateDrag(swipe.dx, swipe.dy);
   },
   { passive: false },
