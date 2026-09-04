@@ -461,7 +461,8 @@ export class BoardRenderer {
     const slabEdge = isPlayer ? "#007A9E" : "#8E1740";
     const slabFace = isPlayer ? "#062B39" : "#32101C";
     ctx.save();
-    roundRect(ctx, ox + 7, oy + 10, size, size, 22);
+    if (isPlayer) chamferedRect(ctx, ox + 7, oy + 10, size, 14);
+    else roundRect(ctx, ox + 7, oy + 10, size, size, 22);
     ctx.fillStyle = "rgba(0, 2, 8, 0.82)";
     ctx.fill();
     ctx.strokeStyle = "rgba(0, 0, 0, 0.9)";
@@ -470,7 +471,8 @@ export class BoardRenderer {
     ctx.restore();
 
     ctx.save();
-    roundRect(ctx, ox + 3, oy + 5, size, size, 22);
+    if (isPlayer) chamferedRect(ctx, ox + 3, oy + 5, size, 14);
+    else roundRect(ctx, ox + 3, oy + 5, size, size, 22);
     ctx.fillStyle = slabFace;
     ctx.fill();
     ctx.strokeStyle = colorWithAlpha(slabEdge, 0.62);
@@ -481,7 +483,8 @@ export class BoardRenderer {
     this.blitWells(ctx, ox, oy, size, cell, isPlayer);
 
     ctx.save();
-    roundRect(ctx, ox + FRAME, oy + FRAME, size - FRAME * 2, size - FRAME * 2, 14);
+    if (isPlayer) chamferedRect(ctx, ox + FRAME, oy + FRAME, size - FRAME * 2, 8);
+    else roundRect(ctx, ox + FRAME, oy + FRAME, size - FRAME * 2, size - FRAME * 2, 14);
     ctx.clip();
     const cavity = ctx.createLinearGradient(ox + FRAME, oy + FRAME, ox + size - FRAME, oy + size - FRAME);
     cavity.addColorStop(0, "rgba(0, 2, 8, 0.1)");
@@ -494,7 +497,8 @@ export class BoardRenderer {
     this.drawBoardEnergy(ctx, ox, oy, size, isPlayer, boosted, frozen, now);
 
     ctx.save();
-    roundRect(ctx, ox + 1, oy + 1, size - 2, size - 2, 21);
+    if (isPlayer) chamferedRect(ctx, ox + 1, oy + 1, size - 2, 13);
+    else roundRect(ctx, ox + 1, oy + 1, size - 2, size - 2, 21);
     ctx.clip();
     const plane = ctx.createLinearGradient(ox, oy, ox + size, oy + size);
     plane.addColorStop(0, isPlayer ? "#B9F8FF0D" : "#FFD6E20B");
@@ -2294,6 +2298,26 @@ function roundRect(
   ctx.arcTo(x + w, y + h, x, y + h, rr);
   ctx.arcTo(x, y + h, x, y, rr);
   ctx.arcTo(x, y, x + w, y, rr);
+  ctx.closePath();
+}
+
+function chamferedRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  size: number,
+  chamfer: number,
+): void {
+  const c = Math.min(Math.max(0, chamfer), size / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + c, y);
+  ctx.lineTo(x + size - c, y);
+  ctx.lineTo(x + size, y + c);
+  ctx.lineTo(x + size, y + size - c);
+  ctx.lineTo(x + size - c, y + size);
+  ctx.lineTo(x + c, y + size);
+  ctx.lineTo(x, y + size - c);
+  ctx.lineTo(x, y + c);
   ctx.closePath();
 }
 
