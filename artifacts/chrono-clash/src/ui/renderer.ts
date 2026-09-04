@@ -22,7 +22,6 @@ const GEM_VISUAL_SCALE = 1.06;
 const MATCH_STAGGER_MIN_MS = 10;
 const MATCH_STAGGER_STEP_MS = 7;
 const MATCH_STAGGER_MAX_MS = MATCH_STAGGER_MIN_MS + MATCH_STAGGER_STEP_MS * 2;
-const MATCH_AFTERGLOW_MS = 58;
 const DRAG_FOLLOW = 0.985;
 const DRAG_NEIGHBOR_PUSH = 0.18;
 
@@ -1046,7 +1045,7 @@ export class BoardRenderer {
       tile.glow = hasMatchPresentation ? 0.82 : 1;
       tile.burstEmitted = impactRemaining + tile.dieStaggerMs <= 0;
       if (tile.burstEmitted) {
-        this.burst(view, tile.x + cell / 2, tile.y + cell / 2, tile.color, cell, now, tile.breakStrength);
+        this.burst(view, tile.x + cell / 2, tile.y + cell / 2, tile.color, cell, tile.breakStrength);
       }
       if (isPlayer) view.shake = Math.max(view.shake, 0.9);
     }
@@ -1098,7 +1097,6 @@ export class BoardRenderer {
           life: 640 + Math.min(280, combo * 40 + pts / 12),
         });
         if (view.floats.length > 5) view.floats.splice(0, view.floats.length - 5);
-        view.flash = Math.max(view.flash, (combo >= 5 ? 0.16 : pts >= 400 ? 0.1 : 0.05) * mul);
       }
       if (fxEvent.kind === "combo") {
         if (!isPlayer) {
@@ -1136,7 +1134,7 @@ export class BoardRenderer {
       tile.dieAge += dt;
       if (!tile.burstEmitted && tile.dieAge >= 0) {
         tile.burstEmitted = true;
-        this.burst(view, tile.x + cell / 2, tile.y + cell / 2, tile.color, cell, now, tile.breakStrength);
+        this.burst(view, tile.x + cell / 2, tile.y + cell / 2, tile.color, cell, tile.breakStrength);
       }
       const pose = easeCrystalDie(Math.max(0, tile.dieAge) / dieDur);
       if (reduced) {
@@ -1518,7 +1516,7 @@ export class BoardRenderer {
     return sheet;
   }
 
-  private burst(view: BoardView, x: number, y: number, color: number, cell: number, now = performance.now(), combo = 1): void {
+  private burst(view: BoardView, x: number, y: number, color: number, cell: number, combo = 1): void {
     const n = particleBudget(this.fx.quality, this.fx.reducedMotion);
     if (!n) return;
     const hex = COLORS[color - 1] ?? "#fff";
@@ -1530,7 +1528,6 @@ export class BoardRenderer {
           : this.fx.vfxTheme === "ember-fx"
             ? "#FF9D00"
             : hex;
-    const strength = Math.min(1.55, 1 + Math.max(0, combo - 3) * 0.11);
 
     const shardCount = this.fx.quality === "medium" ? 2 : combo >= 5 ? 5 : combo >= 4 ? 4 : 3;
     for (let i = 0; i < shardCount; i++) {
