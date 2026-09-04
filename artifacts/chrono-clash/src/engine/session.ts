@@ -831,6 +831,12 @@ export class GameSession {
     this.drag = { from, dx, dy };
   }
 
+  updateDrag(dx: number, dy: number): void {
+    if (!this.drag) return;
+    this.drag.dx = dx;
+    this.drag.dy = dy;
+  }
+
   rejectSwipe(now = performance.now()): void {
     const drag = this.drag;
     this.selected = null;
@@ -1425,7 +1431,14 @@ export class GameSession {
   }
 
   private pruneFx(now: number): void {
-    this.fx = this.fx.filter((f) => now - f.born < (f.kind === "finale" || f.kind === "attack" ? 1700 : 1100));
+    let write = 0;
+    for (let read = 0; read < this.fx.length; read++) {
+      const fx = this.fx[read]!;
+      if (now - fx.born < (fx.kind === "finale" || fx.kind === "attack" ? 1700 : 1100)) {
+        this.fx[write++] = fx;
+      }
+    }
+    this.fx.length = write;
   }
 
   private isDanger(now: number): boolean {

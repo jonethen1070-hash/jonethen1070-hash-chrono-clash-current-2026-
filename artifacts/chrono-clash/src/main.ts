@@ -3,7 +3,7 @@ import { Announcer } from "./audio/announcer";
 import { playBattleCues } from "./audio/events";
 import { bedFromScene } from "./audio/scene";
 import { cuesFromFxBatch, VOICE, VoiceLineId } from "./audio/voice";
-import { clampDrag, neighborFromSwipe } from "./engine/input";
+import { neighborFromSwipe } from "./engine/input";
 import { GameSettings, applyMatchAudioMute, isMatchAudioMuted, loadSettings, saveSettings } from "./engine/settings";
 import { unlockGameAudio } from "./audio/unlock";
 import { canSkipIntro } from "./engine/intro";
@@ -18,7 +18,7 @@ import {
 } from "./engine/types";
 import { GAME_MODES, modeInfo } from "./engine/catalog";
 import { comboBurstText } from "./engine/combat";
-import { GameSession } from "./engine/session";
+import { GameSession, type FxEvent } from "./engine/session";
 import { BOARD_FRAME, BOARD_GAP, BoardRenderer, RenderFx } from "./ui/renderer";
 import { prefetchGemAtlas } from "./ui/gemAtlas";
 import { comboBurstClass, resultHeadline, scoreTickerRate } from "./ui/feel";
@@ -61,7 +61,7 @@ const announcer = new Announcer(audio);
 const haptics = new HapticBus();
 let settings: GameSettings = loadSettings();
 
-type Swipe = { id: number; r: number; c: number; x: number; y: number };
+type Swipe = { id: number; r: number; c: number; x: number; y: number; dx: number; dy: number };
 let swipe: Swipe | null = null;
 app.innerHTML = `
   <div class="space-layer" aria-hidden="true">
@@ -1731,15 +1731,6 @@ ui.sheet.addEventListener("click", (e) => {
   if (e.target === ui.sheet) closeBattleSheet();
 });
 
-document.addEventListener(
-  "touchmove",
-  (e) => {
-    if (!swipe) return;
-    e.preventDefault();
-  },
-  { passive: false },
-);
-
 const layout = {
   player: new DOMRect(),
   opp: new DOMRect(),
@@ -1757,6 +1748,7 @@ function rectMoved(a: DOMRect, b: DOMRect): boolean {
 }
 
 function refreshLayout(): void {
+  if (!layout.dirty) return;
   const player = ui.playerBoard.getBoundingClientRect();
   const opp = ui.oppBoard.getBoundingClientRect();
   const stage = canvas.getBoundingClientRect();
@@ -1792,6 +1784,20 @@ const STAGE_STARS = [
   [0.82, 0.9, 0.95, 0.5],
 ] as const;
 
+type BackdropCache = {
+  canvas: HTMLCanvasElement;
+  ctx: CanvasRenderingContext2D;
+  width: number;
+  height: number;
+  dpr: number;
+  boardX: number;
+  boardY: number;
+  boardW: number;
+  boardH: number;
+};
+
+let backdropCache: BackdropCache | null = null;
+
 function drawStageBackdrop(
   stageCtx: CanvasRenderingContext2D,
   stageRect: DOMRect,
@@ -1805,63 +1811,113 @@ function drawStageBackdrop(
   const boardY = boardRect.top - stageRect.top;
   const boardW = boardRect.width;
   const boardH = boardRect.height;
-  const bandTop = Math.max(0, boardY - boardH * 0.4);
-  const bandBottom = Math.min(h, boardY + boardH * 1.16);
-  const bandHeight = bandBottom - bandTop;
-  if (bandHeight < 8) return;
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const needsRedraw =
+    !backdropCache ||
+    backdropCache.width !== w ||
+    backdropCache.height !== h ||
+    backdropCache.dpr !== dpr ||
+    Math.abs(backdropCache.boardX - boardX) > 0.25 ||
+    Math.abs(backdropCache.boardY - boardY) > 0.25 ||
+    Math.abs(backdropCache.boardW - boardW) > 0.25 ||
+    Math.abs(backdropCache.boardH - boardH) > 0.25;
 
-  const boardPad = 10;
-  stageCtx.save();
-  stageCtx.globalCompositeOperation = "destination-over";
-  stageCtx.beginPath();
-  stageCtx.rect(0, bandTop, w, bandHeight);
-  stageCtx.rect(boardX - boardPad, boardY - boardPad, boardW + boardPad * 2, boardH + boardPad * 2);
-  stageCtx.clip("evenodd");
+  if (needsRedraw) {
+    if (!backdropCache) {
+      const cacheCanvas = document.createElement("canvas");
+      const cacheCtx = cacheCanvas.getContext("2d");
+      if (!cacheCtx) return;
+      backdropCache = {
+        canvas: cacheCanvas,
+        ctx: cacheCtx,
+        width: 0,
+        height: 0,
+        dpr: 0,
+        boardX: 0,
+        boardY: 0,
+        boardW: 0,
+        boardH: 0,
+      };
+    }
 
-  const starY = (ratio: number) => bandTop + bandHeight * ratio;
-  for (const [x, y, radius, alpha] of STAGE_STARS) {
-    stageCtx.beginPath();
-    stageCtx.fillStyle = `rgba(214, 242, 255, ${alpha * 0.34})`;
-    stageCtx.arc(w * x, starY(y), radius, 0, Math.PI * 2);
-    stageCtx.fill();
+    const cache = backdropCache;
+    cache.width = w;
+    cache.height = h;
+    cache.dpr = dpr;
+    cache.boardX = boardX;
+    cache.boardY = boardY;
+    cache.boardW = boardW;
+    cache.boardH = boardH;
+    cache.canvas.width = Math.max(1, Math.floor(w * dpr));
+    cache.canvas.height = Math.max(1, Math.floor(h * dpr));
+    cache.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    cache.ctx.clearRect(0, 0, w, h);
+
+    const bandTop = Math.max(0, boardY - boardH * 0.4);
+    const bandBottom = Math.min(h, boardY + boardH * 1.16);
+    const bandHeight = bandBottom - bandTop;
+    if (bandHeight < 8) return;
+
+    const boardPad = 10;
+    const backdropCtx = cache.ctx;
+    backdropCtx.save();
+    backdropCtx.globalCompositeOperation = "source-over";
+    backdropCtx.beginPath();
+    backdropCtx.rect(0, bandTop, w, bandHeight);
+    backdropCtx.rect(boardX - boardPad, boardY - boardPad, boardW + boardPad * 2, boardH + boardPad * 2);
+    backdropCtx.clip("evenodd");
+
+    const starY = (ratio: number) => bandTop + bandHeight * ratio;
+    for (const [x, y, radius, alpha] of STAGE_STARS) {
+      backdropCtx.beginPath();
+      backdropCtx.fillStyle = `rgba(214, 242, 255, ${alpha * 0.34})`;
+      backdropCtx.arc(w * x, starY(y), radius, 0, Math.PI * 2);
+      backdropCtx.fill();
+    }
+
+    const centerCavity = backdropCtx.createRadialGradient(w * 0.5, boardY + boardH * 0.42, 0, w * 0.5, boardY + boardH * 0.42, w * 0.58);
+    centerCavity.addColorStop(0, "rgba(0, 2, 10, 0.7)");
+    centerCavity.addColorStop(0.42, "rgba(2, 5, 20, 0.42)");
+    centerCavity.addColorStop(1, "rgba(2, 5, 20, 0)");
+    backdropCtx.fillStyle = centerCavity;
+    backdropCtx.fillRect(0, bandTop, w, bandHeight);
+
+    const leftNebula = backdropCtx.createRadialGradient(-w * 0.04, boardY + boardH * 0.44, 0, w * 0.08, boardY + boardH * 0.44, w * 0.72);
+    leftNebula.addColorStop(0, "rgba(0, 185, 245, 0.34)");
+    leftNebula.addColorStop(0.26, "rgba(0, 125, 190, 0.2)");
+    leftNebula.addColorStop(0.62, "rgba(0, 72, 125, 0.08)");
+    leftNebula.addColorStop(1, "rgba(0, 22, 46, 0)");
+    backdropCtx.fillStyle = leftNebula;
+    backdropCtx.fillRect(0, bandTop, w * 0.68, bandHeight);
+
+    const rightNebula = backdropCtx.createRadialGradient(w * 1.04, boardY + boardH * 0.46, 0, w * 0.92, boardY + boardH * 0.46, w * 0.72);
+    rightNebula.addColorStop(0, "rgba(246, 24, 112, 0.3)");
+    rightNebula.addColorStop(0.26, "rgba(164, 18, 94, 0.18)");
+    rightNebula.addColorStop(0.62, "rgba(84, 18, 80, 0.08)");
+    rightNebula.addColorStop(1, "rgba(23, 6, 28, 0)");
+    backdropCtx.fillStyle = rightNebula;
+    backdropCtx.fillRect(w * 0.32, bandTop, w * 0.68, bandHeight);
+
+    const purpleTransition = backdropCtx.createRadialGradient(w * 0.5, boardY + boardH * 0.38, 0, w * 0.5, boardY + boardH * 0.38, w * 0.42);
+    purpleTransition.addColorStop(0, "rgba(94, 58, 156, 0.14)");
+    purpleTransition.addColorStop(0.48, "rgba(74, 34, 122, 0.08)");
+    purpleTransition.addColorStop(1, "rgba(34, 15, 72, 0)");
+    backdropCtx.fillStyle = purpleTransition;
+    backdropCtx.fillRect(w * 0.12, bandTop, w * 0.76, bandHeight);
+
+    const base = backdropCtx.createLinearGradient(0, bandTop, 0, bandBottom);
+    base.addColorStop(0, "rgba(2, 8, 20, 0.9)");
+    base.addColorStop(0.5, "rgba(1, 4, 13, 0.76)");
+    base.addColorStop(1, "rgba(0, 2, 8, 0.92)");
+    backdropCtx.fillStyle = base;
+    backdropCtx.fillRect(0, bandTop, w, bandHeight);
+    backdropCtx.restore();
   }
 
-  const centerCavity = stageCtx.createRadialGradient(w * 0.5, boardY + boardH * 0.42, 0, w * 0.5, boardY + boardH * 0.42, w * 0.58);
-  centerCavity.addColorStop(0, "rgba(0, 2, 10, 0.7)");
-  centerCavity.addColorStop(0.42, "rgba(2, 5, 20, 0.42)");
-  centerCavity.addColorStop(1, "rgba(2, 5, 20, 0)");
-  stageCtx.fillStyle = centerCavity;
-  stageCtx.fillRect(0, bandTop, w, bandHeight);
-
-  const leftNebula = stageCtx.createRadialGradient(-w * 0.04, boardY + boardH * 0.44, 0, w * 0.08, boardY + boardH * 0.44, w * 0.72);
-  leftNebula.addColorStop(0, "rgba(0, 185, 245, 0.34)");
-  leftNebula.addColorStop(0.26, "rgba(0, 125, 190, 0.2)");
-  leftNebula.addColorStop(0.62, "rgba(0, 72, 125, 0.08)");
-  leftNebula.addColorStop(1, "rgba(0, 22, 46, 0)");
-  stageCtx.fillStyle = leftNebula;
-  stageCtx.fillRect(0, bandTop, w * 0.68, bandHeight);
-
-  const rightNebula = stageCtx.createRadialGradient(w * 1.04, boardY + boardH * 0.46, 0, w * 0.92, boardY + boardH * 0.46, w * 0.72);
-  rightNebula.addColorStop(0, "rgba(246, 24, 112, 0.3)");
-  rightNebula.addColorStop(0.26, "rgba(164, 18, 94, 0.18)");
-  rightNebula.addColorStop(0.62, "rgba(84, 18, 80, 0.08)");
-  rightNebula.addColorStop(1, "rgba(23, 6, 28, 0)");
-  stageCtx.fillStyle = rightNebula;
-  stageCtx.fillRect(w * 0.32, bandTop, w * 0.68, bandHeight);
-
-  const purpleTransition = stageCtx.createRadialGradient(w * 0.5, boardY + boardH * 0.38, 0, w * 0.5, boardY + boardH * 0.38, w * 0.42);
-  purpleTransition.addColorStop(0, "rgba(94, 58, 156, 0.14)");
-  purpleTransition.addColorStop(0.48, "rgba(74, 34, 122, 0.08)");
-  purpleTransition.addColorStop(1, "rgba(34, 15, 72, 0)");
-  stageCtx.fillStyle = purpleTransition;
-  stageCtx.fillRect(w * 0.12, bandTop, w * 0.76, bandHeight);
-
-  const base = stageCtx.createLinearGradient(0, bandTop, 0, bandBottom);
-  base.addColorStop(0, "rgba(2, 8, 20, 0.9)");
-  base.addColorStop(0.5, "rgba(1, 4, 13, 0.76)");
-  base.addColorStop(1, "rgba(0, 2, 8, 0.92)");
-  stageCtx.fillStyle = base;
-  stageCtx.fillRect(0, bandTop, w, bandHeight);
+  if (!backdropCache) return;
+  stageCtx.save();
+  stageCtx.globalCompositeOperation = "destination-over";
+  stageCtx.drawImage(backdropCache.canvas, 0, 0, w, h);
   stageCtx.restore();
 }
 
@@ -1932,7 +1988,7 @@ ui.playerBoard.addEventListener(
     const cell = hitPlayer(e);
     if (!cell) return;
     e.preventDefault();
-    swipe = { id: e.pointerId, r: cell.r, c: cell.c, x: e.clientX, y: e.clientY };
+    swipe = { id: e.pointerId, r: cell.r, c: cell.c, x: e.clientX, y: e.clientY, dx: 0, dy: 0 };
     session.setDrag(cell, 0, 0);
     renderer.flashSelect(cell, now);
     audio.play("place");
@@ -1950,8 +2006,17 @@ ui.playerBoard.addEventListener(
   (e) => {
     if (!swipe || e.pointerId !== swipe.id) return;
     e.preventDefault();
-    const pull = clampDrag(e.clientX - swipe.x, e.clientY - swipe.y, cellSize());
-    session.setDrag({ r: swipe.r, c: swipe.c }, pull.dx, pull.dy);
+    const dx = e.clientX - swipe.x;
+    const dy = e.clientY - swipe.y;
+    const limit = cellSize() * 0.92;
+    if (Math.abs(dx) >= Math.abs(dy)) {
+      swipe.dx = Math.max(-limit, Math.min(limit, dx));
+      swipe.dy = 0;
+    } else {
+      swipe.dx = 0;
+      swipe.dy = Math.max(-limit, Math.min(limit, dy));
+    }
+    session.updateDrag(swipe.dx, swipe.dy);
   },
   { passive: false },
 );
@@ -1978,10 +2043,12 @@ ui.playerBoard.addEventListener(
     }
   },
 );
-ui.playerBoard.addEventListener("pointercancel", () => {
+function finishSwipe(): void {
   swipe = null;
   session.setDrag(null);
-});
+}
+ui.playerBoard.addEventListener("pointercancel", finishSwipe);
+ui.playerBoard.addEventListener("lostpointercapture", finishSwipe);
 
 function hitPlayer(e: PointerEvent) {
   return renderer.cellAt(layout.player, layout.canvas, e.clientX, e.clientY);
@@ -2001,6 +2068,7 @@ let lastCombo = "";
 let lastOppCombo = "";
 let lastOverlay = "";
 let seenFx = 0;
+const freshFx: FxEvent[] = [];
 let resultAt = 0;
 let lastScreen = "";
 let lastProfile = -1;
@@ -2210,7 +2278,7 @@ function frame(now: number): void {
     ui.timeshift.classList.toggle("empty-charge", session.powerCharges("timeshift") <= 0);
 
     const comboAt = announcer.lastComboAt;
-    const freshFx: typeof snap.fx = [];
+    freshFx.length = 0;
     for (const fx of snap.fx) {
       if (fx.id <= seenFx) continue;
       seenFx = Math.max(seenFx, fx.id);

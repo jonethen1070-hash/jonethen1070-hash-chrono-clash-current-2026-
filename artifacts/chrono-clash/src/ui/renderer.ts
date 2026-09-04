@@ -98,6 +98,7 @@ interface Bolt {
 
 class BoardView {
   tiles = new Map<number, VisualTile>();
+  live = new Set<number>();
   particles: Particle[] = [];
   shockwaves: Shockwave[] = [];
   floats: FloatText[] = [];
@@ -107,6 +108,7 @@ class BoardView {
 
   reset(): void {
     this.tiles.clear();
+    this.live.clear();
     this.particles = [];
     this.shockwaves = [];
     this.floats = [];
@@ -534,7 +536,8 @@ export class BoardRenderer {
       ctx.stroke();
     }
 
-    const live = new Set<number>();
+    const live = view.live;
+    live.clear();
     const dt = this.animDt;
     const anim = this.fx.animation ?? this.fx.quality;
     const reduced = this.fx.reducedMotion;
@@ -1539,7 +1542,8 @@ export class BoardRenderer {
     ctx.lineWidth = 1.55;
     ctx.shadowColor = "#00D9FF80";
     ctx.shadowBlur = 7;
-    for (const edgeX of [ox + 2.5, ox + size - 2.5]) {
+    for (let edge = 0; edge < 2; edge++) {
+      const edgeX = ox + (edge === 0 ? 2.5 : size - 2.5);
       ctx.beginPath();
       ctx.moveTo(edgeX, oy + chamfer + 3);
       ctx.lineTo(edgeX, oy + size - chamfer - 3);
@@ -1550,7 +1554,8 @@ export class BoardRenderer {
     ctx.lineDashOffset = -size * 0.08;
     ctx.lineWidth = 0.9;
     ctx.strokeStyle = "#7CF5FFB8";
-    for (const edgeX of [ox + 2.5, ox + size - 2.5]) {
+    for (let edge = 0; edge < 2; edge++) {
+      const edgeX = ox + (edge === 0 ? 2.5 : size - 2.5);
       ctx.beginPath();
       ctx.moveTo(edgeX, oy + chamfer + 4);
       ctx.lineTo(edgeX, oy + size - chamfer - 4);
@@ -1569,7 +1574,8 @@ export class BoardRenderer {
     ctx.strokeStyle = horizontalRail;
     ctx.shadowColor = "#00D9FF4D";
     ctx.shadowBlur = 4;
-    for (const edgeY of [oy + 2.5, oy + size - 2.5]) {
+    for (let edge = 0; edge < 2; edge++) {
+      const edgeY = oy + (edge === 0 ? 2.5 : size - 2.5);
       ctx.beginPath();
       ctx.moveTo(ox + chamfer + 3, edgeY);
       ctx.lineTo(ox + size - chamfer - 3, edgeY);
@@ -1579,13 +1585,9 @@ export class BoardRenderer {
     ctx.restore();
 
     // Four angular energy nodes concentrate the brightest light at the corners.
-    const cornerNodes: Array<[number, number]> = [
-      [ox + 3.8, oy + 3.8],
-      [ox + size - 3.8, oy + 3.8],
-      [ox + 3.8, oy + size - 3.8],
-      [ox + size - 3.8, oy + size - 3.8],
-    ];
-    for (const [cx, cy] of cornerNodes) {
+    for (let corner = 0; corner < 4; corner++) {
+      const cx = ox + (corner % 2 === 0 ? 3.8 : size - 3.8);
+      const cy = oy + (corner < 2 ? 3.8 : size - 3.8);
       const node = ctx.createRadialGradient(cx, cy, 0, cx, cy, 6.5);
       node.addColorStop(0, "#F4FFFFFF");
       node.addColorStop(0.2, "#B9F8FFFF");
