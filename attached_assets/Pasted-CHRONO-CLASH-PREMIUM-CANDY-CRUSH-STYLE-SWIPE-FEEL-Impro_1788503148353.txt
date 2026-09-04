@@ -1,0 +1,103 @@
+CHRONO CLASH — PREMIUM CANDY-CRUSH-STYLE SWIPE FEEL
+
+Improve ONLY the tactile/visual feel of the initial gem swipe.
+
+The goal is:
+finger movement → immediate gem response → smooth physical swap → crisp settle → satisfying transition into the existing match/cascade.
+
+DO NOT change:
+- board size or layout
+- HUD
+- bottom controls
+- gem artwork/colors/materials
+- match rules
+- cascade/resolver logic
+- powers
+- board frame
+- corner lighting
+- networking
+
+PREMIUM SWIPE FEEL:
+
+1. DIRECT FINGER RESPONSE
+- The selected gem must follow the swipe intention immediately.
+- Do not make the player wait for a threshold after the swipe direction is clearly established.
+- Preserve the existing valid-swipe threshold so accidental taps do not trigger swaps.
+
+2. PHYSICAL SWAP
+- Use the existing renderer/animation system.
+- The two gems should travel toward each other's cells with smooth acceleration/deceleration.
+- Target roughly 110–140ms for the committed swap.
+- Avoid linear movement.
+- Avoid slow floating movement.
+
+3. PREMIUM "SNAP"
+- At the end of the swap, add a tiny positional settle/snap.
+- Extremely subtle: approximately 2–4px visual movement at most.
+- No exaggerated bounce.
+- The gem should feel like it has weight and has landed securely into its socket.
+
+4. MICRO-SCALE RESPONSE
+- During the final few milliseconds of the swap, allow a very subtle scale response, approximately 1–2%.
+- Return immediately to normal scale.
+- Do NOT make the gems look like they are pulsing.
+
+5. MATCH TRANSITION
+When the swipe creates a match:
+- The completed swap should visually finish first.
+- Then transition cleanly into the existing match/cascade presentation.
+- Preserve the existing 64ms impact lock and crystalline destruction treatment.
+- Do not redesign the cascade.
+
+6. INVALID SWIPE
+- Invalid swaps should feel equally polished.
+- Smoothly return the gems to their original cells.
+- Target roughly 100–130ms return.
+- Add a very small settle at the end.
+- Never leave a gem visually between cells.
+
+7. RAPID INPUT
+- Test fast repeated swipes.
+- Do not allow animation state corruption.
+- Existing input locks/rules must remain authoritative.
+
+IMPORTANT ART DIRECTION:
+
+Think premium match-3:
+- immediate
+- smooth
+- tactile
+- weighted
+- crisp
+- controlled
+- satisfying
+
+NOT:
+- floaty
+- sluggish
+- bouncy
+- exaggerated
+- cartoonish
+- over-glowing
+
+Use the existing Chrono Clash visual language rather than copying Candy Crush artwork.
+
+VERIFY ON REAL RUNTIME at 390×844:
+- normal valid swipe
+- invalid swipe
+- horizontal swipe
+- vertical swipe
+- rapid swipe
+- swipe creating a match
+- swipe leading into multi-wave cascade
+
+Measure/report:
+- committed swap duration
+- invalid return duration
+- whether response begins immediately after valid direction detection
+- whether gems consistently settle exactly into cells
+- files changed
+
+Run typecheck, production build, focused tests, mobile swipe test, and git diff --check.
+
+Make NO unrelated changes.
