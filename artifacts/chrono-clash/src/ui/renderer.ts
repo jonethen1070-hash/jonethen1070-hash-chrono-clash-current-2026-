@@ -2265,18 +2265,6 @@ export class BoardRenderer {
       }
     }
 
-    if (hinted && !selected) {
-      const ring = Math.max(5, size * 0.2);
-      roundRect(ctx, x + 1.6, y + 1.6, size - 3.2, size - 3.2, ring);
-      const hintPulse = 0.62 + Math.sin(now / 180) * 0.38;
-      ctx.strokeStyle = colorWithAlpha("#7CF5FF", 0.55 + hintPulse * 0.3);
-      ctx.lineWidth = 1.8;
-      ctx.shadowColor = "#7CF5FFB3";
-      ctx.shadowBlur = 6;
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-    }
-
     if (tile.kind !== "normal") {
       ctx.strokeStyle = "rgba(255,255,255,0.95)";
       ctx.lineWidth = 2.2;
