@@ -1973,7 +1973,6 @@ function commitSwipe(from: Coord, target: Coord, now: number, gestureDx = 0, ges
     return true;
   }
   renderer.flashInvalid(from, target, now);
-  audio.play("invalid");
   return false;
 }
 
@@ -1989,7 +1988,6 @@ ui.playerBoard.addEventListener(
     swipe = { id: e.pointerId, r: cell.r, c: cell.c, x: e.clientX, y: e.clientY, dx: 0, dy: 0 };
     session.setDrag(cell, 0, 0);
     renderer.flashSelect(cell, now);
-    audio.play("place");
     try {
       ui.playerBoard.setPointerCapture(e.pointerId);
     } catch {
@@ -2042,7 +2040,6 @@ ui.playerBoard.addEventListener(
         sendOnlineAction({ type: "power", id, target });
       } else {
         restartAnim(button, "unavailable");
-        audio.play("ui");
       }
       return;
     }
@@ -2378,7 +2375,6 @@ function frame(now: number): void {
     refreshLayout();
     renderer.draw(snap, layout.player, layout.opp, now, fade);
     if (renderer.takeLandingImpacts() > 0) {
-      audio.play("place");
       haptics.defer("swap", 1, now);
     }
     drawStageBackdrop(ctx!, layout.canvas, layout.player);

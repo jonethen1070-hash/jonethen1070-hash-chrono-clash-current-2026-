@@ -135,9 +135,33 @@ describe("AudioBus music safety", () => {
     expect(src).toContain("audio.dispose()");
     expect(src).toContain("playBattleCues(audio, fx");
     expect(src).toContain("pressUi");
-    expect(src).toContain('feelHaptic("invalid")');
     expect(src).toContain('feelHaptic("tap")');
-    expect(src).toContain('feelHaptic("swap")');
+  });
+
+  it("keeps gem touch and drag paths silent", () => {
+    const src = readFileSync("src/main.ts", "utf8");
+    const commitStart = src.indexOf("function commitSwipe");
+    const pointerDownStart = src.indexOf('ui.playerBoard.addEventListener(\n  "pointerdown"');
+    const pointerMoveStart = src.indexOf('ui.playerBoard.addEventListener(\n  "pointermove"');
+    const pointerUpStart = src.indexOf('ui.playerBoard.addEventListener(\n  "pointerup"');
+    const pointerEnd = src.indexOf('ui.playerBoard.addEventListener("pointercancel"', pointerUpStart);
+    const landingStart = src.indexOf("if (renderer.takeLandingImpacts()");
+    const landingEnd = src.indexOf("drawStageBackdrop", landingStart);
+
+    expect(commitStart).toBeGreaterThan(-1);
+    expect(pointerDownStart).toBeGreaterThan(commitStart);
+    expect(pointerMoveStart).toBeGreaterThan(pointerDownStart);
+    expect(pointerUpStart).toBeGreaterThan(pointerMoveStart);
+    expect(pointerEnd).toBeGreaterThan(pointerUpStart);
+    expect(landingStart).toBeGreaterThan(pointerEnd);
+    expect(landingEnd).toBeGreaterThan(landingStart);
+
+    const commitPath = src.slice(commitStart, pointerDownStart);
+    expect(commitPath).toContain('audio.play("swap")');
+    expect(commitPath).not.toContain('audio.play("invalid")');
+    expect(src.slice(pointerDownStart, pointerEnd)).not.toContain("audio.play(");
+    expect(src.slice(landingStart, landingEnd)).not.toContain("audio.play(");
+    expect(src).toContain("playBattleCues(audio, fx");
   });
 
   it("plays a real GameSession finale sting once for victory, defeat, and draw", () => {
