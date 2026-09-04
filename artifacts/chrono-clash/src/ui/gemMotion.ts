@@ -5,8 +5,8 @@ export const LIVE_GEM_MAX_IN_CELL_DROP = 0.16;
 
 export type GemMoveKind = "swap" | "fall";
 
-export const SWAP_PUSH_MS = 100;
-export const SWAP_MAGNET_MS = 100;
+export const SWAP_PUSH_MS = 120;
+export const SWAP_MAGNET_MS = 80;
 export const SWAP_TOTAL_MS = SWAP_PUSH_MS + SWAP_MAGNET_MS;
 
 export function clamp01(t: number): number {
@@ -30,17 +30,19 @@ export function easeInOutSine(t: number): number {
 }
 
 /**
- * Two-stage socket attraction:
- * - the first half is controlled and resistant,
- * - the second half pulls hard toward the exact neighboring socket.
+ * Continuous travel with a short precision pull:
+ * - the first 86% of distance uses a restrained cubic approach,
+ * - the final 14% uses the dedicated magnetic socket phase.
  */
 export function easeMagneticSwap(t: number): number {
   const x = clamp01(t);
-  if (x <= 0.5) {
-    return 0.38 * easeInOutCubic(x * 2);
+  const magnetStart = SWAP_PUSH_MS / SWAP_TOTAL_MS;
+  const approachDistance = 0.86;
+  if (x <= magnetStart) {
+    return approachDistance * easeInOutCubic(x / magnetStart);
   }
-  const pull = (x - 0.5) * 2;
-  return 0.38 + 0.62 * pull * pull * pull;
+  const pull = (x - magnetStart) / (1 - magnetStart);
+  return approachDistance + (1 - approachDistance) * easeOutCubic(pull);
 }
 
 /** Accelerate then settle into the well. No bounce, no linear slot-drop. */

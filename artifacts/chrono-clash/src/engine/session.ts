@@ -630,7 +630,7 @@ export class GameSession {
   isInteractive(now = performance.now()): boolean {
     if (this.onlineRemote && this.onlinePhase !== "playing") return false;
     if (this.screen !== "match" || this.phase !== "playing" || this.ended) return false;
-    if (now < this.busyUntil || this.resolving) return false;
+    if (this.resolving) return false;
     if (now < this.playerLockedUntil) return false;
     return true;
   }

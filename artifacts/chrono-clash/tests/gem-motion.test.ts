@@ -41,7 +41,7 @@ describe("crystal gem motion curves", () => {
     expect(easeInOutSine(0.75)).toBeGreaterThan(0.5);
     expect(easeMagneticSwap(0)).toBe(0);
     expect(easeMagneticSwap(1)).toBe(1);
-    expect(easeMagneticSwap(0.25)).toBeLessThan(0.2);
+    expect(easeMagneticSwap(0.25)).toBeLessThan(0.3);
     expect(easeMagneticSwap(0.9)).toBeGreaterThan(0.65);
     expect(gemTravelEase("swap", 0.125)).toBe(easeMagneticSwap(0.125));
     expect(easeCrystalFall(0)).toBe(0);
@@ -58,8 +58,8 @@ describe("crystal gem motion curves", () => {
     const fallOne = gemTravelDuration(40, 40, "fall", "high", false);
     const fallThree = gemTravelDuration(40 * 3, 40, "fall", "high", false);
     const fallFar = gemTravelDuration(40 * 5, 40, "fall", "high", false);
-    expect(SWAP_PUSH_MS).toBe(100);
-    expect(SWAP_MAGNET_MS).toBe(100);
+    expect(SWAP_PUSH_MS).toBe(120);
+    expect(SWAP_MAGNET_MS).toBe(80);
     expect(SWAP_TOTAL_MS).toBe(200);
     expect(swap).toBe(0.2);
     expect(fallOne).toBeCloseTo(0.24, 5);
@@ -72,7 +72,7 @@ describe("crystal gem motion curves", () => {
     expect(fallFar).toBeGreaterThan(swap);
     expect(gemFallDelay(0, 3, "high", false)).toBeLessThan(gemFallDelay(7, 3, "high", false));
     expect(gemFallDelay(3, 2, "high", true)).toBe(0);
-    expect(INVALID_RETURN_MS).toBe(200);
+    expect(INVALID_RETURN_MS).toBe(160);
   });
 
   it("blooms then dissolves matched crystals instead of popping them", () => {
@@ -151,6 +151,7 @@ describe("landing feedback", () => {
     expect(renderer).toContain("tile.scale = Math.max(tile.scale, 1.035)");
     expect(renderer).toContain("tile.settleDur = 0.052");
     expect(renderer).toContain("tile.scale = 0.985");
+    expect(renderer).toContain("tile.scale = 1.015");
     expect(renderer).toContain("primeSwapPose");
     expect(renderer).toContain("life: 64");
     expect(renderer).toContain("const MATCH_IMPACT_MS = 80");

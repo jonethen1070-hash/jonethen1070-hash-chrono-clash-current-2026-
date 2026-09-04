@@ -311,14 +311,28 @@ export class BoardRenderer {
       this.playerView.pendingSwap = { from: a, to: b, dx: 0, dy: 0 };
     }
     for (const at of [a, b]) {
-      const tile = [...this.playerView.tiles.values()].find((t) => t.r === at.r && t.c === at.c && !t.dying);
+      const tile = [...this.playerView.tiles.values()].find((t) => t.r === at.r && t.c === at.c);
       if (tile) this.playerView.pendingSwapIds.add(tile.id);
     }
-    const source = [...this.playerView.tiles.values()].find((t) => t.r === a.r && t.c === a.c && !t.dying);
-    const destination = [...this.playerView.tiles.values()].find((t) => t.r === b.r && t.c === b.c && !t.dying);
+    const source = [...this.playerView.tiles.values()].find((t) => t.r === a.r && t.c === a.c);
+    const destination = [...this.playerView.tiles.values()].find((t) => t.r === b.r && t.c === b.c);
     if (source && destination) {
       this.playerView.pendingSwapTargets.set(source.id, { x: destination.toX, y: destination.toY });
       this.playerView.pendingSwapTargets.set(destination.id, { x: source.toX, y: source.toY });
+      const swapDur = gemTravelDuration(this.lastPlayerCell, this.lastPlayerCell, "swap", this.fx.quality, this.fx.reducedMotion);
+      for (const [tile, target] of [
+        [source, { x: destination.toX, y: destination.toY }],
+        [destination, { x: source.toX, y: source.toY }],
+      ] as const) {
+        if (!tile.dying || tile.moveKind === "swap") continue;
+        tile.fromX = tile.x;
+        tile.fromY = tile.y;
+        tile.toX = target.x;
+        tile.toY = target.y;
+        tile.moveAge = 0;
+        tile.moveDur = swapDur;
+        tile.moveKind = "swap";
+      }
     }
     const mul = feelMul(this.fx.quality, this.fx.reducedMotion);
     if (mul < 0.2) return;
@@ -963,7 +977,7 @@ export class BoardRenderer {
                   tile.settleDur = 0.06;
                   tile.settleX = 0;
                   tile.settleY = direction * Math.min(2, Math.max(1, Math.abs(tile.toY - tile.fromY) * 0.012));
-                  tile.scale = 0.985;
+                  tile.scale = 1.015;
                 }
               }
               if (Math.abs(tile.fromY - tile.toY) > cell * 0.4) {
