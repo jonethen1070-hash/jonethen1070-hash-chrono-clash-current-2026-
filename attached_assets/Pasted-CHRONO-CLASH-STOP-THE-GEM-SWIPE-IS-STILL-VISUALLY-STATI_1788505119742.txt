@@ -1,0 +1,179 @@
+CHRONO CLASH — STOP. THE GEM SWIPE IS STILL VISUALLY STATIC.
+
+The previous "premium swipe" implementation passed automated tests, but the actual runtime screenshot shows that the gems do NOT visibly perform the intended physical interaction.
+
+Do NOT add another tiny timing tweak.
+
+FIRST: inspect the actual runtime rendering path and determine exactly where the visible Canvas gems get their position, scale, and draw transform during a swipe.
+
+The visible result is the only thing that matters.
+
+==================================================
+GOAL
+==================================================
+
+When the player swipes a gem, I need to SEE the gem physically move.
+
+The interaction should visibly communicate:
+
+FINGER → GEM MOVES → SWAP → SNAP INTO SOCKET
+
+Not:
+
+FINGER → wait → gem suddenly appears in another cell.
+
+==================================================
+IMPLEMENT ONLY GEM SWIPE MOTION
+==================================================
+
+1. VISIBLE GEM MOVEMENT
+
+Use the actual renderer/gemMotion path that controls the visible Canvas gems.
+
+During a committed swipe:
+
+- The selected gem must visibly travel toward the neighboring cell.
+- The neighboring gem must visibly travel toward the selected gem's original cell.
+- Both movements must be clearly perceptible.
+- Their positions must be continuously interpolated during the animation.
+- They must never simply disappear and reappear at the destination.
+
+2. DIRECT SWIPE RESPONSE
+
+As soon as the existing valid directional threshold is crossed:
+
+- begin the visible gem movement immediately.
+- Do not wait for pointer release.
+- Preserve the existing gameplay/input threshold.
+
+3. PHYSICAL MOTION
+
+Use a premium ease-out/ease-in-out curve.
+
+The movement should have:
+- fast initial response
+- controlled deceleration
+- crisp arrival
+
+Target approximately 120–140ms.
+
+Do NOT make the movement subtle enough that it cannot be seen in a screenshot/video.
+
+4. GEM SCALE
+
+At the beginning of the committed swap:
+
+- selected gem may increase approximately 3–4%
+- neighboring gem remains visually stable
+
+During the final landing:
+
+- tiny compression, approximately 1–2%
+- immediately return to exactly 100%
+
+These effects must be clearly visible in runtime, but still premium and restrained.
+
+5. LANDING SNAP
+
+When each gem reaches its destination:
+
+- add a very short 40–70ms visual settle.
+- The gem should feel like it physically locks into the socket.
+- Do not create a large bounce.
+- Final position MUST be exactly centered in the destination cell.
+
+6. IMPORTANT — RENDERING ARCHITECTURE
+
+Do NOT create a second animation system.
+
+Trace the actual flow:
+
+input.ts
+→ session.ts
+→ gemMotion.ts
+→ renderer.ts
+→ visible Canvas draw
+
+Confirm that the animation state being changed is actually consumed by the renderer that draws the player's visible gems.
+
+If an animation value currently exists but is not affecting the Canvas draw transform, FIX THAT CONNECTION.
+
+This is more important than adding more CSS.
+
+7. INVALID SWIPE
+
+For an invalid swap:
+
+- visibly move the gems toward the attempted swap
+- then visibly return them to their original cells
+- approximately 120ms return
+- crisp settle
+- exact original positions
+
+8. MATCH
+
+For a successful match:
+
+SWIPE
+→ VISIBLE GEM SWAP
+→ LANDING SNAP
+→ existing match impact
+→ existing destruction
+→ existing cascade
+
+Do not change the existing match/cascade rules.
+
+==================================================
+STRICT VISUAL VERIFICATION
+==================================================
+
+DO NOT declare this complete just because tests pass.
+
+Run the game at 390×844.
+
+Actually perform a swipe and inspect the visible Canvas animation.
+
+Capture runtime evidence at:
+- immediately before swipe
+- during the swap
+- immediately after landing
+
+Verify that the SAME visible gems can be seen moving between cells.
+
+If the movement cannot clearly be observed, the task is NOT complete.
+
+Report:
+
+1. The exact renderer function responsible for drawing the visible gems.
+2. The exact animation state/property controlling their visible position.
+3. Whether that property was already connected to rendering.
+4. What was changed to make the movement visible.
+5. Actual measured swap duration.
+6. Files changed.
+
+Run:
+- typecheck
+- production build
+- focused tests
+- mobile swipe test
+- git diff --check
+
+Make NO unrelated changes.
+
+DO NOT change:
+- board size
+- HUD
+- "YOUR BOARD" removal
+- bottom controls
+- gem artwork
+- gem colors
+- powers
+- cascade logic
+- board frame
+- audio system
+- networking
+
+The priority is NOT passing tests.
+
+The priority is:
+"Can a human watching the running game clearly SEE the gem physically move when they swipe?"
