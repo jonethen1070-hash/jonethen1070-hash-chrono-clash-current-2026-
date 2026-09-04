@@ -1,0 +1,82 @@
+CHRONO CLASH — FIX MATCH IMPACT / GEM DESTRUCTION FEEL ONLY
+
+The swipe movement is now slightly improved. DO NOT modify the swipe/magnetic movement, gravity/falling, board size, HUD, layout, gem artwork, or gameplay rules.
+
+The current problem is that immediately after a successful matching swipe, the matched gems disappear almost instantly with little or no visible VFX. This feels aggressive and cheap.
+
+Make ONE focused change: add a short, readable premium match-impact sequence BEFORE the matched gems are removed.
+
+Required sequence:
+
+1. COMPLETE THE SWAP FIRST
+   - Let the existing 200ms magnetic swap finish.
+   - The two swapped gems must visibly reach their destination sockets.
+
+2. MICRO IMPACT PAUSE
+   - After the swap reaches the destination, hold the matched state for approximately 70–90ms.
+   - Do NOT freeze the entire game unnecessarily.
+   - This pause exists so the player can visually register the match.
+
+3. MATCHED GEM CHARGE / CRYSTALLINE PRE-BREAK
+   - During that short pause, matched gems should briefly react:
+     - subtle scale/pressure pulse
+     - small brightness increase
+     - crystalline energy gathering toward the gem center
+   - Keep it restrained and premium.
+   - NO huge neon glow.
+   - NO screen flash.
+   - NO excessive bloom.
+
+4. BREAK VFX
+   - Then trigger a short crystalline destruction effect BEFORE the gem is removed.
+   - Use the game's existing Canvas/VFX/rendering infrastructure where possible.
+   - Prefer:
+     - small crystal shards/fragments
+     - tiny energy particles
+     - localized socket impact
+     - brief directional burst
+   - The VFX should last roughly 100–160ms.
+   - The gem should visually break rather than simply vanish.
+
+5. DELAY ACTUAL REMOVAL
+   - Do NOT remove the matched gem at the exact moment the match is detected.
+   - The board state may mark it as matched immediately, but visual destruction must have a short presentation window before the gem disappears.
+
+6. THEN CONTINUE EXISTING CASCADE
+   - After the destruction presentation, run the existing gravity/fall/refill logic.
+   - Preserve the current falling behavior because it is acceptable.
+   - Preserve automatic cascade resolution.
+
+IMPORTANT:
+- Do not redesign the gems.
+- Do not change gem colors.
+- Do not change the board.
+- Do not change HUD.
+- Do not change swipe duration or magnetic movement.
+- Do not change gravity timing.
+- Do not change scoring or match rules.
+- Do not add a large screen-wide effect.
+- Do not hide the destruction behind an instant state update.
+
+FIRST inspect the actual code path:
+swipe commit → match detection → match resolution → renderer/Canvas → gem removal.
+
+Find exactly where the visual gem disappears and insert the presentation timing there rather than adding a disconnected animation.
+
+VERIFY IN THE RUNNING GAME at 390×844 with a real swipe that creates a match.
+
+I need evidence that:
+- the swapped gems finish their movement first
+- there is a visible ~70–90ms match recognition moment
+- matched crystals visibly react before destruction
+- crystalline break VFX is visible
+- gems do not instantly disappear
+- falling starts only after the destruction presentation
+- no console errors
+- existing gameplay rules remain unchanged
+
+Run the focused tests, typecheck, build, and mobile swipe test.
+
+Report the exact files changed, exact timing used, and what you observed in the live runtime.
+
+Do NOT make any other visual/layout changes.
