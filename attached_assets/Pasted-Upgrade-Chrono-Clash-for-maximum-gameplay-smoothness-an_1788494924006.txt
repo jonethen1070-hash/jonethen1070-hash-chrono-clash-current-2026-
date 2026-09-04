@@ -1,0 +1,140 @@
+Upgrade Chrono Clash for maximum gameplay smoothness and touch/swipe responsiveness.
+
+THIS IS A PERFORMANCE-FIRST TASK.
+
+The most important requirement is:
+NO SWIPE DELAY, NO INPUT LAG, NO STUTTER, NO HEAVY FRAME DROPS.
+
+Preserve all existing gameplay and functionality.
+
+DO NOT redesign the game.
+DO NOT change board dimensions.
+DO NOT change the 8x8 grid.
+DO NOT change gem positions/sizes/artwork.
+DO NOT change game rules.
+DO NOT change HUD layout.
+DO NOT add attack bars.
+DO NOT add heavy visual effects.
+
+PHASE 1 — TOUCH/SWIPE RESPONSIVENESS
+
+Audit the complete touch/pointer input path for the player board.
+
+Make swipe interaction feel immediate and native on mobile.
+
+Requirements:
+- Use Pointer Events consistently where appropriate.
+- Avoid unnecessary touch-event delays.
+- Use touch-action appropriately so the board can receive immediate swipe input.
+- Detect swipe direction with minimal processing.
+- Do not wait for animation completion before accepting valid input unless gameplay requires it.
+- Avoid excessive event listeners.
+- Avoid layout reads during pointer movement.
+- Avoid forced synchronous layout/reflow.
+- Keep pointermove processing extremely lightweight.
+- Use requestAnimationFrame only where visual updates actually require it.
+- Ensure pointerup/pointercancel always cleanly terminates a swipe.
+- Prevent accidental browser scrolling/gesture interference while interacting with the board.
+- Keep touch targets reliable on mobile.
+
+PHASE 2 — GAMEPLAY PERFORMANCE
+
+Audit the animation/render loop.
+
+Target stable 60 FPS on a normal modern mobile device.
+
+Do NOT add expensive per-frame work.
+
+Avoid:
+- large DOM updates every frame
+- repeated getBoundingClientRect() calls during gameplay
+- repeated style recalculation
+- unnecessary Canvas redraws
+- creating new objects/arrays inside hot animation loops where avoidable
+- expensive blur/filter effects on large elements
+- huge box-shadow stacks
+- CSS filters covering the entire board
+- unnecessary particle counts
+- unnecessary image processing every frame
+
+Prefer:
+- cached geometry
+- cached measurements
+- requestAnimationFrame
+- minimal Canvas redraw regions where practical
+- transform/opacity for animation
+- GPU-friendly compositing
+- reuse existing objects/resources
+- event-driven updates instead of continuous polling
+
+PHASE 3 — LIGHTWEIGHT GRAPHICS UPGRADE
+
+Improve the overall visual quality ONLY where it has negligible performance cost.
+
+Use subtle:
+- gradients
+- borders
+- metallic highlights
+- small controlled glow
+- simple depth shadows
+- crisp gem highlights
+- lightweight transitions
+- restrained particle/VFX counts
+
+Avoid:
+- large blurred layers
+- full-screen filters
+- excessive bloom
+- continuously animated CSS shadows
+- multiple giant box-shadows
+- expensive Canvas effects on every frame
+
+The game should LOOK more polished while costing essentially no additional gameplay performance.
+
+IMPORTANT VISUAL PRINCIPLE:
+
+Do not make the board frame brighter by simply increasing blur/glow.
+
+Use crisp highlights, thin luminous edges, gradients and layered solid shapes instead.
+
+The gems must remain:
+- crisp
+- colorful
+- bright
+- clean
+- unaffected by frame glow
+
+PHASE 4 — MOBILE VALIDATION
+
+Test the live mobile preview.
+
+Verify:
+- swipe begins immediately
+- swipe direction is detected reliably
+- no noticeable input delay
+- no accidental page scrolling while swiping the board
+- rapid consecutive swipes remain responsive
+- animations remain smooth
+- board remains visually unchanged in size/position
+- 8x8 grid remains unchanged
+- gems remain unchanged
+- gameplay remains unchanged
+
+Measure/inspect performance where possible.
+
+If a visual effect costs meaningful frame time, DO NOT add it.
+
+IMPORTANT:
+Performance and touch responsiveness have priority over visual effects.
+
+Do not claim success just because the build passes.
+
+Actually interact with the live mobile game and verify swipe responsiveness and smooth gameplay.
+
+At the end report:
+1. exact files changed
+2. touch/input improvements made
+3. performance improvements made
+4. visual improvements made
+5. confirmation that gameplay/board/gems were preserved
+6. live mobile performance/input verification results
