@@ -29,10 +29,15 @@ describe("crystal gem motion curves", () => {
 
   it("keeps swaps tactile, fast, and staggers cascade columns", () => {
     const swap = gemTravelDuration(40, 40, "swap", "high", false);
+    const fallOne = gemTravelDuration(40, 40, "fall", "high", false);
+    const fallThree = gemTravelDuration(40 * 3, 40, "fall", "high", false);
     const fallFar = gemTravelDuration(40 * 5, 40, "fall", "high", false);
     expect(swap).toBeGreaterThanOrEqual(0.11);
     expect(swap).toBeLessThanOrEqual(0.14);
-    expect(fallFar).toBeLessThan(0.18);
+    expect(fallOne).toBeGreaterThan(swap - 0.01);
+    expect(fallThree).toBeGreaterThan(fallOne);
+    expect(fallFar).toBeGreaterThan(fallThree);
+    expect(fallFar).toBeLessThanOrEqual(0.3);
     expect(fallFar).toBeGreaterThan(swap);
     expect(gemFallDelay(0, 3, "high", false)).toBeLessThan(gemFallDelay(7, 3, "high", false));
     expect(gemFallDelay(3, 2, "high", true)).toBe(0);

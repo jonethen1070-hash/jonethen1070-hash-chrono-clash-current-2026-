@@ -50,8 +50,9 @@ export function gemTravelDuration(
     if (animation === "medium") return 0.115;
     return 0.125;
   }
-  const base = animation === "low" ? 0.078 : animation === "medium" ? 0.09 : 0.1;
-  return Math.min(0.16, base + Math.max(0, cells - 1) * 0.024);
+  const base = animation === "low" ? 0.09 : animation === "medium" ? 0.105 : 0.12;
+  const perCell = animation === "low" ? 0.018 : animation === "medium" ? 0.028 : 0.034;
+  return Math.min(0.3, base + Math.max(0, cells - 1) * perCell);
 }
 
 export function gemFallDelay(

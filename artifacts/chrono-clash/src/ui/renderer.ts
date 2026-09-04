@@ -577,7 +577,7 @@ export class BoardRenderer {
         const ty = iy + GAP + r * (cell + GAP);
         let tile = view.tiles.get(piece.id);
         if (!tile) {
-          const startY = populated ? ty - cell * Math.min(2.35, 0.92 + r * 0.2) : ty;
+            const startY = populated ? ty - cell * (r + 1.15) : ty;
           tile = {
             id: piece.id,
             color: piece.color,
@@ -704,8 +704,13 @@ export class BoardRenderer {
                       view.socketPulses.splice(0, view.socketPulses.length - 12);
                     }
                   }
-                } else if (anim !== "low" && Math.abs(tile.fromY - tile.toY) > cell * 0.4) {
-                  tile.scale = Math.min(1.025, tile.scale + 0.018);
+                } else if (completedKind === "fall" && anim !== "low" && Math.abs(tile.fromY - tile.toY) > cell * 0.4) {
+                  const direction = Math.sign(tile.toY - tile.fromY) || 1;
+                  tile.settleAge = 0;
+                  tile.settleDur = 0.06;
+                  tile.settleX = 0;
+                  tile.settleY = direction * Math.min(2, Math.max(1, Math.abs(tile.toY - tile.fromY) * 0.012));
+                  tile.scale = 0.985;
                 }
               }
               if (Math.abs(tile.fromY - tile.toY) > cell * 0.4) {
@@ -731,7 +736,7 @@ export class BoardRenderer {
           }
         }
         if (tile.settleAge < tile.settleDur) tile.settleAge += dt;
-        tile.scale += (1 - tile.scale) * Math.min(1, dt * 16);
+        tile.scale += (1 - tile.scale) * Math.min(1, dt * 20);
         if (Math.abs(tile.scale - 1) < 0.0015) tile.scale = 1;
         tile.glow *= 0.86;
         tile.flash *= 0.9;
