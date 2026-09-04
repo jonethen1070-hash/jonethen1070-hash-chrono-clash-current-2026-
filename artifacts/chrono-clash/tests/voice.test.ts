@@ -14,8 +14,22 @@ import {
 } from "../src/audio/voice";
 import { GameSession } from "../src/engine/session";
 import { SCORE_TARGET } from "../src/engine/types";
+import { readFileSync as readSource } from "node:fs";
 
 describe("announcer catalog", () => {
+  it("does not submit gameplay FX to the spoken announcer on the live match screen", () => {
+    const source = readSource("src/main.ts", "utf8");
+    const scheduleStart = source.indexOf("if (session.screen !== \"match\")");
+    const scheduleEnd = source.indexOf("let burst:", scheduleStart);
+
+    expect(scheduleStart).toBeGreaterThan(-1);
+    expect(scheduleEnd).toBeGreaterThan(scheduleStart);
+    expect(source.slice(scheduleStart, scheduleEnd)).toContain("announcer.schedule");
+    expect(source.slice(scheduleStart, scheduleEnd)).toContain("cuesFromFxBatch");
+    expect(source.slice(scheduleStart, scheduleEnd)).toContain("displayCallout(cue.id)");
+    expect(source).toContain("playBattleCues(audio, fx");
+  });
+
   it("maps every player combo peak to the short Combo callout", () => {
     expect(comboCall(1)).toBeNull();
     expect(comboCall(2)).toBe("combo");

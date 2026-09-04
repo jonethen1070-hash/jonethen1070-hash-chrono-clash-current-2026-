@@ -777,13 +777,15 @@ if (returningGoogle) {
   });
 }
 
-  announcer.onSpeak = (id: VoiceLineId) => {
+function displayCallout(id: VoiceLineId): void {
   const line = VOICE[id];
   showCallout(line.text, line.intensity);
   if (line.priority >= 40 && settings.effects !== "low") {
     restartAnim(ui.match, "impact");
   }
-};
+}
+
+announcer.onSpeak = displayCallout;
 
 let calloutTimer = 0;
 function showCallout(text: string, intensity: string): void {
@@ -2084,6 +2086,7 @@ let lastPlayerEnergy = 0;
 let lastTimerBand: "ok" | "warn" | "critical" = "ok";
 let lastCombo = "";
 let lastOppCombo = "";
+let lastGameplayCalloutAt = 0;
 let lastOverlay = "";
 let seenFx = 0;
 const freshFx: FxEvent[] = [];
@@ -2117,6 +2120,7 @@ function onScreenEnter(id: string, now: number): void {
   if (id === "match") {
     lastOverlay = "";
     seenFx = 0;
+    lastGameplayCalloutAt = 0;
     lastPlayerEnergy = 0;
     battleLog.length = 0;
     setArmedEnergyPower(null);
@@ -2286,7 +2290,7 @@ function frame(now: number): void {
     ui.megaStrikeAttack.classList.toggle("unavailable", !megaStrikeReady);
     ui.rewind.classList.toggle("ready", playing && snap.player.energy >= ENERGY_REWIND);
 
-    const comboAt = announcer.lastComboAt;
+    const comboAt = session.screen === "match" ? lastGameplayCalloutAt : announcer.lastComboAt;
     freshFx.length = 0;
     for (const fx of snap.fx) {
       if (fx.id <= seenFx) continue;
@@ -2326,7 +2330,15 @@ function frame(now: number): void {
         }
       }
     }
-    for (const cue of cuesFromFxBatch(freshFx, now, comboAt)) announcer.schedule(cue.id, cue.delayMs, now);
+    const gameplayCallouts = cuesFromFxBatch(freshFx, now, comboAt);
+    if (session.screen === "match") {
+      for (const cue of gameplayCallouts) {
+        displayCallout(cue.id);
+        if (cue.id === "combo") lastGameplayCalloutAt = now;
+      }
+    } else {
+      for (const cue of gameplayCallouts) announcer.schedule(cue.id, cue.delayMs, now);
+    }
 
     let burst: (typeof snap.fx)[number] | undefined;
     for (let i = snap.fx.length - 1; i >= 0; i--) {
