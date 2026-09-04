@@ -15,6 +15,7 @@ import {
   ENERGY_REWIND,
   ENERGY_TIMESHIFT,
   SCORE_TARGETS,
+  type Coord,
 } from "./engine/types";
 import { GAME_MODES, modeInfo } from "./engine/catalog";
 import { comboBurstText } from "./engine/combat";
@@ -63,6 +64,7 @@ let settings: GameSettings = loadSettings();
 
 type Swipe = { id: number; r: number; c: number; x: number; y: number; dx: number; dy: number };
 let swipe: Swipe | null = null;
+let armedEnergyPower: "burst" | "megaStrike" | null = null;
 app.innerHTML = `
   <div class="space-layer" aria-hidden="true">
     <div class="space-far">
@@ -1576,15 +1578,23 @@ ui.rewind.addEventListener("click", () => {
     sendOnlineAction({ type: "power", id: "rewind" });
   }
 });
+function setArmedEnergyPower(id: "burst" | "megaStrike" | null): void {
+  armedEnergyPower = id;
+  session.setDrag(null);
+  ui.energyBurstAttack.setAttribute("aria-pressed", id === "burst" ? "true" : "false");
+  ui.megaStrikeAttack.setAttribute("aria-pressed", id === "megaStrike" ? "true" : "false");
+}
+
 function useEnergyAttack(id: "burst" | "megaStrike", button: HTMLButtonElement): void {
-  if (session.usePower(id)) {
-    ping(button);
-    flashCast(id === "burst" ? "cast-burst" : "cast-mega", button);
-    sendOnlineAction({ type: "power", id });
-  } else {
+  if (!session.canUsePower(id)) {
     restartAnim(button, "unavailable");
     audio.play("ui");
+    return;
   }
+  const next = armedEnergyPower === id ? null : id;
+  setArmedEnergyPower(next);
+  if (next) ping(button);
+  else audio.play("ui");
 }
 ui.energyBurstAttack.addEventListener("click", () => useEnergyAttack("burst", ui.energyBurstAttack));
 ui.megaStrikeAttack.addEventListener("click", () => useEnergyAttack("megaStrike", ui.megaStrikeAttack));
@@ -2027,6 +2037,22 @@ ui.playerBoard.addEventListener(
     if (!swipe || e.pointerId !== swipe.id) return;
     const now = performance.now();
     const from = { r: swipe.r, c: swipe.c };
+    if (armedEnergyPower) {
+      const id = armedEnergyPower;
+      const target = hitPlayer(e) ?? from;
+      const button = id === "burst" ? ui.energyBurstAttack : ui.megaStrikeAttack;
+      swipe = null;
+      setArmedEnergyPower(null);
+      if (session.usePower(id, now, target)) {
+        ping(button);
+        flashCast(id === "burst" ? "cast-burst" : "cast-mega", button);
+        sendOnlineAction({ type: "power", id, target });
+      } else {
+        restartAnim(button, "unavailable");
+        audio.play("ui");
+      }
+      return;
+    }
     const target = neighborFromSwipe(from, e.clientX - swipe.x, e.clientY - swipe.y, swipeMin());
     swipe = null;
     if (target && session.tryPlayerSwap(from, target, now)) {
@@ -2101,6 +2127,7 @@ function onScreenEnter(id: string, now: number): void {
     seenFx = 0;
     lastPlayerEnergy = 0;
     battleLog.length = 0;
+    setArmedEnergyPower(null);
     layout.dirty = true;
     paintMatchIdentities();
   }

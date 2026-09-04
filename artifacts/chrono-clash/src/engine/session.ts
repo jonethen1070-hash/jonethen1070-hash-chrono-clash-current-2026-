@@ -970,15 +970,36 @@ export class GameSession {
     return move ? [move.a, move.b] : [];
   }
 
-  usePower(id: PowerId, now = performance.now()): boolean {
+  usePower(id: PowerId, now = performance.now(), target?: Coord): boolean {
     if (!this.canUsePower(id, now)) return false;
 
     if (id === "burst" || id === "megaStrike") {
+      if (
+        !target ||
+        target.r < 0 ||
+        target.r >= ROWS ||
+        target.c < 0 ||
+        target.c >= COLS ||
+        !this.player.board[target.r]?.[target.c]
+      ) {
+        return false;
+      }
       const cost = id === "burst" ? ENERGY_BURST : ENERGY_MEGA_STRIKE;
+      const pre = this.capturePlayer();
+      this.resolving = true;
       this.player.energy = Math.max(0, this.player.energy - cost);
-      this.applyEnergyAttack(id, now);
+      const result = this.applyEnergyAttack(id, target);
+      this.bumpPlayerBoard();
+      this.drag = null;
+      this.selected = null;
+      this.bounce = null;
+      this.lastPlayerSnap.push(pre);
+      if (this.lastPlayerSnap.length > REWIND_HISTORY) this.lastPlayerSnap.shift();
+      const boost = now < this.scoreBoostUntil || (this.mode === "time" && now < this.timeshiftUntil) ? 1.35 : 1;
+      this.applyResolve(this.player, result, boost, now, "player");
       this.powerLockUntil = now + 620;
       this.busyUntil = Math.max(this.busyUntil, now + 620);
+      this.resolving = false;
       this.notePower(id);
       this.pushFx("power", id === "burst" ? "ENERGY BURST" : "MEGA STRIKE", now, {
         side: "player",
@@ -1047,34 +1068,29 @@ export class GameSession {
     return false;
   }
 
-  private applyEnergyAttack(id: "burst" | "megaStrike", now: number): void {
-    const cells =
-      id === "burst"
-        ? Array.from({ length: 9 }, (_, index) => ({
-            r: Math.floor(ROWS / 2) - 1 + Math.floor(index / 3),
-            c: Math.floor(COLS / 2) - 1 + (index % 3),
-          }))
-        : (() => {
-            const counts = new Map<number, number>();
-            for (const row of this.opponent.board) {
-              for (const piece of row) {
-                if (piece) counts.set(piece.color, (counts.get(piece.color) ?? 0) + 1);
-              }
-            }
-            const color = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? 1;
-            return this.opponent.board.flatMap((row, r) =>
-              row.flatMap((piece, c) => (piece?.color === color ? [{ r, c }] : [])),
-            );
-          })();
+  private applyEnergyAttack(id: "burst" | "megaStrike", target: Coord): ResolveResult {
+    const targetPiece = this.player.board[target.r]![target.c]!;
+    const cells: Coord[] = [];
+    if (id === "burst") {
+      for (let dr = -1; dr <= 1; dr++) {
+        for (let dc = -1; dc <= 1; dc++) {
+          const r = target.r + dr;
+          const c = target.c + dc;
+          if (r >= 0 && r < ROWS && c >= 0 && c < COLS) cells.push({ r, c });
+        }
+      }
+    } else {
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          if (this.player.board[r]![c]?.color === targetPiece.color) cells.push({ r, c });
+        }
+      }
+    }
 
-    resolveBoard(this.opponent.board, this.rng, cells);
-    this.bumpOppBoard();
+    const result = resolveBoard(this.player.board, this.rng, cells);
     this.opponent.attack = Math.max(0, this.opponent.attack - (id === "burst" ? 22 : 48));
     this.opponent.combo = 0;
-    this.rivalPressureUntil = Math.max(
-      this.rivalPressureUntil,
-      now + (id === "burst" ? PRESSURE_MS : PRESSURE_MS * 2),
-    );
+    return result;
   }
 
   remainingMs(now: number): number {

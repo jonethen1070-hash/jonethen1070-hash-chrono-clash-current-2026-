@@ -8,6 +8,7 @@ import {
   Board,
   Cell,
   COLS,
+  Coord,
   ENERGY_BURST,
   ENERGY_FREEZE,
   ENERGY_MAX,
@@ -46,6 +47,7 @@ export type BattleActionInput = {
   type: BattleActionType;
   a?: { r: number; c: number };
   b?: { r: number; c: number };
+  target?: Coord;
   id?: PowerId;
 };
 
@@ -224,32 +226,51 @@ function applyPower(
   id: PowerId,
   now: number,
   ledger?: PowerLedger,
+  target?: Coord,
 ): boolean {
   if (id === "burst" || id === "megaStrike") {
     const cost = id === "burst" ? ENERGY_BURST : ENERGY_MEGA_STRIKE;
-    if (actor.energy < cost || now < actor.lockUntil) return false;
+    if (
+      actor.energy < cost ||
+      now < actor.lockUntil ||
+      !target ||
+      target.r < 0 ||
+      target.r >= ROWS ||
+      target.c < 0 ||
+      target.c >= COLS ||
+      !actor.board[target.r]?.[target.c]
+    ) {
+      return false;
+    }
     actor.energy -= cost;
-    const cells =
-      id === "burst"
-        ? Array.from({ length: 9 }, (_, index) => ({
-            r: Math.floor(ROWS / 2) - 1 + Math.floor(index / 3),
-            c: Math.floor(COLS / 2) - 1 + (index % 3),
-          }))
-        : (() => {
-            const counts = new Map<number, number>();
-            for (const row of other.board) {
-              for (const piece of row) {
-                if (piece) counts.set(piece.color, (counts.get(piece.color) ?? 0) + 1);
-              }
-            }
-            const color = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? 1;
-            return other.board.flatMap((row, r) =>
-              row.flatMap((piece, c) => (piece?.color === color ? [{ r, c }] : [])),
-            );
-          })();
-    resolveBoard(other.board, other.rng, cells);
+    actor.lastSnap = cloneBoard(actor.board);
+    const targetPiece = actor.board[target.r]![target.c]!;
+    const cells: Coord[] = [];
+    if (id === "burst") {
+      for (let dr = -1; dr <= 1; dr++) {
+        for (let dc = -1; dc <= 1; dc++) {
+          const r = target.r + dr;
+          const c = target.c + dc;
+          if (r >= 0 && r < ROWS && c >= 0 && c < COLS) cells.push({ r, c });
+        }
+      }
+    } else {
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          if (actor.board[r]![c]?.color === targetPiece.color) cells.push({ r, c });
+        }
+      }
+    }
+    const result = resolveBoard(actor.board, actor.rng, cells);
+    actor.score += result.scoreDelta;
+    actor.combo = result.comboPeak;
+    actor.energy = Math.max(0, Math.min(ENERGY_MAX, actor.energy + result.energyDelta));
+    const charged = fillAttack(actor.attack, result.comboPeak, result.cleared);
+    actor.attack = Math.max(0, Math.min(ATTACK_MAX, charged.meter));
+    if (charged.fired && result.comboPeak >= 2) {
+      other.lockUntil = Math.max(other.lockUntil, now + PRESSURE_MS);
+    }
     other.attack = Math.max(0, other.attack - (id === "burst" ? 22 : 48));
-    other.combo = 0;
     other.lockUntil = Math.max(other.lockUntil, now + (id === "burst" ? PRESSURE_MS : PRESSURE_MS * 2));
     actor.lockUntil = Math.max(actor.lockUntil, now + 620);
     return true;
@@ -423,7 +444,7 @@ export class BattleDirector {
     if (input.type === "swap") {
       applied = applySwap(you, other, input, now);
     } else {
-      applied = applyPower(you, other, room, input.id!, now, this.ledger);
+      applied = applyPower(you, other, room, input.id!, now, this.ledger, input.target);
     }
     you.lastClientSeq = clientSeq;
     if (applied) pushEvent(room, now, playerId, input.type);
