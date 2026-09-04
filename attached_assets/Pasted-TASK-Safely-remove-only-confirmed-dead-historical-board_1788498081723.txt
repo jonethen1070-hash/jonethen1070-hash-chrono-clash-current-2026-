@@ -1,0 +1,91 @@
+TASK: Safely remove only confirmed-dead historical board-frame CSS.
+
+IMPORTANT:
+This is a cleanup/verification task only.
+DO NOT redesign the board.
+DO NOT change gameplay.
+DO NOT change Canvas/gem rendering.
+DO NOT change layout, dimensions, colors, lighting, animations, or visual appearance intentionally.
+DO NOT modify powers, input, networking, or session logic.
+
+CURRENT ARCHITECTURE:
+- Canonical board-frame stylesheet: src/styles/match-frame.css
+- Existing legacy visual stylesheets:
+  - src/styles/game.css
+  - src/styles/studio.css
+  - src/styles/aaa-polish.css
+- Canvas/gems must remain untouched.
+
+GOAL:
+Determine which historical board-frame declarations in the legacy CSS are genuinely dead/redundant now that match-frame.css is the canonical owner.
+
+STEP 1 — AUDIT FIRST
+Inspect all board-frame related selectors, including:
+- .board-slot
+- .board-slot::before
+- .board-slot::after
+- .board-outer-rail
+- .board-energy-glass
+- .board-socket-bed
+- .board-fastener
+- #playerGems
+- related board hardware selectors
+
+Trace their actual computed styles in the running Chrono Clash match.
+
+Do not assume a declaration is dead merely because it is duplicated.
+
+STEP 2 — VERIFY ACTIVE OWNERSHIP
+For each legacy declaration you intend to remove:
+- Confirm it does not contribute to the final computed style of the active player board.
+- Confirm it is not required by another board state or responsive breakpoint.
+- Confirm it is not required by hover/active/animation states.
+- Confirm it is not required during match initialization or transitions.
+- Confirm it is not required by the opponent render path.
+- Confirm it is not required by Canvas/gem rendering.
+
+Pay special attention to late overrides such as the existing IDLE MATCH CLEANUP rules that hide board helper layers.
+
+STEP 3 — SCREENSHOT BEFORE/AFTER
+Capture a baseline screenshot of the running match before cleanup.
+
+Remove ONLY declarations that are proven redundant/dead.
+
+Then capture another screenshot.
+
+The before/after screenshots must be visually equivalent:
+- same board geometry
+- same board dimensions
+- same materials
+- same cyan lighting
+- same gem appearance
+- same HUD/layout
+- same gameplay state
+
+If removing a declaration changes the visual result, RESTORE IT.
+
+STEP 4 — VALIDATION
+Run:
+- typecheck
+- production build
+- focused architecture/board tests
+- mobile swipe Playwright test
+- git diff --check
+
+Also verify the managed Chrono Clash workflow still loads successfully with clean browser logs.
+
+IMPORTANT SUCCESS CONDITION:
+Do not report a CSS declaration as dead based only on static duplication analysis.
+It must be confirmed through runtime computed-style analysis and/or runtime behavior.
+
+At the end, report:
+1. Exact files changed.
+2. Exact selectors/declaration groups removed.
+3. Why each removed group was proven dead.
+4. Before/after screenshot comparison result.
+5. Test results.
+6. Any historical declarations deliberately left in place because they could not be proven dead.
+
+If anything is uncertain, LEAVE IT UNCHANGED.
+
+Do not perform any other cleanup or refactoring in this task.
