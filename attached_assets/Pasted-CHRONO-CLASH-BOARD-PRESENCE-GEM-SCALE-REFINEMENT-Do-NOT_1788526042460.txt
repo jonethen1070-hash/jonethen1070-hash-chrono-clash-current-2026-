@@ -1,0 +1,124 @@
+CHRONO CLASH — BOARD PRESENCE / GEM SCALE REFINEMENT
+
+Do NOT create or generate any images.
+Do NOT create new image assets.
+Do NOT redesign the HUD.
+Do NOT change gameplay, 8x8 board logic, swipe logic, matching logic, falling logic, VFX, scoring, or controls.
+
+I inspected the current 390x844 mobile screenshot.
+
+There is a clearly visible unused vertical gap between the bottom of the game board and the bottom power controls.
+
+I want to use that space to make the GAME BOARD feel more dominant and the gems feel BIGGER and more satisfying.
+
+IMPORTANT GEOMETRY RULE:
+The board MUST remain a true 8x8 SQUARE grid.
+Do NOT stretch the board vertically.
+Do NOT make cells rectangular.
+Do NOT allow gems to overlap neighboring cells.
+
+TARGET:
+
+1. Make the board the largest practical square that fits inside the mobile safe width.
+
+2. Increase the actual CELL SIZE as much as safely possible.
+
+3. Gems should become proportionally larger with the cell size.
+   They should feel substantial and satisfying, closer to the visual presence of premium match-3 games.
+
+4. Keep a small, intentional gap between neighboring gems.
+   Gems must NEVER overlap.
+
+5. Reduce unnecessary empty space around the board where possible.
+
+6. Use the currently wasted vertical space below the board to allow the board/controls composition to feel tighter and more substantial.
+
+7. The bottom power controls can move upward ONLY as necessary to accommodate the larger board.
+   Do not redesign them.
+
+8. Preserve the top HUD.
+
+9. Preserve the board's existing premium metallic/glass frame.
+
+10. Preserve the existing 8x8 gameplay coordinates and touch mapping.
+    If the visual board size changes, update the coordinate conversion so touches still map exactly to the correct cells.
+
+MOBILE GEOMETRY:
+
+For 390x844:
+- calculate the maximum safe square board size dynamically
+- use the available width rather than a hardcoded visual size
+- cellSize = boardSize / 8
+- keep the board centered horizontally
+- keep every cell square
+- keep gems centered exactly inside their cells
+
+Do NOT solve this by CSS-only stretching.
+
+The actual Canvas/game board geometry and touch coordinate mapping must remain synchronized.
+
+GEM SCALE:
+
+Once the new cellSize is calculated, scale the gem rendering from the cell size rather than using an unrelated fixed pixel size.
+
+Target:
+- gem visual diameter approximately 80–88% of cell size
+- enough dark socket/background visible around each gem
+- no gem-to-gem collision
+- crystals should feel large, dimensional and tactile
+
+DO NOT make gems simply overflow their cells to appear bigger.
+
+VISUAL PRIORITY:
+
+The desired composition is:
+
+TOP HUD
+↓
+ENERGY BAR
+↓
+LARGE DOMINANT 8x8 BOARD
+↓
+SMALL INTENTIONAL GAP
+↓
+POWER CONTROLS
+
+The board should no longer look like it is floating with a large unused area beneath it.
+
+IMPORTANT:
+Do NOT arbitrarily increase board height.
+Do NOT distort the 8x8 square.
+Do NOT change the number of rows or columns.
+Do NOT modify gameplay.
+
+FIRST inspect the existing mobile board sizing/layout code and identify:
+- current board size
+- current cellSize
+- current canvas size
+- current gem render size
+- current board-to-screen positioning
+- current touch coordinate conversion
+
+Then make the smallest geometry change necessary.
+
+TEST AT:
+- 390x844
+- 360x740
+
+Verify:
+- full 8x8 board visible
+- no clipping
+- no overlap
+- gems are visibly larger
+- board uses the available screen space better
+- controls remain fully visible
+- touch/swipe still selects the correct gems
+- falling/matching positions remain accurate
+
+Do NOT make any image.
+Do NOT add assets.
+
+Report the exact files/functions changed and the measured before/after:
+board size, cell size, gem size, and bottom gap.
+
+This is a GEOMETRY/LAYOUT change only.
