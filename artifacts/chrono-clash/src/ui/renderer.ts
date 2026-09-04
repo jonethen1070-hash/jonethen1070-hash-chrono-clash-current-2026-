@@ -2116,19 +2116,6 @@ export class BoardRenderer {
     ctx.lineWidth = 1.15;
     ctx.stroke();
 
-    // The lower inner rail is a soft reflected band, not a second outline.
-    const lowerReflection = ctx.createLinearGradient(ox, oy + size, ox + size, oy + size);
-    lowerReflection.addColorStop(0, "#00D9FF00");
-    lowerReflection.addColorStop(0.28, "#00D9FF2A");
-    lowerReflection.addColorStop(0.62, "#7CF5FF66");
-    lowerReflection.addColorStop(1, "#00D9FF10");
-    ctx.strokeStyle = lowerReflection;
-    ctx.lineWidth = 1.65;
-    ctx.beginPath();
-    ctx.moveTo(ox + size * 0.22, oy + size - 2.5);
-    ctx.lineTo(ox + size * 0.78, oy + size - 2.5);
-    ctx.stroke();
-
     ctx.restore();
   }
 
