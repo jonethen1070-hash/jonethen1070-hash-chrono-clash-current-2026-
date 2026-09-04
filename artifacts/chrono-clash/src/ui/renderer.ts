@@ -17,7 +17,7 @@ export const BOARD_FRAME = 6;
 export { LIVE_GEM_MAX_IN_CELL_DROP, liveGemDrawOrigin } from "./gemMotion";
 const GAP = BOARD_GAP;
 const FRAME = BOARD_FRAME;
-const MATCH_IMPACT_MS = 80;
+const MATCH_IMPACT_MS = 64;
 const GEM_VISUAL_SCALE = 1.06;
 const MATCH_STAGGER_MIN_MS = 10;
 const MATCH_STAGGER_STEP_MS = 7;

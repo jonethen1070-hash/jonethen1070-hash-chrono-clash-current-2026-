@@ -376,8 +376,16 @@ test.describe("mobile cascade visibility", () => {
     expect(swapTiles.length).toBeGreaterThanOrEqual(1);
     expect(swapTiles.filter((tile) => Math.abs(tile.x - tile.fromX) > swapFrame!.cell * 0.08)).toHaveLength(swapTiles.length);
 
-    await expect.poll(async () => (await state())?.visibleEmptySockets.length ?? 0, transientPoll).toBeGreaterThan(0);
-    const impactFrame = await state();
+    let observedImpactFrame: Awaited<ReturnType<typeof state>> = null;
+    await expect.poll(async () => {
+      const snapshot = await state();
+      if (snapshot?.visibleEmptySockets.length && snapshot.dying.length > 0) {
+        observedImpactFrame = snapshot;
+        return true;
+      }
+      return false;
+    }, transientPoll).toBe(true);
+    const impactFrame = observedImpactFrame ?? (await state());
     expect(impactFrame!.dying.length).toBeGreaterThan(0);
     expect(impactFrame!.visibleEmptySockets.some((cell) => cell.r === 2 && cell.c === 4)).toBe(true);
 

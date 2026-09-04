@@ -95,9 +95,9 @@ export function gemFallDelay(
 
 export function gemDieDuration(animation: Intensity, reduced: boolean): number {
   if (reduced) return 0.055;
-  if (animation === "low") return 0.09;
-  if (animation === "medium") return 0.115;
-  return 0.132;
+  if (animation === "low") return 0.072;
+  if (animation === "medium") return 0.092;
+  return 0.105;
 }
 
 /** Energy bloom, then a short crystal dissolve. Fast enough for competitive play. */

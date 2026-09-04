@@ -8,6 +8,7 @@ import {
   easeInOutSine,
   easeMagneticSwap,
   gemFallDelay,
+  gemDieDuration,
   gemTravelDuration,
   gemTravelEase,
   SWAP_MAGNET_MS,
@@ -76,6 +77,9 @@ describe("crystal gem motion curves", () => {
   });
 
   it("blooms then dissolves matched crystals instead of popping them", () => {
+    expect(gemDieDuration("high", false)).toBe(0.105);
+    expect(gemDieDuration("medium", false)).toBe(0.092);
+    expect(gemDieDuration("low", false)).toBe(0.072);
     const start = easeCrystalDie(0);
     const bloom = easeCrystalDie(0.15);
     const end = easeCrystalDie(1);
@@ -154,7 +158,7 @@ describe("landing feedback", () => {
     expect(renderer).toContain("tile.scale = 1.015");
     expect(renderer).toContain("primeSwapPose");
     expect(renderer).toContain("life: 64");
-    expect(renderer).toContain("const MATCH_IMPACT_MS = 80");
+    expect(renderer).toContain("const MATCH_IMPACT_MS = 64");
     expect(renderer).toContain("const MATCH_STAGGER_STEP_MS = 7");
     expect(renderer).toContain("const cascadeHold");
     expect(renderer).toContain("life: 0.13");
