@@ -1,0 +1,256 @@
+TASK: Finalize the mobile gameplay layout using the newly available vertical space.
+
+IMPORTANT:
+DO NOT create or generate any images.
+
+This task includes ONLY:
+1. Safely move the bottom power strip upward.
+2. Enlarge the 8×8 board/gems into the empty vertical space above the board.
+3. Permanently disable/remove Freeze and Time Shift from the playable game.
+4. Keep Energy Burst, Mega Strike, and Rewind as the only usable powers.
+
+DO NOT redesign the visual style.
+DO NOT change gem artwork.
+DO NOT change gem colors/materials.
+DO NOT change cascade behavior.
+DO NOT change swipe behavior.
+DO NOT change board/gameplay rules except disabling Freeze and Time Shift.
+DO NOT change Energy Burst, Mega Strike, or Rewind gameplay logic.
+DO NOT change networking unless required to prevent disabled powers from being used.
+DO NOT create another CSS override system.
+
+CURRENT LAYOUT:
+The large Energy Burst / Mega Strike cards were removed from above the board.
+
+This created useful empty vertical space above the board.
+
+CURRENT BOTTOM STRIP:
+[ ENERGY BURST ] [ MEGA STRIKE ] [ REWIND ]
+
+TARGET:
+
+TOP HUD
+↓
+ENERGY BAR
+↓
+YOUR BOARD LABEL
+↓
+LARGER 8×8 BOARD
+↓
+[ ENERGY BURST ] [ MEGA STRIKE ] [ REWIND ]
+
+1. ENLARGE THE BOARD
+
+Use the empty vertical space above the current board to enlarge the board.
+
+IMPORTANT:
+- Make the board visibly larger than it is now.
+- Increase the actual visible gem/cell presentation proportionally.
+- Keep the exact 8×8 grid.
+- Keep all 64 cells.
+- Keep gem aspect ratios.
+- Keep cell spacing clean.
+- Keep the existing board-frame design.
+- Keep the existing corner-light containment.
+- Do not overlap the YOUR BOARD label.
+- Do not overlap the energy bar.
+- Do not overlap the bottom power strip.
+
+Use the maximum safe size available on the mobile viewport.
+
+Do NOT enlarge the board by pushing the bottom controls off-screen.
+
+2. BOTTOM SAFE AREA
+
+Move the three bottom power controls upward enough to give them proper mobile safe-area breathing room.
+
+They must NOT sit against or behind the browser/home-indicator area.
+
+Target 390×844.
+
+The controls must remain fully visible and tappable.
+
+Keep:
+[ ENERGY BURST ] [ MEGA STRIKE ] [ REWIND ]
+
+No overlap between the three buttons.
+
+Do not make the buttons so small that their icons, names, or energy costs become difficult to read.
+
+3. FREEZE AND TIME SHIFT MUST BE UNUSABLE
+
+This is IMPORTANT.
+
+Freeze and Time Shift should NOT merely be visually hidden while remaining functional.
+
+They must be completely unavailable to the player.
+
+Remove their playable UI controls.
+
+Prevent their normal player action handlers from being callable through the active game UI.
+
+If the current architecture has them in a hidden functional reserve, remove that reserve from the playable match path.
+
+Do not allow:
+- tapping them
+- keyboard activation
+- pointer activation
+- accidental programmatic UI activation through the active match controls
+
+Do NOT delete historical code blindly if it is needed by old tests or unrelated systems.
+
+Instead, make the active Chrono Clash match explicitly recognize only these three usable powers:
+
+Energy Burst
+Mega Strike
+Rewind
+
+Freeze and Time Shift must not be usable during a normal match.
+
+IMPORTANT:
+Do not change Energy Burst or Mega Strike targeting/cost/gameplay behavior.
+Do not change Rewind behavior.
+
+4. EMPTY SPACE ABOVE BOARD
+
+The empty space created by removing the large power cards should primarily benefit the BOARD.
+
+Do not leave a large unused gap above the board.
+
+Move/enlarge the board upward into that available space while preserving:
+- HUD separation
+- YOUR BOARD label
+- board-frame margins
+- clean composition
+
+The result should feel like the board is the main focus of the screen.
+
+5. CORNER ARTIFACT
+
+Keep the previous corner-light fix.
+
+The four corner-adjacent gems must remain free from the unwanted cyan/white light spill.
+
+Do not reintroduce that effect while resizing the board.
+
+6. RESPONSIVE BEHAVIOR
+
+Do not hard-code a layout that only works at exactly 390×844.
+
+Use the existing responsive layout system.
+
+At 390×844:
+- board should be as large as safely possible
+- bottom controls must stay inside the safe area
+
+Also test a smaller mobile viewport if the existing Playwright setup supports it.
+
+7. ARCHITECTURE
+
+Respect the current ownership architecture.
+
+Use the existing UI/layout owner.
+
+Do not create duplicate controls.
+
+Do not create duplicate power handlers.
+
+Do not create another stylesheet just to override the current layout.
+
+Use the canonical owners already established by the architecture refactor.
+
+VERIFICATION:
+
+Capture a baseline screenshot at 390×844.
+
+After implementation capture another 390×844 screenshot.
+
+The AFTER screenshot must visibly show:
+
+- larger board
+- larger gems
+- board moved into the previously empty space
+- no overlap with YOUR BOARD
+- no overlap with energy bar
+- no overlap with bottom controls
+- bottom controls safely above the mobile bottom area
+- Energy Burst visible and usable
+- Mega Strike visible and usable
+- Rewind visible and usable
+- Freeze completely unavailable
+- Time Shift completely unavailable
+- corner light spill still gone
+
+MEASURE AND REPORT:
+- Before board dimensions
+- After board dimensions
+- Before Canvas dimensions
+- After Canvas dimensions
+- Bottom-control bounds
+- Board/control separation
+- Any safe-area spacing used
+
+FUNCTIONAL TESTS:
+
+Test:
+1. Normal swipe.
+2. Valid match.
+3. Automatic cascade.
+4. Energy Burst.
+5. Mega Strike.
+6. Rewind.
+7. Confirm Freeze cannot be used.
+8. Confirm Time Shift cannot be used.
+9. Confirm all 64 board cells remain valid.
+10. Confirm no gems overlap.
+11. Confirm board settles correctly.
+12. Confirm bottom controls are tappable.
+13. Confirm no UI element is clipped.
+
+Run:
+- TypeScript typecheck
+- production build
+- focused gameplay/UI/board/power tests
+- mobile swipe Playwright test
+- git diff --check
+- managed Chrono Clash workflow
+- browser console diagnostics
+
+IMPORTANT SUCCESS CONDITION:
+
+Do NOT report success just because the build passes.
+
+The screenshot must prove:
+
+EMPTY SPACE ABOVE BOARD
+→ USED TO MAKE BOARD/GEMS LARGER
+
+AND:
+
+BOARD
+→ DOES NOT OVERLAP ANYTHING
+
+AND:
+
+BOTTOM CONTROLS
+→ ENERGY BURST | MEGA STRIKE | REWIND
+→ FULLY VISIBLE
+→ SAFE FROM BOTTOM EDGE
+
+AND:
+
+FREEZE / TIME SHIFT
+→ NOT IN PLAYABLE GAME
+→ NOT USABLE
+
+If the board cannot safely become larger without overlap, use the maximum safe size and report the exact limitation.
+
+Make NO unrelated changes.
+
+Report only:
+1. Files changed.
+2. Before/after board and Canvas dimensions.
+3. Exact bottom-control positioning result.
+4. Confirmation Freeze and Time Shift are completely unavailable.
+5. Screenshot verification.
+6. Test results.
