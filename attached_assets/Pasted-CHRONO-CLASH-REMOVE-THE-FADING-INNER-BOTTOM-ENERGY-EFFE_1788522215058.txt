@@ -1,0 +1,99 @@
+CHRONO CLASH — REMOVE THE FADING INNER-BOTTOM ENERGY EFFECT
+
+The unwanted effect is NOT a permanent border.
+
+I have confirmed its behavior:
+
+A thin cyan horizontal line appears along the INNER BOTTOM of the gameplay board,
+becomes visible/bright,
+then slowly fades away,
+and later appears again.
+
+It is an animated transient effect.
+
+REMOVE THIS EFFECT COMPLETELY.
+
+Do NOT remove the permanent structural bottom frame.
+
+The permanent cyan frame/rail must remain.
+
+TARGET:
+Only the animated inner-bottom cyan line that:
+APPEARS → GLOWS/IS VISIBLE → SLOWLY FADES → DISAPPEARS → REPEATS.
+
+This is the effect I do NOT want.
+
+FIRST trace the animation responsible.
+
+Search specifically for:
+- opacity animation
+- fade-in/fade-out
+- boardRail
+- scan
+- sweep
+- energy
+- pulse
+- shimmer
+- rail
+- bottom gradient
+- pseudo-element animation
+- Canvas animation
+- requestAnimationFrame drawing of a bottom line
+
+Inspect:
+match-frame.css
+studio.css
+aaa-polish.css
+board renderer / Canvas drawing code
+and all related keyframes.
+
+IMPORTANT:
+Do NOT make a broad change to the entire board frame.
+
+Identify the exact animated layer producing:
+"line becomes visible → slowly fades".
+
+Then disable/remove ONLY that animated layer.
+
+Do NOT replace it with another effect.
+
+LIVE VERIFICATION IS REQUIRED:
+
+Run the game at 390×844.
+
+Watch the board continuously for at least 10 seconds.
+
+Do NOT just take one screenshot.
+
+Confirm that:
+- the inner-bottom line never appears
+- it never fades in
+- it never fades out
+- it never sweeps
+- it never returns after a match
+- it never returns during falling/cascade
+- permanent outer board frame remains intact
+- bottom corner hardware remains intact
+
+Then perform:
+- normal swipe
+- matching swipe
+- cascade
+
+Watch again and confirm the unwanted line never appears.
+
+Do NOT change:
+- gems
+- gem VFX
+- swipe
+- falling
+- board size
+- HUD
+- layout
+- power buttons
+- CPU
+- gameplay rules
+
+ONE CHANGE ONLY.
+
+Do not report success unless the LIVE GAME has been watched through multiple animation cycles and the fading inner-bottom line is actually gone.
