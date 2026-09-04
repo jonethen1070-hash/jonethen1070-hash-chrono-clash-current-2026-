@@ -9,9 +9,10 @@ export function assetStem(file: string): string {
 
 export function candidateUrls(file: string, dir = AUDIO_DIR): string[] {
   const stem = assetStem(file);
+  const formats = /\.m4a$/i.test(file) ? ["m4a", ...PREFERRED_FORMATS] : PREFERRED_FORMATS;
   const seen = new Set<string>();
   const urls: string[] = [];
-  for (const ext of PREFERRED_FORMATS) {
+  for (const ext of formats) {
     const url = `${dir}/${stem}.${ext}`;
     if (seen.has(url)) continue;
     seen.add(url);

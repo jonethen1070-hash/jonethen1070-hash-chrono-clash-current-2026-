@@ -90,11 +90,11 @@ export const MUSIC_FILES: Record<Exclude<MusicBed, "none">, AudioAsset> = {
   ),
   battle: asset(
     "music-battle",
-    "music-battle.wav",
+    "Arena_Pulse_1788563386140.m4a",
     "music",
     true,
-    90.0,
-    "Gameplay theme. Force Field groove with intro → drop. Loop after match-start intro.",
+    224.4,
+    "Arena gameplay theme. Uploaded Arena Pulse master. Loop.",
   ),
   victory: asset(
     "music-victory",
@@ -189,8 +189,8 @@ export const AUDIO_ASSETS: AudioAsset[] = [
   ...Object.values(VOICE_FILES),
 ];
 
-MUSIC_FILES.battle.loopStartSec = 8.0;
-MUSIC_FILES.battle.loopEndSec = 72.0;
+MUSIC_FILES.battle.loopStartSec = 0;
+MUSIC_FILES.battle.loopEndSec = 224.4;
 
 export const LOOPING_BEDS: ReadonlySet<MusicBed> = new Set(["lobby", "battle"]);
 

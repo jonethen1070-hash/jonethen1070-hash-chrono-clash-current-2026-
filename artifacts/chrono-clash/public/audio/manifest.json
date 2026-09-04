@@ -20,12 +20,12 @@
     },
     {
       "id": "music-battle",
-      "files": ["music-battle.mp3", "music-battle.wav", "music-battle.ogg"],
+      "files": ["Arena_Pulse_1788563386140.m4a"],
       "loop": true,
-      "loopStartSec": 8.0,
-      "loopEndSec": 72.0,
-      "durationSec": 90.0,
-      "role": "Gameplay theme. Force Field groove with intro → drop. Loop after match-start intro."
+      "loopStartSec": 0,
+      "loopEndSec": 224.4,
+      "durationSec": 224.4,
+      "role": "Arena gameplay theme. Uploaded Arena Pulse master. Loop."
     },
     {
       "id": "music-victory",

@@ -11,6 +11,12 @@ describe("audio file resolver", () => {
       "/audio/music-lobby.ogg",
     ]);
     expect(candidateUrls("sfx-freeze.wav")[0]).toBe("/audio/sfx-freeze.mp3");
+    expect(candidateUrls("Arena_Pulse_1788563386140.m4a")).toEqual([
+      "/audio/Arena_Pulse_1788563386140.m4a",
+      "/audio/Arena_Pulse_1788563386140.mp3",
+      "/audio/Arena_Pulse_1788563386140.wav",
+      "/audio/Arena_Pulse_1788563386140.ogg",
+    ]);
   });
 
   it("marks committed files as stand-ins that the loader can replace", () => {
