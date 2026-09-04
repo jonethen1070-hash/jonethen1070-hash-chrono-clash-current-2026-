@@ -1,0 +1,229 @@
+CHRONO CLASH — MOTION CORRECTION ONLY
+MAKE SWAP + GRAVITY FALL SLOWER, SOFTER, AND MORE SATISFYING
+
+The previous physics implementation is functional, but after actually playing it:
+
+PROBLEM 1:
+The gem swipe/swap is EXTREMELY QUICK and feels abrupt.
+
+PROBLEM 2:
+The gravity fall is TOO FAST and does NOT have the gentle, readable match-3 feel we want.
+
+Do NOT change the board, HUD, gems, controls, gameplay rules, cascade resolver, artwork, powers, or layout.
+
+ONLY adjust the existing motion system.
+
+==================================================
+1. SWAP MUST FEEL GENTLE AND PHYSICAL
+==================================================
+
+Current swap feels too fast.
+
+Slow the visible gem exchange down substantially.
+
+Target approximately:
+
+COMMITTED SWAP:
+~180–220ms
+
+INVALID RETURN:
+~180–220ms
+
+Do NOT make it sluggish.
+
+The desired feeling is:
+
+finger pushes
+→ gem begins moving immediately
+→ smooth travel
+→ gentle deceleration
+→ soft SNAP into neighboring socket
+
+The player must clearly SEE the two gems exchanging positions.
+
+Use a smooth ease-in-out / physically weighted curve.
+
+Avoid:
+- instant movement
+- sharp acceleration
+- teleporting
+- robotic linear movement
+
+Keep the existing direct swipe recognition.
+
+==================================================
+2. GRAVITY FALL MUST BE MUCH GENTLER
+==================================================
+
+The current:
+
+1 cell ≈ 120ms
+3 cells ≈ 188ms
+5 cells ≈ 256ms
+
+is too fast.
+
+Replace the timing with a noticeably slower distance-based fall.
+
+TARGET FEEL:
+
+1 cell:
+~220–260ms
+
+2 cells:
+~300–340ms
+
+3 cells:
+~380–420ms
+
+4 cells:
+~460–500ms
+
+5+ cells:
+continue increasing naturally, with a sensible maximum around ~600ms.
+
+Do NOT simply use one fixed duration.
+
+The more cells a gem falls, the longer it should visibly travel.
+
+==================================================
+3. GRAVITY CURVE
+==================================================
+
+The falling motion should feel like actual gravity:
+
+- begins gently
+- accelerates downward
+- approaches destination with controlled deceleration
+- soft landing
+- tiny settle
+
+Do NOT use a harsh linear fall.
+
+Do NOT make it bounce like a cartoon.
+
+The player should have enough time to visually follow a crystal falling several rows.
+
+==================================================
+4. CASCADE RHYTHM
+==================================================
+
+Important:
+
+Do NOT immediately slam one cascade wave into the next.
+
+The rhythm should be:
+
+MATCH
+↓
+BREAK
+↓
+brief readable pause
+↓
+CRYSTALS FALL
+↓
+SOFT LANDING
+↓
+tiny settling moment
+↓
+NEXT MATCH / CASCADE
+
+Preserve the existing gameplay resolver.
+
+Only improve the visual timing.
+
+==================================================
+5. NEW GEMS
+==================================================
+
+New crystals entering from above should also feel gentle.
+
+They should visibly travel into the board rather than appearing instantly.
+
+Use the same gravity-style motion.
+
+They should softly settle into their sockets.
+
+==================================================
+6. DO NOT OVERDO EFFECTS
+==================================================
+
+Do NOT add:
+- huge bounce
+- giant scale
+- excessive glow
+- screen shake
+- giant particles
+- new animation framework
+
+The satisfaction should come from:
+
+TIMING + MOMENTUM + GRAVITY + LANDING
+
+==================================================
+7. RUNTIME TEST — VERY IMPORTANT
+==================================================
+
+Do NOT rely only on automated tests.
+
+Run the actual game at 390×844.
+
+Perform:
+A) a normal valid swap
+B) a match producing a 3+ row fall
+C) a cascade with new gems entering
+
+Actually WATCH the animation.
+
+The swap must no longer feel extremely quick.
+
+The falling gems must be slow enough that a human can clearly follow their travel.
+
+Capture runtime frames during:
+- swap
+- mid-fall
+- landing
+- cascade
+
+Compare visually against the previous implementation.
+
+If the movement still looks rushed, slow it further.
+
+==================================================
+SUCCESS CRITERIA
+==================================================
+
+The game should feel like:
+
+SWIPE:
+push → smooth exchange → soft snap
+
+FALL:
+release → gentle gravity → controlled acceleration → soft landing
+
+NOT:
+
+SWIPE:
+tap → instant swap
+
+FALL:
+teleport downward
+
+Report:
+- final swap duration
+- invalid return duration
+- 1-cell fall duration
+- 3-cell fall duration
+- 4-cell fall duration
+- 5-cell fall duration
+- whether runtime inspection showed clearly readable movement
+- files changed
+
+Run:
+- typecheck
+- production build
+- focused tests
+- mobile swipe test
+- git diff --check
+
+Make NO unrelated changes.
