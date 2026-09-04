@@ -1,0 +1,317 @@
+CHRONO CLASH — PREMIUM MATCH-3 PHYSICS FEEL
+SWAP + GRAVITY FALL + GENTLE LANDING
+
+IMPORTANT:
+The previous swipe pass technically passed tests, but the visible game still feels static.
+
+Do NOT optimize for test results alone.
+
+The goal of this task is to make the actual running game FEEL like a premium match-3 game.
+
+Think:
+
+FINGER PUSH
+→ SMOOTH SWAP
+→ CRISP SNAP
+→ MATCH IMPACT
+→ GEMS FALL WITH GRAVITY
+→ GENTLE LANDING
+→ NEW GEMS FALL IN
+→ AUTOMATIC CASCADE
+
+Do NOT copy Candy Crush artwork or branding.
+Use Chrono Clash's existing crystals, colors, materials and sci-fi style.
+
+==================================================
+PART 1 — THE SWIPE/SWAP
+==================================================
+
+Inspect the CURRENT visible Canvas rendering path first.
+
+The actual visible gems must physically move.
+
+When the player swipes:
+
+1. The selected gem immediately responds to the finger.
+2. The neighboring gem moves in the opposite direction.
+3. Both gems visibly travel between their cells.
+4. Use smooth acceleration/deceleration.
+5. Target roughly 120–150ms for the committed exchange.
+6. The movement must be clearly visible to a human watching the game.
+7. Finish with a very short, subtle socket "lock" / settle.
+
+Do NOT simply change CSS or animation numbers if the Canvas renderer is not consuming them.
+
+Trace:
+
+input
+→ session
+→ gem motion
+→ renderer
+→ Canvas draw
+
+Make sure the animation state controls the ACTUAL visible gem positions.
+
+==================================================
+PART 2 — MATCH IMPACT
+==================================================
+
+When the swap creates a match:
+
+DO NOT immediately redraw the board into its final state.
+
+First show:
+
+SWAP FINISHES
+→ SHORT IMPACT
+→ MATCHED CRYSTALS REACT
+→ CRYSTALS BREAK/DISAPPEAR
+→ EMPTY CELLS BECOME VISIBLE
+
+Preserve the existing 64ms minimum impact lock and existing match/cascade gameplay rules.
+
+Use the existing crystalline destruction effects.
+
+Do not redesign the gems.
+
+==================================================
+PART 3 — REAL GRAVITY FALL
+==================================================
+
+THIS IS THE MOST IMPORTANT PART.
+
+After matched gems disappear, the gems above the empty spaces must visibly FALL DOWN.
+
+Do NOT simply calculate the final board and instantly redraw it.
+
+For every falling gem:
+
+- Start at its actual current cell.
+- Calculate its destination cell.
+- Animate its Y position continuously from start → destination.
+- The player must visibly see the crystal travel through every empty cell.
+- Use gravity-like acceleration.
+- Start relatively controlled.
+- Accelerate during the fall.
+- Decelerate slightly as it approaches the destination.
+- Finish with a very small physical settle.
+
+The longer the fall, the longer the visible travel should be.
+
+Example:
+
+If a crystal falls 1 cell:
+→ short fall
+
+If it falls 3 cells:
+→ clearly visible 3-cell travel
+
+If it falls 5 cells:
+→ clearly visible longer fall
+
+Do NOT use one fixed-duration animation regardless of distance.
+
+==================================================
+PART 4 — GENTLE LANDING
+==================================================
+
+When a falling gem reaches its destination:
+
+- tiny 1–2% compression
+- immediate return to normal scale
+- subtle 1–2px settle
+- exact center of socket
+
+The landing should feel soft and weighted.
+
+NOT:
+- bouncing wildly
+- elastic cartoon movement
+- giant glow
+- shaking the board
+
+Think:
+
+crystal falls
+↓
+lands
+↓
+soft "click"
+↓
+settles
+
+==================================================
+PART 5 — NEW GEMS ENTER FROM ABOVE
+==================================================
+
+When new gems are generated to fill the board:
+
+Do NOT spawn them directly at their final cells.
+
+Spawn them above the visible board.
+
+Then:
+
+NEW GEM
+↓
+falls into empty cell
+↓
+accelerates
+↓
+slows near destination
+↓
+soft landing
+
+New gems should visibly enter from above the board.
+
+Their starting height should depend on how many cells they need to travel.
+
+==================================================
+PART 6 — CASCADE CHAIN
+==================================================
+
+Preserve the existing automatic cascade resolver.
+
+Do NOT change match rules.
+
+After the first fall:
+
+IF another match exists:
+
+falling completes
+→ short settling moment
+→ next match reacts
+→ matched gems disappear
+→ gems fall again
+→ new gems enter
+→ repeat
+
+Each cascade wave should feel physically connected to the previous one.
+
+Do not teleport between cascade states.
+
+Preserve the existing combo/audio/score behavior.
+
+==================================================
+PART 7 — INPUT SAFETY
+==================================================
+
+During swap, destruction and falling:
+
+- prevent invalid player input from corrupting the board
+- preserve existing input locking
+- do not allow gems to become stuck between cells
+- once the cascade finishes, every gem must be exactly centered in its cell
+
+==================================================
+PERFORMANCE
+==================================================
+
+Use the existing Canvas renderer and animation infrastructure.
+
+Do NOT:
+- create DOM elements for each gem
+- create a second animation loop
+- add expensive particle systems
+- add excessive blur/glow
+- rewrite the board engine
+- rewrite the cascade resolver
+
+The visual animation should be driven from the existing board state.
+
+==================================================
+STRICT RUNTIME VERIFICATION
+==================================================
+
+THIS IS CRITICAL.
+
+Automated tests alone are NOT sufficient.
+
+Run the actual game at:
+
+390×844
+
+Perform a swipe that creates a match where at least some gems fall 3+ cells.
+
+Capture runtime evidence showing:
+
+FRAME A:
+Before swipe
+
+FRAME B:
+During the actual swap
+→ the SAME gems must visibly be between cells.
+
+FRAME C:
+After destruction
+→ empty cells must visibly exist.
+
+FRAME D:
+During gravity fall
+→ a gem must visibly be traveling through multiple cells.
+
+FRAME E:
+After landing
+→ gems are centered and settled.
+
+FRAME F:
+If a second match occurs
+→ show the next cascade wave.
+
+If the movement is too fast to visually distinguish in runtime evidence, slow the animation enough to make the physical movement clearly perceptible while remaining premium.
+
+DO NOT declare success merely because:
+- tests pass
+- animation state exists
+- a duration is configured
+- the board eventually reaches the correct final state
+
+A human must be able to SEE the gems physically moving.
+
+==================================================
+REPORT
+==================================================
+
+Report:
+
+1. Exact renderer function responsible for visible gem drawing.
+2. Exact motion state controlling visible X/Y position.
+3. How swap movement is rendered.
+4. How falling movement is rendered.
+5. Whether fall duration is distance-dependent.
+6. Example timing for a 1-cell, 3-cell and 5-cell fall.
+7. Whether new gems visibly enter from above.
+8. Whether landing settle is visible.
+9. Runtime evidence inspected.
+10. Files changed.
+
+Run:
+
+- TypeScript typecheck
+- production build
+- focused gameplay/motion/render tests
+- mobile swipe Playwright
+- 390×844 runtime verification
+- git diff --check
+
+Make NO unrelated changes.
+
+DO NOT change:
+- board layout
+- HUD
+- bottom controls
+- powers
+- gem artwork
+- gem colors
+- board frame
+- networking
+- match rules
+- cascade rules
+- "YOUR BOARD" removal
+
+The success criterion is simple:
+
+WHEN I SWIPE AND MAKE A MATCH,
+I SHOULD ACTUALLY WATCH THE CRYSTALS SWAP, BREAK, FALL DOWN WITH GRAVITY, AND GENTLY LAND.
+
+If that cannot be clearly seen, the task is NOT finished.
