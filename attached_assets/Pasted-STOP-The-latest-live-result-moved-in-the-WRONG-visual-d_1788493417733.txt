@@ -1,0 +1,98 @@
+STOP. The latest live result moved in the WRONG visual direction.
+
+Compare the LIVE PREVIEW directly against the supplied TARGET IMAGE.
+
+The target is NOT a predominantly dark/recessed frame with subtle cyan strips.
+
+The target has a BRIGHT, PREMIUM, LUMINOUS ELECTRIC-CYAN OUTER FRAME with dark metallic depth underneath it.
+
+CORRECT THE EXISTING CSS FRAME ONLY.
+
+Do not modify renderer.ts.
+
+Do not change:
+- board position
+- board width/height
+- 8x8 grid
+- cell geometry
+- gems
+- gem positions/sizes/artwork
+- HUD
+- abilities
+- bottom controls
+- background
+- gameplay
+- animations
+- attack bars
+- touch behavior
+
+Do not add DOM elements or create a second frame.
+
+VISUAL TARGET:
+
+The board frame should read visually in this order:
+
+1. BRIGHT ELECTRIC-CYAN OUTER ENERGY RIM
+2. DARK GUNMETAL STRUCTURAL HOUSING
+3. SEGMENTED CYAN SIDE-RAIL CHANNELS
+4. DARK RECESSED METAL BEVEL
+5. THIN BRIGHT INNER CYAN REFLECTION
+6. EXISTING GEM WELLS
+7. EXISTING GEMS
+
+IMPORTANT CORRECTION:
+
+Do NOT reduce the overall cyan brightness.
+
+The target has a strong luminous cyan silhouette around the board.
+
+Replace the previous “reduced broad cyan glow” approach with:
+- strong bright cyan core along the outer frame
+- controlled soft bloom immediately around that core
+- brighter corners
+- dark metal visible between/layered behind the light
+- no large blurry haze spreading far into the game
+
+The goal is NOT “dark frame with cyan accents.”
+
+The goal is:
+PREMIUM SCI-FI ENERGY FRAME WITH DARK METALLIC DEPTH.
+
+CORNER TREATMENT:
+- four corners should have obvious bright cyan/electric-blue hotspots
+- corners should visually connect the outer frame
+- retain angular/chamfered futuristic construction
+- do not make the corners disappear into darkness
+
+SIDE RAILS:
+- side rails should be clearly visible from a normal mobile viewing distance
+- use segmented bright cyan/electric-blue illumination
+- segments should look embedded in the metal housing but remain visually BRIGHT
+- do not turn them into thin faint lines
+
+TOP/BOTTOM:
+- retain thinner highlights than the side rails
+- but they must still contribute to a clearly visible luminous outer silhouette
+
+METAL:
+- keep the dark gunmetal layers
+- use them to create depth BEHIND the cyan illumination
+- do not let the metal overpower the cyan frame
+
+CRITICAL:
+Use the supplied TARGET IMAGE as the visual authority.
+Do not interpret “recessed,” “metallic,” or “controlled bloom” as instructions to make the entire frame darker.
+
+The current version is too dark and the cyan frame is too weak/inset.
+
+Make the frame BRIGHTER and more visually prominent while preserving the mechanical depth that was successfully added.
+
+After editing:
+1. run the build
+2. open the live mobile preview
+3. visually compare the board against the supplied target
+4. confirm the cyan outer silhouette is clearly visible
+5. confirm the four corners are bright
+6. confirm the board geometry and gems are unchanged
+
+Do not claim success from build output alone. Verify the actual live visual result.
