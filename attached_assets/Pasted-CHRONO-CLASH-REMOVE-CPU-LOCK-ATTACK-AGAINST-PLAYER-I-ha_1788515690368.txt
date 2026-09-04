@@ -1,0 +1,69 @@
+CHRONO CLASH — REMOVE CPU “LOCK” ATTACK AGAINST PLAYER
+
+I have identified the problem.
+
+The “LOCKED” message shown on my board is being triggered by the CPU/RIVAL player.
+
+This is a CPU gameplay action, NOT a touch-input bug.
+
+Fix ONLY this:
+
+THE CPU/RIVAL MUST NEVER LOCK, FREEZE, DISABLE, OR BLOCK MY BOARD/GEMS.
+
+Do NOT remove normal player touch interaction.
+Do NOT change my swipe behavior.
+Do NOT change falling.
+Do NOT change match VFX.
+Do NOT change the board layout.
+Do NOT change HUD.
+Do NOT change Energy Burst, Mega Strike, or Rewind.
+
+Inspect the CPU/rival decision and power/action code.
+
+Trace:
+
+CPU decision
+→ CPU power selection
+→ lock/freeze/time-shift action
+→ player state mutation
+→ “LOCKED” overlay
+
+Find exactly which CPU action causes the player board to become LOCKED.
+
+Disable ONLY the CPU ability to perform that lock/freeze action against the player.
+
+IMPORTANT:
+- CPU should still play normally.
+- CPU should still make moves.
+- CPU should still use allowed attacks/powers if they are part of the current design.
+- Only the player-lock/freeze effect must be disabled.
+- Do not replace it with another disabling effect.
+- Do not display “LOCKED” on the player's board.
+
+Also check BOTH:
+1. Local/single-player CPU path
+2. Online/battle CPU/opponent path, if applicable
+
+The player board must NEVER enter a LOCKED state because of a CPU action.
+
+If the old Freeze/Time Shift system remains in the engine for legacy compatibility, that is okay, but the ACTIVE CPU opponent must not invoke it against the player.
+
+RUNTIME VERIFICATION:
+
+At 390×844:
+- Start a match.
+- Let the CPU make several actions.
+- Allow enough time for the CPU to attempt its normal power behavior.
+- Confirm the player board never displays “LOCKED”.
+- Confirm the CPU still functions and continues making moves.
+- Confirm my board remains playable.
+
+Report:
+- exact CPU function responsible for LOCKED
+- exact file changed
+- exact CPU action disabled
+- confirmation that no other CPU behavior was changed
+
+Run typecheck, build, focused tests, and live runtime verification.
+
+ONE CHANGE ONLY.
