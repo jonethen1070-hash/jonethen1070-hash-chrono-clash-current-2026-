@@ -1,0 +1,190 @@
+CHRONO CLASH — SWIPE MAGNET / SOCKET LOCK PASS
+MOTION ONLY
+
+The gravity/falling motion is now good. DO NOT TOUCH IT.
+
+The remaining problem is ONLY the player swipe.
+
+The current 220ms swap still feels too fast and lacks a physical "magnet" feeling.
+
+I want the crystal to feel like it is being PUSHED/PULLED by the player's finger and then ATTRACTED into the neighboring socket.
+
+Do not simply increase the duration again.
+
+==================================================
+TARGET FEEL
+==================================================
+
+FINGER PUSH
+→ tiny pickup
+→ crystal follows gesture
+→ slight resistance
+→ magnetic pull toward destination
+→ fast final approach
+→ soft SNAP/LOCK into socket
+
+The important sensation is:
+
+"the crystal is being pulled into its socket"
+
+not:
+
+"the crystal is playing an animation."
+
+==================================================
+1. GESTURE-LINKED MOVEMENT
+==================================================
+
+Inspect the existing input → gemMotion → renderer path.
+
+During the active swipe, the selected crystal should visibly move with the gesture BEFORE the swap animation completes.
+
+Do not wait for pointer release if the existing valid direction threshold has already been crossed.
+
+The visible crystal must respond to the player's actual movement.
+
+==================================================
+2. MAGNETIC DESTINATION
+==================================================
+
+Once the swipe commits:
+
+Use a two-stage motion.
+
+STAGE A — PUSH/PULL
+Approximately 80–110ms:
+
+- crystal follows the swipe direction
+- movement starts smoothly
+- slight resistance at the beginning
+- movement is clearly visible
+
+STAGE B — MAGNETIC LOCK
+Approximately 70–100ms:
+
+- destination socket begins visually "winning" the crystal
+- crystal accelerates toward the exact center of the neighboring socket
+- acceleration should increase toward the final destination
+- final 10–20% of travel should feel like a magnetic snap
+
+The total movement can be approximately 180–210ms, but DO NOT make it feel like one uniform animation.
+
+==================================================
+3. MAGNETIC EASING
+==================================================
+
+Do NOT use a simple sine ease-in-out for the entire movement.
+
+Use a custom curve that feels like:
+
+slow/controlled beginning
+→ smooth travel
+→ increasing pull
+→ fast final approach
+→ tiny settle
+
+The final approach should be perceptibly stronger than the beginning.
+
+==================================================
+4. SOCKET LOCK
+==================================================
+
+At the exact moment the crystal reaches the destination:
+
+- very small 1–2% compression
+- tiny 1–2px settle
+- immediate return to 100%
+- exact cell-center position
+
+Add a subtle localized socket/rim pulse for approximately 50–70ms.
+
+This must feel like:
+
+CLICK / LOCK
+
+NOT:
+- bounce
+- explosion
+- large glow
+- screen shake
+
+==================================================
+5. TWO-GEM EXCHANGE
+==================================================
+
+The second gem must also visibly move toward the first gem's original socket.
+
+Both crystals should appear physically connected to the exchange.
+
+Avoid:
+one gem moving while the other appears to teleport.
+
+==================================================
+6. IMPORTANT — DO NOT TOUCH FALLING
+==================================================
+
+Do NOT modify:
+
+- gravity timings
+- falling easing
+- refill animation
+- new gem entry
+- cascade timing
+- match resolver
+
+The falling pass is now acceptable.
+
+==================================================
+7. RUNTIME VERIFICATION
+==================================================
+
+This is NOT complete unless the actual running game visibly feels different.
+
+At 390×844:
+
+Perform several horizontal and vertical swipes.
+
+Watch the selected crystal carefully.
+
+Verify:
+
+1. crystal visibly responds to the finger
+2. movement has slight initial resistance
+3. crystal follows the gesture
+4. destination begins pulling the crystal
+5. final approach accelerates
+6. crystal visibly locks into socket
+7. second gem visibly moves in the opposite direction
+8. no teleporting
+9. no stuck/intermediate positions
+
+Capture runtime frames DURING the swap, not just before/after.
+
+Compare the mid-swap frame against the previous implementation.
+
+If the mid-swap crystal still looks like it simply travels along a generic animation path, DO NOT declare success.
+
+==================================================
+REPORT
+==================================================
+
+Report:
+
+- exact input-to-render path used
+- exact motion curve used
+- Stage A duration
+- Stage B duration
+- total swap duration
+- whether the crystal visibly follows the gesture
+- whether the final approach visibly accelerates
+- whether the socket lock is visible
+- files changed
+
+Run:
+- typecheck
+- production build
+- focused motion tests
+- mobile swipe test
+- git diff --check
+
+Make NO unrelated changes.
