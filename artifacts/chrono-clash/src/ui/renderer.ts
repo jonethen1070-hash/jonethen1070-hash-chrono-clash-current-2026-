@@ -19,9 +19,10 @@ const GAP = BOARD_GAP;
 const FRAME = BOARD_FRAME;
 const MATCH_IMPACT_MS = 80;
 const GEM_VISUAL_SCALE = 1.06;
-const MATCH_STAGGER_MIN_MS = 15;
-const MATCH_STAGGER_STEP_MS = 9;
+const MATCH_STAGGER_MIN_MS = 10;
+const MATCH_STAGGER_STEP_MS = 7;
 const MATCH_STAGGER_MAX_MS = MATCH_STAGGER_MIN_MS + MATCH_STAGGER_STEP_MS * 2;
+const MATCH_AFTERGLOW_MS = 58;
 const DRAG_FOLLOW = 0.96;
 const DRAG_NEIGHBOR_PUSH = 0.18;
 
@@ -732,6 +733,7 @@ export class BoardRenderer {
     const fxSide = isPlayer ? "player" : "opponent";
     let recentClearBorn = -Infinity;
     let recentClearCombo = 1;
+    let recentClearSize = 3;
     for (let i = fx.length - 1; i >= 0; i--) {
       const fxEvent = fx[i]!;
       if (
@@ -742,6 +744,7 @@ export class BoardRenderer {
       ) {
         recentClearBorn = fxEvent.born;
         recentClearCombo = Math.max(1, fxEvent.combo ?? 1);
+        recentClearSize = Math.max(3, Math.min(8, fxEvent.cells?.length ?? 3));
         break;
       }
     }
@@ -1016,7 +1019,7 @@ export class BoardRenderer {
         tile.moveKind = "swap";
         view.pendingSwapTargets.delete(id);
       }
-      tile.breakStrength = recentClearCombo;
+      tile.breakStrength = Math.max(recentClearCombo, recentClearSize);
       tile.dieStaggerMs = Number.isFinite(recentClearBorn)
         ? MATCH_STAGGER_MIN_MS + ((tile.id + tile.r + tile.c) % 3) * MATCH_STAGGER_STEP_MS
         : 0;
@@ -1149,10 +1152,10 @@ export class BoardRenderer {
       } else if (tile.dieAge < 0) {
         // Hold the matched crystal in a tiny charged lock before the break.
         const charge = Math.max(0, Math.min(1, (tile.dieAge + MATCH_IMPACT_MS / 1000) / (MATCH_IMPACT_MS / 1000)));
-        tile.scale = 1.012 + charge * 0.018;
+        tile.scale = 1.018 - charge * 0.028;
         tile.alpha = 1;
-        tile.flash = Math.max(tile.flash, 0.4 + charge * 0.24);
-        tile.glow = Math.max(tile.glow, 0.36 + charge * 0.22);
+        tile.flash = Math.max(tile.flash, 0.42 + charge * 0.3);
+        tile.glow = Math.max(tile.glow, 0.38 + charge * 0.28);
       } else {
         tile.scale = pose.scale;
         tile.alpha = pose.alpha;
@@ -1534,16 +1537,16 @@ export class BoardRenderer {
           : this.fx.vfxTheme === "ember-fx"
             ? "#FF9D00"
             : hex;
-    const strength = Math.min(1.4, 1 + Math.max(0, combo - 3) * 0.08);
-    this.addShockwave(view, x, y, cell * 0.42, accent, 150, 1.4 * strength, now);
-    this.addShockwave(view, x, y, cell * 0.22, "#EAFBFF", 92, 1.05 * strength, now);
-    view.socketPulses.push({ x, y, born: now, life: 120, color: accent });
+    const strength = Math.min(1.55, 1 + Math.max(0, combo - 3) * 0.11);
+    this.addShockwave(view, x, y, cell * (0.42 + Math.min(0.08, Math.max(0, combo - 3) * 0.018)), accent, 112, 1.45 * strength, now);
+    this.addShockwave(view, x, y, cell * 0.22, "#EAFBFF", 72, 1.05 * strength, now);
+    view.socketPulses.push({ x, y, born: now, life: MATCH_AFTERGLOW_MS, color: accent });
     if (view.socketPulses.length > 12) view.socketPulses.splice(0, view.socketPulses.length - 12);
 
-    const shardCount = this.fx.quality === "medium" ? 2 : combo >= 5 ? 5 : 3;
+    const shardCount = this.fx.quality === "medium" ? 2 : combo >= 5 ? 5 : combo >= 4 ? 4 : 3;
     for (let i = 0; i < shardCount; i++) {
       const a = (Math.PI * 2 * i) / shardCount + 0.18;
-      const sp = 1.9 + combo * 0.12 + Math.random() * 0.7;
+      const sp = 2.1 + combo * 0.14 + Math.random() * 0.55;
       this.spawnCrystalShard(view, {
         x: x + Math.cos(a) * cell * 0.08,
         y: y + Math.sin(a) * cell * 0.08,
@@ -1551,25 +1554,25 @@ export class BoardRenderer {
         vy: Math.sin(a) * sp - 0.85,
         rotation: a,
         spin: (i % 2 ? 1 : -1) * (0.08 + Math.random() * 0.06),
-        life: 0.24,
-        max: 0.24,
-        size: cell * (0.07 + Math.random() * 0.025),
+        life: 0.2,
+        max: 0.2,
+        size: cell * (0.07 + Math.random() * 0.022),
         color: i % 2 ? "#EAFBFF" : accent,
       });
     }
 
-    const particleCount = Math.min(10, n + (combo >= 5 ? 2 : combo >= 3 ? 1 : 0));
+    const particleCount = Math.min(12, n + (combo >= 5 ? 3 : combo >= 4 ? 2 : combo >= 3 ? 1 : 0));
     for (let i = 0; i < particleCount; i++) {
       const a = (Math.PI * 2 * i) / particleCount + Math.random() * 0.35;
-      const sp = 1.6 + Math.random() * 2.4;
+      const sp = 1.8 + Math.random() * 1.8;
       this.spawnParticle(view, {
         x,
         y,
         vx: Math.cos(a) * sp,
         vy: Math.sin(a) * sp - 2.2,
-        life: 0.15,
-        max: 0.15,
-        size: cell * (0.038 + Math.random() * 0.04),
+        life: 0.13,
+        max: 0.13,
+        size: cell * (0.04 + Math.random() * 0.035),
         color: i % 3 === 0 ? "#EAFBFF" : i % 2 === 0 ? hex : accent,
       });
     }
@@ -2258,14 +2261,18 @@ export class BoardRenderer {
       }
       ctx.stroke();
     }
-    if (tile.dying && tile.dieAge >= 0 && this.fx.quality !== "low" && !this.fx.reducedMotion) {
+    if (tile.dying && this.fx.quality !== "low" && !this.fx.reducedMotion) {
       const dieDur = gemDieDuration(this.fx.animation, false);
+      const fractureProgress =
+        tile.dieAge < 0
+          ? charge * 0.28
+          : 0.28 + Math.min(0.72, tile.dieAge / dieDur) * 0.72;
       this.drawCrystalFracture(
         cx,
         cy,
         s,
         tile.color,
-        Math.min(1, tile.dieAge / dieDur),
+        fractureProgress,
         tile.fractureSeed,
         tile.breakStrength,
       );
@@ -2285,9 +2292,9 @@ export class BoardRenderer {
     const ctx = this.ctx;
     const crystal = crystalAccent(colorIndex);
     const color = COLORS[colorIndex - 1] ?? "#FFFFFF";
-    const crackProgress = Math.min(1, progress * 1.35);
-    const fade = Math.max(0, 1 - progress * 0.8);
-    const arms = strength >= 5 ? 5 : 4;
+    const crackProgress = Math.min(1, progress * 1.55);
+    const fade = Math.max(0, 1 - progress * 0.72);
+    const arms = strength >= 5 ? 5 : strength >= 4 ? 4 : 3;
 
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
@@ -2319,6 +2326,24 @@ export class BoardRenderer {
       ctx.strokeStyle = colorWithAlpha(color, 0.58);
       ctx.lineWidth = Math.max(0.55, s * 0.009);
       ctx.stroke();
+
+      if (strength >= 4) {
+        const branchAngle = angle + (i % 2 ? 1 : -1) * 0.42;
+        const branchStart = reach * 0.42;
+        const branchReach = reach * 0.78;
+        ctx.beginPath();
+        ctx.moveTo(
+          cx + px * branchStart + nx * bend * 0.4,
+          cy + py * branchStart + ny * bend * 0.4,
+        );
+        ctx.lineTo(
+          cx + Math.cos(branchAngle) * branchReach,
+          cy + Math.sin(branchAngle) * branchReach,
+        );
+        ctx.strokeStyle = colorWithAlpha("#EAFBFF", 0.52);
+        ctx.lineWidth = Math.max(0.65, s * 0.012);
+        ctx.stroke();
+      }
     }
 
     const core = ctx.createRadialGradient(cx, cy, 0, cx, cy, s * 0.22);

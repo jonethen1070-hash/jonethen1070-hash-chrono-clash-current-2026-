@@ -154,9 +154,13 @@ describe("landing feedback", () => {
     expect(renderer).toContain("primeSwapPose");
     expect(renderer).toContain("life: 64");
     expect(renderer).toContain("const MATCH_IMPACT_MS = 80");
+    expect(renderer).toContain("const MATCH_AFTERGLOW_MS = 58");
+    expect(renderer).toContain("const MATCH_STAGGER_STEP_MS = 7");
     expect(renderer).toContain("const cascadeHold");
-    expect(renderer).toContain("life: 0.15");
+    expect(renderer).toContain("life: 0.13");
     expect(renderer).toContain("const charge =");
-    expect(renderer).toContain("cell * 0.42, accent, 150");
+    expect(renderer).toContain("life: MATCH_AFTERGLOW_MS");
+    expect(renderer).toContain("branchAngle");
+    expect(renderer).toContain("cell * (0.42 + Math.min");
   });
 });
