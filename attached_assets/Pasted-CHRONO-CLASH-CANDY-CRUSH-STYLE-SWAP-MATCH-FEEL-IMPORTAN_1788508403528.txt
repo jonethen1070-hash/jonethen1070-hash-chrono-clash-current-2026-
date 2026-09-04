@@ -1,0 +1,206 @@
+CHRONO CLASH — CANDY CRUSH-STYLE SWAP + MATCH FEEL
+
+IMPORTANT: Do NOT create or generate any images.
+
+The current FALLING/GRAVITY behavior is good. DO NOT TOUCH IT.
+
+The two problems that must be fixed are ONLY:
+A) SWAP FEEL
+B) GEM MATCH/DISAPPEAR FEEL
+
+Do not make any other visual/layout/gameplay changes.
+
+==================================================
+A) MAKE THE SWAP FEEL LIKE CANDY CRUSH
+==================================================
+
+The current swap still feels too aggressive and mechanical.
+
+I do NOT want simply a longer animation.
+
+I want the physical interaction feeling:
+
+FINGER GRABS GEM
+→ GEM FEELS ATTACHED TO FINGER
+→ SLIGHT RESISTANCE
+→ GEM FOLLOWS THE SWIPE
+→ NEIGHBORING GEM IS PUSHED/EXCHANGED
+→ BOTH GEMS TRAVEL SMOOTHLY
+→ MAGNETIC PULL INTO DESTINATION SOCKET
+→ SMALL SOFT SETTLE
+→ MATCH IS THEN RECOGNIZED
+
+Inspect the real path:
+
+pointerdown
+→ drag state
+→ pointermove
+→ swipe threshold
+→ swap commit
+→ gem visual motion
+→ match detection
+→ renderer
+
+Use the existing Canvas/rendering system.
+
+During the drag BEFORE the swap commits:
+- the selected gem should visibly follow the finger
+- it should not remain visually static until the threshold
+- movement should feel slightly weighted
+- use subtle resistance rather than instant 1:1 movement
+- do not make it float or wobble excessively
+
+When the swipe commits:
+- BOTH exchanged gems must visibly move
+- no teleporting
+- no instant position replacement
+- no disappearing during the movement
+
+The movement should have two perceptual phases:
+
+PHASE 1 — PUSH / TRAVEL
+- smooth controlled movement
+- approximately 100–120ms
+- slightly restrained at the beginning
+
+PHASE 2 — MAGNETIC SOCKET LOCK
+- approximately 90–110ms
+- stronger pull toward the exact destination socket
+- accelerate toward the destination and settle precisely
+- subtle 1–2px final settle
+- no exaggerated bounce
+
+Total visible committed swap:
+approximately 200–230ms.
+
+The important thing is NOT the exact number.
+
+The important thing is that the player feels:
+
+"my finger pushed this crystal and the board pulled it into the socket."
+
+Do NOT change gravity.
+
+==================================================
+B) FIX MATCHED GEM DISAPPEARANCE
+==================================================
+
+Current problem:
+
+SWIPE
+→ MATCH
+→ GEMS IMMEDIATELY DISAPPEAR
+
+This feels cheap and too aggressive.
+
+Instead:
+
+SWAP FINISHES
+→ MATCH RECOGNITION
+→ SHORT IMPACT MOMENT
+→ CRYSTALS REACT
+→ CRYSTALS BREAK
+→ SMALL CRYSTAL VFX
+→ GEMS ARE REMOVED
+→ EXISTING FALLING STARTS
+
+After the swap reaches its destination:
+
+1. MATCH RECOGNITION
+Hold the matched gems visually for approximately 70–90ms.
+
+The player must be able to SEE that the match happened.
+
+2. CRYSTAL REACTION
+Matched gems should briefly:
+- tighten/scale slightly
+- brighten internally
+- show a subtle crystalline energy pulse
+
+Keep this restrained.
+
+3. CRYSTAL BREAK
+Then show a short destruction presentation, approximately 100–160ms.
+
+Use the EXISTING game rendering/VFX infrastructure.
+
+Prefer:
+- small crystal fragments
+- tiny energy particles
+- localized socket impact
+- short directional burst
+
+The actual gem must look like it breaks rather than simply vanishing.
+
+4. ONLY AFTER THE BREAK:
+Remove the matched gems and allow the EXISTING gravity/falling system to begin.
+
+DO NOT CHANGE THE CURRENT FALLING TIMING OR MOTION.
+
+==================================================
+CRITICAL REQUIREMENTS
+==================================================
+
+Do NOT:
+- change board size
+- change mobile layout
+- change HUD
+- redesign gems
+- change gem colors
+- change gravity
+- change cascade rules
+- change scoring
+- change powers
+- change networking
+- add screen-wide flashes
+- add excessive bloom
+- use generic CSS filters
+- create images
+- generate artwork
+- replace the existing Canvas renderer
+
+Use the actual existing code path and integrate into it.
+
+Do not fake the effect with disconnected DOM animation.
+
+==================================================
+RUNTIME VERIFICATION
+==================================================
+
+Run the actual game at 390×844.
+
+Perform real swipes that create matches.
+
+Verify visually:
+
+1. Selected gem responds to the finger BEFORE commit.
+2. Swap feels weighted rather than instant.
+3. Both gems visibly travel.
+4. Destination has a magnetic pull/snap.
+5. Gems settle into exact sockets.
+6. Swap completes BEFORE match destruction begins.
+7. Matched gems remain visible briefly.
+8. Matched gems visibly react.
+9. Crystal-break VFX is actually visible.
+10. Gems do NOT simply disappear.
+11. Existing falling begins AFTER destruction.
+12. Falling behavior remains unchanged.
+13. Cascade behavior remains unchanged.
+14. No console errors.
+
+Do not rely only on unit tests.
+
+Actually inspect the live rendered result.
+
+If the effect is technically present but visually too subtle to notice, adjust only the timing/intensity of the swap and destruction presentation until the difference is clearly visible on the real 390×844 runtime.
+
+Afterwards report:
+- exact files changed
+- exact swap timings
+- exact destruction timings
+- how the selected gem follows the finger
+- how the magnetic lock is implemented
+- what was visibly confirmed in the live game
+
+ONE CHANGE SET ONLY.
+DO NOT TOUCH ANYTHING ELSE.
