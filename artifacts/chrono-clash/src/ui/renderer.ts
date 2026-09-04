@@ -2380,8 +2380,8 @@ export class BoardRenderer {
     ctx.beginPath();
     ctx.arc(cx, cy + s * 0.08, s * 0.36, 0, Math.PI * 2);
     const under = ctx.createRadialGradient(cx, cy - s * 0.02, s * 0.02, cx, cy + s * 0.1, s * 0.36);
-    under.addColorStop(0, colorWithAlpha(color, 0.26));
-    under.addColorStop(0.38, colorWithAlpha(color, 0.24));
+    under.addColorStop(0, crystal.bloom);
+    under.addColorStop(0.38, `${color}52`);
     under.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = under;
     ctx.fill();
@@ -2401,7 +2401,7 @@ export class BoardRenderer {
     // baked colors can otherwise overpower the live palette. A restrained
     // exact-primary tint makes each crystal read as its gameplay color while
     // preserving the atlas material detail.
-    ctx.fillStyle = colorWithAlpha(color, 0.38);
+    ctx.fillStyle = colorWithAlpha(color, 0.34);
     ctx.fillRect(dx, dy, dest, dest);
     const occlude = ctx.createRadialGradient(cx + s * 0.14, cy + s * 0.24, s * 0.02, cx, cy, s * 0.52);
     occlude.addColorStop(0, "rgba(0, 4, 12, 0.4)");
@@ -2429,10 +2429,10 @@ export class BoardRenderer {
     const edgeShade = ctx.createLinearGradient(cx - s * 0.48, cy - s * 0.48, cx + s * 0.48, cy + s * 0.48);
     edgeShade.addColorStop(0, "rgba(255,255,255,0)");
     edgeShade.addColorStop(0.62, "rgba(0,0,0,0)");
-    edgeShade.addColorStop(1, "rgba(0,8,18,0.64)");
+    edgeShade.addColorStop(1, "rgba(0,8,18,0.55)");
     jewelPath(ctx, cx, cy, s * 0.97, colorIndex);
     ctx.strokeStyle = edgeShade;
-    ctx.lineWidth = Math.max(1, s * 0.028);
+    ctx.lineWidth = Math.max(1, s * 0.024);
     ctx.stroke();
 
     ctx.globalCompositeOperation = "lighter";
@@ -2918,7 +2918,7 @@ function paintSpeculars(ctx: CanvasRenderingContext2D, cx: number, cy: number, s
     const y = cy + s * oy;
     const g = ctx.createRadialGradient(x, y, 0, x, y, s * rad);
     g.addColorStop(0, `rgba(255,255,255,${a})`);
-    g.addColorStop(0.24, `rgba(255,255,255,${a * 0.24})`);
+    g.addColorStop(0.32, `rgba(255,255,255,${a * 0.34})`);
     g.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = g;
     ctx.beginPath();

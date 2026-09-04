@@ -9304,11 +9304,3 @@ html body #app #match .player-side .board-socket-bed {
   }
 }
 
-/* Keep the compact HUD crisp over the dark arena without adding brightness. */
-html body #app #match.active .fighter-copy b,
-html body #app #match.active .score-card b,
-html body #app #match.active .timer b {
-  text-shadow:
-    0 2px 0 #01050AF2,
-    0 0 6px currentColor !important;
-}
