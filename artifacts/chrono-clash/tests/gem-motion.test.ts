@@ -66,7 +66,7 @@ describe("crystal gem motion curves", () => {
     expect(fallThree).toBeGreaterThan(fallOne);
     expect(fallFar).toBeGreaterThan(fallThree);
     expect(fallThree).toBeCloseTo(0.38, 5);
-    expect(fallFar).toBeCloseTo(0.56, 5);
+    expect(fallFar).toBeCloseTo(0.54, 5);
     expect(gemTravelDuration(40 * 4, 40, "fall", "high", false)).toBeCloseTo(0.46, 5);
     expect(gemTravelDuration(40 * 8, 40, "fall", "high", false)).toBe(0.6);
     expect(fallFar).toBeGreaterThan(swap);

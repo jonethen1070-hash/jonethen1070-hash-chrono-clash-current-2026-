@@ -357,6 +357,7 @@ test.describe("mobile cascade visibility", () => {
       return renderState?.() ?? null;
     });
     const transientPoll = { intervals: [10, 20, 40, 80], timeout: 1_500 };
+    let observedSwapFrame: Awaited<ReturnType<typeof state>> = null;
 
     await expect.poll(async () => {
       const snapshot = await state();
@@ -366,9 +367,10 @@ test.describe("mobile cascade visibility", () => {
       const snapshot = await state();
       if (!snapshot) return false;
       const swapTiles = snapshot.tiles.filter((tile) => tile.moveKind === "swap");
+      if (swapTiles.length > 0) observedSwapFrame = snapshot;
       return swapTiles.length > 0 && swapTiles.every((tile) => Math.abs(tile.x - tile.fromX) > snapshot.cell * 0.08);
     }, transientPoll).toBe(true);
-    const swapFrame = await state();
+    const swapFrame = observedSwapFrame ?? (await state());
     expect(swapFrame).not.toBeNull();
     const swapTiles = swapFrame!.tiles.filter((tile) => tile.moveKind === "swap");
     expect(swapTiles.length).toBeGreaterThanOrEqual(1);
