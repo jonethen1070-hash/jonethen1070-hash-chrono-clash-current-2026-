@@ -1,0 +1,70 @@
+TASK: Remove ONLY the four corner light spills covering the nearest gems.
+
+EDIT ONLY:
+artifacts/chrono-clash/src/styles/match-frame.css
+
+PROBLEM:
+The four board corners currently cast a faint cyan/white light or shadow inward onto the corner-adjacent gems.
+
+Remove that spill completely.
+
+IMPORTANT:
+- Do NOT modify the gems.
+- Do NOT modify #playerGems.
+- Do NOT modify Canvas rendering.
+- Do NOT modify gem colors, materials, brightness, or effects.
+- Do NOT remove the visible cyan frame/corner hardware itself.
+- Do NOT change board dimensions.
+- Do NOT change gameplay or HUD.
+- Do NOT edit any other file.
+- Do NOT add a new stylesheet.
+- Do NOT redesign the board.
+
+FIRST:
+Inspect the existing:
+html body #app #match .player-side .board-slot::after
+
+and any other corner-light rules in match-frame.css.
+
+Determine exactly which background gradient/shadow/filter is producing the four inward light spills.
+
+FIX:
+Remove or fully contain ONLY the inward-facing glow from those four corners.
+
+The desired result is:
+
+CORNER LIGHT → stays on the frame edge
+GEM → receives NO corner-light spill
+
+The four corner accents themselves must remain visible.
+
+Do NOT simply make the entire board darker.
+Do NOT change the gem rendering to hide the problem.
+
+VERIFICATION:
+1. Capture a 390×844 baseline screenshot.
+2. Apply the fix.
+3. Reload the managed Chrono Clash workflow.
+4. Capture another 390×844 screenshot.
+5. Inspect all four corners closely.
+6. Confirm the faint light/shadow is completely gone from the blue, yellow, purple, and pink corner-adjacent gems.
+7. Confirm the actual corner frame lights remain visible.
+8. Confirm gem appearance itself was not changed.
+
+Run:
+- typecheck
+- production build
+- focused architecture/board tests
+- mobile swipe Playwright test
+- git diff --check
+
+If the spill cannot be removed using match-frame.css alone, STOP and report the actual source. Do not modify another file.
+
+Make NO other changes.
+
+Report only:
+- exact selector/property changed
+- confirmation that all four gem spills are gone
+- confirmation that corner frame lights remain
+- validation results
+- files changed
