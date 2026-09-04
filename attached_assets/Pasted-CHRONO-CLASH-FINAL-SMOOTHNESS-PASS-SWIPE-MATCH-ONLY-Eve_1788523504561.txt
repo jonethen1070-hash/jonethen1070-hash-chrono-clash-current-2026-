@@ -1,0 +1,267 @@
+CHRONO CLASH — FINAL SMOOTHNESS PASS: SWIPE + MATCH ONLY
+
+Everything else in the game is currently good.
+
+DO NOT CHANGE ANYTHING except:
+
+1. GEM SWIPE FEEL
+2. GEM MATCH TRANSITION FEEL
+
+Do NOT touch:
+- board/layout
+- HUD
+- gem artwork
+- gem size
+- colors
+- board frame
+- falling/gravity
+- cascade logic
+- CPU
+- powers
+- score
+- audio
+- bottom controls
+- existing VFX outside the match transition
+
+NO IMAGE GENERATION.
+
+==================================================
+1. SWIPE — MAKE THE GEM FEEL ATTACHED TO THE FINGER
+==================================================
+
+The biggest problem is that the swipe does not feel smooth.
+
+I do NOT want a fixed animation that plays after the player swipes.
+
+The player's finger must control the selected gem continuously.
+
+For BOTH slow and fast swipes:
+
+finger moves
+→ gem follows continuously
+→ neighboring gem responds
+→ release/threshold
+→ smooth completion
+→ magnetic socket settle
+
+FAST SWIPE:
+The gem must immediately respond to the finger.
+
+SLOW SWIPE:
+The gem must move slowly with the finger.
+
+There must be NO noticeable delay between finger movement and gem movement.
+
+Do NOT use a fixed 200ms animation as the primary drag motion.
+
+During pointermove/touchmove:
+- update the selected gem's visual position continuously
+- preserve the existing board cell coordinates
+- use only very light smoothing
+- avoid visible lag
+
+The player should feel:
+
+"I am dragging this crystal."
+
+NOT:
+
+"I swiped and the game animated the crystal."
+
+==================================================
+2. SWAP COMPLETION
+==================================================
+
+When the gesture crosses the valid neighboring-cell threshold:
+
+Complete the exchange smoothly.
+
+The selected gem should continue naturally from its current finger-driven position into the destination socket.
+
+Do NOT restart the gem from its original cell.
+
+This is critical.
+
+BAD:
+original socket → animation starts → destination
+
+GOOD:
+finger-driven position → continues naturally → destination socket
+
+The neighboring gem must also move naturally.
+
+Use a subtle magnetic ease only for the final few pixels.
+
+No aggressive snap.
+
+No sudden acceleration.
+
+No teleport.
+
+==================================================
+3. MATCH TRANSITION — MAKE IT SMOOTH
+==================================================
+
+After the swap reaches the destination:
+
+Do NOT immediately switch from "moving gems" to "destroyed gems."
+
+The transition should feel continuous:
+
+SWAP
+↓
+SOFT SOCKET SETTLE
+↓
+MATCH RECOGNITION
+↓
+SUBTLE CRYSTAL REACTION
+↓
+BREAK VFX
+↓
+REMOVAL
+↓
+FALL
+
+The important part is that there is no visual "cut" between these states.
+
+==================================================
+4. MATCH RECOGNITION
+==================================================
+
+Use a very short visual transition:
+
+approximately 60–90ms.
+
+Matched crystals should:
+- settle naturally
+- slightly compress
+- subtly brighten
+- have a controlled internal pulse
+
+No hard freeze.
+
+No abrupt disappearance.
+
+==================================================
+5. BREAK TRANSITION
+==================================================
+
+The break should smoothly grow out of the crystal's reaction.
+
+Avoid:
+
+gem visible
+→ instant VFX
+→ gem gone
+
+Instead:
+
+gem settles
+→ internal energy builds
+→ subtle fracture
+→ crystal breaks
+→ small shards/particles
+→ disappears
+
+Keep it fast and responsive.
+
+Target total match presentation approximately 150–220ms.
+
+Do NOT make it slow.
+
+==================================================
+6. NO ARTIFICIAL INPUT LOCK
+==================================================
+
+Do not lock or freeze the player while these animations happen.
+
+Do not add busy timers simply to hide the transition.
+
+VFX and motion must remain visually smooth without taking control away from the player.
+
+==================================================
+7. TECHNICAL REQUIREMENT
+==================================================
+
+FIRST trace the actual runtime path:
+
+touch/pointer
+→ drag state
+→ visual gem position
+→ swap commit
+→ match detection
+→ match visual state
+→ renderer
+→ destruction
+→ gravity
+
+Do not create a second animation system.
+
+Fix the existing motion pipeline.
+
+==================================================
+8. LIVE TEST — VERY IMPORTANT
+==================================================
+
+Test the REAL GAME at 390×844.
+
+Perform:
+
+A. Very slow swipe
+B. Medium swipe
+C. Very fast swipe
+D. Swipe that creates a 3-gem match
+E. Swipe that creates a larger match
+F. Cascade
+
+Watch the actual crystal movement.
+
+SUCCESS means:
+
+SLOW:
+finger and crystal stay together.
+
+FAST:
+crystal immediately follows the finger.
+
+SWAP:
+crystal naturally continues from the finger position into the socket.
+
+MATCH:
+there is a smooth transition from swap → settle → reaction → break.
+
+There should be NO:
+- jump
+- teleport
+- abrupt disappearance
+- harsh snap
+- visual cut
+- frozen feeling
+
+==================================================
+IMPORTANT
+==================================================
+
+Do NOT make changes to anything else.
+
+Do not add new UI.
+
+Do not redesign the VFX.
+
+Do not change falling.
+
+Do not change the board.
+
+Do not change gem artwork.
+
+This is a MOTION QUALITY PASS ONLY.
+
+Before reporting completion, verify the actual live game rather than relying only on tests.
+
+Report:
+- exact files changed
+- how finger position drives gem position
+- how the swap transitions from drag into socket
+- exact match transition timing
+- what was observed during slow/medium/fast swipes
+- what was observed during a real match
