@@ -18,6 +18,8 @@ export { LIVE_GEM_MAX_IN_CELL_DROP, liveGemDrawOrigin } from "./gemMotion";
 const GAP = BOARD_GAP;
 const FRAME = BOARD_FRAME;
 const MATCH_IMPACT_MS = 80;
+const DRAG_FOLLOW = 0.96;
+const DRAG_NEIGHBOR_PUSH = 0.18;
 
 export interface RenderFx {
   quality: Intensity;
@@ -263,8 +265,8 @@ export class BoardRenderer {
     }
     const tile = source;
     if (!tile) return;
-    tile.x = tile.toX + dx;
-    tile.y = tile.toY + dy;
+    tile.x = tile.toX + dx * DRAG_FOLLOW;
+    tile.y = tile.toY + dy * DRAG_FOLLOW;
     tile.fromX = tile.x;
     tile.fromY = tile.y;
     tile.toX = tile.x;
@@ -813,8 +815,8 @@ export class BoardRenderer {
         tile.c = c;
         const selectedHere = selected?.r === r && selected?.c === c && drag;
         if (selectedHere && drag) {
-          tile.x = tx + drag.dx;
-          tile.y = ty + drag.dy;
+          tile.x = tx + drag.dx * DRAG_FOLLOW;
+          tile.y = ty + drag.dy * DRAG_FOLLOW;
           tile.toX = tx;
           tile.toY = ty;
           tile.fromX = tile.x;
@@ -849,6 +851,30 @@ export class BoardRenderer {
           if (kind === "swap") {
             this.playerView.pendingSwapIds.delete(piece.id);
             this.playerView.pendingSwapTargets.delete(piece.id);
+          }
+        } else if (
+          tile.moveKind === "idle" &&
+          drag &&
+          isPlayer &&
+          selected &&
+          Math.abs(r - selected.r) + Math.abs(c - selected.c) === 1
+        ) {
+          const pushX = c === selected.c ? 0 : drag.dx * DRAG_NEIGHBOR_PUSH;
+          const pushY = r === selected.r ? 0 : drag.dy * DRAG_NEIGHBOR_PUSH;
+          if ((pushX || pushY) && drag.dx * (c - selected.c) + drag.dy * (r - selected.r) > 0) {
+            tile.x = tx + pushX;
+            tile.y = ty + pushY;
+            tile.fromX = tile.x;
+            tile.fromY = tile.y;
+            tile.toX = tx;
+            tile.toY = ty;
+            tile.vx = 0;
+            tile.vy = 0;
+          } else {
+            tile.x = tx;
+            tile.y = ty;
+            tile.vx = 0;
+            tile.vy = 0;
           }
         } else if (tile.moveKind === "idle") {
           tile.toX = tx;

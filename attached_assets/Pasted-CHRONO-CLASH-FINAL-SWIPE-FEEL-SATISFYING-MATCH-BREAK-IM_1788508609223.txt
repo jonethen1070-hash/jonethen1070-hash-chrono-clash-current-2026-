@@ -1,0 +1,235 @@
+CHRONO CLASH — FINAL SWIPE FEEL + SATISFYING MATCH BREAK
+
+IMPORTANT:
+Do NOT create or generate any images.
+
+The current falling/gravity behavior is GOOD.
+DO NOT CHANGE FALLING.
+
+Fix ONLY these two things:
+
+1. SWIPE MUST STAY WITH THE FINGER
+2. MATCHED GEMS MUST BREAK WITH SATISFYING VFX BEFORE FALLING
+
+==================================================
+1. SWIPE MUST BE DIRECTLY CONNECTED TO THE FINGER
+==================================================
+
+I want the same basic physical feeling as Candy Crush.
+
+Whether the player swipes:
+- very slowly
+- normally
+- very quickly
+
+the selected gem must visibly stay connected to the finger throughout the drag.
+
+DO NOT use a fixed-duration animation as the primary drag response.
+
+During pointer/touch movement:
+
+finger position
+      ↓
+selected gem position follows finger continuously
+      ↓
+neighboring gem responds naturally
+      ↓
+release / threshold
+      ↓
+complete the exchange
+      ↓
+magnetic socket lock
+
+The gem should NEVER:
+- wait at its original position while the finger moves
+- suddenly jump toward the destination
+- visually teleport
+- move independently of the finger
+- feel like an automatic animation after the swipe
+
+Implement this in the existing input → session → renderer/Canvas path.
+
+Use the existing drag state if possible.
+
+The selected gem should follow the finger with a very small amount of smoothing/resistance so it feels physical, but the connection must remain obvious.
+
+FAST SWIPE:
+The gem should respond immediately and travel with the finger.
+
+SLOW SWIPE:
+The gem should move slowly with the finger.
+
+The player should feel:
+"I am physically dragging this crystal."
+
+Do NOT make slow swipes feel delayed.
+
+==================================================
+2. COMMITTED SWAP
+==================================================
+
+When the drag crosses the valid neighboring-cell threshold:
+
+- commit the swap
+- both gems move into their new sockets
+- preserve the existing magnetic destination lock
+- use only a short finishing transition after the finger release/commit
+
+The finishing motion should feel like:
+PUSH → TRAVEL → MAGNETIC SNAP → SETTLE
+
+Do NOT make the entire swap a pre-programmed 200ms animation disconnected from the finger.
+
+==================================================
+3. MATCH MUST NOT INSTANTLY DISAPPEAR
+==================================================
+
+Current behavior:
+
+SWIPE → MATCH → GEMS VANISH
+
+This is NOT acceptable.
+
+Required:
+
+SWAP FINISHES
+→ MATCH RECOGNITION
+→ CRYSTALS HOLD/REACT
+→ CRYSTALLINE IMPACT
+→ BREAK VFX
+→ GEM REMOVAL
+→ FALLING
+
+The match needs a satisfying visual payoff.
+
+==================================================
+4. MATCH REACTION
+==================================================
+
+Immediately after a successful match:
+
+Hold the matched gems visibly for approximately 70–100ms.
+
+During this moment:
+- subtle scale/pressure pulse
+- internal brightness increases
+- crystalline facets become more pronounced
+- small energy gathering effect
+
+The player should clearly understand:
+"That match connected."
+
+==================================================
+5. CRYSTAL BREAK VFX
+==================================================
+
+After the recognition moment:
+
+Create a short, polished crystal-break effect using the EXISTING Canvas/VFX infrastructure.
+
+Target approximately 120–180ms.
+
+Use restrained effects such as:
+- small crystal shards
+- tiny particles
+- short energy burst
+- localized socket flash
+- subtle directional fragments
+
+The gem should appear to BREAK rather than simply disappear.
+
+Keep the center crisp.
+
+Do NOT use:
+- giant screen flash
+- full-board white flash
+- excessive bloom
+- huge particle explosion
+- blurry gem
+- generic CSS fade
+
+==================================================
+6. FALLING STARTS AFTER THE BREAK
+==================================================
+
+Only after the destruction presentation completes:
+
+- remove matched gems
+- run the existing gravity/falling system
+
+DO NOT modify the current falling implementation or timing.
+
+Automatic cascades must continue exactly as they currently do.
+
+==================================================
+7. IMPORTANT CODE REQUIREMENT
+==================================================
+
+Inspect the REAL runtime path before changing anything:
+
+pointerdown
+→ pointermove
+→ drag position
+→ swipe threshold
+→ swap
+→ match detection
+→ match resolution
+→ renderer
+→ gem removal
+→ gravity
+
+Do not add a disconnected animation just to satisfy tests.
+
+The visible Canvas gem position must actually reflect the touch/pointer position during the drag.
+
+==================================================
+8. LIVE RUNTIME VERIFICATION
+==================================================
+
+Test at 390×844 with real touch interaction.
+
+Perform:
+
+A. VERY SLOW SWIPE
+Confirm the gem visibly stays with the finger.
+
+B. NORMAL SWIPE
+Confirm smooth physical tracking.
+
+C. FAST SWIPE
+Confirm the gem responds immediately and does not lag far behind.
+
+D. MATCHING SWIPE
+Confirm:
+- swap finishes
+- matched gems remain visible briefly
+- matched gems visibly react
+- crystal-break VFX is clearly visible
+- gems disappear only after the break
+- falling begins afterward
+
+The result should feel:
+
+GRAB → DRAG → PUSH → SNAP → MATCH → CRYSTAL BREAK → FALL
+
+NOT:
+
+SWIPE → JUMP → DISAPPEAR
+
+Do NOT change:
+- board
+- HUD
+- layout
+- gem artwork
+- gem colors
+- gravity
+- scoring
+- cascade rules
+- powers
+- networking
+
+Run typecheck, build, focused tests, and mobile runtime verification.
+
+Report the exact files changed and what was visually observed in the live game.
+
+ONE focused change set only.
