@@ -6,9 +6,13 @@ import {
   easeCrystalFall,
   easeInOutCubic,
   easeInOutSine,
+  easeMagneticSwap,
   gemFallDelay,
   gemTravelDuration,
   gemTravelEase,
+  SWAP_MAGNET_MS,
+  SWAP_PUSH_MS,
+  SWAP_TOTAL_MS,
 } from "../src/ui/gemMotion";
 import { COLS, INVALID_RETURN_MS, ROWS } from "../src/engine/types";
 import { cloneBoard, createSeededRng, findMatches, makePiece, resetIds, trySwap } from "../src/engine/board";
@@ -35,13 +39,17 @@ describe("crystal gem motion curves", () => {
     expect(easeInOutSine(1)).toBeCloseTo(1, 5);
     expect(easeInOutSine(0.25)).toBeLessThan(0.5);
     expect(easeInOutSine(0.75)).toBeGreaterThan(0.5);
-    expect(gemTravelEase("swap", 0.125)).toBeGreaterThan(0);
+    expect(easeMagneticSwap(0)).toBe(0);
+    expect(easeMagneticSwap(1)).toBe(1);
+    expect(easeMagneticSwap(0.25)).toBeLessThan(0.2);
+    expect(easeMagneticSwap(0.9)).toBeGreaterThan(0.65);
+    expect(gemTravelEase("swap", 0.125)).toBe(easeMagneticSwap(0.125));
     expect(easeCrystalFall(0)).toBe(0);
     expect(easeCrystalFall(1)).toBeCloseTo(1, 5);
     expect(easeCrystalFall(0.2)).toBeLessThan(0.2);
     expect(easeInOutCubic(0.25)).toBeLessThan(0.25);
     expect(easeInOutCubic(0.75)).toBeGreaterThan(0.75);
-    expect(gemTravelEase("swap", 0.5)).toBe(easeInOutSine(0.5));
+    expect(gemTravelEase("swap", 0.5)).toBe(easeMagneticSwap(0.5));
     expect(gemTravelEase("fall", 0.5)).toBe(easeCrystalFall(0.5));
   });
 
@@ -50,7 +58,10 @@ describe("crystal gem motion curves", () => {
     const fallOne = gemTravelDuration(40, 40, "fall", "high", false);
     const fallThree = gemTravelDuration(40 * 3, 40, "fall", "high", false);
     const fallFar = gemTravelDuration(40 * 5, 40, "fall", "high", false);
-    expect(swap).toBe(0.22);
+    expect(SWAP_PUSH_MS).toBe(100);
+    expect(SWAP_MAGNET_MS).toBe(100);
+    expect(SWAP_TOTAL_MS).toBe(200);
+    expect(swap).toBe(0.2);
     expect(fallOne).toBeCloseTo(0.24, 5);
     expect(fallThree).toBeGreaterThan(fallOne);
     expect(fallFar).toBeGreaterThan(fallThree);
@@ -140,5 +151,7 @@ describe("landing feedback", () => {
     expect(renderer).toContain("tile.scale = Math.max(tile.scale, 1.035)");
     expect(renderer).toContain("tile.settleDur = 0.052");
     expect(renderer).toContain("tile.scale = 0.985");
+    expect(renderer).toContain("primeSwapPose");
+    expect(renderer).toContain("life: 64");
   });
 });

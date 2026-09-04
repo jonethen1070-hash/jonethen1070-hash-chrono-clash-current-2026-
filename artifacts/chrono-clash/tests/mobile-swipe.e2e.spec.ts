@@ -317,11 +317,20 @@ test.describe("mobile cascade visibility", () => {
     expect(box).not.toBeNull();
     const accepted = await page.evaluate(({ fromRow, fromCol, toRow, toCol }) => {
       const session = (window as Window & {
-        __chrono?: { session?: { tryPlayerSwap: (a: { r: number; c: number }, b: { r: number; c: number }, now: number) => boolean } };
+        __chrono?: {
+          session?: { tryPlayerSwap: (a: { r: number; c: number }, b: { r: number; c: number }, now: number) => boolean };
+          flashSwap?: (a: { r: number; c: number }, b: { r: number; c: number }) => void;
+        };
       }).__chrono?.session;
       return session?.tryPlayerSwap({ r: fromRow, c: fromCol }, { r: toRow, c: toCol }, performance.now()) ?? false;
     }, { fromRow: 3, fromCol: 3, toRow: 3, toCol: 4 });
     expect(accepted).toBe(true);
+    await page.evaluate(() => {
+      const chrono = (window as Window & {
+        __chrono?: { flashSwap?: (a: { r: number; c: number }, b: { r: number; c: number }) => void };
+      }).__chrono;
+      chrono?.flashSwap?.({ r: 3, c: 3 }, { r: 3, c: 4 });
+    });
 
     const state = () => page.evaluate(() => {
       const renderState = (window as Window & {
@@ -352,6 +361,12 @@ test.describe("mobile cascade visibility", () => {
     await expect.poll(async () => {
       const snapshot = await state();
       return snapshot?.tiles.some((tile) => tile.moveKind === "swap") ?? false;
+    }, transientPoll).toBe(true);
+    await expect.poll(async () => {
+      const snapshot = await state();
+      if (!snapshot) return false;
+      const swapTiles = snapshot.tiles.filter((tile) => tile.moveKind === "swap");
+      return swapTiles.length > 0 && swapTiles.every((tile) => Math.abs(tile.x - tile.fromX) > snapshot.cell * 0.08);
     }, transientPoll).toBe(true);
     const swapFrame = await state();
     expect(swapFrame).not.toBeNull();

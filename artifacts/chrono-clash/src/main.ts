@@ -1964,7 +1964,8 @@ function swipeMin(): number {
   return Math.max(8, cellSize() * 0.12);
 }
 
-function commitSwipe(from: Coord, target: Coord, now: number): boolean {
+function commitSwipe(from: Coord, target: Coord, now: number, gestureDx = 0, gestureDy = 0): boolean {
+  renderer.primeSwapPose(from, target, gestureDx, gestureDy, now);
   if (session.tryPlayerSwap(from, target, now)) {
     audio.play("swap");
     renderer.flashSwap(from, target, now);
@@ -2013,8 +2014,10 @@ ui.playerBoard.addEventListener(
       const target = neighborFromSwipe({ r: swipe.r, c: swipe.c }, dx, dy, swipeMin());
       if (target) {
         const from = { r: swipe.r, c: swipe.c };
+        const gestureDx = swipe.dx;
+        const gestureDy = swipe.dy;
         swipe = null;
-        commitSwipe(from, target, performance.now());
+        commitSwipe(from, target, performance.now(), gestureDx, gestureDy);
       }
     }
   },
@@ -2044,9 +2047,11 @@ ui.playerBoard.addEventListener(
       return;
     }
     const target = neighborFromSwipe(from, e.clientX - swipe.x, e.clientY - swipe.y, swipeMin());
+    const gestureDx = swipe.dx;
+    const gestureDy = swipe.dy;
     swipe = null;
     if (target) {
-      commitSwipe(from, target, now);
+      commitSwipe(from, target, now, gestureDx, gestureDy);
     } else {
       if (session.drag) session.rejectSwipe(now);
       else session.setDrag(null);
@@ -2463,6 +2468,9 @@ if (location.hostname === "127.0.0.1" || location.hostname === "localhost") {
     },
     renderState() {
       return renderer.inspectPlayer();
+    },
+    flashSwap(a: Coord, b: Coord) {
+      renderer.flashSwap(a, b, performance.now());
     },
     speak(id: "locked" | "combo" | "ultimate") {
       return announcer.submit(id, performance.now());

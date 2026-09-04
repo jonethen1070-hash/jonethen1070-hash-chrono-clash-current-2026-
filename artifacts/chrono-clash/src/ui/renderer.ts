@@ -139,6 +139,7 @@ export interface BoardRenderInspection {
 
 class BoardView {
   tiles = new Map<number, VisualTile>();
+  pendingSwapIds = new Set<number>();
   live = new Set<number>();
   particles: Particle[] = [];
   shockwaves: Shockwave[] = [];
@@ -150,6 +151,7 @@ class BoardView {
 
   reset(): void {
     this.tiles.clear();
+    this.pendingSwapIds.clear();
     this.live.clear();
     this.particles = [];
     this.shockwaves = [];
@@ -241,8 +243,35 @@ export class BoardRenderer {
     void now;
   }
 
-  flashSwap(a: Coord, b: Coord, _now: number): void {
+  primeSwapPose(from: Coord, to: Coord, dx: number, dy: number, now: number): void {
+    const source = [...this.playerView.tiles.values()].find((t) => t.r === from.r && t.c === from.c && !t.dying);
+    const destination = [...this.playerView.tiles.values()].find((t) => t.r === to.r && t.c === to.c && !t.dying);
+    if (source) this.playerView.pendingSwapIds.add(source.id);
+    if (destination) this.playerView.pendingSwapIds.add(destination.id);
+    const tile = source;
+    if (!tile) return;
+    tile.x = tile.toX + dx;
+    tile.y = tile.toY + dy;
+    tile.fromX = tile.x;
+    tile.fromY = tile.y;
+    tile.toX = tile.x;
+    tile.toY = tile.y;
+    tile.moveKind = "idle";
+    tile.moveAge = 0;
+    tile.moveDur = 0;
+    tile.moveHold = 0;
+    tile.scale = Math.max(tile.scale, 1.035);
+    tile.flash = Math.max(tile.flash, 0.55);
+    tile.glow = Math.max(tile.glow, 0.4);
+    void now;
+  }
+
+  flashSwap(a: Coord, b: Coord, now: number): void {
     this.playerView.flash = Math.max(this.playerView.flash, this.fx.reducedMotion ? 0.04 : 0.08);
+    for (const at of [a, b]) {
+      const tile = [...this.playerView.tiles.values()].find((t) => t.r === at.r && t.c === at.c && !t.dying);
+      if (tile) this.playerView.pendingSwapIds.add(tile.id);
+    }
     const mul = feelMul(this.fx.quality, this.fx.reducedMotion);
     if (mul < 0.2) return;
     const cell = this.lastPlayerCell;
@@ -252,7 +281,19 @@ export class BoardRenderer {
       tile.flash = Math.max(tile.flash, 0.55);
       tile.glow = Math.max(tile.glow, 0.4);
       if (at === a) tile.scale = Math.max(tile.scale, 1.035);
+      if (at === b) {
+        this.playerView.socketPulses.push({
+          x: tile.x + cell / 2,
+          y: tile.y + cell / 2,
+          born: now,
+          life: 64,
+          color: "#7CF5FF",
+        });
+      }
       this.impactSpark(this.playerView, tile.x + cell / 2, tile.y + cell / 2, tile.color, cell);
+    }
+    if (this.playerView.socketPulses.length > 12) {
+      this.playerView.socketPulses.splice(0, this.playerView.socketPulses.length - 12);
     }
   }
 
@@ -712,8 +753,7 @@ export class BoardRenderer {
           tile.settleY = 0;
         } else if (moved) {
           const dist = Math.hypot(tx - tile.x, ty - tile.y);
-          const neighbor = Math.abs(prevC - c) + Math.abs(prevR - r) === 1;
-          const kind: GemMoveKind = neighbor ? "swap" : "fall";
+          const kind: GemMoveKind = this.playerView.pendingSwapIds.has(piece.id) ? "swap" : "fall";
           tile.fromX = tile.x;
           tile.fromY = tile.y;
           tile.toX = tx;
@@ -727,6 +767,7 @@ export class BoardRenderer {
           tile.settleDur = 0;
           tile.settleX = 0;
           tile.settleY = 0;
+          if (kind === "swap") this.playerView.pendingSwapIds.delete(piece.id);
         } else if (tile.moveKind === "idle") {
           tile.toX = tx;
           tile.toY = ty;
@@ -816,6 +857,9 @@ export class BoardRenderer {
         tile.flash *= 0.9;
         tile.alpha = 1;
       }
+    }
+    for (const id of this.playerView.pendingSwapIds) {
+      if (!live.has(id)) this.playerView.pendingSwapIds.delete(id);
     }
     this.capParticles(view);
 

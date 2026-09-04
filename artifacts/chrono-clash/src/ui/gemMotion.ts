@@ -5,6 +5,10 @@ export const LIVE_GEM_MAX_IN_CELL_DROP = 0.16;
 
 export type GemMoveKind = "swap" | "fall";
 
+export const SWAP_PUSH_MS = 100;
+export const SWAP_MAGNET_MS = 100;
+export const SWAP_TOTAL_MS = SWAP_PUSH_MS + SWAP_MAGNET_MS;
+
 export function clamp01(t: number): number {
   return t < 0 ? 0 : t > 1 ? 1 : t;
 }
@@ -25,6 +29,20 @@ export function easeInOutSine(t: number): number {
   return -(Math.cos(Math.PI * x) - 1) / 2;
 }
 
+/**
+ * Two-stage socket attraction:
+ * - the first half is controlled and resistant,
+ * - the second half pulls hard toward the exact neighboring socket.
+ */
+export function easeMagneticSwap(t: number): number {
+  const x = clamp01(t);
+  if (x <= 0.5) {
+    return 0.38 * easeInOutCubic(x * 2);
+  }
+  const pull = (x - 0.5) * 2;
+  return 0.38 + 0.62 * pull * pull * pull;
+}
+
 /** Accelerate then settle into the well. No bounce, no linear slot-drop. */
 export function easeCrystalFall(t: number): number {
   const x = clamp01(t);
@@ -37,9 +55,7 @@ export function easeCrystalFall(t: number): number {
 }
 
 export function gemTravelEase(kind: GemMoveKind, t: number): number {
-  // A sine-weighted exchange gives the finger push a gentle launch and a
-  // controlled final lock without the abrupt snap of a fast ease-out.
-  return kind === "swap" ? easeInOutSine(t) : easeCrystalFall(t);
+  return kind === "swap" ? easeMagneticSwap(t) : easeCrystalFall(t);
 }
 
 export function gemTravelDuration(
@@ -54,7 +70,7 @@ export function gemTravelDuration(
   if (kind === "swap") {
     if (animation === "low") return 0.18;
     if (animation === "medium") return 0.2;
-    return 0.22;
+    return SWAP_TOTAL_MS / 1000;
   }
   const base = animation === "low" ? 0.22 : animation === "medium" ? 0.23 : 0.24;
   const perCell = animation === "low" ? 0.07 : animation === "medium" ? 0.075 : 0.08;
