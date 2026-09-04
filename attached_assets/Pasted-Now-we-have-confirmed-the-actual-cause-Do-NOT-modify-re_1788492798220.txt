@@ -1,0 +1,58 @@
+Now we have confirmed the actual cause.
+
+Do NOT modify renderer.ts or the Canvas board/gems.
+
+The visible outer board frame is primarily produced by the existing DOM/CSS layers:
+
+- .board-outer-rail
+- .board-energy-glass
+- .board-socket-bed
+- .board-fastener
+- .board-slot
+- their existing pseudo-elements, borders, backgrounds, gradients and shadows
+
+Modify ONLY those existing CSS frame layers so the LIVE board visually matches the supplied target reference.
+
+TARGET FRAME DESIGN:
+
+1. Replace the current smooth/uniform cyan shell appearance with a premium futuristic mechanical frame.
+2. Use dark gunmetal/black structural housing as the dominant material.
+3. Create a layered recessed construction:
+   outer gunmetal housing → segmented blue energy rail → darker metallic recess → thin inner cyan reflection → existing gem wells → existing gems.
+4. Make the left and right blue rails visibly SEGMENTED rather than one continuous uniform glow.
+5. Add concentrated bright electric-blue/cyan energy nodes at the four corners.
+6. Keep top and bottom lighting thinner and more restrained than the side rails.
+7. Use sharp bright blue cores with softer bloom around them.
+8. Add dark metallic separation between illuminated sections so the frame has physical depth.
+9. Use chamfered/angular corner treatment where possible with the existing CSS structure; do not change the board's dimensions.
+10. Add subtle inner bevel/highlight so the board looks physically recessed rather than like a glowing rounded rectangle.
+11. The frame must remain premium futuristic sci-fi.
+12. DO NOT make it horror, gothic, rusty, ancient, distressed, dirty, or retro.
+13. Do not redesign the gems. Do not change gem positions, sizes, artwork, colors, or the 8x8 grid.
+14. Do not change board width, height, position, aspect ratio, spacing, or touch interaction.
+15. Do not change HUD, abilities, bottom controls, background, typography, gameplay, animations, or any other UI.
+16. DO NOT add YOUR ATTACK or RIVAL ATTACK bars.
+17. Do not create a second board, overlay, duplicate frame, or replacement component. Modify the existing CSS frame layers only.
+
+IMPORTANT:
+The supplied reference image is the visual target. Compare the CURRENT LIVE BOARD against the reference specifically for the outer frame.
+
+The biggest required improvement is NOT a stronger generic cyan glow. It is the combination of:
+- dark mechanical metal
+- segmented side energy rails
+- corner energy nodes
+- recessed layers
+- thin inner reflection
+- controlled bloom
+- visible depth separation.
+
+Use the existing DOM structure and existing CSS layers rather than inventing a new board.
+
+After making the CSS change:
+1. Run typecheck/build.
+2. Open the live mobile preview.
+3. Verify that the OUTER FRAME visibly changed.
+4. Verify the board geometry and gems did not change.
+5. Report the exact CSS file(s) and selectors modified.
+
+Do not report success based only on build completion. The visual frame must actually be different in the live preview.
