@@ -505,35 +505,29 @@ export class BoardRenderer {
     ctx.fillRect(ox, oy, size, size);
     ctx.restore();
 
-    const bevel = ctx.createLinearGradient(ox, oy, ox + size, oy + size);
-    bevel.addColorStop(0, isPlayer ? "#EAFBFF60" : "#FFE1EA4A");
-    bevel.addColorStop(0.16, isPlayer ? "#6FEAFF22" : "#FF6B9120");
-    bevel.addColorStop(0.52, "#FFFFFF00");
-    bevel.addColorStop(0.84, "#01050A18");
-    bevel.addColorStop(1, "#01050AC4");
-    roundRect(ctx, ox + 2, oy + 2, size - 4, size - 4, 20);
-    ctx.strokeStyle = bevel;
-    ctx.lineWidth = 1.8;
-    ctx.stroke();
-
-    const rim = boosted
-      ? "#6FEAFFF0"
-      : frozen
-        ? "#00D9FF8C"
-        : isPlayer
-          ? "#00D9FFC7"
-          : "#FF174FC7";
-    roundRect(ctx, ox, oy, size, size, 22);
-    ctx.strokeStyle = rim;
-    ctx.lineWidth = boosted ? 2.8 : isPlayer ? 2.2 : 1.8;
-    ctx.stroke();
-    ctx.strokeStyle = isPlayer ? "#B9F8FF38" : "#FFD6E22E";
-    ctx.lineWidth = 1;
-    roundRect(ctx, ox + 3, oy + 3, size - 6, size - 6, 18);
-    ctx.stroke();
-
     if (isPlayer) {
-      this.paintPlayerFrameLighting(ctx, ox, oy, size);
+      this.paintPlayerFrameLighting(ctx, ox, oy, size, boosted, frozen);
+    } else {
+      const bevel = ctx.createLinearGradient(ox, oy, ox + size, oy + size);
+      bevel.addColorStop(0, "#FFE1EA4A");
+      bevel.addColorStop(0.16, "#FF6B9120");
+      bevel.addColorStop(0.52, "#FFFFFF00");
+      bevel.addColorStop(0.84, "#01050A18");
+      bevel.addColorStop(1, "#01050AC4");
+      roundRect(ctx, ox + 2, oy + 2, size - 4, size - 4, 20);
+      ctx.strokeStyle = bevel;
+      ctx.lineWidth = 1.8;
+      ctx.stroke();
+
+      const rim = frozen ? "#FF174F8C" : "#FF174FC7";
+      roundRect(ctx, ox, oy, size, size, 22);
+      ctx.strokeStyle = rim;
+      ctx.lineWidth = 1.8;
+      ctx.stroke();
+      ctx.strokeStyle = "#FFD6E22E";
+      ctx.lineWidth = 1;
+      roundRect(ctx, ox + 3, oy + 3, size - 6, size - 6, 18);
+      ctx.stroke();
     }
 
     const live = new Set<number>();
@@ -1485,44 +1479,132 @@ export class BoardRenderer {
     ox: number,
     oy: number,
     size: number,
+    boosted: boolean,
+    frozen: boolean,
   ): void {
-    const radius = 22;
+    const chamfer = Math.min(12, Math.max(8, size * 0.08));
     const frameInset = FRAME - 0.7;
+    const rail = boosted ? "#8AFFFF" : frozen ? "#7CF5FF" : "#28DFFF";
+    const railHot = boosted ? "#F4FFFF" : "#B9F8FF";
+    const railSoft = frozen ? "#00D9FF80" : "#00D9FFB0";
 
     ctx.save();
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
 
-    // Keep the lower-right plane dark so the cyan rim reads as raised hardware.
-    const depth = ctx.createLinearGradient(ox, oy, ox + size, oy + size);
-    depth.addColorStop(0, "#EAFBFF16");
-    depth.addColorStop(0.36, "#00D9FF08");
-    depth.addColorStop(0.7, "#01050A66");
-    depth.addColorStop(1, "#01050AC8");
-    roundRect(ctx, ox + 1.7, oy + 1.7, size - 3.4, size - 3.4, radius - 1.5);
-    ctx.strokeStyle = depth;
-    ctx.lineWidth = 3.2;
-    ctx.stroke();
-
-    // Focus the brightest light on the upper-left and left perimeter.
-    const upperLeft = ctx.createLinearGradient(ox, oy, ox + size * 0.72, oy + size * 0.72);
-    upperLeft.addColorStop(0, "#F4FFFFE8");
-    upperLeft.addColorStop(0.22, "#7CF5FFDC");
-    upperLeft.addColorStop(0.7, "#00D9FF8A");
-    upperLeft.addColorStop(1, "#00D9FF00");
-    ctx.strokeStyle = upperLeft;
-    ctx.shadowColor = "#00D9FF66";
-    ctx.shadowBlur = 4;
-    ctx.lineWidth = 2.35;
-    ctx.beginPath();
-    ctx.moveTo(ox + size * 0.58, oy + 1.5);
-    ctx.lineTo(ox + radius, oy + 1.5);
-    ctx.arcTo(ox + 1.5, oy + 1.5, ox + 1.5, oy + radius, radius - 1.5);
-    ctx.lineTo(ox + 1.5, oy + size * 0.62);
+    // Dark metal housing: the player frame keeps a distinct lower-right shadow.
+    const housing = ctx.createLinearGradient(ox, oy, ox + size, oy + size);
+    housing.addColorStop(0, "#DDF8FF42");
+    housing.addColorStop(0.12, "#173C4A");
+    housing.addColorStop(0.52, "#06131C");
+    housing.addColorStop(0.82, "#01050A");
+    housing.addColorStop(1, "#000204");
+    chamferedRect(ctx, ox + 1.2, oy + 1.2, size - 2.4, chamfer);
+    ctx.strokeStyle = housing;
+    ctx.lineWidth = 4.6;
+    ctx.shadowColor = "#000000A8";
+    ctx.shadowBlur = 5;
+    ctx.shadowOffsetY = 3;
     ctx.stroke();
     ctx.shadowBlur = 0;
+    ctx.shadowOffsetY = 0;
 
-    // Add a quiet inner-lip reflection where the recessed glass meets the frame.
+    // Metallic bevel separating the bright rails from the recessed board.
+    const bevel = ctx.createLinearGradient(ox, oy, ox + size, oy + size);
+    bevel.addColorStop(0, "#EAFBFF70");
+    bevel.addColorStop(0.18, "#6FEAFF38");
+    bevel.addColorStop(0.48, "#0A3543");
+    bevel.addColorStop(0.78, "#01050A");
+    bevel.addColorStop(1, "#000204");
+    chamferedRect(ctx, ox + 2.5, oy + 2.5, size - 5, chamfer - 1);
+    ctx.strokeStyle = bevel;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Side rails carry the strongest energy; the segmented pass keeps them
+    // technological rather than reading as one uniform cyan glow.
+    const sideRail = ctx.createLinearGradient(ox, oy, ox, oy + size);
+    sideRail.addColorStop(0, railHot);
+    sideRail.addColorStop(0.18, rail);
+    sideRail.addColorStop(0.5, railSoft);
+    sideRail.addColorStop(0.82, rail);
+    sideRail.addColorStop(1, "#007A9E80");
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.strokeStyle = sideRail;
+    ctx.lineWidth = 1.55;
+    ctx.shadowColor = "#00D9FF80";
+    ctx.shadowBlur = 7;
+    for (const edgeX of [ox + 2.5, ox + size - 2.5]) {
+      ctx.beginPath();
+      ctx.moveTo(edgeX, oy + chamfer + 3);
+      ctx.lineTo(edgeX, oy + size - chamfer - 3);
+      ctx.stroke();
+    }
+    ctx.shadowBlur = 0;
+    ctx.setLineDash([Math.max(7, size * 0.075), Math.max(4, size * 0.045)]);
+    ctx.lineDashOffset = -size * 0.08;
+    ctx.lineWidth = 0.9;
+    ctx.strokeStyle = "#7CF5FFB8";
+    for (const edgeX of [ox + 2.5, ox + size - 2.5]) {
+      ctx.beginPath();
+      ctx.moveTo(edgeX, oy + chamfer + 4);
+      ctx.lineTo(edgeX, oy + size - chamfer - 4);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+
+    // Top and bottom rails are quieter horizontal reflections.
+    const horizontalRail = ctx.createLinearGradient(ox, oy, ox + size, oy);
+    horizontalRail.addColorStop(0, "#00D9FF60");
+    horizontalRail.addColorStop(0.18, railHot);
+    horizontalRail.addColorStop(0.5, "#00D9FF88");
+    horizontalRail.addColorStop(0.82, rail);
+    horizontalRail.addColorStop(1, "#00D9FF42");
+    ctx.lineWidth = 1.15;
+    ctx.strokeStyle = horizontalRail;
+    ctx.shadowColor = "#00D9FF4D";
+    ctx.shadowBlur = 4;
+    for (const edgeY of [oy + 2.5, oy + size - 2.5]) {
+      ctx.beginPath();
+      ctx.moveTo(ox + chamfer + 3, edgeY);
+      ctx.lineTo(ox + size - chamfer - 3, edgeY);
+      ctx.stroke();
+    }
+    ctx.shadowBlur = 0;
+    ctx.restore();
+
+    // Four angular energy nodes concentrate the brightest light at the corners.
+    const cornerNodes: Array<[number, number]> = [
+      [ox + 3.8, oy + 3.8],
+      [ox + size - 3.8, oy + 3.8],
+      [ox + 3.8, oy + size - 3.8],
+      [ox + size - 3.8, oy + size - 3.8],
+    ];
+    for (const [cx, cy] of cornerNodes) {
+      const node = ctx.createRadialGradient(cx, cy, 0, cx, cy, 6.5);
+      node.addColorStop(0, "#F4FFFFFF");
+      node.addColorStop(0.2, "#B9F8FFFF");
+      node.addColorStop(0.52, "#00D9FF99");
+      node.addColorStop(1, "#00D9FF00");
+      ctx.fillStyle = node;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 6.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - 3.1);
+      ctx.lineTo(cx + 3.1, cy);
+      ctx.lineTo(cx, cy + 3.1);
+      ctx.lineTo(cx - 3.1, cy);
+      ctx.closePath();
+      ctx.fillStyle = "#B9F8FFCC";
+      ctx.fill();
+      ctx.strokeStyle = "#F4FFFFFF";
+      ctx.lineWidth = 0.75;
+      ctx.stroke();
+    }
+
+    // Thin cyan reflection follows the inside edge without entering the wells.
     const innerReflection = ctx.createLinearGradient(
       ox + frameInset,
       oy + frameInset,
@@ -1533,18 +1615,12 @@ export class BoardRenderer {
     innerReflection.addColorStop(0.28, "#00D9FF12");
     innerReflection.addColorStop(0.68, "#00D9FF18");
     innerReflection.addColorStop(1, "#7CF5FF58");
-    roundRect(
-      ctx,
-      ox + frameInset,
-      oy + frameInset,
-      size - frameInset * 2,
-      size - frameInset * 2,
-      15,
-    );
+    chamferedRect(ctx, ox + frameInset, oy + frameInset, size - frameInset * 2, 5);
     ctx.strokeStyle = innerReflection;
     ctx.lineWidth = 1.15;
     ctx.stroke();
 
+    // The lower inner rail is a soft reflected band, not a second outline.
     const lowerReflection = ctx.createLinearGradient(ox, oy + size, ox + size, oy + size);
     lowerReflection.addColorStop(0, "#00D9FF00");
     lowerReflection.addColorStop(0.28, "#00D9FF2A");
@@ -1556,24 +1632,6 @@ export class BoardRenderer {
     ctx.moveTo(ox + size * 0.22, oy + size - 2.5);
     ctx.lineTo(ox + size * 0.78, oy + size - 2.5);
     ctx.stroke();
-
-    // Corner hotspots stay within the existing perimeter and off the gems.
-    const hotspots: Array<[number, number]> = [
-      [ox + size * 0.16, oy + 2.4],
-      [ox + size * 0.84, oy + 2.4],
-      [ox + size * 0.16, oy + size - 2.4],
-      [ox + size * 0.84, oy + size - 2.4],
-    ];
-    for (const [hx, hy] of hotspots) {
-      const light = ctx.createRadialGradient(hx, hy, 0, hx, hy, 3.2);
-      light.addColorStop(0, "#EAFBFFFF");
-      light.addColorStop(0.38, "#7CF5FFCC");
-      light.addColorStop(1, "#00D9FF00");
-      ctx.fillStyle = light;
-      ctx.beginPath();
-      ctx.arc(hx, hy, 3.1, 0, Math.PI * 2);
-      ctx.fill();
-    }
 
     ctx.restore();
   }

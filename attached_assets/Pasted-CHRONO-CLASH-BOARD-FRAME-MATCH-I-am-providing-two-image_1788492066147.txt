@@ -1,0 +1,185 @@
+CHRONO CLASH — BOARD FRAME MATCH
+
+I am providing two images:
+
+IMAGE 1 = CURRENT BUILD
+IMAGE 2 = TARGET REFERENCE
+
+Your job is to make ONLY the existing YOUR BOARD FRAME in Image 1 visually match Image 2 as closely as technically possible.
+
+Do not redesign the game.
+
+⸻
+
+FIRST: INSPECT, DO NOT GUESS
+
+Before editing anything, inspect the existing implementation and determine exactly how the YOUR BOARD frame is currently rendered.
+
+Identify whether the frame is produced by Canvas, CSS, or both.
+
+If Canvas is responsible for the frame, modify the existing Canvas board-frame rendering rather than creating another board or overlay.
+
+⸻
+
+TARGET VISUAL CONSTRUCTION
+
+The target frame must visually read as a physical futuristic sci-fi energy board, not as a flat glowing rectangle.
+
+Reproduce these layers from OUTSIDE → INSIDE:
+
+LAYER 1 — OUTER HOUSING
+
+* dark gunmetal/black metallic housing
+* angular/chamfered corners
+* physically thick appearance
+* dark recessed sections
+
+LAYER 2 — OUTER BLUE ENERGY CHANNEL
+
+* electric-blue illuminated rails
+* strongest along the left and right sides
+* visible horizontal illumination along top and bottom
+* segmented/highlighted rather than uniformly glowing
+
+LAYER 3 — CORNER ENERGY NODES
+
+* bright concentrated blue/cyan hotspots at all four corners
+* angular light geometry
+* sharp bright core
+* softer blue bloom behind the core
+
+LAYER 4 — METALLIC RECESS
+
+* dark metal between illuminated channels
+* strong contrast between light and metal
+* subtle beveled edges
+
+LAYER 5 — INNER CYAN REFLECTION
+
+* thin cyan/blue highlight following the inside edge
+* subtle reflection/light spill toward the gem wells
+
+LAYER 6 — GEM WELL HOUSING
+
+* preserve the existing individual wells
+* dark metallic/beveled appearance
+* subtle blue reflected light from the frame
+
+LAYER 7 — EXISTING GEMS
+
+* leave completely unchanged
+
+⸻
+
+LIGHTING BEHAVIOR
+
+Do NOT use one uniform cyan glow.
+
+The target lighting should have:
+
+sharp bright energy strip
++
+soft surrounding bloom
++
+dark metallic separation
++
+corner hotspots
++
+inner reflected light
+
+The brightest areas should be concentrated around the frame’s energy rails and corners.
+
+The center of the frame must remain comparatively dark so the gems remain the visual focus.
+
+Use appropriate Canvas gradients, strokes, shadows and compositing where Canvas is responsible for the rendering.
+
+⸻
+
+GEOMETRY — ABSOLUTELY LOCKED
+
+Do NOT change:
+
+* board width
+* board height
+* board position
+* board aspect ratio
+* 8×8 grid
+* cell dimensions
+* cell spacing
+* gem positions
+* gem sizes
+* touch targets
+* responsive behavior
+
+The frame must be painted within the existing board geometry.
+
+⸻
+
+DO NOT TOUCH
+
+Do NOT modify:
+
+* gem artwork
+* gem colors
+* gameplay
+* matching logic
+* energy mechanics
+* HUD
+* player panels
+* abilities
+* Freeze
+* Time Shift
+* Rewind
+* background
+* animations unrelated to the board frame
+* typography
+* attack bars
+
+Do not add YOUR ATTACK or RIVAL ATTACK bars.
+
+⸻
+
+IMPORTANT VISUAL RULE
+
+Do NOT make the result darker, creepy, horror-themed, gothic, rusty, ancient, retro, distressed or old-looking.
+
+The visual direction is:
+
+premium futuristic sci-fi / high-end mobile game / clean metallic technology / electric blue energy.
+
+⸻
+
+IMPLEMENTATION RULE
+
+Modify the existing board-frame rendering rather than creating a second frame.
+
+Prefer multiple rendering passes:
+
+1. dark outer housing
+2. metallic bevel
+3. blue energy rail
+4. bright edge highlight
+5. corner hotspots
+6. soft bloom
+7. inner reflection
+
+Keep the implementation lightweight enough for smooth mobile performance.
+
+⸻
+
+VALIDATION
+
+After implementation:
+
+1. Render the game at the existing mobile viewport.
+2. Compare the board frame against the supplied target image.
+3. Verify the frame has the same overall visual hierarchy.
+4. Verify the 8×8 board geometry has not moved or resized.
+5. Verify every existing gem remains unchanged.
+6. Verify touch interaction still works.
+
+Only the board-frame appearance is allowed to change.
+
+Do not make additional “polish” changes.
+
+If you discover that the existing rendering architecture cannot reproduce a particular reference detail, implement the closest equivalent using the existing architecture rather than changing the architecture or redesigning the game.
