@@ -5,7 +5,7 @@ import {
   easeCrystalDie,
   easeCrystalFall,
   easeInOutCubic,
-  easeOutCubic,
+  easeInOutSine,
   gemFallDelay,
   gemTravelDuration,
   gemTravelEase,
@@ -14,16 +14,17 @@ import { COLS, INVALID_RETURN_MS, ROWS } from "../src/engine/types";
 
 describe("crystal gem motion curves", () => {
   it("eases swaps and falls from rest to the target without overshoot", () => {
-    expect(easeOutCubic(0)).toBe(0);
-    expect(easeOutCubic(1)).toBe(1);
-    expect(easeOutCubic(0.5)).toBeGreaterThan(0.5);
-    expect(gemTravelEase("swap", 0.125)).toBeGreaterThan(0.3);
+    expect(easeInOutSine(0)).toBe(0);
+    expect(easeInOutSine(1)).toBeCloseTo(1, 5);
+    expect(easeInOutSine(0.25)).toBeLessThan(0.5);
+    expect(easeInOutSine(0.75)).toBeGreaterThan(0.5);
+    expect(gemTravelEase("swap", 0.125)).toBeGreaterThan(0);
     expect(easeCrystalFall(0)).toBe(0);
     expect(easeCrystalFall(1)).toBeCloseTo(1, 5);
     expect(easeCrystalFall(0.2)).toBeLessThan(0.2);
     expect(easeInOutCubic(0.25)).toBeLessThan(0.25);
     expect(easeInOutCubic(0.75)).toBeGreaterThan(0.75);
-    expect(gemTravelEase("swap", 0.5)).toBe(easeOutCubic(0.5));
+    expect(gemTravelEase("swap", 0.5)).toBe(easeInOutSine(0.5));
     expect(gemTravelEase("fall", 0.5)).toBe(easeCrystalFall(0.5));
   });
 
@@ -32,17 +33,18 @@ describe("crystal gem motion curves", () => {
     const fallOne = gemTravelDuration(40, 40, "fall", "high", false);
     const fallThree = gemTravelDuration(40 * 3, 40, "fall", "high", false);
     const fallFar = gemTravelDuration(40 * 5, 40, "fall", "high", false);
-    expect(swap).toBeGreaterThanOrEqual(0.11);
-    expect(swap).toBeLessThanOrEqual(0.14);
-    expect(fallOne).toBeGreaterThan(swap - 0.01);
+    expect(swap).toBe(0.22);
+    expect(fallOne).toBeCloseTo(0.24, 5);
     expect(fallThree).toBeGreaterThan(fallOne);
     expect(fallFar).toBeGreaterThan(fallThree);
-    expect(fallFar).toBeLessThanOrEqual(0.3);
+    expect(fallThree).toBeCloseTo(0.4, 5);
+    expect(fallFar).toBeCloseTo(0.56, 5);
+    expect(gemTravelDuration(40 * 4, 40, "fall", "high", false)).toBeCloseTo(0.48, 5);
+    expect(gemTravelDuration(40 * 8, 40, "fall", "high", false)).toBe(0.6);
     expect(fallFar).toBeGreaterThan(swap);
     expect(gemFallDelay(0, 3, "high", false)).toBeLessThan(gemFallDelay(7, 3, "high", false));
     expect(gemFallDelay(3, 2, "high", true)).toBe(0);
-    expect(INVALID_RETURN_MS).toBeGreaterThanOrEqual(100);
-    expect(INVALID_RETURN_MS).toBeLessThanOrEqual(130);
+    expect(INVALID_RETURN_MS).toBe(200);
   });
 
   it("blooms then dissolves matched crystals instead of popping them", () => {

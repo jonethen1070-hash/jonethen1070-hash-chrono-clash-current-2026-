@@ -21,7 +21,7 @@ describe("visual depth polish", () => {
     const motion = readFileSync(join(root, "src/ui/gemMotion.ts"), "utf8");
     expect(motion).toContain("easeCrystalFall");
     expect(motion).toContain("easeCrystalDie");
-    expect(motion).toContain("easeOutCubic");
+    expect(motion).toContain("easeInOutSine");
   });
 
   it("bakes dimensional crystal lighting into cached gem sprites", () => {

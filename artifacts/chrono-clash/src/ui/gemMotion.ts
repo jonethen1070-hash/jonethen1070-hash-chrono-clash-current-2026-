@@ -19,6 +19,12 @@ export function easeInOutCubic(t: number): number {
   return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 }
 
+export function easeInOutSine(t: number): number {
+  const x = clamp01(t);
+  if (x === 0) return 0;
+  return -(Math.cos(Math.PI * x) - 1) / 2;
+}
+
 /** Accelerate then settle into the well. No bounce, no linear slot-drop. */
 export function easeCrystalFall(t: number): number {
   const x = clamp01(t);
@@ -31,9 +37,9 @@ export function easeCrystalFall(t: number): number {
 }
 
 export function gemTravelEase(kind: GemMoveKind, t: number): number {
-  // Swaps need immediate visual travel after a finger commits; the existing
-  // landing settle supplies the controlled final lock without a slow launch.
-  return kind === "swap" ? easeOutCubic(t) : easeCrystalFall(t);
+  // A sine-weighted exchange gives the finger push a gentle launch and a
+  // controlled final lock without the abrupt snap of a fast ease-out.
+  return kind === "swap" ? easeInOutSine(t) : easeCrystalFall(t);
 }
 
 export function gemTravelDuration(
@@ -46,13 +52,13 @@ export function gemTravelDuration(
   if (reduced) return kind === "swap" ? 0.06 : 0.058;
   const cells = Math.max(0.4, dist / Math.max(cell, 1));
   if (kind === "swap") {
-    if (animation === "low") return 0.11;
-    if (animation === "medium") return 0.115;
-    return 0.125;
+    if (animation === "low") return 0.18;
+    if (animation === "medium") return 0.2;
+    return 0.22;
   }
-  const base = animation === "low" ? 0.09 : animation === "medium" ? 0.105 : 0.12;
-  const perCell = animation === "low" ? 0.018 : animation === "medium" ? 0.028 : 0.034;
-  return Math.min(0.3, base + Math.max(0, cells - 1) * perCell);
+  const base = animation === "low" ? 0.22 : animation === "medium" ? 0.23 : 0.24;
+  const perCell = animation === "low" ? 0.07 : animation === "medium" ? 0.075 : 0.08;
+  return Math.min(0.6, base + Math.max(0, cells - 1) * perCell);
 }
 
 export function gemFallDelay(
@@ -63,7 +69,8 @@ export function gemFallDelay(
 ): number {
   if (reduced || animation === "low") return 0;
   const spread = animation === "medium" ? 0.007 : 0.01;
-  return Math.min(0.042, col * spread + Math.max(0, cellsFallen) * 0.003);
+  const readablePause = animation === "medium" ? 0.058 : 0.064;
+  return Math.min(0.11, readablePause + col * spread + Math.max(0, cellsFallen) * 0.003);
 }
 
 export function gemDieDuration(animation: Intensity, reduced: boolean): number {
