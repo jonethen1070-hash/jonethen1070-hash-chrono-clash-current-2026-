@@ -1,0 +1,205 @@
+TASK: Recompose the Chrono Clash mobile gameplay layout.
+
+IMPORTANT:
+This is a layout/composition change only.
+Do NOT redesign the visual style.
+Do NOT generate/create any images.
+Do NOT change gem artwork.
+Do NOT change gem colors/materials.
+Do NOT change match rules.
+Do NOT change cascade behavior.
+Do NOT change powers' gameplay logic or energy costs.
+Do NOT modify networking.
+Do NOT add another CSS override stylesheet.
+
+GOAL:
+Use the space currently occupied by the large Energy Burst / Mega Strike cards to give the actual game board more screen space, while moving those two powers into the bottom action area.
+
+DESIRED MOBILE COMPOSITION:
+
+TOP:
+Player / Rival HUD
+↓
+Energy bar
+↓
+"YOUR BOARD"
+↓
+LARGER BOARD
+↓
+BOTTOM POWER CONTROLS
+
+BOTTOM CONTROLS:
+[ ENERGY BURST ] [ MEGA STRIKE ] [ REWIND ]
+
+REMOVE FROM BOTTOM:
+- FREEZE
+- TIME SHIFT
+
+REMOVE THE LARGE POWER CARDS FROM ABOVE THE BOARD:
+- Energy Burst card
+- Mega Strike card
+
+The functionality of Energy Burst and Mega Strike must remain exactly the same.
+Only their UI location changes.
+
+IMPORTANT:
+Do not create duplicate Energy Burst or Mega Strike controls.
+The existing functional power controls should be moved/reused.
+
+BOARD:
+After removing the large power-card row above the board, use the recovered vertical space to make the board larger.
+
+Increase the board and gem presentation as much as safely possible on the target mobile viewport.
+
+TARGET:
+390x844 mobile viewport.
+
+The board should:
+- become visibly larger
+- give the gems more usable visual size
+- preserve the existing 8×8 grid
+- preserve all 64 cells
+- preserve cell spacing
+- preserve gem proportions
+- preserve the board's existing frame style
+- preserve the existing corner-light containment
+- remain fully inside the playable viewport
+
+CRITICAL:
+DO NOT allow:
+- board overlapping HUD
+- board overlapping "YOUR BOARD"
+- board overlapping bottom controls
+- gems touching/colliding with the frame
+- gems overlapping neighboring gems
+- bottom controls going behind the browser/home safe area
+- text clipping
+- power buttons overlapping each other
+
+RESPONSIVE BEHAVIOR:
+Do not hard-code a size that only works at 390x844.
+
+Use the existing responsive/layout system so the composition remains safe on smaller and taller mobile screens.
+
+CORNER ARTIFACT:
+There is still a small unwanted visual hint/light artifact around the top-left corner area of the board/gem.
+
+Remove ONLY that artifact.
+
+Do NOT modify the gem itself.
+Do NOT modify #playerGems.
+Do NOT modify Canvas rendering.
+
+First identify whether the artifact comes from the board-frame CSS or another existing visual layer.
+
+If it comes from match-frame.css, fix it there.
+
+If it comes from Canvas/gem rendering, STOP and report the source rather than changing another system.
+
+POWER BUTTON DESIGN:
+Reuse the existing visual language of the bottom controls.
+
+Energy Burst should remain clearly associated with green energy.
+Mega Strike should remain clearly associated with red energy.
+Rewind keeps its existing appearance.
+
+Do NOT simply squeeze the existing large power cards into the bottom bar.
+
+Create/reuse compact bottom-control presentation appropriate for the available space.
+
+Keep:
+- icon
+- name
+- energy cost
+- disabled/available state
+- pressed/feedback behavior
+
+Readable at 390x844.
+
+DO NOT CHANGE:
+- Energy Burst gameplay
+- Mega Strike gameplay
+- Rewind gameplay
+- power costs
+- board resolver
+- cascade logic
+- swipe logic
+- gem renderer
+- gem artwork
+- HUD logic
+
+IMPLEMENTATION:
+First inspect the current ownership architecture.
+
+Use the existing UI/layout owner for this change.
+Do not create a second UI system.
+
+Use the canonical match-frame.css only for board-frame styling if necessary.
+
+Do not modify aaa-polish.css for this task unless absolutely required by an existing active rule; prefer the current canonical owners.
+
+VERIFICATION:
+
+Before changing:
+- capture 390x844 baseline screenshot.
+
+After changing:
+- capture 390x844 screenshot.
+
+Verify visually:
+
+1. Freeze is gone from the bottom.
+2. Time Shift is gone from the bottom.
+3. Energy Burst is now in the bottom controls.
+4. Mega Strike is now in the bottom controls.
+5. Rewind remains in the bottom controls.
+6. The large Energy Burst/Mega Strike cards above the board are gone.
+7. The board is visibly larger.
+8. The gems are visibly larger.
+9. No gem overlaps another gem.
+10. No gem overlaps the board frame.
+11. Board does not overlap HUD.
+12. Board does not overlap bottom controls.
+13. Bottom controls stay inside the mobile safe area.
+14. Corner artifact is gone.
+15. Existing board frame and corner-light containment remain intact.
+16. Swipe interaction still works.
+17. Energy Burst still works.
+18. Mega Strike still works.
+19. Rewind still works.
+
+Run:
+- typecheck
+- production build
+- focused UI/board/input/power tests
+- mobile swipe Playwright test
+- git diff --check
+
+IMPORTANT SUCCESS CONDITION:
+Do NOT report success simply because the build passes.
+
+The after screenshot must visibly demonstrate:
+SMALLER/REMOVED POWER ROW
++
+LARGER BOARD
++
+LARGER GEMS
++
+COMPACT BOTTOM POWERS
++
+ZERO OVERLAP
+
+If the board cannot safely become larger without overlap, do NOT force it.
+Use the maximum safe size and report the actual resulting board dimensions.
+
+Make no unrelated changes.
+
+Report:
+1. Files changed.
+2. Exact layout changes.
+3. Before/after board dimensions.
+4. Before/after gem/cell dimensions if measurable.
+5. Confirmation of the new bottom controls.
+6. Confirmation that the corner artifact is gone.
+7. Screenshot verification result.
+8. Test results.
