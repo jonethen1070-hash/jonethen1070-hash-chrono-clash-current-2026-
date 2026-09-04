@@ -1,0 +1,296 @@
+CHRONO CLASH — FINAL BOARD SMOOTHING / REFINEMENT / TUNING PASS
+
+DO NOT create, generate, import, or design any images or assets.
+
+This is NOT a redesign.
+The current enlarged-board geometry is the new baseline.
+
+Do NOT change:
+- 8x8 board
+- gameplay rules
+- matching logic
+- falling logic
+- HUD structure
+- bottom power controls
+- gem types
+- board frame design
+- scoring
+- audio
+- existing match VFX
+- touch/swipe functionality
+
+ONLY smooth, refine and tune the current result.
+
+GOAL:
+Make the enlarged board and gems feel polished, premium, fluid and physically satisfying rather than simply "bigger".
+
+1. GEM SPACING / SCALE
+
+Tune the gem render size so every gem feels substantial but has breathing room.
+
+Target:
+- gem visual size approximately 80–88% of cellSize
+- consistent spacing on all 8x8 cells
+- identical visual centering
+- no clipping
+- no overlap
+- no uneven gaps caused by rounding
+
+Do not independently position individual gems.
+Everything must derive from the canonical cell geometry.
+
+2. GEM POSITIONING
+
+Every gem must sit exactly on:
+
+cellCenterX = boardOriginX + col * cellSize + cellSize / 2
+cellCenterY = boardOriginY + row * cellSize + cellSize / 2
+
+Do not use different coordinate calculations for rendering, dragging, matching or falling.
+
+Rendering, touch coordinates and animation destinations must share the same geometry.
+
+3. SWIPE FEEL
+
+The selected gem must feel physically attached to the finger.
+
+During drag:
+- minimal latency
+- no visible lag
+- no snapping back
+- no teleporting
+- no fixed-duration animation fighting the finger
+- preserve the initial grab offset
+- selected gem follows the finger continuously
+- neighboring gem moves naturally in the opposite direction
+
+Use frame-rate-independent interpolation only where necessary.
+
+Do NOT add artificial input delay.
+
+4. SWAP HANDOFF
+
+When the swipe crosses the commit threshold:
+
+DO NOT reset either gem to its original cell before the swap animation.
+
+The animation must begin from the exact positions visible at the moment of commitment.
+
+Then perform a short magnetic settle into the destination sockets.
+
+Target magnetic settle:
+60–90ms.
+
+Use a smooth cubic ease-out / critically damped style.
+
+NO bounce.
+NO elastic overshoot.
+NO sudden snap.
+
+5. INVALID SWIPE
+
+If the swipe is invalid:
+
+Return the gems smoothly to their original sockets.
+
+Target:
+140–180ms.
+
+The return should feel intentional and physical, not like a teleport.
+
+6. MATCH TIMING
+
+Do not make matched gems disappear instantly.
+
+Sequence:
+
+SWAP
+→ brief settled position
+→ MATCH RECOGNITION
+→ subtle crystal response
+→ FRACTURE
+→ BREAK
+→ REMOVAL
+→ FALL
+
+Target recognition delay:
+60–90ms.
+
+Keep it subtle.
+
+Do not add the circular/radial ripple VFX that was previously removed.
+
+7. MATCH ANIMATION
+
+Matched crystals should feel like physical objects breaking.
+
+Use the existing crystal/fracture/particle system.
+
+Tune:
+- scale response
+- opacity
+- brightness
+- fracture timing
+- particle timing
+- shard velocity
+- stagger between multiple gems
+
+Target stagger:
+10–25ms between nearby matched gems.
+
+Avoid excessive particles.
+
+8. FALLING
+
+Falling gems must travel smoothly through their COMPLETE trajectory.
+
+Never teleport from source cell to destination cell.
+
+Use distance-aware timing.
+
+Target starting range:
+approximately 150–220ms per cell.
+
+For example:
+
+1 cell ≈ 150–220ms
+2 cells ≈ 220–320ms
+3 cells ≈ 300–400ms
+4+ cells progressively longer, with a reasonable cap.
+
+Use a smooth gravity-like ease:
+fastening through the middle of the fall and naturally settling toward the destination.
+
+Do NOT use a linear movement.
+
+Do NOT make all falling distances use the same duration.
+
+9. LANDING
+
+When a falling gem reaches its socket:
+
+Use a very subtle landing compression:
+
+1.00
+→ approximately 1.015
+→ 1.00
+
+over roughly 40–60ms.
+
+Very subtle.
+
+No bouncing.
+
+No exaggerated squash.
+
+10. FRAME-RATE INDEPENDENCE
+
+All motion must behave consistently at different frame rates.
+
+Do not use frame-count-based movement.
+
+Use elapsed time / delta time.
+
+The same swipe should feel approximately the same on:
+- 390x844
+- 360x740
+
+11. PIXEL / SUBPIXEL QUALITY
+
+Avoid visible jitter caused by repeated integer rounding.
+
+Keep animation positions as floating-point values internally.
+
+Only round where the Canvas/rendering pipeline genuinely requires it.
+
+12. VISUAL TUNING
+
+After the functional implementation, actually WATCH the game.
+
+Do not rely only on automated tests.
+
+At 390x844:
+- perform slow swipe
+- perform fast swipe
+- horizontal swipe
+- vertical swipe
+- invalid swipe
+- normal 3-match
+- multiple simultaneous matches
+- cascade
+- large fall
+
+Look specifically for:
+- jitter
+- snapping
+- delayed response
+- teleporting
+- uneven easing
+- gems appearing to float
+- gems colliding
+- inconsistent spacing
+- harsh stopping
+- abrupt disappearance
+
+Fix only the observed problems.
+
+13. IMPORTANT — DO NOT OVER-TUNE
+
+Do NOT keep changing numbers randomly.
+
+Measure the current values first.
+
+Then make small controlled adjustments.
+
+Prefer:
+5–10% parameter changes
+
+instead of completely rewriting the animation system.
+
+14. PRESERVE PERFORMANCE
+
+Do not add heavy rendering effects.
+
+Keep Canvas rendering efficient.
+
+No new libraries.
+No new assets.
+No image generation.
+
+FINAL ACCEPTANCE CRITERIA:
+
+The board should feel like one cohesive physical system.
+
+A finger moves a gem.
+The neighboring gem reacts.
+The swap starts exactly where the finger released.
+The gems magnetically settle into their sockets.
+The match has a brief satisfying recognition moment.
+The crystal breaks naturally.
+Gems fall with believable acceleration.
+They settle softly.
+
+Nothing should:
+- teleport
+- jitter
+- snap
+- bounce excessively
+- lag behind the finger
+- visually fight another animation.
+
+After the pass, report:
+
+1. Exact files changed.
+2. Exact animation values BEFORE → AFTER.
+3. Board size and cellSize.
+4. Gem render size.
+5. Swap duration.
+6. Invalid-return duration.
+7. Match recognition duration.
+8. Fall timing.
+9. Landing settle timing.
+10. Confirm 390x844 and 360x740 were tested.
+
+DO NOT CREATE ANY IMAGE.
+DO NOT ADD ANY IMAGE ASSETS.
+THIS IS A CODE/GEOMETRY/ANIMATION TUNING PASS ONLY.

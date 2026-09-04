@@ -74,7 +74,9 @@ export function gemTravelDuration(
     if (animation === "medium") return 0.2;
     return SWAP_TOTAL_MS / 1000;
   }
-  const base = animation === "low" ? 0.22 : animation === "medium" ? 0.23 : 0.24;
+  // Keep a one-cell drop quick enough to read as responsive while preserving
+  // progressively longer travel for deeper cascades.
+  const base = animation === "low" ? 0.2 : animation === "medium" ? 0.21 : 0.22;
   const perCell = animation === "low" ? 0.07 : animation === "medium" ? 0.075 : 0.08;
   return Math.min(0.6, base + Math.max(0, cells - 1) * perCell);
 }
