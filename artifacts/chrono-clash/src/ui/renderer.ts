@@ -1087,15 +1087,6 @@ export class BoardRenderer {
         const pts = Math.abs(Number(String(fxEvent.text).replace(/[^\d]/g, "")) || 0);
         const px = fxEvent.at ? ix + GAP + fxEvent.at.c * (cell + GAP) + cell / 2 : ox + size / 2;
         const py = fxEvent.at ? iy + GAP + fxEvent.at.r * (cell + GAP) + cell / 2 : oy + size * 0.46;
-        this.addShockwave(
-          view,
-          px,
-          py,
-          cell * (combo >= 5 ? 1.55 : combo >= 3 ? 1.28 : 1),
-          isPlayer ? (combo >= 5 ? "#EAFBFF" : "#00D9FF") : (combo >= 5 ? "#FFD6E2" : "#FF174F"),
-          combo >= 5 ? 520 : 380,
-          combo >= 5 ? 3.4 : 2.2,
-        );
         view.floats.push({
           x: px,
           y: py,
@@ -1124,18 +1115,6 @@ export class BoardRenderer {
         }
         view.shake = Math.max(view.shake, (combo >= 6 ? 5.2 : combo >= 4 ? 3.4 : combo >= 3 ? 2.2 : 1.4) * mul);
         if (view.floats.length > 5) view.floats.splice(0, view.floats.length - 5);
-        if (combo >= 2) {
-          this.ringBurst(view, ox + size / 2, oy + size / 2, cell, combo);
-          this.addShockwave(
-            view,
-            ox + size / 2,
-            oy + size / 2,
-            cell * (combo >= 8 ? 2.7 : combo >= 5 ? 2.2 : 1.8),
-            combo >= 8 ? "#FFF2B0" : combo >= 5 ? "#7CF5FF" : "#00D9FF",
-            combo >= 8 ? 900 : 680,
-            combo >= 8 ? 4.2 : 2.8,
-          );
-        }
       }
     }
 
@@ -1552,10 +1531,6 @@ export class BoardRenderer {
             ? "#FF9D00"
             : hex;
     const strength = Math.min(1.55, 1 + Math.max(0, combo - 3) * 0.11);
-    this.addShockwave(view, x, y, cell * (0.42 + Math.min(0.08, Math.max(0, combo - 3) * 0.018)), accent, 112, 1.45 * strength, now);
-    this.addShockwave(view, x, y, cell * 0.22, "#EAFBFF", 72, 1.05 * strength, now);
-    view.socketPulses.push({ x, y, born: now, life: MATCH_AFTERGLOW_MS, color: accent });
-    if (view.socketPulses.length > 12) view.socketPulses.splice(0, view.socketPulses.length - 12);
 
     const shardCount = this.fx.quality === "medium" ? 2 : combo >= 5 ? 5 : combo >= 4 ? 4 : 3;
     for (let i = 0; i < shardCount; i++) {

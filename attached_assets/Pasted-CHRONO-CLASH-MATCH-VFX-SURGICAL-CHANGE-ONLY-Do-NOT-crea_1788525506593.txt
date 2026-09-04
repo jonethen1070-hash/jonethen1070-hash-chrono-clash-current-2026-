@@ -1,0 +1,78 @@
+CHRONO CLASH — MATCH VFX SURGICAL CHANGE ONLY
+
+Do NOT create, generate, import, or design any image/assets.
+Do NOT change the board layout, gem size, gem geometry, HUD, controls, gameplay, scoring, swipe logic, falling logic, audio, or existing crystal break VFX.
+
+I inspected the current gameplay screenshot carefully.
+
+There is a VFX effect that appears when gems match:
+- a large translucent circular/radial ripple
+- looks like an expanding ring/halo
+- centered around the matched gem area
+- creates visible circular outlines/glowing rings behind/around the gems
+
+I DO NOT LIKE THIS CIRCULAR RING/RIPPLE EFFECT.
+
+TASK:
+Remove ONLY this circular/radial match ripple VFX from the match-resolution sequence.
+
+IMPORTANT:
+Do not simply hide the entire match VFX system.
+Do not remove gem fracture, crystal shards, sparks, glow, flash, particles, or match feedback that already looks good.
+Do not remove the actual match recognition.
+
+Find the exact runtime code responsible for:
+- circular/radial match rings
+- expanding circles
+- ring pulses
+- radial halos
+- match-area circular shockwaves
+
+Disable/remove only those specific draw/render calls.
+
+REPLACEMENT:
+If removing it completely would make the match feel too empty, replace it with a much more premium CRYSTAL impact instead:
+
+MATCH IMPACT SHOULD BE:
+1. Very short bright crystal flash at the matched gem.
+2. Small sharp crystal fragments/shards moving outward.
+3. Tiny color-matched sparks.
+4. Subtle localized glow directly on the gem.
+5. No large circles.
+6. No expanding rings.
+7. No radial shockwave.
+8. No circular outline/halo.
+9. No large transparent disc.
+10. No screen-wide pulse.
+
+The visual language should feel like a premium crystalline gem breaking, NOT like a sci-fi radar/water ripple.
+
+TIMING:
+- recognition: approximately 60–90ms
+- tiny crystal charge/flash: approximately 50–80ms
+- fracture/break: approximately 100–150ms
+- particles/shards should be short-lived and localized
+- stagger multiple matched gems by approximately 10–25ms
+
+PERFORMANCE:
+Keep the existing Canvas rendering/VFX architecture.
+Do not add expensive effects.
+Do not create image assets.
+Do not add external libraries.
+
+MOST IMPORTANT:
+This is a surgical VFX change.
+Find the existing circular match effect in the code and remove/change ONLY that effect.
+
+After implementation:
+- run the existing tests/build
+- open the actual game at 390x844
+- trigger several real matches
+- verify the circular ripple/ring is completely gone
+- verify the gems still visibly match, fracture, break, and produce appropriate crystal particles
+- verify swipe and falling behavior are unchanged
+- verify there is NO new circular replacement effect.
+
+Report the exact file and function/section changed and what specific circular VFX code was removed or replaced.
+
+DO NOT CREATE ANY IMAGE.

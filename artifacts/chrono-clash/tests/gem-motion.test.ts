@@ -165,3 +165,27 @@ describe("landing feedback", () => {
     expect(renderer).toContain("cell * (0.42 + Math.min");
   });
 });
+
+describe("match impact VFX", () => {
+  it("keeps match resolution crystalline without circular ripple calls", () => {
+    const renderer = readFileSync("src/ui/renderer.ts", "utf8");
+    const clearStart = renderer.indexOf('if (fxEvent.kind === "clear")');
+    const comboStart = renderer.indexOf('if (fxEvent.kind === "combo")');
+    const dieStart = renderer.indexOf("const dieDur = gemDieDuration");
+    const burstStart = renderer.indexOf("private burst(");
+    const impactStart = renderer.indexOf("private impactSpark(");
+
+    expect(clearStart).toBeGreaterThan(-1);
+    expect(comboStart).toBeGreaterThan(clearStart);
+    expect(dieStart).toBeGreaterThan(comboStart);
+    expect(burstStart).toBeGreaterThan(-1);
+    expect(impactStart).toBeGreaterThan(burstStart);
+    expect(renderer.slice(clearStart, comboStart)).not.toContain("addShockwave");
+    expect(renderer.slice(comboStart, dieStart)).not.toContain("ringBurst");
+    expect(renderer.slice(comboStart, dieStart)).not.toContain("addShockwave");
+    expect(renderer.slice(burstStart, impactStart)).not.toContain("addShockwave");
+    expect(renderer.slice(burstStart, impactStart)).not.toContain("socketPulses.push");
+    expect(renderer.slice(burstStart, impactStart)).toContain("spawnCrystalShard");
+    expect(renderer.slice(burstStart, impactStart)).toContain("spawnParticle");
+  });
+});
