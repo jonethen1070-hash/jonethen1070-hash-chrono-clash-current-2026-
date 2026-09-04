@@ -6057,16 +6057,16 @@ html body #app #match.match-screen {
   --safe-right: env(safe-area-inset-right, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
-  --game-pad-x: 8px;
+  --game-pad-x: 4px;
   --game-pad-top: 0px;
   --game-pad-bottom: 0px;
   --section-gap: 0px;
   --brand-height: 40px;
   --battle-height: 68px;
   --energy-height: 32px;
-  --ability-height: 60px;
+  --ability-height: 0px;
   --board-label-height: 24px;
-  --control-height: 78px;
+  --control-height: 66px;
 
   inset: 0 !important;
   width: 100% !important;
@@ -6088,7 +6088,7 @@ html body #app #match .match-stage {
     var(--brand-height)
     var(--battle-height)
     var(--energy-height)
-    var(--ability-height)
+    0px
     var(--board-label-height)
     minmax(0, 1fr)
     var(--control-height) !important;
@@ -6232,7 +6232,7 @@ html body #app #match .energy-options {
 
 html body #app #match .energy-attack {
   width: 100% !important;
-  height: var(--ability-height) !important;
+  height: var(--control-height) !important;
   min-height: 0 !important;
   padding: clamp(3px, 0.65dvh, 7px) clamp(5px, 1.7vw, 8px) !important;
   grid-template-columns: clamp(18px, 5.8vw, 28px) minmax(0, 1fr) !important;
@@ -6275,11 +6275,11 @@ html body #app #match .player-side .you-meta {
 
 html body #app #match .player-side .board-slot {
   width: auto !important;
-  height: min(100%, 368px) !important;
+  height: min(100%, 376px) !important;
   min-width: 0 !important;
   min-height: 0 !important;
   max-width: 100% !important;
-  max-height: 368px !important;
+  max-height: 376px !important;
   justify-self: center !important;
   align-self: center !important;
   aspect-ratio: 1 / 1 !important;
@@ -6301,6 +6301,17 @@ html body #app #match .powers {
   margin: 0 auto !important;
   padding: 0 1px !important;
   gap: 8px !important;
+  transform: translateZ(2px) translateY(-2px) !important;
+}
+
+html body #app #match .powers .energy-attack {
+  height: var(--control-height) !important;
+  min-height: 0 !important;
+  grid-template-columns: clamp(20px, 5.8vw, 28px) minmax(0, 1fr) !important;
+}
+
+html body #app #match .powers .energy-attack-copy small {
+  display: none !important;
 }
 
 html body #app #match .power {
@@ -6340,6 +6351,14 @@ html body #app #match .power .cost {
     clip: rect(0 0 0 0) !important;
     clip-path: inset(50%) !important;
     white-space: nowrap !important;
+  }
+
+  html body #app #match .powers .energy-attack-copy b {
+    font-size: clamp(7px, 1.9vw, 9px) !important;
+  }
+
+  html body #app #match .powers .energy-attack-cost {
+    font-size: clamp(8px, 1.7vw, 10px) !important;
   }
 }
 

@@ -88,7 +88,6 @@ html body #app #match .player-side .board-outer-rail {
     0 18px
   ) !important;
   background:
-    radial-gradient(circle at 8px 8px, #ffffff 0 1.5px, #e2ffff 1.5px 3.5px, #5debf6 3.5px 6px, rgba(0, 217, 255, .92) 6px 10px, transparent 16px) top left / 30px 30px no-repeat,
     radial-gradient(circle at calc(100% - 8px) 8px, #ffffff 0 1.5px, #e2ffff 1.5px 3.5px, #5debf6 3.5px 6px, rgba(0, 217, 255, .92) 6px 10px, transparent 16px) top right / 30px 30px no-repeat,
     radial-gradient(circle at 8px calc(100% - 8px), #ffffff 0 1.5px, #e2ffff 1.5px 3.5px, #5debf6 3.5px 6px, rgba(0, 217, 255, .92) 6px 10px, transparent 16px) bottom left / 30px 30px no-repeat,
     radial-gradient(circle at calc(100% - 8px) calc(100% - 8px), #ffffff 0 1.5px, #e2ffff 1.5px 3.5px, #5debf6 3.5px 6px, rgba(0, 217, 255, .92) 6px 10px, transparent 16px) bottom right / 30px 30px no-repeat,

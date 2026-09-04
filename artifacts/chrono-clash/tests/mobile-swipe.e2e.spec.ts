@@ -114,6 +114,37 @@ test("guest mobile matches survive rapid swipes, cancellation, and layout checks
   expect(geometry.canvasHeight).toBeLessThanOrEqual(geometry.height);
   expect(geometry.touchAction).toBe("none");
 
+  const visiblePowerIds = await page.locator(".powers > button").evaluateAll((buttons) =>
+    buttons.map((button) => button.id),
+  );
+  expect(visiblePowerIds).toEqual(["energyBurstAttack", "megaStrikeAttack", "rewind"]);
+  expect(await page.locator(".energy-options").count()).toBe(0);
+  await expect(page.locator("#freeze")).toBeHidden();
+  await expect(page.locator("#timeshift")).toBeHidden();
+  expect(geometry.width).toBeGreaterThan(374);
+
+  const actionGeometry = await page.locator(".powers > button").evaluateAll((buttons) =>
+    buttons.map((button) => {
+      const rect = button.getBoundingClientRect();
+      return { top: rect.top, bottom: rect.bottom, left: rect.left, right: rect.right };
+    }),
+  );
+  expect(actionGeometry.every(({ top, bottom, left, right }) => top >= 0 && bottom <= view.height + 1 && left >= 0 && right <= view.width + 1)).toBe(true);
+  expect(actionGeometry[0].top).toBeGreaterThan(geometry.bottom);
+
+  const energyHandlerState = await page.evaluate(async () => {
+    const button = document.querySelector<HTMLButtonElement>("#energyBurstAttack");
+    if (!button) throw new Error("Missing Energy Burst button");
+    button.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    return {
+      pressed: button.getAttribute("aria-pressed"),
+      unavailable: button.classList.contains("unavailable"),
+    };
+  });
+  expect(energyHandlerState.pressed).toBe("false");
+  expect(energyHandlerState.unavailable).toBe(true);
+
   const centers = Array.from({ length: BOARD_SIZE * BOARD_SIZE }, (_, index) =>
     cellCenter(box, Math.floor(index / BOARD_SIZE), index % BOARD_SIZE),
   );

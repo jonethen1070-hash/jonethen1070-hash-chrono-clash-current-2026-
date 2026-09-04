@@ -353,24 +353,6 @@ app.innerHTML = `
           <div class="energy"><span id="energyFill"></span></div>
           <b id="energyLabel">0 / 100</b>
         </div>
-        <section class="energy-options" aria-label="Energy attack options">
-          <button type="button" class="energy-attack burst" id="energyBurstAttack" data-power-id="burst">
-            <span class="energy-attack-glyph" aria-hidden="true"></span>
-            <span class="energy-attack-copy">
-              <b>ENERGY BURST</b>
-              <small>Destroy 3x3 area</small>
-            </span>
-             <span class="energy-attack-cost"><i aria-hidden="true"></i>${ENERGY_BURST}</span>
-          </button>
-          <button type="button" class="energy-attack strike" id="megaStrikeAttack" data-power-id="megaStrike">
-            <span class="energy-attack-glyph" aria-hidden="true"></span>
-            <span class="energy-attack-copy">
-              <b>MEGA STRIKE</b>
-              <small>Destroy all gems of a color</small>
-            </span>
-             <span class="energy-attack-cost"><i aria-hidden="true"></i>${ENERGY_MEGA_STRIKE}</span>
-          </button>
-        </section>
         <div class="player-side">
           <div class="you-meta">
             <span>YOUR BOARD</span>
@@ -395,11 +377,29 @@ app.innerHTML = `
           <i class="ability-deck-rail"></i>
           <i class="ability-deck-core"></i>
         </div>
-        <button class="power" id="freeze"><span class="glyph" aria-hidden="true">❄</span><i class="ability-fx" aria-hidden="true"></i><b>FREEZE</b><span class="cost" id="freezeQty">0/5</span><span class="need">${ENERGY_FREEZE} ENERGY · Pauses rival board for 5 seconds.</span></button>
-        <button class="power" id="timeshift"><span class="glyph" aria-hidden="true">⏱</span><i class="ability-fx" aria-hidden="true"></i><b>TIME SHIFT</b><span class="cost" id="shiftQty">0/5</span><span class="need">${ENERGY_TIMESHIFT} ENERGY · Steals 5s in TIME BATTLE, or grants a tempo surge.</span></button>
+        <button type="button" class="energy-attack burst" id="energyBurstAttack" data-power-id="burst">
+          <span class="energy-attack-glyph" aria-hidden="true"></span>
+          <span class="energy-attack-copy">
+            <b>ENERGY BURST</b>
+            <small>Destroy 3x3 area</small>
+          </span>
+          <span class="energy-attack-cost"><i aria-hidden="true"></i>${ENERGY_BURST}</span>
+        </button>
+        <button type="button" class="energy-attack strike" id="megaStrikeAttack" data-power-id="megaStrike">
+          <span class="energy-attack-glyph" aria-hidden="true"></span>
+          <span class="energy-attack-copy">
+            <b>MEGA STRIKE</b>
+            <small>Destroy all gems of a color</small>
+          </span>
+          <span class="energy-attack-cost"><i aria-hidden="true"></i>${ENERGY_MEGA_STRIKE}</span>
+        </button>
         <button class="power" id="rewind"><span class="glyph" aria-hidden="true">↺</span><i class="ability-fx" aria-hidden="true"></i><b>REWIND</b><span class="cost">${ENERGY_REWIND} ENERGY</span><span class="need">Restores your last valid move.</span></button>
       </div>
       <div id="oppBoard" class="opponent-render-reserve" aria-hidden="true">
+        <div class="power-reserve" hidden>
+          <button class="power" id="freeze"><span class="glyph" aria-hidden="true">❄</span><i class="ability-fx" aria-hidden="true"></i><b>FREEZE</b><span class="cost" id="freezeQty">0/5</span><span class="need">${ENERGY_FREEZE} ENERGY · Pauses rival board for 5 seconds.</span></button>
+          <button class="power" id="timeshift"><span class="glyph" aria-hidden="true">⏱</span><i class="ability-fx" aria-hidden="true"></i><b>TIME SHIFT</b><span class="cost" id="shiftQty">0/5</span><span class="need">${ENERGY_TIMESHIFT} ENERGY · Steals 5s in TIME BATTLE, or grants a tempo surge.</span></button>
+        </div>
         <span id="freezeClock"></span>
         <span id="oppCombo"></span>
         <canvas id="oppGems" aria-hidden="true"></canvas>
