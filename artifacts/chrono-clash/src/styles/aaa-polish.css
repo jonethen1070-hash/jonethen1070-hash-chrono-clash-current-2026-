@@ -9220,7 +9220,7 @@ html body #app #match .player-side .board-slot::after {
 
 html body #app #match .player-side .board-outer-rail {
   inset: -7px !important;
-  border: 3px solid transparent !important;
+  border: 4px solid transparent !important;
   border-bottom-width: 9px !important;
   border-radius: 15px !important;
   clip-path: polygon(
@@ -9234,6 +9234,10 @@ html body #app #match .player-side .board-outer-rail {
     0 12px
   ) !important;
   background:
+    radial-gradient(circle at 8px 8px, #ffffff 0 1.5px, #e2ffff 1.5px 3.5px, #5debf6 3.5px 6px, rgba(0, 217, 255, .92) 6px 10px, transparent 16px) top left / 30px 30px no-repeat,
+    radial-gradient(circle at calc(100% - 8px) 8px, #ffffff 0 1.5px, #e2ffff 1.5px 3.5px, #5debf6 3.5px 6px, rgba(0, 217, 255, .92) 6px 10px, transparent 16px) top right / 30px 30px no-repeat,
+    radial-gradient(circle at 8px calc(100% - 8px), #ffffff 0 1.5px, #e2ffff 1.5px 3.5px, #5debf6 3.5px 6px, rgba(0, 217, 255, .92) 6px 10px, transparent 16px) bottom left / 30px 30px no-repeat,
+    radial-gradient(circle at calc(100% - 8px) calc(100% - 8px), #ffffff 0 1.5px, #e2ffff 1.5px 3.5px, #5debf6 3.5px 6px, rgba(0, 217, 255, .92) 6px 10px, transparent 16px) bottom right / 30px 30px no-repeat,
     linear-gradient(180deg,
       #071923 0 6%,
       #1c6070 6% 10%,
@@ -9251,7 +9255,7 @@ html body #app #match .player-side .board-outer-rail {
       #247486 79% 84%,
       #82f7ff 84% 91%,
       #092735 90% 94%,
-      #061923 94% 100%) left / 5px 100% no-repeat,
+      #061923 94% 100%) left / 8px 100% no-repeat,
     linear-gradient(180deg,
       #071923 0 6%,
       #1c6070 6% 10%,
@@ -9269,7 +9273,7 @@ html body #app #match .player-side .board-outer-rail {
       #247486 79% 84%,
       #82f7ff 84% 91%,
       #092735 90% 94%,
-      #061923 94% 100%) right / 5px 100% no-repeat,
+      #061923 94% 100%) right / 8px 100% no-repeat,
     linear-gradient(90deg,
       #071923 0 7%,
       #b6fcff 7% 14%,
@@ -9277,7 +9281,7 @@ html body #app #match .player-side .board-outer-rail {
       #0b202a 20% 80%,
       #1a6170 80% 86%,
       #b6fcff 86% 93%,
-      #071923 93% 100%) top / 100% 4px no-repeat,
+      #071923 93% 100%) top / 100% 5px no-repeat,
     linear-gradient(90deg,
       #071923 0 7%,
       #45e4ef 7% 14%,
@@ -9285,15 +9289,16 @@ html body #app #match .player-side .board-outer-rail {
       #0b202a 20% 80%,
       #1a6170 80% 86%,
       #45e4ef 86% 93%,
-      #071923 93% 100%) bottom / 100% 4px no-repeat,
+      #071923 93% 100%) bottom / 100% 5px no-repeat,
     linear-gradient(145deg, #173b47 0%, #06131b 42%, #010408 100%) padding-box !important;
-  background-clip: border-box, border-box, border-box, border-box, padding-box !important;
+  background-clip: border-box, border-box, border-box, border-box, border-box, border-box, border-box, border-box, padding-box !important;
+  filter: drop-shadow(0 0 4px rgba(0, 226, 255, .52)) !important;
   box-shadow:
     0 3px 0 #0d5261,
     0 8px 0 #062630,
     0 15px 0 #020b12,
     0 23px 22px rgba(0, 0, 0, .98),
-    0 0 18px rgba(0, 213, 236, .18),
+    0 0 22px rgba(0, 213, 236, .24),
     inset 0 1px 0 rgba(239, 255, 255, .38),
     inset 6px 0 0 rgba(0, 0, 0, .78),
     inset -6px 0 0 rgba(0, 0, 0, .9),
@@ -9332,13 +9337,13 @@ html body #app #match .player-side .board-socket-bed {
 }
 
 html body #app #match .player-side .board-fastener {
-  width: 10px !important;
-  height: 10px !important;
+  width: 12px !important;
+  height: 12px !important;
   background:
     radial-gradient(circle at 32% 27%, #ffffff 0 13%, #d8ffff 14% 23%, #5debf6 24% 39%, #0a7187 40% 59%, #031219 60% 72%, #000 73%) !important;
   box-shadow:
     0 0 0 1px #062630,
-    0 0 0 2px rgba(37, 217, 233, .28),
-    0 0 7px rgba(61, 235, 248, .86),
+    0 0 0 2px rgba(37, 217, 233, .46),
+    0 0 9px rgba(61, 235, 248, .98),
     0 2px 3px #000 !important;
 }
