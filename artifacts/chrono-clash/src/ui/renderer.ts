@@ -54,6 +54,10 @@ interface VisualTile {
   dieAge: number;
   glow: number;
   burstEmitted: boolean;
+  settleAge: number;
+  settleDur: number;
+  settleX: number;
+  settleY: number;
 }
 
 interface Particle {
@@ -579,6 +583,10 @@ export class BoardRenderer {
             dieAge: 0,
             glow: populated ? 0.16 : 0,
             burstEmitted: false,
+            settleAge: 1,
+            settleDur: 0,
+            settleX: 0,
+            settleY: 0,
           };
           view.tiles.set(piece.id, tile);
           if (populated && tile.moveKind === "fall") {
@@ -604,6 +612,10 @@ export class BoardRenderer {
           tile.moveHold = 0;
           tile.vx = 0;
           tile.vy = 0;
+          tile.settleAge = 1;
+          tile.settleDur = 0;
+          tile.settleX = 0;
+          tile.settleY = 0;
         } else if (moved) {
           const dist = Math.hypot(tx - tile.x, ty - tile.y);
           const neighbor = Math.abs(prevC - c) + Math.abs(prevR - r) === 1;
@@ -617,6 +629,10 @@ export class BoardRenderer {
           tile.moveDur = gemTravelDuration(dist, cell, kind, anim, reduced);
           tile.moveHold = kind === "fall" ? gemFallDelay(c, Math.abs(r - prevR), anim, reduced) : 0;
           tile.glow = Math.max(tile.glow, kind === "swap" ? 0.28 : 0.12);
+          tile.settleAge = 1;
+          tile.settleDur = 0;
+          tile.settleX = 0;
+          tile.settleY = 0;
         } else if (tile.moveKind === "idle") {
           tile.toX = tx;
           tile.toY = ty;
@@ -638,13 +654,26 @@ export class BoardRenderer {
             tile.x = nx;
             tile.y = ny;
             if (t >= 1) {
+              const completedKind = tile.moveKind;
               tile.x = tile.toX;
               tile.y = tile.toY;
               tile.moveKind = "idle";
               tile.vx = 0;
               tile.vy = 0;
-              if (!reduced && anim !== "low" && Math.abs(tile.fromY - tile.toY) > cell * 0.4) {
-                tile.scale = Math.min(1.025, tile.scale + 0.018);
+              if (!reduced) {
+                if (completedKind === "swap") {
+                  const moveX = tile.toX - tile.fromX;
+                  const moveY = tile.toY - tile.fromY;
+                  const moveDistance = Math.hypot(moveX, moveY) || 1;
+                  const settle = Math.min(3.2, Math.max(2, moveDistance * 0.055));
+                  tile.settleAge = 0;
+                  tile.settleDur = 0.045;
+                  tile.settleX = (moveX / moveDistance) * settle;
+                  tile.settleY = (moveY / moveDistance) * settle;
+                  tile.scale = Math.min(1.018, tile.scale + 0.018);
+                } else if (anim !== "low" && Math.abs(tile.fromY - tile.toY) > cell * 0.4) {
+                  tile.scale = Math.min(1.025, tile.scale + 0.018);
+                }
               }
               if (Math.abs(tile.fromY - tile.toY) > cell * 0.4) {
                 this.impactSpark(view, tile.x + cell / 2, tile.y + cell / 2, tile.color, cell);
@@ -668,6 +697,7 @@ export class BoardRenderer {
             tile.vy = 0;
           }
         }
+        if (tile.settleAge < tile.settleDur) tile.settleAge += dt;
         tile.scale += (1 - tile.scale) * Math.min(1, dt * 16);
         tile.glow *= 0.86;
         tile.flash *= 0.9;
@@ -690,7 +720,13 @@ export class BoardRenderer {
         break;
       }
     }
-    const impactDelay = this.fx.reducedMotion ? 20 : MATCH_IMPACT_MS;
+    const swapRemainingMs = [...view.tiles.values()].reduce((max, tile) => {
+      if (tile.moveKind !== "swap" || tile.moveDur <= 0) return max;
+      return Math.max(max, (tile.moveDur - tile.moveAge) * 1000);
+    }, 0);
+    const impactDelay = this.fx.reducedMotion
+      ? 20
+      : Math.max(MATCH_IMPACT_MS, swapRemainingMs);
     for (const [id, tile] of view.tiles) {
       if (live.has(id) || tile.dying) continue;
       tile.dying = true;
@@ -853,7 +889,23 @@ export class BoardRenderer {
       const lift = sel ? 1.045 : 1;
       const restX = ix + GAP + tile.c * (cell + GAP);
       const restY = iy + GAP + tile.r * (cell + GAP);
-      const origin = liveGemDrawOrigin(restX, restY, tile.x, tile.y, cell, tile.dying, 0, 0, wobble);
+      const settleT = tile.settleDur > 0 ? Math.min(1, tile.settleAge / tile.settleDur) : 1;
+      const settleEase = 1 - Math.pow(1 - settleT, 3);
+      const settleDx = tile.settleX * (1 - settleEase);
+      const settleDy = tile.settleY * (1 - settleEase);
+      const origin = liveGemDrawOrigin(
+        restX,
+        restY,
+        tile.x,
+        tile.y,
+        cell,
+        tile.dying,
+        0,
+        0,
+        wobble,
+        settleDx,
+        settleDy,
+      );
       this.drawGem(
         origin.x,
         origin.y,

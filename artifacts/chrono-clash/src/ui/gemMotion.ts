@@ -14,6 +14,11 @@ export function easeOutCubic(t: number): number {
   return 1 - (1 - x) * (1 - x) * (1 - x);
 }
 
+export function easeInOutCubic(t: number): number {
+  const x = clamp01(t);
+  return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+}
+
 /** Accelerate then settle into the well. No bounce, no linear slot-drop. */
 export function easeCrystalFall(t: number): number {
   const x = clamp01(t);
@@ -26,7 +31,7 @@ export function easeCrystalFall(t: number): number {
 }
 
 export function gemTravelEase(kind: GemMoveKind, t: number): number {
-  return kind === "swap" ? easeOutCubic(t) : easeCrystalFall(t);
+  return kind === "swap" ? easeInOutCubic(t) : easeCrystalFall(t);
 }
 
 export function gemTravelDuration(
@@ -36,12 +41,12 @@ export function gemTravelDuration(
   animation: Intensity,
   reduced: boolean,
 ): number {
-  if (reduced) return kind === "swap" ? 0.042 : 0.058;
+  if (reduced) return kind === "swap" ? 0.06 : 0.058;
   const cells = Math.max(0.4, dist / Math.max(cell, 1));
   if (kind === "swap") {
-    if (animation === "low") return 0.068;
-    if (animation === "medium") return 0.08;
-    return 0.09;
+    if (animation === "low") return 0.11;
+    if (animation === "medium") return 0.115;
+    return 0.125;
   }
   const base = animation === "low" ? 0.078 : animation === "medium" ? 0.09 : 0.1;
   return Math.min(0.16, base + Math.max(0, cells - 1) * 0.024);
@@ -91,10 +96,12 @@ export function liveGemDrawOrigin(
   dragDx = 0,
   dragDy = 0,
   wobble = 0,
+  settleDx = 0,
+  settleDy = 0,
 ): { x: number; y: number } {
   if (dying) return { x: tileX + wobble, y: tileY };
   void restX;
   void restY;
   void cell;
-  return { x: tileX + wobble + dragDx, y: tileY + dragDy };
+  return { x: tileX + wobble + dragDx + settleDx, y: tileY + dragDy + settleDy };
 }

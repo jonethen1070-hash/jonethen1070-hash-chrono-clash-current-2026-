@@ -1157,7 +1157,9 @@ export class GameSession {
   private liveBounce(now: number): BounceState | null {
     if (!this.bounce) return null;
     const t = Math.min(1, (now - this.bounce.born) / INVALID_RETURN_MS);
-    const k = 1 - t * t * (3 - 2 * t);
+    const smoothReturn = 1 - t * t * (3 - 2 * t);
+    const settle = t > 0.74 ? Math.sin(((t - 0.74) / 0.26) * Math.PI) * 0.035 : 0;
+    const k = Math.max(0, smoothReturn + settle);
     return {
       from: this.bounce.from,
       dx: this.bounce.dx * k,

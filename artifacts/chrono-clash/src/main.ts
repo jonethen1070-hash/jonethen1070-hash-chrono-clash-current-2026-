@@ -1965,6 +1965,18 @@ function swipeMin(): number {
   return Math.max(8, cellSize() * 0.12);
 }
 
+function commitSwipe(from: Coord, target: Coord, now: number): boolean {
+  if (session.tryPlayerSwap(from, target, now)) {
+    audio.play("swap");
+    renderer.flashSwap(from, target, now);
+    sendOnlineAction({ type: "swap", a: from, b: target });
+    return true;
+  }
+  renderer.flashInvalid(from, target, now);
+  audio.play("invalid");
+  return false;
+}
+
 ui.playerBoard.addEventListener(
   "pointerdown",
   (e) => {
@@ -1998,6 +2010,14 @@ ui.playerBoard.addEventListener(
     swipe.dx = drag.dx;
     swipe.dy = drag.dy;
     session.updateDrag(swipe.dx, swipe.dy);
+    if (!armedEnergyPower) {
+      const target = neighborFromSwipe({ r: swipe.r, c: swipe.c }, dx, dy, swipeMin());
+      if (target) {
+        const from = { r: swipe.r, c: swipe.c };
+        swipe = null;
+        commitSwipe(from, target, performance.now());
+      }
+    }
   },
   { passive: false },
 );
@@ -2026,17 +2046,11 @@ ui.playerBoard.addEventListener(
     }
     const target = neighborFromSwipe(from, e.clientX - swipe.x, e.clientY - swipe.y, swipeMin());
     swipe = null;
-    if (target && session.tryPlayerSwap(from, target, now)) {
-      audio.play("swap");
-      renderer.flashSwap(from, target, now);
-      sendOnlineAction({ type: "swap", a: from, b: target });
+    if (target) {
+      commitSwipe(from, target, now);
     } else {
       if (session.drag) session.rejectSwipe(now);
       else session.setDrag(null);
-      if (target) {
-        renderer.flashInvalid(from, target, now);
-        audio.play("invalid");
-      }
     }
   },
 );

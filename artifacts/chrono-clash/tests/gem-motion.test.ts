@@ -3,12 +3,13 @@ import { BOARD_GAP, liveGemDrawOrigin } from "../src/ui/renderer";
 import {
   easeCrystalDie,
   easeCrystalFall,
+  easeInOutCubic,
   easeOutCubic,
   gemFallDelay,
   gemTravelDuration,
   gemTravelEase,
 } from "../src/ui/gemMotion";
-import { COLS, ROWS } from "../src/engine/types";
+import { COLS, INVALID_RETURN_MS, ROWS } from "../src/engine/types";
 
 describe("crystal gem motion curves", () => {
   it("eases swaps and falls from rest to the target without overshoot", () => {
@@ -18,18 +19,23 @@ describe("crystal gem motion curves", () => {
     expect(easeCrystalFall(0)).toBe(0);
     expect(easeCrystalFall(1)).toBeCloseTo(1, 5);
     expect(easeCrystalFall(0.2)).toBeLessThan(0.2);
-    expect(gemTravelEase("swap", 0.5)).toBe(easeOutCubic(0.5));
+    expect(easeInOutCubic(0.25)).toBeLessThan(0.25);
+    expect(easeInOutCubic(0.75)).toBeGreaterThan(0.75);
+    expect(gemTravelEase("swap", 0.5)).toBe(easeInOutCubic(0.5));
     expect(gemTravelEase("fall", 0.5)).toBe(easeCrystalFall(0.5));
   });
 
-  it("keeps travel short enough for fast play and staggers cascade columns", () => {
+  it("keeps swaps tactile, fast, and staggers cascade columns", () => {
     const swap = gemTravelDuration(40, 40, "swap", "high", false);
     const fallFar = gemTravelDuration(40 * 5, 40, "fall", "high", false);
-    expect(swap).toBeLessThan(0.12);
+    expect(swap).toBeGreaterThanOrEqual(0.11);
+    expect(swap).toBeLessThanOrEqual(0.14);
     expect(fallFar).toBeLessThan(0.18);
     expect(fallFar).toBeGreaterThan(swap);
     expect(gemFallDelay(0, 3, "high", false)).toBeLessThan(gemFallDelay(7, 3, "high", false));
     expect(gemFallDelay(3, 2, "high", true)).toBe(0);
+    expect(INVALID_RETURN_MS).toBeGreaterThanOrEqual(100);
+    expect(INVALID_RETURN_MS).toBeLessThanOrEqual(130);
   });
 
   it("blooms then dissolves matched crystals instead of popping them", () => {
@@ -53,6 +59,7 @@ describe("occupied cells still have a gem pose", () => {
     expect(flying.x).toBe(restX);
     expect(flying.y).toBe(restY - cell * 3);
     expect(liveGemDrawOrigin(12, 40, 18, 22, 40, false, 4, -3)).toEqual({ x: 22, y: 19 });
+    expect(liveGemDrawOrigin(12, 40, 18, 22, 40, false, 0, 0, 0, 2.5, -1.5)).toEqual({ x: 20.5, y: 20.5 });
   });
 
   it("lets dying gems keep a free overlay path", () => {

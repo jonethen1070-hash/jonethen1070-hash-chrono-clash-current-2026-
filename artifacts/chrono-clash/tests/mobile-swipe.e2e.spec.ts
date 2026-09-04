@@ -168,6 +168,46 @@ test("guest mobile matches survive rapid swipes, cancellation, and layout checks
   const swipeRight = cellCenter(box, 3, 4);
   const swipeDown = cellCenter(box, 4, 3);
 
+  const hintSwipe = await page.evaluate(() => {
+    const chrono = (window as Window & {
+      __chrono?: { session?: { hintCells: (now: number) => Array<{ r: number; c: number }> } };
+    }).__chrono;
+    const hint = chrono?.session?.hintCells(performance.now()) ?? [];
+    return { from: hint[0] ?? { r: 3, c: 3 }, to: hint[1] ?? { r: 3, c: 4 } };
+  });
+  const hintFrom = cellCenter(box, hintSwipe.from.r, hintSwipe.from.c);
+  const hintTo = cellCenter(box, hintSwipe.to.r, hintSwipe.to.c);
+  const beforeImmediateSwipe = await page.evaluate(() => {
+    const session = (window as Window & {
+      __chrono?: { session?: { snapshot: (now: number) => { player: { score: number }; drag: unknown; bounce: unknown } } };
+    }).__chrono?.session;
+    const snapshot = session?.snapshot(performance.now());
+    return { score: snapshot?.player.score ?? 0, dragging: Boolean(snapshot?.drag), bouncing: Boolean(snapshot?.bounce) };
+  });
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchStart",
+    touchPoints: [{ x: hintFrom.x, y: hintFrom.y, id: 7 }],
+  });
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchMove",
+    touchPoints: [{ x: hintTo.x, y: hintTo.y, id: 7 }],
+  });
+  const afterDirectionDetection = await page.evaluate(() => {
+    const session = (window as Window & {
+      __chrono?: { session?: { snapshot: (now: number) => { player: { score: number }; drag: unknown; bounce: unknown } } };
+    }).__chrono?.session;
+    const snapshot = session?.snapshot(performance.now());
+    return { score: snapshot?.player.score ?? 0, dragging: Boolean(snapshot?.drag), bouncing: Boolean(snapshot?.bounce) };
+  });
+  expect(beforeImmediateSwipe.dragging).toBe(false);
+  expect(afterDirectionDetection.dragging).toBe(false);
+  expect(afterDirectionDetection.bouncing).toBe(false);
+  expect(afterDirectionDetection.score).toBeGreaterThanOrEqual(beforeImmediateSwipe.score);
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchEnd",
+    touchPoints: [],
+  });
+
   await touchSwipe(cdp, swipeFrom, swipeRight, 1);
   await touchSwipe(cdp, swipeRight, swipeFrom, 2);
   await touchSwipe(cdp, swipeFrom, swipeDown, 3);
