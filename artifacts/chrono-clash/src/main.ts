@@ -2461,6 +2461,9 @@ if (location.hostname === "127.0.0.1" || location.hostname === "localhost") {
       paintArmory();
       paintReadyPowers();
     },
+    renderState() {
+      return renderer.inspectPlayer();
+    },
     speak(id: "locked" | "combo" | "ultimate") {
       return announcer.submit(id, performance.now());
     },

@@ -254,3 +254,140 @@ test("guest mobile matches survive rapid swipes, cancellation, and layout checks
   expect(state.scrollY).toBe(0);
   expect(state.scrollTop).toBe(0);
 });
+
+test.describe("mobile cascade visibility", () => {
+  test.use({
+    viewport: { width: 390, height: 844 },
+    isMobile: true,
+    hasTouch: true,
+    deviceScaleFactor: 1,
+  });
+
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      const settings = JSON.parse(localStorage.getItem("chrono-clash-settings-v2") ?? "{}");
+      localStorage.setItem("chrono-clash-settings-v2", JSON.stringify({ ...settings, animation: "high", effects: "high" }));
+    });
+  });
+
+  test("keeps a three-row cascade visible from swap through centered landing", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("#menu.active")).toBeVisible();
+    await page.locator("#menuGuest").click();
+    await expect(page.locator("#match.active")).toBeVisible();
+    await expect.poll(async () => page.locator("#overlay").evaluate((el) => el.classList.contains("hidden"))).toBe(true);
+    await expect.poll(async () => page.evaluate(() => {
+      const chrono = (window as Window & {
+        __chrono?: { session?: { phase?: string }; renderState?: () => { tiles: unknown[] } };
+      }).__chrono;
+      return chrono?.session?.phase === "playing" && (chrono.renderState?.().tiles.length ?? 0) >= 64;
+    })).toBe(true);
+
+    const fixtureColors = [
+      [4, 1, 4, 6, 6, 2, 4, 5],
+      [3, 6, 3, 3, 1, 3, 2, 1],
+      [3, 1, 3, 5, 2, 2, 1, 3],
+      [4, 5, 2, 2, 4, 4, 5, 2],
+      [5, 3, 5, 6, 2, 5, 1, 2],
+      [3, 2, 1, 5, 4, 1, 2, 1],
+      [4, 6, 2, 6, 5, 3, 2, 5],
+      [6, 6, 5, 6, 6, 1, 1, 6],
+    ];
+    const fixture = await page.evaluate((colors) => {
+      const chrono = (window as Window & {
+        __chrono?: {
+          session?: {
+            player: { board: Array<Array<{ id: number; color: number; kind: string }>> };
+          };
+        };
+      }).__chrono;
+      const board = chrono?.session?.player.board;
+      if (!board) throw new Error("Missing live session board");
+      colors.forEach((row, r) => row.forEach((color, c) => {
+        const piece = board[r]?.[c];
+        if (!piece) throw new Error(`Missing fixture cell ${r},${c}`);
+        piece.color = color;
+        piece.kind = "normal";
+      }));
+      return { fallingId: board[0]![4]!.id };
+    }, fixtureColors);
+
+    const board = page.locator("#playerBoard");
+    const box = await board.boundingBox();
+    expect(box).not.toBeNull();
+    const accepted = await page.evaluate(({ fromRow, fromCol, toRow, toCol }) => {
+      const session = (window as Window & {
+        __chrono?: { session?: { tryPlayerSwap: (a: { r: number; c: number }, b: { r: number; c: number }, now: number) => boolean } };
+      }).__chrono?.session;
+      return session?.tryPlayerSwap({ r: fromRow, c: fromCol }, { r: toRow, c: toCol }, performance.now()) ?? false;
+    }, { fromRow: 3, fromCol: 3, toRow: 3, toCol: 4 });
+    expect(accepted).toBe(true);
+
+    const state = () => page.evaluate(() => {
+      const renderState = (window as Window & {
+        __chrono?: { renderState?: () => {
+          cell: number;
+          tiles: Array<{
+            id: number;
+            x: number;
+            y: number;
+            fromX: number;
+            fromY: number;
+            toX: number;
+            toY: number;
+            moveKind: string;
+            dying: boolean;
+            settleAge: number;
+            settleDur: number;
+          }>;
+          moving: unknown[];
+          dying: unknown[];
+          visibleEmptySockets: Array<{ r: number; c: number }>;
+        } };
+      }).__chrono?.renderState;
+      return renderState?.() ?? null;
+    });
+    const transientPoll = { intervals: [10, 20, 40, 80], timeout: 1_500 };
+
+    await expect.poll(async () => {
+      const snapshot = await state();
+      return snapshot?.tiles.some((tile) => tile.moveKind === "swap") ?? false;
+    }, transientPoll).toBe(true);
+    const swapFrame = await state();
+    expect(swapFrame).not.toBeNull();
+    const swapTiles = swapFrame!.tiles.filter((tile) => tile.moveKind === "swap");
+    expect(swapTiles.length).toBeGreaterThanOrEqual(1);
+    expect(swapTiles.filter((tile) => Math.abs(tile.x - tile.fromX) > swapFrame!.cell * 0.08)).toHaveLength(swapTiles.length);
+
+    await expect.poll(async () => (await state())?.visibleEmptySockets.length ?? 0, transientPoll).toBeGreaterThan(0);
+    const impactFrame = await state();
+    expect(impactFrame!.dying.length).toBeGreaterThan(0);
+    expect(impactFrame!.visibleEmptySockets.some((cell) => cell.r === 2 && cell.c === 4)).toBe(true);
+
+    await expect.poll(async () => {
+      const snapshot = await state();
+      return snapshot?.tiles.some((tile) =>
+        tile.id === fixture.fallingId &&
+        tile.moveKind === "fall" &&
+        tile.fromY < tile.y &&
+        tile.y < tile.toY,
+      ) ?? false;
+    }, transientPoll).toBe(true);
+    const fallFrame = await state();
+    const fallingTile = fallFrame!.tiles.find((tile) => tile.id === fixture.fallingId);
+    expect(fallingTile).toMatchObject({ moveKind: "fall", dying: false });
+    expect(fallingTile!.fromY).toBeLessThan(fallingTile!.toY);
+    expect(fallingTile!.y).toBeGreaterThan(fallingTile!.fromY);
+    expect(fallingTile!.y).toBeLessThan(fallingTile!.toY);
+
+    await expect.poll(async () => {
+      const tile = (await state())?.tiles.find((candidate) => candidate.id === fixture.fallingId);
+      return tile?.moveKind === "idle" && Math.abs(tile.x - tile.toX) < 1 && Math.abs(tile.y - tile.toY) < 1;
+    }, transientPoll).toBe(true);
+    const landingFrame = await state();
+    const landed = landingFrame!.tiles.find((tile) => tile.id === fixture.fallingId);
+    expect(landed).toMatchObject({ moveKind: "idle", settleDur: expect.any(Number) });
+    expect(Math.abs(landed!.x - landed!.toX)).toBeLessThan(1);
+    expect(Math.abs(landed!.y - landed!.toY)).toBeLessThan(1);
+  });
+});

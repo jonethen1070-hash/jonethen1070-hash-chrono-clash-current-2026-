@@ -11,6 +11,23 @@ import {
   gemTravelEase,
 } from "../src/ui/gemMotion";
 import { COLS, INVALID_RETURN_MS, ROWS } from "../src/engine/types";
+import { cloneBoard, createSeededRng, findMatches, makePiece, resetIds, trySwap } from "../src/engine/board";
+
+const THREE_ROW_CASCADE_FIXTURE = [
+  [4, 1, 4, 6, 6, 2, 4, 5],
+  [3, 6, 3, 3, 1, 3, 2, 1],
+  [3, 1, 3, 5, 2, 2, 1, 3],
+  [4, 5, 2, 2, 4, 4, 5, 2],
+  [5, 3, 5, 6, 2, 5, 1, 2],
+  [3, 2, 1, 5, 4, 1, 2, 1],
+  [4, 6, 2, 6, 5, 3, 2, 5],
+  [6, 6, 5, 6, 6, 1, 1, 6],
+] as const;
+
+function cascadeFixture() {
+  resetIds();
+  return THREE_ROW_CASCADE_FIXTURE.map((row) => row.map((color) => makePiece(color)));
+}
 
 describe("crystal gem motion curves", () => {
   it("eases swaps and falls from rest to the target without overshoot", () => {
@@ -83,6 +100,32 @@ describe("occupied cells still have a gem pose", () => {
         expect(liveGemDrawOrigin(tx, ty, tx, ty, 40, false)).toEqual({ x: tx, y: ty });
       }
     }
+  });
+});
+
+describe("three-row cascade visibility fixture", () => {
+  it("creates a valid swap whose first gravity wave moves a gem three rows", () => {
+    const board = cascadeFixture();
+    expect(findMatches(board)).toHaveLength(0);
+    const before = cloneBoard(board);
+    const result = trySwap(board, { r: 3, c: 3 }, { r: 3, c: 4 }, createSeededRng(101));
+
+    expect(result).not.toBeNull();
+    expect(result!.events.some((event) => event.type === "clear")).toBe(true);
+
+    const originalPositions = new Map(
+      before.flatMap((row, r) => row.map((piece, c) => [piece!.id, { r, c }] as const)),
+    );
+    const falls = board.flatMap((row, r) =>
+      row.flatMap((piece, c) => {
+        if (!piece) return [];
+        const from = originalPositions.get(piece.id);
+        return from && from.c === c && r > from.r ? [{ piece, from, to: { r, c } }] : [];
+      }),
+    );
+    const longest = falls.reduce((max, fall) => Math.max(max, fall.to.r - fall.from.r), 0);
+    expect(longest).toBeGreaterThanOrEqual(3);
+    expect(falls.some((fall) => fall.from.r === 0 && fall.to.r === 3 && fall.to.c === 4)).toBe(true);
   });
 });
 

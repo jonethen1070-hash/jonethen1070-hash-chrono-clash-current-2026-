@@ -110,6 +110,33 @@ interface Bolt {
   impacted: boolean;
 }
 
+export interface RenderTileInspection {
+  id: number;
+  r: number;
+  c: number;
+  x: number;
+  y: number;
+  fromX: number;
+  fromY: number;
+  toX: number;
+  toY: number;
+  moveAge: number;
+  moveDur: number;
+  moveKind: GemMoveKind | "idle";
+  dying: boolean;
+  alpha: number;
+  settleAge: number;
+  settleDur: number;
+}
+
+export interface BoardRenderInspection {
+  cell: number;
+  tiles: RenderTileInspection[];
+  moving: RenderTileInspection[];
+  dying: RenderTileInspection[];
+  visibleEmptySockets: Coord[];
+}
+
 class BoardView {
   tiles = new Map<number, VisualTile>();
   live = new Set<number>();
@@ -233,6 +260,53 @@ export class BoardRenderer {
     const count = this.landingImpacts;
     this.landingImpacts = 0;
     return count;
+  }
+
+  inspectPlayer(): BoardRenderInspection {
+    const { tiles } = this.playerView;
+    const inspected = [...tiles.values()].map<RenderTileInspection>((tile) => ({
+      id: tile.id,
+      r: tile.r,
+      c: tile.c,
+      x: tile.x,
+      y: tile.y,
+      fromX: tile.fromX,
+      fromY: tile.fromY,
+      toX: tile.toX,
+      toY: tile.toY,
+      moveAge: tile.moveAge,
+      moveDur: tile.moveDur,
+      moveKind: tile.moveKind,
+      dying: tile.dying,
+      alpha: tile.alpha,
+      settleAge: tile.settleAge,
+      settleDur: tile.settleDur,
+    }));
+    const cell = this.lastPlayerCell;
+    const empty: Coord[] = [];
+    if (cell > 2) {
+      const covered = new Set(
+        inspected
+          .filter(
+            (tile) =>
+              !tile.dying &&
+              Math.hypot(tile.x - tile.toX, tile.y - tile.toY) < cell * 0.44,
+          )
+          .map((tile) => `${tile.r},${tile.c}`),
+      );
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          if (!covered.has(`${r},${c}`)) empty.push({ r, c });
+        }
+      }
+    }
+    return {
+      cell,
+      tiles: inspected,
+      moving: inspected.filter((tile) => !tile.dying && tile.moveKind !== "idle"),
+      dying: inspected.filter((tile) => tile.dying),
+      visibleEmptySockets: empty,
+    };
   }
 
   draw(
