@@ -1,0 +1,203 @@
+CHRONO CLASH — ENLARGE BOARD DOWNWARD + CANDY-CRUSH-SIZE GEM PROPORTIONS
+
+Use the CURRENT mobile layout as the baseline.
+
+I want ONE focused layout/scale improvement:
+
+The screenshot shows noticeable empty vertical space between the bottom of the game board and the three bottom power buttons:
+
+ENERGY BURST | MEGA STRIKE | REWIND
+
+Use that available space to make the gameplay board visually larger.
+
+IMPORTANT:
+The three bottom power buttons MUST NOT move into the board area and MUST NOT overlap the board.
+
+==================================================
+1. MAKE THE BOARD AS LARGE AS SAFELY POSSIBLE
+==================================================
+
+At the current mobile viewport:
+
+- Keep the top HUD exactly where it is.
+- Keep the three bottom power buttons exactly as a separate bottom control area.
+- Use the empty vertical space between the board and the power buttons.
+- Increase the board's overall footprint toward the bottom as much as the safe viewport allows.
+- Maintain a comfortable visual gap between board and bottom controls.
+- Never overlap the three power buttons.
+- Never clip the board.
+- Never push controls off-screen.
+
+Calculate the actual available viewport space rather than using a guessed fixed height.
+
+The board should be the largest safe 8×8 gameplay area that fits between:
+
+TOP:
+energy/HUD area
+
+BOTTOM:
+three power buttons
+
+while maintaining safe breathing room.
+
+==================================================
+2. KEEP THE 8×8 BOARD GEOMETRY CORRECT
+==================================================
+
+Do NOT distort the board into a stretched rectangle.
+
+Keep:
+- 8 columns
+- 8 rows
+- square/near-square cells
+- correct gem positioning
+- correct touch hit areas
+
+If the viewport width becomes the limiting factor, do NOT stretch cells vertically just to fill space.
+
+Instead maximize the board within the actual safe bounds.
+
+==================================================
+3. MAKE THE GEMS FEEL LIKE CANDY-CRUSH-SIZED PIECES
+==================================================
+
+The current gems have too much visual empty space around them.
+
+Increase the GEM'S visual occupancy inside each socket.
+
+Target approximately:
+- 80–90% of the usable cell area
+- small consistent breathing room around each gem
+- clear separation between neighboring gems
+
+The gems should feel substantial and satisfying to touch.
+
+Think of the visual proportion of polished match-3 games:
+the crystal should dominate its cell without touching the neighboring crystal.
+
+Do NOT redesign the crystal shapes.
+
+Do NOT replace the existing artwork.
+
+Do NOT change gem colors/materials.
+
+Only adjust the rendered gem scale/fit inside the existing cells.
+
+==================================================
+4. IMPORTANT — TOUCH TARGETS
+==================================================
+
+Keep the full cell as the touch/swipe target.
+
+Do NOT make the actual hit area smaller just because the gem is visually larger.
+
+Touching anywhere within a cell should still correctly select/drag that gem.
+
+==================================================
+5. PRESERVE CURRENT DESIGN
+==================================================
+
+Do NOT change:
+- HUD
+- score panels
+- energy bar
+- board frame design
+- board position relative to HUD
+- three bottom power buttons
+- power behavior
+- CPU behavior
+- swipe physics
+- magnetic swap
+- match VFX
+- gravity/falling
+- cascade rules
+- hint behavior
+
+This is ONLY a board-size and gem-scale refinement.
+
+==================================================
+6. RESPONSIVE REQUIREMENT
+==================================================
+
+Test at:
+
+390×844
+360×740
+
+For each viewport:
+
+Find the maximum safe board size available between the HUD and bottom controls.
+
+The three power buttons must remain completely visible and usable.
+
+No overlap.
+No clipping.
+No horizontal overflow.
+No vertical overflow.
+
+==================================================
+7. VISUAL TARGET
+==================================================
+
+The final gameplay area should feel:
+
+LARGE
+DENSE
+PREMIUM
+EASY TO TOUCH
+LIKE A POLISHED MATCH-3 GAME
+
+The gems should feel closer in visual size/proportion to Candy Crush-style gameplay pieces:
+
+CELL
+┌─────────┐
+│         │
+│  GEM    │
+│  LARGE  │
+│         │
+└─────────┘
+
+Not:
+
+CELL
+┌─────────┐
+│         │
+│   gem   │
+│         │
+│         │
+└─────────┘
+
+But keep enough spacing that adjacent gems never visually merge.
+
+==================================================
+8. RUNTIME VERIFICATION
+==================================================
+
+Actually open the live game and verify:
+
+390×844:
+- board is visibly larger using the available lower space
+- gems are visibly larger within their cells
+- board does NOT overlap Energy Burst / Mega Strike / Rewind
+- all three buttons remain fully visible
+- bottom safe area remains intact
+- board frame is not clipped
+
+360×740:
+- same requirements
+- automatically scale down if necessary
+
+Also perform real touch/swipe tests after resizing.
+
+Confirm:
+- 8×8 remains correct
+- touch targets remain correct
+- swipe works
+- no gems are clipped
+- no controls overlap
+
+Do NOT make any other changes.
+
+Run typecheck, build, focused tests, and mobile runtime verification.
+
+Report the exact before/after board dimensions and gem visual scale at 390×844 and 360×740.
