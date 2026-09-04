@@ -1,0 +1,330 @@
+I want to make the existing Chrono Clash project AI-friendly and maintainable BEFORE doing any more visual or gameplay upgrades.
+
+This is an ARCHITECTURE / OWNERSHIP REFACTOR.
+
+Do not redesign the game.
+Do not add new gameplay.
+Do not change the visual style.
+Do not change the board size.
+Do not change the 8×8 grid.
+Do not change gems.
+Do not change touch/swipe behavior.
+Do not change HUD layout.
+Do not change abilities.
+Do not change networking/authentication/persistence.
+
+The goal is:
+
+EVERY IMPORTANT GAMEPLAY OR VISUAL FEATURE MUST HAVE ONE CLEAR SOURCE OF TRUTH AND ONE OBVIOUS FILE/PATH THAT AN AI AGENT CAN MODIFY.
+
+CURRENT PROBLEM TO SOLVE:
+
+The project currently has overlapping responsibilities and large amounts of cascading CSS.
+
+In particular:
+- main.ts contains substantial UI/game wiring
+- session.ts contains gameplay/session logic
+- renderer.ts contains Canvas rendering
+- game.css, studio.css and aaa-polish.css all contribute to presentation
+- aaa-polish.css is extremely large and contains repeated/overriding board selectors
+- the player board uses both DOM/CSS hardware layers and Canvas rendering
+- some later CSS rules can hide or override earlier visual changes
+- gameplay behavior and UI descriptions can become disconnected
+
+DO NOT ASSUME THE CURRENT ARCHITECTURE IS CORRECT.
+
+FIRST PHASE — AUDIT ONLY
+
+Before changing code, inspect the entire project and create an internal ownership map.
+
+For every major system identify:
+1. current source file
+2. current functions/classes
+3. current DOM elements
+4. current Canvas renderer
+5. current CSS owner
+6. duplicate/overlapping implementations
+7. hidden/overridden implementations
+8. dependencies that must remain intact
+
+At minimum audit:
+
+GAMEPLAY
+- board state
+- gem generation
+- matching
+- swapping
+- gravity
+- refill
+- scoring
+- energy
+- powers
+- Energy Burst
+- Mega Strike
+- Freeze
+- Time Shift
+- Rewind
+- timer
+- CPU
+- multiplayer/session synchronization
+
+INPUT
+- pointerdown
+- pointermove
+- pointerup
+- pointercancel
+- swipe detection
+- touch-action
+- board hit testing
+
+RENDERING
+- player board
+- opponent board
+- gems
+- board frame
+- VFX
+- Canvas
+- DOM visual layers
+
+UI
+- HUD
+- player/rival panels
+- energy bar
+- ability cards
+- bottom controls
+- menus/results
+
+STYLING
+- game.css
+- studio.css
+- aaa-polish.css
+- duplicate selectors
+- cascade conflicts
+- hidden layers
+- pseudo-elements
+- filters/shadows
+
+SECOND PHASE — DESIGN THE CLEAN OWNERSHIP MODEL
+
+Create a clear ownership model WITHOUT breaking the existing game.
+
+Use the smallest safe number of modules.
+
+The desired conceptual ownership is:
+
+BOARD GAMEPLAY
+→ one authoritative board/game-state module
+
+POWERS
+→ one authoritative power/ability module
+
+INPUT
+→ one authoritative input/swipe module
+
+SESSION
+→ one authoritative match/session orchestrator
+
+RENDERING
+→ one authoritative rendering path
+
+BOARD FRAME
+→ one authoritative visual owner
+
+GEMS
+→ one authoritative gem-rendering owner
+
+HUD/UI
+→ one authoritative UI owner
+
+VISUAL STYLE
+→ one authoritative stylesheet/component per visual system, rather than endless override chains
+
+Do not blindly create files just to create files.
+
+If an existing file is already the correct owner, keep it.
+
+If functionality must move, move it carefully and update all imports/callers.
+
+THIRD PHASE — CONSOLIDATE
+
+Safely remove or consolidate duplicate implementations.
+
+Especially address the board-frame styling.
+
+The board frame must have ONE authoritative implementation.
+
+There must not be multiple late CSS overrides fighting over:
+- .board-slot
+- .board-slot::before
+- .board-slot::after
+- .board-outer-rail
+- .board-energy-glass
+- .board-socket-bed
+- .board-fastener
+
+Do not leave old duplicate rules behind merely because the build still passes.
+
+If aaa-polish.css contains obsolete or conflicting board-frame rules, consolidate them into one authoritative section or appropriate component stylesheet.
+
+IMPORTANT:
+Do not change the board's visible dimensions or position during this refactor.
+
+FOURTH PHASE — GAMEPLAY CONTRACTS
+
+Make sure each major gameplay feature has a clearly identifiable implementation path.
+
+For example:
+
+Swipe
+→ input handler
+→ validated board action
+→ board state mutation
+→ renderer update
+
+Energy Burst
+→ power handler
+→ target selection
+→ board mutation
+→ cascade/refill
+→ score/energy
+→ multiplayer synchronization
+→ visual feedback
+
+Mega Strike
+→ power handler
+→ selected color
+→ board mutation
+→ cascade/refill
+→ score/energy
+→ multiplayer synchronization
+→ visual feedback
+
+Do not leave gameplay behavior split across unrelated UI/rendering code.
+
+FIFTH PHASE — TESTS
+
+Add or improve tests where necessary so every important gameplay system has a basic regression test.
+
+At minimum verify:
+- swap
+- match
+- cascade
+- refill
+- energy
+- Energy Burst
+- Mega Strike
+- Freeze
+- Time Shift
+- Rewind
+- swipe/input
+- invalid moves
+- energy costs
+- multiplayer action synchronization where applicable
+
+A build passing is NOT sufficient.
+
+Tests must verify actual state changes.
+
+SIXTH PHASE — AI MODIFICATION RULE
+
+Add a project-level developer/architecture document such as:
+
+CHRONO_CLASH_ARCHITECTURE.md
+
+It must clearly state:
+
+- what file owns each system
+- what files an AI should modify for common requests
+- what files must NOT be modified for each type of request
+- how rendering flows from state to screen
+- how input flows into gameplay
+- how powers mutate the board
+- which stylesheet is authoritative
+- how to verify a change
+- how to avoid duplicate implementations
+- how to avoid changing unrelated systems
+
+Include a simple table such as:
+
+REQUEST | PRIMARY OWNER | DO NOT MODIFY
+
+Board gameplay | [actual file] | renderer/UI
+Swipe | [actual file] | board renderer
+Energy Burst | [actual file] | CSS
+Mega Strike | [actual file] | renderer
+Board frame | [actual owner] | gameplay/session
+Gem artwork/rendering | [actual owner] | gameplay
+HUD | [actual owner] | board state
+
+Use the ACTUAL final files after the refactor. Do not invent paths.
+
+SEVENTH PHASE — VALIDATION
+
+After the refactor:
+
+1. typecheck
+2. production build
+3. restart the workflow
+4. open the live game
+5. verify the board is unchanged
+6. verify gems are unchanged
+7. verify swipe still works
+8. verify a normal match works
+9. verify powers still work
+10. verify HUD still works
+11. check browser console
+12. check git diff
+
+IMPORTANT SAFETY RULE:
+
+Do not perform a large rewrite in one uncontrolled operation.
+
+Make the smallest safe changes necessary.
+
+After each logical subsystem migration, verify that existing behavior still works.
+
+Do not claim success merely because files were reorganized.
+
+The game must still run correctly.
+
+FINAL REPORT:
+
+Provide:
+- old architecture
+- new architecture
+- exact files created
+- exact files changed
+- exact files deleted (if any)
+- ownership map
+- duplicate systems removed
+- CSS conflicts removed
+- gameplay paths clarified
+- tests added/fixed
+- verification results
+- any remaining architectural problems
+
+MOST IMPORTANT:
+
+The end result must make this project easier for ANY future AI agent to understand.
+
+If someone later says:
+
+"Upgrade the board frame"
+
+the project should have ONE obvious visual implementation path.
+
+If someone says:
+
+"Fix swipe"
+
+there should be ONE obvious input implementation path.
+
+If someone says:
+
+"Fix Energy Burst"
+
+there should be ONE obvious gameplay implementation path.
+
+Do not make visual improvements during this task.
+
+This task is to build the clean foundation FIRST.
