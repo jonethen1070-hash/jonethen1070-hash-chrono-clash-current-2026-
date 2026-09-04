@@ -100,6 +100,7 @@ describe("GameUI reskin assets", () => {
 
   it("keeps the rival board a compact square below the HUD and above energy", () => {
     const studio = readFileSync(join(process.cwd(), "src/styles/studio.css"), "utf8");
+    const polish = readFileSync(join(process.cwd(), "src/styles/aaa-polish.css"), "utf8");
     const main = readFileSync(join(process.cwd(), "src/main.ts"), "utf8");
     const boards = main.slice(main.indexOf('class="boards"'), main.indexOf('class="powers"'));
     expect(boards.indexOf('id="oppBoard"')).toBeLessThan(boards.indexOf('class="energy-wrap"'));
@@ -107,7 +108,7 @@ describe("GameUI reskin assets", () => {
     expect(studio).toContain("grid-template-rows: max-content max-content minmax(0, 1fr)");
     expect(studio).toContain("#match .rival-side .board-slot");
     expect(studio).toContain("min(28vw, 14dvh, 120px)");
-    expect(studio).toContain("width: min(100%, var(--board-inline), var(--board-block))");
+    expect(polish).toContain("width: min(100%, calc(100vw - var(--safe-left) - var(--safe-right) - 2px), 388px)");
     expect(studio).toContain("aspect-ratio: 1 / 1");
     expect(studio).toContain("#rewind .glyph");
     expect(studio).toContain("rgba(251,113,133,0.6)");

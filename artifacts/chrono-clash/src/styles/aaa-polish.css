@@ -6005,7 +6005,7 @@ html body #app #match .power:active {
   }
 
   html body #app #match .player-side .board-slot {
-    transform: rotateX(.6deg) translateZ(4px);
+    transform: translateZ(4px);
     border-width: 6px !important;
   }
 
@@ -6065,7 +6065,6 @@ html body #app #match.match-screen {
   --battle-height: 68px;
   --energy-height: 32px;
   --ability-height: 0px;
-  --board-label-height: 24px;
   --control-height: 66px;
 
   inset: 0 !important;
@@ -6089,7 +6088,6 @@ html body #app #match .match-stage {
     var(--battle-height)
     var(--energy-height)
     0px
-    var(--board-label-height)
     minmax(0, 1fr)
     var(--control-height) !important;
   grid-template-columns: minmax(0, 1fr) !important;
@@ -6127,15 +6125,19 @@ html body #app #match .boards > .player-side {
 }
 
 html body #app #match .player-side > .you-meta {
-  grid-row: 5 !important;
+  grid-row: 4 !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  visibility: hidden !important;
 }
 
 html body #app #match .player-side > .board-slot {
-  grid-row: 6 !important;
+  grid-row: 5 !important;
 }
 
 html body #app #match .powers {
-  grid-row: 7 !important;
+  grid-row: 6 !important;
 }
 
 html body #app #match .match-brand-row {
@@ -6263,7 +6265,7 @@ html body #app #match .player-side {
 
 html body #app #match .player-side .you-meta {
   width: 100% !important;
-  height: var(--board-label-height) !important;
+  height: 0 !important;
   min-height: 0 !important;
   margin: 0 !important;
   position: relative !important;
@@ -6271,18 +6273,19 @@ html body #app #match .player-side .you-meta {
   padding-block: 0 !important;
   display: flex !important;
   align-self: stretch !important;
+  visibility: hidden !important;
 }
 
 html body #app #match .player-side .board-slot {
-  width: min(100%, calc(100vw - 12px), 376px) !important;
+  width: min(100%, calc(100vw - var(--safe-left) - var(--safe-right) - 2px), 388px) !important;
   height: auto !important;
   min-width: 0 !important;
   min-height: 0 !important;
-  max-width: 100% !important;
+  max-width: min(100%, calc(100vw - var(--safe-left) - var(--safe-right) - 2px), 388px) !important;
   max-height: none !important;
   justify-self: center !important;
   align-self: start !important;
-  margin-top: 12px !important;
+  margin-top: 0 !important;
   aspect-ratio: 1 / 1 !important;
 }
 
@@ -6303,6 +6306,20 @@ html body #app #match .powers {
   padding: 0 1px !important;
   gap: 8px !important;
   transform: translateZ(2px) translateY(-6px) !important;
+}
+
+/* The metadata row is intentionally collapsed; combo/status text is retained
+   for legacy state updates without reserving a visible label slot. */
+html body #app #match .player-side .you-meta {
+  height: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+  visibility: hidden !important;
 }
 
 html body #app #match .powers .energy-attack {

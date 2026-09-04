@@ -353,8 +353,7 @@ app.innerHTML = `
           <b id="energyLabel">0 / 100</b>
         </div>
         <div class="player-side">
-          <div class="you-meta">
-            <span>YOUR BOARD</span>
+          <div class="you-meta" aria-hidden="true">
             <span class="shift-clock" id="shiftClock"></span>
             <span class="combo" id="playerCombo"></span>
             <span class="combo-damage" id="comboDamage"></span>
@@ -2367,6 +2366,10 @@ function frame(now: number): void {
     const fade = snap.screen === "results" ? Math.max(0, 1 - (now - resultAt) / 700) : 1;
     refreshLayout();
     renderer.draw(snap, layout.player, layout.opp, now, fade);
+    if (renderer.takeLandingImpacts() > 0) {
+      audio.play("place");
+      haptics.defer("swap", 1, now);
+    }
     drawStageBackdrop(ctx!, layout.canvas, layout.player);
     boardsDrawn = true;
   } else if (boardsDrawn && !showBoards) {

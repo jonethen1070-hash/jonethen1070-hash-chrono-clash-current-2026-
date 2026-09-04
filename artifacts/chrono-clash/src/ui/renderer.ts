@@ -82,6 +82,14 @@ interface Shockwave {
   width: number;
 }
 
+interface SocketPulse {
+  x: number;
+  y: number;
+  born: number;
+  life: number;
+  color: string;
+}
+
 interface FloatText {
   x: number;
   y: number;
@@ -107,6 +115,7 @@ class BoardView {
   live = new Set<number>();
   particles: Particle[] = [];
   shockwaves: Shockwave[] = [];
+  socketPulses: SocketPulse[] = [];
   floats: FloatText[] = [];
   seenFx = new Set<number>();
   shake = 0;
@@ -117,6 +126,7 @@ class BoardView {
     this.live.clear();
     this.particles = [];
     this.shockwaves = [];
+    this.socketPulses = [];
     this.floats = [];
     this.seenFx.clear();
     this.shake = 0;
@@ -146,6 +156,7 @@ export class BoardRenderer {
   private parentTop = 0;
   private playerLayer: CanvasRenderingContext2D | null = null;
   private oppLayer: CanvasRenderingContext2D | null = null;
+  private landingImpacts = 0;
   private fx: RenderFx = {
     quality: "high",
     animation: "high",
@@ -217,6 +228,12 @@ export class BoardRenderer {
     }
   }
 
+  takeLandingImpacts(): number {
+    const count = this.landingImpacts;
+    this.landingImpacts = 0;
+    return count;
+  }
+
   draw(
     snap: GameSnapshot,
     playerRect: DOMRect,
@@ -254,6 +271,7 @@ export class BoardRenderer {
         this.oppView.reset();
         this.bolts = [];
         this.combatFloats = [];
+        this.landingImpacts = 0;
         this.wellCache.clear();
       }
       this.lastScreen = snap.screen;
@@ -489,6 +507,7 @@ export class BoardRenderer {
     ctx.restore();
 
     this.blitWells(ctx, ox, oy, size, cell, isPlayer);
+    this.drawSocketPulses(view, now);
 
     ctx.save();
     if (isPlayer) chamferedRect(ctx, ox + FRAME, oy + FRAME, size - FRAME * 2, 8);
@@ -671,6 +690,19 @@ export class BoardRenderer {
                   tile.settleX = (moveX / moveDistance) * settle;
                   tile.settleY = (moveY / moveDistance) * settle;
                   tile.scale = Math.min(1.018, tile.scale + 0.018);
+                  if (isPlayer) {
+                    this.landingImpacts += 1;
+                    view.socketPulses.push({
+                      x: tile.toX + cell / 2,
+                      y: tile.toY + cell / 2,
+                      born: now,
+                      life: 64,
+                      color: "#7CF5FF",
+                    });
+                    if (view.socketPulses.length > 12) {
+                      view.socketPulses.splice(0, view.socketPulses.length - 12);
+                    }
+                  }
                 } else if (anim !== "low" && Math.abs(tile.fromY - tile.toY) > cell * 0.4) {
                   tile.scale = Math.min(1.025, tile.scale + 0.018);
                 }
@@ -886,7 +918,7 @@ export class BoardRenderer {
       const hinted = !tile.dying && this.hintBits[tile.r * COLS + tile.c] === 1;
       const bad = invalid.some((p) => p && p.r === tile.r && p.c === tile.c);
       const wobble = bad ? Math.sin(now / 18) * 3.2 : 0;
-      const lift = sel ? 1.045 : 1;
+      const lift = sel ? 1.026 : 1;
       const restX = ix + GAP + tile.c * (cell + GAP);
       const restY = iy + GAP + tile.r * (cell + GAP);
       const settleT = tile.settleDur > 0 ? Math.min(1, tile.settleAge / tile.settleDur) : 1;
@@ -1090,6 +1122,26 @@ export class BoardRenderer {
       ctx.fill();
     }
     ctx.restore();
+  }
+
+  private drawSocketPulses(view: BoardView, now: number): void {
+    if (!view.socketPulses.length) return;
+    view.socketPulses = view.socketPulses.filter((pulse) => now - pulse.born < pulse.life);
+    for (const pulse of view.socketPulses) {
+      const progress = Math.max(0, Math.min(1, (now - pulse.born) / pulse.life));
+      const envelope = Math.sin(Math.PI * progress);
+      const radius = this.lastPlayerCell * (0.27 + progress * 0.1);
+      this.ctx.save();
+      this.ctx.globalAlpha = envelope * 0.42;
+      this.ctx.strokeStyle = pulse.color;
+      this.ctx.lineWidth = Math.max(1, this.lastPlayerCell * 0.028);
+      this.ctx.shadowColor = pulse.color;
+      this.ctx.shadowBlur = this.lastPlayerCell * 0.08;
+      this.ctx.beginPath();
+      this.ctx.arc(pulse.x, pulse.y, radius, 0, Math.PI * 2);
+      this.ctx.stroke();
+      this.ctx.restore();
+    }
   }
 
   private blitWells(ctx: CanvasRenderingContext2D, ox: number, oy: number, size: number, cell: number, isPlayer: boolean): void {

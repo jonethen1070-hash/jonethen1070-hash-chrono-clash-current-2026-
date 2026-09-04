@@ -7,13 +7,6 @@ function studioCss(): string {
   return readFileSync("src/styles/studio.css", "utf8");
 }
 
-function playerBoardSlotCss(studio: string): string {
-  const start = studio.indexOf("#match .player-side .board-slot {\n  flex:");
-  expect(start).toBeGreaterThan(-1);
-  const end = studio.indexOf("#match .player-side .board-slot::before", start);
-  return studio.slice(start, end);
-}
-
 function rivalBoardSlotCss(studio: string): string {
   const start = studio.indexOf("#match .rival-side .board-slot {\n  flex:");
   expect(start).toBeGreaterThan(-1);
@@ -39,28 +32,16 @@ describe("production responsive board layout", () => {
     expect(main).toContain('setProperty("--app-vh"');
   });
 
-  it("sizes YOUR BOARD to the padded viewport instead of a fixed pixel width", () => {
-    const studio = studioCss();
-    expect(studio).toContain("Production lock: 8x8 YOUR BOARD is a 1:1 square sized to the padded viewport");
-    expect(studio).toContain("--board-inline: min(100%, calc(100dvw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)))");
-    expect(studio).toContain("padding-left: var(--match-inline-pad)");
-    expect(studio).toContain("padding-right: var(--match-inline-pad-end)");
-    expect(studio).toContain("--match-inline-pad: max(2px, env(safe-area-inset-left, 0px))");
-    expect(studio).toContain("env(safe-area-inset-bottom, 0px)");
-    expect(studio).toContain("--app-vh");
-    expect(studio).toContain("100svh");
-    const slot = playerBoardSlotCss(studio);
-    expect(slot).toContain("width: min(100%, var(--board-inline), var(--board-block))");
-    expect(slot).toContain("max-width: min(100%, var(--board-inline), var(--board-block))");
-    expect(slot).toContain("--board-block: calc(100cqh - 14px)");
-    expect(slot).toContain("max-height: var(--board-block)");
-    expect(slot).toContain("height: auto");
-    expect(slot).toContain("aspect-ratio: 1 / 1");
-    expect(slot).toContain("margin-inline: auto");
-    expect(slot).toContain("min-height: 0");
-    expect(slot).not.toMatch(/width:\s*\d+px/);
-    expect(slot).not.toMatch(/max-width:\s*\d+px/);
-    expect(slot).not.toMatch(/height:\s*\d+px/);
+  it("sizes the player board to the recovered safe viewport space", () => {
+    const css = readFileSync("src/styles/aaa-polish.css", "utf8");
+    expect(css).toContain("--game-pad-x: 4px");
+    expect(css).toContain("grid-template-rows:");
+    expect(css).toContain("var(--energy-height)\n    0px\n    minmax(0, 1fr)");
+    expect(css).toContain("width: min(100%, calc(100vw - var(--safe-left) - var(--safe-right) - 2px), 388px)");
+    expect(css).toContain("max-width: min(100%, calc(100vw - var(--safe-left) - var(--safe-right) - 2px), 388px)");
+    expect(css).toContain("height: auto !important");
+    expect(css).toContain("aspect-ratio: 1 / 1 !important");
+    expect(css).toContain("margin-top: 0 !important");
   });
 
   it("scales gem cells proportionally with board size", () => {
@@ -114,7 +95,20 @@ describe("production responsive board layout", () => {
     expect(match.indexOf('id="playerGems"')).toBeGreaterThan(match.indexOf('id="playerBoard"'));
     expect(match.indexOf('id="playerGems"')).toBeLessThan(match.indexOf('id="stage"'));
     expect(match.indexOf('id="oppGems"')).toBeGreaterThan(match.indexOf('id="oppBoard"'));
-    expect(match.indexOf('id="oppGems"')).toBeLessThan(match.indexOf('id="playerBoard"'));
+    expect(match.indexOf('id="oppGems"')).toBeGreaterThan(match.indexOf('id="playerBoard"'));
+  });
+
+  it("removes the board label and gives the square board the recovered space", () => {
+    const main = readFileSync("src/main.ts", "utf8");
+    const match = main.slice(main.indexOf('id="match"'), main.indexOf('id="sheet"'));
+    expect(match).not.toContain("YOUR BOARD");
+    const css = readFileSync("src/styles/aaa-polish.css", "utf8");
+    expect(css).toContain("grid-row: 4 !important");
+    expect(css).toContain("grid-row: 5 !important");
+    expect(css).toContain("grid-row: 6 !important");
+    expect(css).toContain("width: min(100%, calc(100vw - var(--safe-left) - var(--safe-right) - 2px), 388px)");
+    expect(css).toContain("388px");
+    expect(css).toContain("margin-top: 0 !important");
   });
 
   it("paints gems on in-slot canvases so Android frames cannot hide them", () => {

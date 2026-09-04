@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { BOARD_GAP, liveGemDrawOrigin } from "../src/ui/renderer";
 import {
@@ -74,5 +75,16 @@ describe("occupied cells still have a gem pose", () => {
         expect(liveGemDrawOrigin(tx, ty, tx, ty, 40, false)).toEqual({ x: tx, y: ty });
       }
     }
+  });
+});
+
+describe("landing feedback", () => {
+  it("keeps landing feedback renderer-owned and localized", () => {
+    const renderer = readFileSync("src/ui/renderer.ts", "utf8");
+    expect(renderer).toContain("takeLandingImpacts");
+    expect(renderer).toContain("drawSocketPulses");
+    expect(renderer).toContain("life: 64");
+    expect(renderer).toContain("x: tile.toX + cell / 2");
+    expect(renderer).toContain("const lift = sel ? 1.026 : 1");
   });
 });
