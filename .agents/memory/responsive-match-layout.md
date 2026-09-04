@@ -15,8 +15,8 @@ When the match stage uses perspective, validate transformed `getBoundingClientRe
 
 **How to apply:** Keep the action strip within its grid row with a small in-flow visual correction, then assert every visible control's transformed bounds at the supported phone viewport sizes.
 
-The player board must not use horizontal overscan to reclaim space: a width ceiling can be larger than the phone, but the active board width should remain constrained by its parent and safe viewport margins.
+The player board should not use broad horizontal overscan to reclaim space. A tiny gutter reclaim is acceptable only when the transformed board bounds are explicitly measured and remain inside both viewport edges.
 
-**Why:** Centered overscan made the enlarged board visually square while allowing a few pixels of right-edge overflow on narrower phones.
+**Why:** The beveled board's perspective transform expands its rendered rectangle beyond the CSS box, so even a mathematically centered enlargement can clip the right edge by a pixel.
 
-**How to apply:** Prefer a parent-width/safe-area clamp, retain the square aspect ratio, and measure both edges as well as width and height at 360px and 390px widths.
+**How to apply:** Keep the square aspect ratio, cap any reclaimed gutter with safe-area math, and measure transformed left/right edges plus width/height at 360px and 390px widths.

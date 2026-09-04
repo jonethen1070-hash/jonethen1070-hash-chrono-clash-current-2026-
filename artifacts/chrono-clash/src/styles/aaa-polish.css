@@ -9273,3 +9273,12 @@ html body #app #match .player-side .board-socket-bed {
     inset 0 0 0 5px rgba(5, 22, 28, .94),
     inset 0 -1px 0 rgba(117, 223, 232, .1) !important;
 }
+
+/* Width is the limiting dimension on supported phones. Reclaim the small
+   horizontal gutter for the square board without changing the HUD or controls. */
+@media (max-width: 600px) {
+  html body #app #match .player-side .board-slot {
+    width: min(calc(100% + 2px), calc(100vw - var(--safe-left) - var(--safe-right) - 4px), 388px) !important;
+    max-width: min(calc(100% + 2px), calc(100vw - var(--safe-left) - var(--safe-right) - 4px), 388px) !important;
+  }
+}

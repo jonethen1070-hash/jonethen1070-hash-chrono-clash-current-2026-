@@ -18,6 +18,7 @@ export { LIVE_GEM_MAX_IN_CELL_DROP, liveGemDrawOrigin } from "./gemMotion";
 const GAP = BOARD_GAP;
 const FRAME = BOARD_FRAME;
 const MATCH_IMPACT_MS = 80;
+const GEM_VISUAL_SCALE = 1.06;
 const MATCH_STAGGER_MIN_MS = 15;
 const MATCH_STAGGER_STEP_MS = 9;
 const MATCH_STAGGER_MAX_MS = MATCH_STAGGER_MIN_MS + MATCH_STAGGER_STEP_MS * 2;
@@ -2146,7 +2147,7 @@ export class BoardRenderer {
     const color = COLORS[tile.color - 1] ?? "#FFFFFF";
     const pulse =
       selected && this.fx.animation !== "low" && !this.fx.reducedMotion ? 1 + Math.sin(now / 140) * 0.03 : 1;
-    const visScale = tile.dying ? tile.scale : Math.min(tile.scale, 1.04);
+    const visScale = Math.min(tile.scale * GEM_VISUAL_SCALE, 1.1);
     let travelLift = 1;
     if (!tile.dying && tile.moveKind !== "idle" && tile.moveDur > 0 && !this.fx.reducedMotion) {
       const t = Math.min(1, tile.moveAge / tile.moveDur);
