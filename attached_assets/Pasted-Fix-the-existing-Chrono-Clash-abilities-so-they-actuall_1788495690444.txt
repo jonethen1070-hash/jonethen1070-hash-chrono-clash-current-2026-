@@ -1,0 +1,98 @@
+Fix the existing Chrono Clash abilities so they actually perform the actions described on their cards.
+
+IMPORTANT: This is a GAMEPLAY FUNCTIONALITY fix only.
+Do not change the visual design.
+
+ABILITY 1 — ENERGY BURST
+
+The card currently says:
+“Destroy 3x3 area”
+
+Make the existing Energy Burst ability actually:
+- activate when the player has enough energy
+- select/use the intended board target according to the existing game design
+- destroy exactly the intended 3×3 group of board cells around that target
+- correctly remove the affected gems from the actual game state
+- trigger the normal cascade/refill/match-resolution system
+- correctly update the player's board
+- correctly update score/energy/cooldowns if those systems already exist
+- synchronize the result with the opponent/game session if the game architecture requires it
+
+Do NOT merely play an animation.
+The actual underlying board state must change.
+
+ABILITY 2 — MEGA STRIKE
+
+The card currently says:
+“Destroy all gems of a color”
+
+Make the existing Mega Strike ability actually:
+- activate when the player has enough energy
+- determine the selected/intended gem color using the existing ability interaction
+- find ALL gems of that color on the player's actual board
+- remove all matching-color gems from the underlying game state
+- trigger the normal cascade/refill/match-resolution system
+- correctly update score/energy/cooldowns if those systems already exist
+- synchronize the result with the opponent/game session if required
+
+Do NOT merely highlight the gems or play a visual effect.
+The actual board state must change.
+
+IMPORTANT:
+First inspect the existing ability implementation, game-state/session logic, board mutation functions, and input handling.
+
+Reuse the existing architecture.
+Do not create a second ability system.
+Do not duplicate board state.
+Do not bypass the normal match/cascade/refill logic.
+
+Preserve:
+- existing 8×8 board
+- gem artwork
+- board geometry
+- HUD
+- ability-card appearance
+- touch/swipe gameplay
+- CPU behavior
+- networking
+- authentication
+- persistence
+- existing animations unless needed for the ability to function
+
+Do NOT change renderer.ts for visual reasons.
+Do NOT redesign the cards.
+
+TEST THE ACTUAL GAME:
+
+For Energy Burst:
+1. Start a real match.
+2. Accumulate enough energy.
+3. Activate Energy Burst.
+4. Use it on a real board position.
+5. Verify that the underlying board actually loses the correct 3×3 cells.
+6. Verify gems fall/refill through the existing system.
+7. Verify the board remains playable afterward.
+
+For Mega Strike:
+1. Start a real match.
+2. Accumulate enough energy.
+3. Activate Mega Strike.
+4. Select a real gem color using the existing interaction.
+5. Verify EVERY gem of that color is actually removed from the board.
+6. Verify cascade/refill occurs.
+7. Verify the board remains playable afterward.
+
+Do not claim success from typecheck/build alone.
+
+The final verification must demonstrate that the BOARD STATE actually changes when each ability is used.
+
+Report:
+- exact files changed
+- existing ability functions reused
+- Energy Burst behavior verified
+- Mega Strike behavior verified
+- whether energy costs are enforced
+- whether cascade/refill works
+- whether multiplayer/session state remains synchronized
+
+Do not modify unrelated systems.
