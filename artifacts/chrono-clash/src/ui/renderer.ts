@@ -224,6 +224,7 @@ export class BoardRenderer {
       if (!tile) continue;
       tile.flash = Math.max(tile.flash, 0.55);
       tile.glow = Math.max(tile.glow, 0.4);
+      if (at === a) tile.scale = Math.max(tile.scale, 1.035);
       this.impactSpark(this.playerView, tile.x + cell / 2, tile.y + cell / 2, tile.color, cell);
     }
   }
@@ -686,10 +687,10 @@ export class BoardRenderer {
                   const moveDistance = Math.hypot(moveX, moveY) || 1;
                   const settle = Math.min(3.2, Math.max(2, moveDistance * 0.055));
                   tile.settleAge = 0;
-                  tile.settleDur = 0.045;
+                  tile.settleDur = 0.052;
                   tile.settleX = (moveX / moveDistance) * settle;
                   tile.settleY = (moveY / moveDistance) * settle;
-                  tile.scale = Math.min(1.018, tile.scale + 0.018);
+                  tile.scale = 0.985;
                   if (isPlayer) {
                     this.landingImpacts += 1;
                     view.socketPulses.push({
@@ -731,6 +732,7 @@ export class BoardRenderer {
         }
         if (tile.settleAge < tile.settleDur) tile.settleAge += dt;
         tile.scale += (1 - tile.scale) * Math.min(1, dt * 16);
+        if (Math.abs(tile.scale - 1) < 0.0015) tile.scale = 1;
         tile.glow *= 0.86;
         tile.flash *= 0.9;
         tile.alpha = 1;

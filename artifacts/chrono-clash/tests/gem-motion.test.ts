@@ -17,12 +17,13 @@ describe("crystal gem motion curves", () => {
     expect(easeOutCubic(0)).toBe(0);
     expect(easeOutCubic(1)).toBe(1);
     expect(easeOutCubic(0.5)).toBeGreaterThan(0.5);
+    expect(gemTravelEase("swap", 0.125)).toBeGreaterThan(0.3);
     expect(easeCrystalFall(0)).toBe(0);
     expect(easeCrystalFall(1)).toBeCloseTo(1, 5);
     expect(easeCrystalFall(0.2)).toBeLessThan(0.2);
     expect(easeInOutCubic(0.25)).toBeLessThan(0.25);
     expect(easeInOutCubic(0.75)).toBeGreaterThan(0.75);
-    expect(gemTravelEase("swap", 0.5)).toBe(easeInOutCubic(0.5));
+    expect(gemTravelEase("swap", 0.5)).toBe(easeOutCubic(0.5));
     expect(gemTravelEase("fall", 0.5)).toBe(easeCrystalFall(0.5));
   });
 
@@ -86,5 +87,8 @@ describe("landing feedback", () => {
     expect(renderer).toContain("life: 64");
     expect(renderer).toContain("x: tile.toX + cell / 2");
     expect(renderer).toContain("const lift = sel ? 1.026 : 1");
+    expect(renderer).toContain("tile.scale = Math.max(tile.scale, 1.035)");
+    expect(renderer).toContain("tile.settleDur = 0.052");
+    expect(renderer).toContain("tile.scale = 0.985");
   });
 });

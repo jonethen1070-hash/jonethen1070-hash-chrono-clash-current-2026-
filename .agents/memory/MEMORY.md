@@ -3,3 +3,4 @@
 - [Idle visual cleanup](idle-visual-cleanup.md) — ambient match texture can come from fixed pseudo-elements outside the decorative space-layer tree.
 - [Mobile performance validation](mobile-performance-validation.md) — validate touch completion/cancellation and scroll locking alongside event-driven layout and cached static canvas work.
 - [Vitest config isolation](chrono-clash-test-runner.md) — Chrono Clash tests need a dedicated Vitest config because the app Vite config requires injected PORT and BASE_PATH.
+- [Swap motion visibility](swap-motion-visibility.md) — a mathematically smooth swap can look static if its first frames barely leave the source socket.

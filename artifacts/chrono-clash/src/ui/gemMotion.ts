@@ -31,7 +31,9 @@ export function easeCrystalFall(t: number): number {
 }
 
 export function gemTravelEase(kind: GemMoveKind, t: number): number {
-  return kind === "swap" ? easeInOutCubic(t) : easeCrystalFall(t);
+  // Swaps need immediate visual travel after a finger commits; the existing
+  // landing settle supplies the controlled final lock without a slow launch.
+  return kind === "swap" ? easeOutCubic(t) : easeCrystalFall(t);
 }
 
 export function gemTravelDuration(
