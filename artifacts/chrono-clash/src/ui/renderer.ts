@@ -1826,22 +1826,7 @@ export class BoardRenderer {
   }
 
   private drawFloats(view: BoardView, now: number): void {
-    const ctx = this.ctx;
     view.floats = view.floats.filter((f) => now - f.born < f.life);
-    ctx.save();
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    for (const f of view.floats) {
-      const t = (now - f.born) / f.life;
-      const pop = t < 0.14 ? 0.55 + (t / 0.14) * 0.55 : t > 0.72 ? 1 - (t - 0.72) * 0.35 : 1;
-      ctx.globalAlpha = Math.max(0, 1 - t * t);
-      ctx.fillStyle = f.color;
-      ctx.shadowColor = f.color;
-      ctx.shadowBlur = 9;
-      ctx.font = `800 ${Math.max(10, f.size * pop)}px Outfit, Trebuchet MS, sans-serif`;
-      ctx.fillText(f.text, f.x, f.y - t * f.rise);
-    }
-    ctx.restore();
   }
 
   private drawAtmosphere(w: number, h: number, last10: boolean, danger: boolean, now: number): void {
