@@ -82,14 +82,14 @@ html body #app #match .player-side .board-outer-rail {
   border-bottom-width: 9px !important;
   border-radius: 15px !important;
   clip-path: polygon(
-    12px 0,
-    calc(100% - 12px) 0,
-    100% 12px,
-    100% calc(100% - 12px),
-    calc(100% - 12px) 100%,
-    12px 100%,
-    0 calc(100% - 12px),
-    0 12px
+    18px 0,
+    calc(100% - 18px) 0,
+    100% 18px,
+    100% calc(100% - 18px),
+    calc(100% - 18px) 100%,
+    18px 100%,
+    0 calc(100% - 18px),
+    0 18px
   ) !important;
   background:
     radial-gradient(circle at 8px 8px, #ffffff 0 1.5px, #e2ffff 1.5px 3.5px, #5debf6 3.5px 6px, rgba(0, 217, 255, .92) 6px 10px, transparent 16px) top left / 30px 30px no-repeat,
