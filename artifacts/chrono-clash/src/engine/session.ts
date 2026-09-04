@@ -1304,7 +1304,6 @@ export class GameSession {
       this.pushFx("pressure", "PRESSURE", now, { side: "opponent", combo });
       this.pushFx("attack", "TIME STRIKE", now, { side: "player", combo: Math.max(4, combo) });
     } else {
-      this.playerLockedUntil = Math.max(this.playerLockedUntil, now + PRESSURE_MS);
       this.pushFx("pressure", "RIVAL PRESSURE", now, { side: "player", combo });
       this.pushFx("attack", "RIVAL STRIKE", now, { side: "opponent", combo: Math.max(4, combo) });
     }
@@ -1349,14 +1348,12 @@ export class GameSession {
     if (this.rng() > chance) return;
     if (this.opponent.energy >= ENERGY_TIMESHIFT && this.mode === "time" && playerLeading && this.rng() < 0.45) {
       this.opponent.energy = Math.max(0, this.opponent.energy - ENERGY_TIMESHIFT);
-      this.playerLockedUntil = Math.max(this.playerLockedUntil, now + RIVAL_FREEZE_MS);
       this.pausedAccum -= 3000;
       this.rivalPowerCool = now + 8000;
       this.pushFx("power", "RIVAL SHIFT", now, { side: "player" });
       return;
     }
     this.opponent.energy = Math.max(0, this.opponent.energy - ENERGY_FREEZE);
-    this.playerLockedUntil = Math.max(this.playerLockedUntil, now + RIVAL_FREEZE_MS);
     this.rivalPowerCool = now + 7000;
     this.pushFx("power", "RIVAL FREEZE", now, { side: "player" });
   }
