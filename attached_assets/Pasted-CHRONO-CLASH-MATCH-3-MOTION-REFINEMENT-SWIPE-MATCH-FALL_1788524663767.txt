@@ -1,0 +1,658 @@
+CHRONO CLASH — MATCH-3 MOTION REFINEMENT
+SWIPE + MATCH + FALL MUST FEEL PHYSICALLY SMOOTH
+
+ROLE:
+Act as a senior mobile match-3 gameplay engineer specializing in touch interaction, animation curves, motion design and game feel.
+
+IMPORTANT:
+Do NOT create images.
+Do NOT redesign anything.
+Do NOT add new artwork.
+
+The current game is functionally correct.
+
+The problem is GAME FEEL.
+
+The three motion phases currently do not feel like one polished physical system:
+
+1. SWIPE
+2. MATCH / BREAK
+3. FALL
+
+Make these three phases feel continuous, deliberate and premium.
+
+==================================================
+NON-NEGOTIABLE PRESERVATION
+==================================================
+
+DO NOT CHANGE:
+
+- board dimensions
+- 8×8 grid
+- gem artwork
+- gem size
+- gem colors
+- board frame
+- HUD
+- power buttons
+- CPU
+- score rules
+- energy rules
+- match rules
+- cascade rules
+- existing falling destination logic
+- existing VFX assets
+- layout
+
+DO NOT touch unrelated CSS.
+
+DO NOT add global CSS filters.
+
+NO IMAGE GENERATION.
+
+==================================================
+IMPORTANT PLAYER-CONTROL RULE
+==================================================
+
+The player must NEVER feel frozen.
+
+Do not introduce a visible "LOCKED" state.
+
+Do not display LOCKED.
+
+Do not disable the board simply because VFX is playing.
+
+If the game engine needs to protect state while resolving a cascade, use an internal queued-input/state mechanism rather than making the player feel frozen.
+
+The touch system must remain responsive.
+
+==================================================
+A. SWIPE — TRUE DIRECT MANIPULATION
+==================================================
+
+This is the highest priority.
+
+The selected gem must be physically attached to the finger.
+
+DO NOT use:
+
+pointerdown
+→ wait
+→ threshold
+→ play a fixed swap animation
+
+Instead:
+
+pointerdown
+→ immediately capture gem
+→ pointermove continuously updates visual gem position
+→ finger controls gem position
+→ neighboring gem responds
+→ threshold crossed
+→ exchange begins from CURRENT visual positions
+→ magnetic settle into socket
+
+Coordinate model:
+
+For each selected gem:
+
+cellCenterX = boardOriginX + col * cellSize + cellSize / 2
+cellCenterY = boardOriginY + row * cellSize + cellSize / 2
+
+During drag:
+
+dragX = pointerX - grabOffsetX
+dragY = pointerY - grabOffsetY
+
+Clamp the drag vector to the selected neighboring-cell direction.
+
+The gem's rendered position must be derived from this drag position EVERY FRAME.
+
+Do NOT wait for pointerup.
+
+Do NOT animate from the original cell after the threshold.
+
+==================================================
+B. DRAG RESPONSE
+==================================================
+
+Use extremely light smoothing only.
+
+Target:
+
+visualPosition += (targetPosition - visualPosition) * responseFactor
+
+Use a frame-rate independent response.
+
+Approximate response time:
+20–35ms.
+
+The player should NOT perceive the renderer chasing the finger.
+
+Do NOT use heavy lerp smoothing such as 100ms+.
+
+Slow finger:
+→ gem moves slowly with finger.
+
+Fast finger:
+→ gem responds immediately.
+
+Reverse direction:
+→ gem reverses naturally.
+
+The finger is the source of truth.
+
+==================================================
+C. CELL-SCALE GEOMETRY
+==================================================
+
+Do not make the gem move more than the neighboring cell.
+
+For a horizontal drag:
+
+normalizedDrag = clamp(
+  (pointerX - startX) / cellSize,
+  -1,
+  1
+)
+
+For vertical:
+
+normalizedDrag = clamp(
+  (pointerY - startY) / cellSize,
+  -1,
+  1
+)
+
+The selected gem may visually travel continuously through:
+
+0.0 → 0.25 → 0.5 → 0.75 → 1.0 cell
+
+rather than jumping directly:
+
+0 → 1.
+
+This is essential.
+
+==================================================
+D. NEIGHBORING GEM RESPONSE
+==================================================
+
+The neighboring gem must respond continuously as the selected gem approaches it.
+
+Example:
+
+selected gem = A
+neighbor = B
+
+As A moves toward B:
+
+A position:
+0.00 → 0.20 → 0.40 → 0.60 → 0.80 → 1.00
+
+B position:
+1.00 → 0.80 → 0.60 → 0.40 → 0.20 → 0.00
+
+Do not allow B to disappear and reappear.
+
+Both visual positions must interpolate continuously.
+
+==================================================
+E. SWAP COMMIT
+==================================================
+
+When the existing valid threshold is crossed:
+
+Commit the logical board exchange.
+
+BUT preserve the current visual positions.
+
+The visual animation must continue FROM:
+
+CURRENT DRAG POSITION
+
+not from:
+
+ORIGINAL SOCKET CENTER.
+
+This is critical.
+
+Bad:
+
+original socket
+→ reset
+→ tween
+→ destination
+
+Good:
+
+finger position
+→ current crystal position
+→ smooth continuation
+→ destination socket
+
+==================================================
+F. MAGNETIC SOCKET SETTLE
+==================================================
+
+Use a short final magnetic settle.
+
+Target:
+60–90ms.
+
+Only the final ~10–15% of travel should use this magnetic easing.
+
+Use a smooth cubic ease-out / critically damped style.
+
+No hard snap.
+
+No overshoot.
+
+No bounce.
+
+No sudden acceleration.
+
+The crystal should feel like it is being attracted into a precision socket.
+
+==================================================
+G. INVALID SWAP
+==================================================
+
+If the move is invalid:
+
+Do not teleport the gem back.
+
+Animate from the CURRENT finger-driven position back to the original socket.
+
+Target:
+140–180ms.
+
+Use smooth ease-out.
+
+The player should feel:
+
+"I pushed it, but the board rejected it."
+
+Not:
+
+"The gem disappeared and returned."
+
+==================================================
+H. MATCH TRANSITION
+==================================================
+
+After a successful swap:
+
+DO NOT abruptly switch from movement to destruction.
+
+Required sequence:
+
+SWAP FINISH
+↓
+SOFT SOCKET SETTLE
+↓
+MATCH RECOGNITION
+↓
+CRYSTAL REACTION
+↓
+BREAK
+↓
+REMOVE
+↓
+FALL
+
+Match recognition:
+
+60–90ms.
+
+During recognition:
+- tiny compression
+- internal brightness
+- facet emphasis
+- subtle energy pulse
+
+Do NOT freeze the entire board.
+
+==================================================
+I. CRYSTAL BREAK
+==================================================
+
+The gem should not simply disappear.
+
+Target:
+
+100–150ms destruction presentation.
+
+Use the existing VFX infrastructure.
+
+Sequence:
+
+0–40ms:
+compression / energy buildup
+
+40–90ms:
+fracture / facet flash
+
+90–150ms:
+crystal fragments + small energy particles
+
+Then remove the gem.
+
+The break must feel like the crystal itself is breaking.
+
+Not:
+
+opacity → 0
+
+==================================================
+J. MATCH GROUP TIMING
+==================================================
+
+Do not destroy every matched gem on exactly the same frame.
+
+Use a tiny stagger:
+
+10–25ms between nearby matched gems.
+
+Example:
+
+Gem 1:
+0ms
+
+Gem 2:
+15ms
+
+Gem 3:
+30ms
+
+This creates a connected chain reaction.
+
+Do NOT make the stagger slow enough to feel sequential or laggy.
+
+==================================================
+K. FALLING — PRESERVE CURRENT LOGIC BUT REFINEMENT MUST BE DISTANCE BASED
+==================================================
+
+Do NOT redesign the existing gravity system.
+
+However, verify that each gem's visual fall is based on DISTANCE TRAVELLED, not one generic duration.
+
+Movement distance:
+
+1 cell
+2 cells
+3 cells
+4 cells
+5 cells
+
+should produce proportionally longer travel.
+
+Use a consistent fall-speed model.
+
+Target starting range:
+
+approximately 150–220ms per cell,
+
+then tune from LIVE DEVICE observation.
+
+Do NOT make a 5-cell fall take the same time as a 1-cell fall.
+
+Do NOT animate a 4-cell fall as four separate stop/start one-cell animations.
+
+Calculate each gem's complete destination and animate the full trajectory continuously.
+
+This is critical for smoothness.
+
+==================================================
+L. FALL CURVE
+==================================================
+
+Use a physically readable gravity curve.
+
+Recommended model:
+
+normalizedTime = t / duration
+
+position = start + distance * easeOutQuadratic(normalizedTime)
+
+or an equivalent smooth gravity-inspired curve.
+
+The gem should:
+
+START:
+controlled
+
+MIDDLE:
+accelerate naturally
+
+END:
+decelerate into the socket
+
+Avoid:
+- linear movement
+- sudden velocity changes
+- multiple micro-tweens
+- robotic stepping
+
+==================================================
+M. LANDING
+==================================================
+
+When a falling gem reaches its destination:
+
+Use a very subtle landing response.
+
+Approximately:
+
+scale:
+1.00 → 1.015 → 1.00
+
+duration:
+40–60ms
+
+Optional:
+1px visual settle.
+
+Do NOT bounce aggressively.
+
+The landing should feel weighted, not cartoonish.
+
+==================================================
+N. CASCADE CONTINUITY
+==================================================
+
+When falling produces another match:
+
+Do not create a visible dead stop.
+
+Required:
+
+fall
+→ land
+→ match recognition
+→ break
+→ next fall
+
+The next cascade should feel like the same physical system continuing.
+
+Avoid:
+
+fall
+→ FREEZE
+→ sudden explosion
+
+==================================================
+O. FRAME-RATE INDEPENDENCE
+==================================================
+
+All motion must be based on elapsed time, not frame count.
+
+Use:
+
+deltaTime
+
+or equivalent time-based interpolation.
+
+The result must remain consistent at:
+
+30fps
+60fps
+90fps
+120fps
+
+Do not make animation speed dependent on frame rate.
+
+==================================================
+P. NO TELEPORTING
+==================================================
+
+Search the renderer for any state transition where a gem's:
+
+x/y
+
+is immediately overwritten with the destination position.
+
+For animated states:
+
+NEVER:
+
+x = destinationX
+y = destinationY
+
+before the visual animation completes.
+
+Instead maintain:
+
+fromX
+fromY
+toX
+toY
+elapsed
+duration
+motionType
+
+and render the interpolated position every frame.
+
+==================================================
+Q. LIVE DEVICE TESTING
+==================================================
+
+Do NOT judge this from unit tests alone.
+
+Actually run the game at:
+
+390×844
+
+Test:
+
+1. very slow horizontal swipe
+2. normal horizontal swipe
+3. very fast horizontal swipe
+4. very slow vertical swipe
+5. fast vertical swipe
+6. invalid swipe
+7. 3-gem match
+8. 4+ gem match
+9. two-wave cascade
+10. three-wave cascade
+
+Watch the actual crystals.
+
+SUCCESS CONDITION:
+
+The player should feel:
+
+TOUCH
+→ GRAB
+→ DRAG
+→ PUSH
+→ MAGNETIC SOCKET
+→ MATCH
+→ CRYSTAL BREAK
+→ FALL
+
+as ONE continuous physical experience.
+
+There must be no perceptible:
+
+jump
+teleport
+lag
+hard snap
+dead pause
+abrupt disappearance
+robotic movement
+
+==================================================
+RUNTIME MEASUREMENT
+==================================================
+
+Capture actual measured values from the live runtime:
+
+- pointer-to-gem visual latency
+- drag response time
+- swap completion duration
+- magnetic settle duration
+- match recognition duration
+- crystal break duration
+- fall milliseconds per cell
+- landing settle duration
+
+Do not simply report the intended values.
+
+Report what the running game actually uses.
+
+==================================================
+STRICT SCOPE
+==================================================
+
+Change ONLY:
+
+- gem drag motion
+- gem swap motion
+- match transition timing
+- gem destruction motion
+- existing gem fall interpolation ONLY if needed to satisfy the continuous distance-based requirement
+
+Do NOT modify:
+- gameplay rules
+- board
+- HUD
+- gem artwork
+- layout
+- powers
+- CPU
+- score
+- energy
+- unrelated VFX
+- CSS
+- permanent board frame
+
+==================================================
+FINAL VALIDATION
+==================================================
+
+Run typecheck and build.
+
+Run only the focused motion/match tests relevant to these changes.
+
+Then perform the LIVE 390×844 tests.
+
+Do not report "smooth" because the tests pass.
+
+Report exactly:
+
+1. Files changed
+2. Old vs new swap motion model
+3. Pointer-to-gem response time
+4. Swap easing model
+5. Magnetic settle timing
+6. Match recognition timing
+7. Break timing
+8. Fall ms/cell
+9. Landing timing
+10. Live observations from slow and fast swipes
+
+ONE MOTION REFINEMENT PASS ONLY.
+
+DO NOT MAKE ANY OTHER CHANGES.
