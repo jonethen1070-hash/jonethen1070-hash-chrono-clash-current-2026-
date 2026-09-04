@@ -1,0 +1,233 @@
+TASK: Make Chrono Clash gem swipes and match cascades feel physically satisfying and responsive.
+
+THIS IS A GAMEPLAY-FEEL + GEM-REACTION PASS.
+
+IMPORTANT:
+Do NOT redesign the board.
+Do NOT modify the HUD.
+Do NOT modify the board-frame styling.
+Do NOT add corner lighting.
+Do NOT generate or create images.
+Do NOT replace the existing gem artwork.
+Do NOT change gem colors/materials.
+Do NOT change energy costs or power behavior.
+Do NOT change the actual match rules.
+Do NOT change networking behavior unless required to keep the existing gameplay state synchronized.
+
+CURRENT ARCHITECTURE:
+- src/engine/input.ts = swipe/input interpretation
+- src/engine/board.ts = board/match/gravity rules
+- src/engine/session.ts = match state/orchestration
+- src/ui/renderer.ts = Canvas/gem rendering
+- src/engine/powers.ts = power logic
+
+FIRST:
+Inspect the existing swipe, match, cascade, gravity/refill, and gem-rendering implementation.
+
+Do NOT assume a feature is missing if it already exists.
+
+GOAL:
+Make the player's swipe feel immediate, physical, responsive, and satisfying, similar to the best polished match-3 games, while keeping Chrono Clash's existing gameplay rules intact.
+
+IMPLEMENT THE FOLLOWING:
+
+1. IMMEDIATE SWIPE RESPONSE
+
+When the player begins a valid swipe:
+- Respond immediately to the pointer/finger.
+- Do not introduce noticeable input delay.
+- The selected gem should visibly react to the swipe direction.
+- Keep the movement controlled and responsive.
+- Do not make the gem float or lag behind the finger.
+
+When the swipe is committed:
+- Make the gem exchange feel quick and decisive.
+- Use a short acceleration/deceleration rather than a slow linear movement.
+- Add a very small overshoot/settle if it fits the existing renderer.
+- The final position must settle cleanly into the grid cell.
+
+2. SUCCESSFUL MATCH IMPACT
+
+When a valid match is detected:
+- Add a very short impact moment before destruction.
+- Target roughly 50–80ms only if compatible with the existing timing architecture.
+- The matched gems should briefly feel like they have "locked onto" the match.
+- Then perform the existing destruction effect.
+
+Do NOT freeze the whole game for a long period.
+
+3. GEM DESTRUCTION
+
+Improve the existing match destruction reaction.
+
+Preferred sequence:
+
+MATCH
+→ tiny brightness/energy response
+→ crystalline compression/fracture feel
+→ quick burst
+→ disappear
+
+Do NOT simply add a large glow.
+
+Use the existing Canvas/gem rendering system wherever possible.
+
+The gem artwork itself must remain unchanged.
+
+4. PHYSICAL GEM FALLING
+
+When matched gems are removed:
+- Existing gravity/refill logic must remain authoritative.
+- Make falling gems visually feel like they have weight.
+- Gems should accelerate into their destination rather than move at a constant linear speed.
+- Use a short ease-out/settle when they reach their socket.
+- Slightly stagger simultaneous falling pieces where appropriate so the cascade feels organic.
+
+Do NOT change which cells receive which gems.
+Do NOT change the randomization rules.
+Do NOT change board logic.
+
+5. LANDING REACTION
+
+When a falling gem reaches its destination:
+- Give it a very small physical settle/bounce.
+- Keep it subtle.
+- Think "gem lands in a mechanical socket," not "cartoon bounce."
+
+6. AUTOMATIC CASCADES
+
+This is VERY IMPORTANT.
+
+After a match:
+- Gems fall.
+- Refilled gems fall into place.
+- Automatically check the resulting board for another match.
+- If another match exists, resolve it automatically.
+- Continue until the board is stable.
+
+The player must NOT need to swipe again to trigger a cascade.
+
+Use the existing cascade/refill implementation if it already supports this.
+
+DO NOT create a second cascade system.
+
+7. CASCADE ESCALATION
+
+Make consecutive automatic matches feel increasingly satisfying.
+
+Example:
+
+CHAIN 1:
+normal match impact
+
+CHAIN 2:
+slightly stronger impact/response
+
+CHAIN 3:
+stronger response
+
+CHAIN 4+:
+progressively more energetic feedback
+
+Keep this restrained.
+
+Do NOT cover the screen with effects.
+Do NOT add excessive glow.
+Do NOT alter the gem artwork.
+
+8. AUDIO/HAPTICS
+
+Inspect the existing audio/haptic system.
+
+If it already supports match/fall/impact feedback:
+- Use it rather than creating a new audio architecture.
+- Swipe should have a subtle tactile/sonic response.
+- Successful match should have a crisp impact.
+- Gem landing should have a light mechanical/crystalline tick.
+- Cascade chains should have increasing pitch/intensity where the existing system supports it.
+
+Do not add external audio assets.
+
+If haptics are already available, keep them short and subtle.
+
+9. PERFORMANCE
+
+This is a mobile game.
+
+Do NOT:
+- allocate large arrays every animation frame
+- create unnecessary DOM elements for individual gems
+- add expensive blur/filter effects every frame
+- create a second animation loop
+- introduce continuous polling
+
+Reuse the existing renderer/animation architecture.
+
+10. MOST IMPORTANT FEEL TARGET
+
+The final interaction should feel like:
+
+FINGER
+→ immediate gem response
+→ FAST SNAP
+→ MATCH
+→ tiny impact pause
+→ CRYSTALLINE BREAK
+→ GEMS DROP WITH WEIGHT
+→ SOCKET LANDING
+→ AUTOMATIC MATCH
+→ STRONGER CHAIN
+→ MORE GEMS DROP
+→ BOARD SETTLES
+
+The player should feel:
+"That swipe had weight."
+
+Not:
+"I dragged an image across a grid."
+
+VERIFICATION:
+
+Before changing anything:
+- Run the existing game.
+- Capture a baseline gameplay screenshot.
+- Inspect the current swipe/match/cascade behavior.
+
+After implementation:
+- Test a normal valid swipe.
+- Test an invalid/non-matching swipe.
+- Test a normal 3-gem match.
+- Test a cascade.
+- Test multiple consecutive cascades if the board produces them.
+- Test that the board eventually settles.
+- Test that the player can immediately swipe again after the cascade completes.
+- Test that no gem gets stuck between cells.
+- Test that no duplicate match resolution occurs.
+- Test that gameplay state remains correct.
+
+Run:
+- typecheck
+- production build
+- focused board/input/rendering/session tests
+- mobile swipe Playwright test
+- git diff --check
+
+IMPORTANT:
+Do NOT report success just because tests/build pass.
+
+Provide runtime evidence that:
+1. Swipe responds immediately.
+2. Matched gems visibly react before disappearing.
+3. Falling gems accelerate and settle.
+4. Automatic cascades actually occur when the resulting board creates another match.
+5. Consecutive cascades resolve until the board is stable.
+6. No gameplay rules were changed.
+7. No HUD or board-frame changes were made.
+
+If the existing architecture already has automatic cascade logic, improve its presentation/timing rather than creating another cascade system.
+
+If any requested behavior requires a change to game rules rather than presentation/feel, STOP and report that before changing it.
+
+FILES SHOULD BE CHANGED ONLY WHERE NECESSARY.
+
+Do not perform unrelated cleanup or visual redesign.
