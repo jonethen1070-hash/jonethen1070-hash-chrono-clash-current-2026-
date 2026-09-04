@@ -18,6 +18,9 @@ export { LIVE_GEM_MAX_IN_CELL_DROP, liveGemDrawOrigin } from "./gemMotion";
 const GAP = BOARD_GAP;
 const FRAME = BOARD_FRAME;
 const MATCH_IMPACT_MS = 80;
+const MATCH_STAGGER_MIN_MS = 15;
+const MATCH_STAGGER_STEP_MS = 9;
+const MATCH_STAGGER_MAX_MS = MATCH_STAGGER_MIN_MS + MATCH_STAGGER_STEP_MS * 2;
 const DRAG_FOLLOW = 0.96;
 const DRAG_NEIGHBOR_PUSH = 0.18;
 
@@ -56,6 +59,9 @@ interface VisualTile {
   dieAge: number;
   glow: number;
   burstEmitted: boolean;
+  breakStrength: number;
+  fractureSeed: number;
+  dieStaggerMs: number;
   settleAge: number;
   settleDur: number;
   settleX: number;
@@ -82,6 +88,19 @@ interface Shockwave {
   radius: number;
   color: string;
   width: number;
+}
+
+interface CrystalShard {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  rotation: number;
+  spin: number;
+  life: number;
+  max: number;
+  size: number;
+  color: string;
 }
 
 interface SocketPulse {
@@ -146,6 +165,7 @@ class BoardView {
   pendingSwap: { from: Coord; to: Coord; dx: number; dy: number } | null = null;
   live = new Set<number>();
   particles: Particle[] = [];
+  shards: CrystalShard[] = [];
   shockwaves: Shockwave[] = [];
   socketPulses: SocketPulse[] = [];
   floats: FloatText[] = [];
@@ -160,6 +180,7 @@ class BoardView {
     this.pendingSwap = null;
     this.live.clear();
     this.particles = [];
+    this.shards = [];
     this.shockwaves = [];
     this.socketPulses = [];
     this.floats = [];
@@ -709,6 +730,7 @@ export class BoardRenderer {
     const reduced = this.fx.reducedMotion;
     const fxSide = isPlayer ? "player" : "opponent";
     let recentClearBorn = -Infinity;
+    let recentClearCombo = 1;
     for (let i = fx.length - 1; i >= 0; i--) {
       const fxEvent = fx[i]!;
       if (
@@ -718,6 +740,7 @@ export class BoardRenderer {
         now - fxEvent.born <= 240
       ) {
         recentClearBorn = fxEvent.born;
+        recentClearCombo = Math.max(1, fxEvent.combo ?? 1);
         break;
       }
     }
@@ -758,7 +781,7 @@ export class BoardRenderer {
     const breakMs = gemDieDuration(anim, reduced) * 1000;
     const clearAgeMs = Number.isFinite(recentClearBorn) ? Math.max(0, now - recentClearBorn) : 0;
     const cascadeHold = hasMatchPresentation
-      ? Math.max(0, swapWindowMs + recognitionMs + breakMs - clearAgeMs) / 1000
+      ? Math.max(0, swapWindowMs + recognitionMs + breakMs + MATCH_STAGGER_MAX_MS - clearAgeMs) / 1000
       : 0;
     const populated = view.tiles.size > 0;
     for (let r = 0; r < ROWS; r++) {
@@ -796,6 +819,9 @@ export class BoardRenderer {
             dieAge: 0,
             glow: populated ? 0.16 : 0,
             burstEmitted: false,
+            breakStrength: 1,
+            fractureSeed: ((piece.id * 37 + r * 11 + c * 17) % 628) / 100,
+            dieStaggerMs: 0,
             settleAge: 1,
             settleDur: 0,
             settleX: 0,
@@ -989,16 +1015,20 @@ export class BoardRenderer {
         tile.moveKind = "swap";
         view.pendingSwapTargets.delete(id);
       }
+      tile.breakStrength = recentClearCombo;
+      tile.dieStaggerMs = Number.isFinite(recentClearBorn)
+        ? MATCH_STAGGER_MIN_MS + ((tile.id + tile.r + tile.c) % 3) * MATCH_STAGGER_STEP_MS
+        : 0;
       const impactRemaining = hasMatchPresentation
         ? Math.max(0, impactDelay - (Number.isFinite(recentClearBorn) ? now - recentClearBorn : 0))
         : 0;
-      tile.dieAge = -impactRemaining / 1000;
+      tile.dieAge = -(impactRemaining + tile.dieStaggerMs) / 1000;
       if (!swapTarget) tile.moveKind = "idle";
       tile.flash = reduced ? 0.28 : hasMatchPresentation ? 0.78 : 1;
       tile.glow = hasMatchPresentation ? 0.82 : 1;
-      tile.burstEmitted = impactRemaining <= 0;
+      tile.burstEmitted = impactRemaining + tile.dieStaggerMs <= 0;
       if (tile.burstEmitted) {
-        this.burst(view, tile.x + cell / 2, tile.y + cell / 2, tile.color, cell);
+        this.burst(view, tile.x + cell / 2, tile.y + cell / 2, tile.color, cell, now, tile.breakStrength);
       }
       if (isPlayer) view.shake = Math.max(view.shake, 0.9);
     }
@@ -1109,7 +1139,7 @@ export class BoardRenderer {
       tile.dieAge += dt;
       if (!tile.burstEmitted && tile.dieAge >= 0) {
         tile.burstEmitted = true;
-        this.burst(view, tile.x + cell / 2, tile.y + cell / 2, tile.color, cell);
+        this.burst(view, tile.x + cell / 2, tile.y + cell / 2, tile.color, cell, now, tile.breakStrength);
       }
       const pose = easeCrystalDie(Math.max(0, tile.dieAge) / dieDur);
       if (reduced) {
@@ -1192,7 +1222,9 @@ export class BoardRenderer {
     }
 
     this.stepParticles(view);
+    this.stepCrystalShards(view);
     this.drawParticles(view);
+    this.drawCrystalShards(view);
     this.drawShockwaves(view, now);
     this.drawFloats(view, now);
 
@@ -1460,6 +1492,11 @@ export class BoardRenderer {
     if (this.particlePool.length < 96) this.particlePool.push(p);
   }
 
+  private spawnCrystalShard(view: BoardView, shard: CrystalShard): void {
+    view.shards.push(shard);
+    if (view.shards.length > 40) view.shards.splice(0, view.shards.length - 40);
+  }
+
   private gemSprite(atlas: HTMLCanvasElement, colorIndex: number, color: string, inner: number, selected: boolean): HTMLCanvasElement {
     const q = Math.max(GEM_CELL, Math.round(inner));
     const key = `${colorIndex}|${q}|${selected ? 1 : 0}|c6`;
@@ -1484,7 +1521,7 @@ export class BoardRenderer {
     return sheet;
   }
 
-  private burst(view: BoardView, x: number, y: number, color: number, cell: number): void {
+  private burst(view: BoardView, x: number, y: number, color: number, cell: number, now = performance.now(), combo = 1): void {
     const n = particleBudget(this.fx.quality, this.fx.reducedMotion);
     if (!n) return;
     const hex = COLORS[color - 1] ?? "#fff";
@@ -1496,9 +1533,33 @@ export class BoardRenderer {
           : this.fx.vfxTheme === "ember-fx"
             ? "#FF9D00"
             : hex;
-    this.addShockwave(view, x, y, cell * 0.42, accent, 150, 1.4);
-    for (let i = 0; i < n; i++) {
-      const a = (Math.PI * 2 * i) / n + Math.random() * 0.35;
+    const strength = Math.min(1.4, 1 + Math.max(0, combo - 3) * 0.08);
+    this.addShockwave(view, x, y, cell * 0.42, accent, 150, 1.4 * strength, now);
+    this.addShockwave(view, x, y, cell * 0.22, "#EAFBFF", 92, 1.05 * strength, now);
+    view.socketPulses.push({ x, y, born: now, life: 120, color: accent });
+    if (view.socketPulses.length > 12) view.socketPulses.splice(0, view.socketPulses.length - 12);
+
+    const shardCount = this.fx.quality === "medium" ? 2 : combo >= 5 ? 5 : 3;
+    for (let i = 0; i < shardCount; i++) {
+      const a = (Math.PI * 2 * i) / shardCount + 0.18;
+      const sp = 1.9 + combo * 0.12 + Math.random() * 0.7;
+      this.spawnCrystalShard(view, {
+        x: x + Math.cos(a) * cell * 0.08,
+        y: y + Math.sin(a) * cell * 0.08,
+        vx: Math.cos(a) * sp,
+        vy: Math.sin(a) * sp - 0.85,
+        rotation: a,
+        spin: (i % 2 ? 1 : -1) * (0.08 + Math.random() * 0.06),
+        life: 0.24,
+        max: 0.24,
+        size: cell * (0.07 + Math.random() * 0.025),
+        color: i % 2 ? "#EAFBFF" : accent,
+      });
+    }
+
+    const particleCount = Math.min(10, n + (combo >= 5 ? 2 : combo >= 3 ? 1 : 0));
+    for (let i = 0; i < particleCount; i++) {
+      const a = (Math.PI * 2 * i) / particleCount + Math.random() * 0.35;
       const sp = 1.6 + Math.random() * 2.4;
       this.spawnParticle(view, {
         x,
@@ -1552,9 +1613,10 @@ export class BoardRenderer {
     color: string,
     life: number,
     width: number,
+    born = performance.now(),
   ): void {
     if (this.fx.quality === "low" || this.fx.reducedMotion) return;
-    view.shockwaves.push({ x, y, born: performance.now(), life, radius, color, width });
+    view.shockwaves.push({ x, y, born, life, radius, color, width });
     if (view.shockwaves.length > 12) view.shockwaves.splice(0, view.shockwaves.length - 12);
   }
 
@@ -1687,6 +1749,20 @@ export class BoardRenderer {
     list.length = write;
   }
 
+  private stepCrystalShards(view: BoardView): void {
+    let write = 0;
+    for (let i = 0; i < view.shards.length; i++) {
+      const shard = view.shards[i]!;
+      shard.x += shard.vx;
+      shard.y += shard.vy;
+      shard.vy += 0.1;
+      shard.rotation += shard.spin;
+      shard.life -= 0.032;
+      if (shard.life > 0) view.shards[write++] = shard;
+    }
+    view.shards.length = write;
+  }
+
   private drawParticles(view: BoardView): void {
     const ctx = this.ctx;
     ctx.save();
@@ -1712,6 +1788,40 @@ export class BoardRenderer {
     }
     ctx.restore();
     ctx.globalAlpha = 1;
+  }
+
+  private drawCrystalShards(view: BoardView): void {
+    if (!view.shards.length) return;
+    const ctx = this.ctx;
+    ctx.save();
+    for (const shard of view.shards) {
+      const alpha = Math.max(0, shard.life / shard.max);
+      const size = shard.size * (0.72 + alpha * 0.28);
+      ctx.save();
+      ctx.translate(shard.x, shard.y);
+      ctx.rotate(shard.rotation);
+      ctx.globalAlpha = alpha * 0.92;
+      ctx.fillStyle = shard.color;
+      ctx.shadowColor = shard.color;
+      ctx.shadowBlur = Math.max(2, size * 1.8);
+      ctx.beginPath();
+      ctx.moveTo(-size * 0.62, size * 0.34);
+      ctx.lineTo(-size * 0.12, -size * 0.58);
+      ctx.lineTo(size * 0.58, -size * 0.12);
+      ctx.lineTo(size * 0.16, size * 0.52);
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalAlpha = alpha * 0.72;
+      ctx.fillStyle = "#FFFFFF";
+      ctx.beginPath();
+      ctx.moveTo(-size * 0.12, -size * 0.58);
+      ctx.lineTo(size * 0.12, -size * 0.24);
+      ctx.lineTo(-size * 0.04, size * 0.04);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+    ctx.restore();
   }
 
   private drawFloats(view: BoardView, now: number): void {
@@ -2194,6 +2304,78 @@ export class BoardRenderer {
       }
       ctx.stroke();
     }
+    if (tile.dying && tile.dieAge >= 0 && this.fx.quality !== "low" && !this.fx.reducedMotion) {
+      const dieDur = gemDieDuration(this.fx.animation, false);
+      this.drawCrystalFracture(
+        cx,
+        cy,
+        s,
+        tile.color,
+        Math.min(1, tile.dieAge / dieDur),
+        tile.fractureSeed,
+        tile.breakStrength,
+      );
+    }
+    ctx.restore();
+  }
+
+  private drawCrystalFracture(
+    cx: number,
+    cy: number,
+    s: number,
+    colorIndex: number,
+    progress: number,
+    seed: number,
+    strength: number,
+  ): void {
+    const ctx = this.ctx;
+    const crystal = crystalAccent(colorIndex);
+    const color = COLORS[colorIndex - 1] ?? "#FFFFFF";
+    const crackProgress = Math.min(1, progress * 1.35);
+    const fade = Math.max(0, 1 - progress * 0.8);
+    const arms = strength >= 5 ? 5 : 4;
+
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.globalAlpha = fade;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.shadowColor = crystal.bloom;
+    ctx.shadowBlur = s * 0.08;
+    for (let i = 0; i < arms; i++) {
+      const angle = seed + (Math.PI * 2 * i) / arms;
+      const reach = s * (0.16 + crackProgress * (0.26 + Math.min(0.05, strength * 0.008)));
+      const kink = reach * 0.48;
+      const inner = s * 0.05;
+      const bend = Math.sin(seed * 2.3 + i * 1.7) * s * 0.035;
+      const px = Math.cos(angle);
+      const py = Math.sin(angle);
+      const nx = -py;
+      const ny = px;
+      ctx.beginPath();
+      ctx.moveTo(cx + px * inner, cy + py * inner);
+      ctx.lineTo(cx + px * kink + nx * bend, cy + py * kink + ny * bend);
+      ctx.lineTo(cx + px * reach, cy + py * reach);
+      ctx.strokeStyle = colorWithAlpha("#EAFBFF", 0.76);
+      ctx.lineWidth = Math.max(0.9, s * 0.018);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx + px * (inner + s * 0.02), cy + py * (inner + s * 0.02));
+      ctx.lineTo(cx + px * reach * 0.92, cy + py * reach * 0.92);
+      ctx.strokeStyle = colorWithAlpha(color, 0.58);
+      ctx.lineWidth = Math.max(0.55, s * 0.009);
+      ctx.stroke();
+    }
+
+    const core = ctx.createRadialGradient(cx, cy, 0, cx, cy, s * 0.22);
+    core.addColorStop(0, "#FFFFFF");
+    core.addColorStop(0.2, crystal.core);
+    core.addColorStop(1, colorWithAlpha(color, 0));
+    ctx.globalAlpha = Math.min(0.7, 0.2 + progress * 0.5);
+    ctx.fillStyle = core;
+    ctx.beginPath();
+    ctx.arc(cx, cy, s * (0.1 + progress * 0.1), 0, Math.PI * 2);
+    ctx.fill();
     ctx.restore();
   }
 
