@@ -98,9 +98,13 @@ describe("production responsive board layout", () => {
     expect(studio).not.toMatch(/#match\.match-screen[\s\S]{0,400}overflow-y:\s*auto/);
     const main = readFileSync("src/main.ts", "utf8");
     const match = main.slice(main.indexOf('id="match"'), main.indexOf('id="sheet"'));
-    expect(match).toContain('id="freeze"');
-    expect(match).toContain('id="timeshift"');
+    expect(match).not.toContain('id="freeze"');
+    expect(match).not.toContain('id="timeshift"');
+    expect(match).not.toContain('id="freezeQty"');
+    expect(match).not.toContain('id="shiftQty"');
     expect(match).toContain('id="rewind"');
+    expect(match).toContain('id="energyBurstAttack"');
+    expect(match).toContain('id="megaStrikeAttack"');
     expect(match.indexOf('class="powers"')).toBeGreaterThan(match.indexOf('id="playerBoard"'));
     expect(match).toContain('id="stage"');
     expect(match.indexOf('id="stage"')).toBeGreaterThan(match.indexOf('id="playerBoard"'));

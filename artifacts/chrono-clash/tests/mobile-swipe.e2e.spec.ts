@@ -119,8 +119,8 @@ test("guest mobile matches survive rapid swipes, cancellation, and layout checks
   );
   expect(visiblePowerIds).toEqual(["energyBurstAttack", "megaStrikeAttack", "rewind"]);
   expect(await page.locator(".energy-options").count()).toBe(0);
-  await expect(page.locator("#freeze")).toBeHidden();
-  await expect(page.locator("#timeshift")).toBeHidden();
+  expect(await page.locator("#freeze").count()).toBe(0);
+  expect(await page.locator("#timeshift").count()).toBe(0);
   expect(geometry.width).toBeGreaterThan(374);
 
   const actionGeometry = await page.locator(".powers > button").evaluateAll((buttons) =>

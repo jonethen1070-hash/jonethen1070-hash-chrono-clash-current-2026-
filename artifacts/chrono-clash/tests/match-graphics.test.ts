@@ -18,12 +18,12 @@ describe("match screen graphics-only polish", () => {
     expect(BOARD_FRAME).toBe(6);
     expect(BOARD_GAP).toBe(1.5);
     const main = read("src/main.ts");
-    expect(main).toContain('id="freeze"');
-    expect(main).toContain('id="timeshift"');
+    expect(main).not.toContain('id="freeze"');
+    expect(main).not.toContain('id="timeshift"');
     expect(main).toContain('id="rewind"');
-    expect(main).toContain(">FREEZE<");
-    expect(main).toContain(">TIME SHIFT<");
     expect(main).toContain(">REWIND<");
+    expect(main).toContain('id="energyBurstAttack"');
+    expect(main).toContain('id="megaStrikeAttack"');
     expect(main).toContain('id="playerGems"');
     expect(main).toContain('id="oppGems"');
     expect(main).toContain('id="energyFill"');

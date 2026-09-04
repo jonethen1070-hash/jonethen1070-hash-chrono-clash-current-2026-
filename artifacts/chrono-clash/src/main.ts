@@ -13,7 +13,6 @@ import {
   ENERGY_MAX,
   ENERGY_MEGA_STRIKE,
   ENERGY_REWIND,
-  ENERGY_TIMESHIFT,
   SCORE_TARGETS,
   type Coord,
 } from "./engine/types";
@@ -396,10 +395,6 @@ app.innerHTML = `
         <button class="power" id="rewind"><span class="glyph" aria-hidden="true">↺</span><i class="ability-fx" aria-hidden="true"></i><b>REWIND</b><span class="cost">${ENERGY_REWIND} ENERGY</span><span class="need">Restores your last valid move.</span></button>
       </div>
       <div id="oppBoard" class="opponent-render-reserve" aria-hidden="true">
-        <div class="power-reserve" hidden>
-          <button class="power" id="freeze"><span class="glyph" aria-hidden="true">❄</span><i class="ability-fx" aria-hidden="true"></i><b>FREEZE</b><span class="cost" id="freezeQty">0/5</span><span class="need">${ENERGY_FREEZE} ENERGY · Pauses rival board for 5 seconds.</span></button>
-          <button class="power" id="timeshift"><span class="glyph" aria-hidden="true">⏱</span><i class="ability-fx" aria-hidden="true"></i><b>TIME SHIFT</b><span class="cost" id="shiftQty">0/5</span><span class="need">${ENERGY_TIMESHIFT} ENERGY · Steals 5s in TIME BATTLE, or grants a tempo surge.</span></button>
-        </div>
         <span id="freezeClock"></span>
         <span id="oppCombo"></span>
         <canvas id="oppGems" aria-hidden="true"></canvas>
@@ -533,13 +528,9 @@ const ui = {
   callout: $("#callout"),
   playerBoard: $("#playerBoard"),
   oppBoard: $("#oppBoard"),
-  freeze: $("#freeze") as HTMLButtonElement,
-  timeshift: $("#timeshift") as HTMLButtonElement,
   rewind: $("#rewind") as HTMLButtonElement,
   energyBurstAttack: $("#energyBurstAttack") as HTMLButtonElement,
   megaStrikeAttack: $("#megaStrikeAttack") as HTMLButtonElement,
-  freezeQty: $("#freezeQty"),
-  shiftQty: $("#shiftQty"),
   powerArmory: $("#powerArmory"),
   dailyRun: $("#dailyRun"),
   modeTime: $("#modeTime") as HTMLButtonElement,
@@ -1557,20 +1548,6 @@ function flashCombo(combo: number): void {
   }, 480);
 }
 
-ui.freeze.addEventListener("click", () => {
-  if (session.usePower("freeze")) {
-    ping(ui.freeze);
-    flashCast("cast-freeze", ui.freeze);
-    sendOnlineAction({ type: "power", id: "freeze" });
-  }
-});
-ui.timeshift.addEventListener("click", () => {
-  if (session.usePower("timeshift")) {
-    ping(ui.timeshift);
-    flashCast("cast-shift", ui.timeshift);
-    sendOnlineAction({ type: "power", id: "timeshift" });
-  }
-});
 ui.rewind.addEventListener("click", () => {
   if (session.usePower("rewind")) {
     ping(ui.rewind);
@@ -1600,15 +1577,14 @@ ui.energyBurstAttack.addEventListener("click", () => useEnergyAttack("burst", ui
 ui.megaStrikeAttack.addEventListener("click", () => useEnergyAttack("megaStrike", ui.megaStrikeAttack));
 document.querySelector(".powers")?.addEventListener("pointerdown", (e) => {
   const point = e as PointerEvent;
+  const target = e.target;
+  if (!(target instanceof Element) || !target.closest("#rewind")) return;
   const x = point.clientX;
   const y = point.clientY;
-  const hit = [ui.freeze, ui.timeshift, ui.rewind].find((btn) => {
-    const box = btn.getBoundingClientRect();
-    return x >= box.left && x <= box.right && y >= box.top && y <= box.bottom;
-  });
-  if (!hit) return;
-  const id = hit === ui.freeze ? "freeze" : hit === ui.timeshift ? "timeshift" : "rewind";
-  if (!session.canUsePower(id)) audio.play("deny");
+  const box = ui.rewind.getBoundingClientRect();
+  if (x >= box.left && x <= box.right && y >= box.top && y <= box.bottom && !session.canUsePower("rewind")) {
+    audio.play("deny");
+  }
 });
 
 $("#sfxToggle").addEventListener("click", () => {
@@ -2278,8 +2254,6 @@ function frame(now: number): void {
     energyWrap?.classList.toggle("low", snap.player.energy < ENERGY_FREEZE);
     energyWrap?.classList.toggle("hot", snap.player.energy >= 70);
     const playing = snap.phase === "playing";
-    ui.freeze.disabled = !session.canUsePower("freeze", now);
-    ui.timeshift.disabled = !session.canUsePower("timeshift", now);
     ui.rewind.disabled = !session.canUsePower("rewind", now);
     const burstReady = session.canUsePower("burst", now);
     const megaStrikeReady = session.canUsePower("megaStrike", now);
@@ -2289,15 +2263,7 @@ function frame(now: number): void {
     ui.megaStrikeAttack.classList.toggle("ready", megaStrikeReady);
     ui.energyBurstAttack.classList.toggle("unavailable", !burstReady);
     ui.megaStrikeAttack.classList.toggle("unavailable", !megaStrikeReady);
-    const freezeQty = matchPowerQty(session.progress, "freeze", `${ENERGY_FREEZE} ENERGY`);
-    const shiftQty = matchPowerQty(session.progress, "timeshift", `${ENERGY_TIMESHIFT} ENERGY`);
-    setText(ui.freezeQty, freezeQty);
-    setText(ui.shiftQty, shiftQty);
-    ui.freeze.classList.toggle("ready", playing && snap.player.energy >= ENERGY_FREEZE && session.powerCharges("freeze") > 0);
-    ui.timeshift.classList.toggle("ready", playing && snap.player.energy >= ENERGY_TIMESHIFT && session.powerCharges("timeshift") > 0);
     ui.rewind.classList.toggle("ready", playing && snap.player.energy >= ENERGY_REWIND);
-    ui.freeze.classList.toggle("empty-charge", session.powerCharges("freeze") <= 0);
-    ui.timeshift.classList.toggle("empty-charge", session.powerCharges("timeshift") <= 0);
 
     const comboAt = announcer.lastComboAt;
     freshFx.length = 0;
@@ -2325,9 +2291,9 @@ function frame(now: number): void {
       }
       if (fx.kind === "power") {
         const t = fx.text.toUpperCase();
-        if (t.includes("FREEZE")) flashCast("cast-freeze", t.startsWith("RIVAL") ? undefined : ui.freeze);
+        if (t.includes("FREEZE")) flashCast("cast-freeze");
         else if (t.includes("TIME") || t.includes("TEMPO") || t.includes("SHIFT")) {
-          flashCast("cast-shift", t.startsWith("RIVAL") ? undefined : ui.timeshift);
+          flashCast("cast-shift");
         }
         else if (t.includes("ENERGY BURST")) flashCast("cast-burst", t.startsWith("RIVAL") ? undefined : ui.energyBurstAttack);
         else if (t.includes("MEGA STRIKE")) flashCast("cast-mega", t.startsWith("RIVAL") ? undefined : ui.megaStrikeAttack);

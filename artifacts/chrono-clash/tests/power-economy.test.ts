@@ -94,8 +94,8 @@ describe("before-match UI", () => {
     const views = readFileSync(new URL("../src/ui/metaViews.ts", import.meta.url), "utf8");
     expect(main).toContain('id="powerArmory"');
     expect(main).toContain('id="readyPowers"');
-    expect(main).toContain('id="freezeQty"');
-    expect(main).toContain('id="shiftQty"');
+    expect(main).not.toContain('id="freezeQty"');
+    expect(main).not.toContain('id="shiftQty"');
     expect(main).toContain("paintArmory");
     expect(views).toContain("WATCH AD +1");
     expect(views).toContain("WINNING COINS");
