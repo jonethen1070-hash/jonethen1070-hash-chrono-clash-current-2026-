@@ -44,6 +44,15 @@ describe("production responsive board layout", () => {
     expect(css).toContain("margin-top: 0 !important");
   });
 
+  it("packs mobile controls beneath the content-sized square board", () => {
+    const css = readFileSync("src/styles/aaa-polish.css", "utf8");
+    expect(css).toContain(
+      "var(--energy-height)\n      0px\n      max-content\n      calc(var(--control-height) + 6px)",
+    );
+    expect(css).toContain("margin-top: 6px !important");
+    expect(css).toContain("transform: translateZ(2px) !important");
+  });
+
   it("scales gem cells proportionally with board size", () => {
     const narrow = gemCell(316);
     const mid = gemCell(386);

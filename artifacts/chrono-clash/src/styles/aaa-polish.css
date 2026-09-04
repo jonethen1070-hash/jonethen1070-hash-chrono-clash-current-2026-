@@ -9282,3 +9282,24 @@ html body #app #match .player-side .board-socket-bed {
     max-width: min(calc(100% + 2px), calc(100vw - var(--safe-left) - var(--safe-right) - 4px), 388px) !important;
   }
 }
+
+/* Keep the square board width-limited, but let the mobile composition pack
+   the controls directly beneath it instead of stretching the board row to
+   consume the remaining viewport height. */
+@media (max-width: 600px) {
+  html body #app #match .match-stage {
+    grid-template-rows:
+      var(--brand-height)
+      var(--battle-height)
+      var(--energy-height)
+      0px
+      max-content
+      calc(var(--control-height) + 6px) !important;
+    align-content: start !important;
+  }
+
+  html body #app #match .powers {
+    margin-top: 6px !important;
+    transform: translateZ(2px) !important;
+  }
+}
