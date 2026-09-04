@@ -1,0 +1,78 @@
+TASK: Contain the four board-corner lights so they illuminate the frame, NOT the gems.
+
+IMPORTANT:
+This is ONE visual fix only.
+
+EDIT ONLY:
+artifacts/chrono-clash/src/styles/match-frame.css
+
+DO NOT:
+- Create or generate any image.
+- Modify Canvas rendering.
+- Modify #playerGems.
+- Modify gem materials, brightness, colors, or effects.
+- Modify gameplay.
+- Modify HUD.
+- Modify powers/input/networking.
+- Modify game.css, studio.css, or aaa-polish.css.
+- Add another stylesheet.
+- Change board dimensions.
+- Remove the corner lights completely.
+
+CURRENT PROBLEM:
+In the live mobile match, the four board corners have bright cyan/white lighting/glow that spills inward over the board and visually contaminates the nearest gems.
+
+GOAL:
+Keep the four corner energy/light accents visible on the BOARD FRAME, but contain their illumination so it stays visually within the frame/housing.
+
+The gems immediately beside each corner should remain clean and retain their existing colors/materials.
+
+IMPLEMENTATION:
+1. Inspect the existing corner-node/corner-light rules in match-frame.css.
+2. Identify the actual pseudo-element/layer responsible for each corner glow.
+3. Reduce or contain only the glow's outward/inward spill.
+4. Prefer clipping, masking, containment, or a tighter localized shadow/glow rather than changing the gem layer.
+5. Preserve the existing corner-node position and general cyan sci-fi appearance.
+6. Do not introduce a new overlay over the gems.
+
+VISUAL REQUIREMENT:
+The corner lights should read as:
+FRAME LIGHT → contained at the frame edge
+
+NOT:
+FRAME LIGHT → large glow spreading across the gem wells
+
+VERIFICATION:
+- Capture a 390x844 baseline screenshot.
+- Apply the change.
+- Reload the managed Chrono Clash workflow.
+- Capture the same 390x844 view.
+- Compare all four corners.
+- Confirm the corner accents are still visible.
+- Confirm their glow no longer washes over nearby gems.
+- Confirm gem appearance itself was not modified.
+- Confirm board dimensions are unchanged.
+- Confirm HUD is unchanged.
+
+Then run:
+- typecheck
+- production build
+- focused architecture/board tests
+- mobile swipe Playwright test
+- git diff --check
+
+IMPORTANT:
+If the light is actually coming from another stylesheet or from Canvas rather than match-frame.css, DO NOT edit another file.
+
+Instead, report exactly where the light is coming from and STOP.
+
+Do not redesign anything else.
+Do not increase board depth yet.
+
+Report:
+1. Exact selector/layer changed.
+2. Exact property changed.
+3. Before/after result for all four corners.
+4. Confirmation that gems were not modified.
+5. Validation results.
+6. Files changed.
