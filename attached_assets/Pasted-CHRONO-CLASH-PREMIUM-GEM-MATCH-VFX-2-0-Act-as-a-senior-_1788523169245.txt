@@ -1,0 +1,378 @@
+CHRONO CLASH — PREMIUM GEM MATCH VFX 2.0
+
+Act as a senior AAA mobile-game VFX artist and technical VFX engineer.
+
+Improve ONLY the visual experience when gems successfully match.
+
+DO NOT create or generate images.
+
+DO NOT change:
+- board size/layout
+- gem artwork or shapes
+- gem colors
+- swipe behavior
+- falling/gravity
+- cascade logic
+- scoring
+- energy
+- powers
+- CPU behavior
+- HUD layout
+- bottom controls
+- touch input
+- floating +XX score numbers
+- the permanent board frame
+
+The falling behavior is already good. Leave it alone.
+
+==================================================
+TARGET FEEL
+==================================================
+
+The current match effect needs to feel much more premium.
+
+I want:
+
+SWAP
+→ MATCH CONFIRMATION
+→ CRYSTAL ENERGY CHARGE
+→ CRYSTAL FRACTURE
+→ SHARP CRYSTAL BREAK
+→ CONTROLLED PARTICLE BURST
+→ QUICK AFTERGLOW
+→ FALL
+
+It should feel satisfying and expensive, not like the gem simply disappears.
+
+Use successful premium match-3 games as DESIGN REFERENCE for timing, layering, impact and readability, but do NOT copy their assets or effects.
+
+==================================================
+1. MATCH CONFIRMATION
+==================================================
+
+When a match is detected:
+
+Give the matched gems a very short visual confirmation.
+
+Approximately 60–90ms.
+
+Each matched crystal should:
+- slightly tighten/compress
+- brighten from inside
+- emphasize its facets
+- produce a subtle energy pulse
+
+Keep this extremely responsive.
+
+Do NOT freeze the player.
+
+==================================================
+2. CRYSTAL FRACTURE
+==================================================
+
+Before the gem disappears, make it visually fracture.
+
+The crystal should briefly look like its internal energy is cracking apart.
+
+Use the existing Canvas renderer/VFX infrastructure.
+
+Possible techniques:
+- bright facet lines
+- radial fracture strokes
+- internal crack flashes
+- tiny crystalline highlights
+
+The effect should be visible on a real phone screen.
+
+Do NOT use a generic opacity fade.
+
+==================================================
+3. CRYSTAL BREAK
+==================================================
+
+Create a short, sharp destruction moment.
+
+Target approximately 100–150ms.
+
+Sequence:
+
+CHARGE
+→ FRACTURE
+→ BREAK
+
+At the break:
+- crystal contracts slightly
+- bright crystalline core flashes
+- small shards eject outward
+- tiny particles follow
+- short localized energy burst occurs
+
+The gem then disappears.
+
+The effect should remain localized to the matched gem.
+
+==================================================
+4. SHARDS MUST LOOK LIKE CRYSTAL
+==================================================
+
+Do not make generic circular particles the main effect.
+
+Use a mixture of:
+- tiny angular shards
+- short crystalline fragments
+- small spark particles
+
+Fragments should inherit the gem's color with a brighter/whiter core.
+
+Example:
+
+cyan gem
+→ cyan + white crystal fragments
+
+magenta gem
+→ magenta + white fragments
+
+yellow gem
+→ gold + white fragments
+
+green gem
+→ green + white fragments
+
+blue gem
+→ blue + white fragments
+
+purple gem
+→ purple + white fragments
+
+==================================================
+5. IMPACT RING
+==================================================
+
+Add a very short localized impact ring at the socket.
+
+It should:
+- appear at the moment of break
+- expand quickly
+- fade smoothly
+
+Keep it thin and crisp.
+
+Do NOT create a giant glowing circle.
+
+==================================================
+6. PARTICLE MOTION
+==================================================
+
+Particles should have intentional motion.
+
+Avoid random noise.
+
+Use:
+- short outward velocity
+- slight directional bias
+- quick deceleration
+- very short lifetime
+
+The player should perceive an actual impact.
+
+Do not flood the board with particles.
+
+==================================================
+7. MATCH SIZE RESPONSE
+==================================================
+
+Make larger matches feel slightly more powerful.
+
+3 gems:
+- standard effect
+
+4 gems:
+- slightly stronger impact
+- slightly more shards
+
+5+ gems:
+- stronger energy pulse
+- slightly larger localized burst
+
+Do NOT create huge explosions.
+
+==================================================
+8. MULTI-GEM TIMING
+==================================================
+
+For a group of matched gems, do not make every crystal explode on exactly the same frame.
+
+Use a subtle 10–25ms stagger between nearby gems.
+
+This should create a satisfying chain reaction:
+
+CRACK → CRACK → CRACK
+
+rather than:
+
+BOOM ALL AT ONCE
+
+Keep the entire match extremely fast.
+
+==================================================
+9. CASCADE ESCALATION
+==================================================
+
+For automatic cascade matches:
+
+Wave 1:
+normal impact
+
+Wave 2:
+slightly stronger
+
+Wave 3:
+slightly stronger again
+
+Increase intensity through:
+- slightly more particles
+- slightly brighter core
+- slightly stronger impact ring
+
+Do NOT increase duration significantly.
+
+==================================================
+10. AFTERGLOW
+==================================================
+
+After the crystal breaks:
+
+Leave a very brief residual energy trace at the socket.
+
+Approximately 40–70ms.
+
+Then clear it completely.
+
+The socket should feel like it received an energy impact.
+
+==================================================
+11. AUDIO / HAPTIC
+==================================================
+
+Synchronize existing audio/haptic systems with the visual timing if already available.
+
+Match:
+- recognition
+- crystal break
+- cascade
+
+Do NOT create a new audio system.
+
+Do NOT delay gameplay for audio/haptics.
+
+==================================================
+12. IMPORTANT — NO PLAYER LOCK
+==================================================
+
+VFX must NEVER lock or freeze the player.
+
+No:
+- LOCKED
+- Freeze
+- artificial input blocking
+- long busy state
+- disabled touch during VFX
+
+The CPU must also NOT apply its old rival lock/freeze mechanic.
+
+VFX is presentation only.
+
+==================================================
+13. PERFORMANCE
+==================================================
+
+This is a mobile game.
+
+Keep the effect efficient:
+- bounded particle count
+- short particle lifetime
+- no full-screen post-processing
+- no expensive blur
+- no permanent particles
+- no particle accumulation during cascades
+
+The board must remain smooth.
+
+==================================================
+14. USE THE ACTUAL RENDERING PATH
+==================================================
+
+First inspect:
+
+match detection
+→ match resolution
+→ visual match state
+→ Canvas renderer
+→ gem destruction
+→ VFX
+→ gem removal
+→ gravity
+
+Modify the existing system rather than creating a disconnected animation.
+
+Do NOT use CSS filters to fake Canvas VFX.
+
+==================================================
+15. LIVE QUALITY TEST
+==================================================
+
+Test the actual running game at 390×844.
+
+Perform:
+- 3-gem match
+- horizontal match
+- vertical match
+- 4+ match if possible
+- cascade
+- multiple cascade waves
+
+Watch the actual effect frame-by-frame.
+
+The result should clearly show:
+
+MATCH
+→ CHARGE
+→ FRACTURE
+→ CRYSTAL BREAK
+→ SHARDS / ENERGY
+→ DISAPPEAR
+→ FALL
+
+If the VFX is technically present but barely visible, increase its visual readability.
+
+If it looks cheap or noisy, reduce particle count and improve timing.
+
+If it looks blurry, reduce glow and strengthen crisp crystal cores.
+
+If it looks like a simple fade, increase fracture and shard readability.
+
+==================================================
+VALIDATION
+==================================================
+
+Run:
+- typecheck
+- production build
+- focused tests
+- mobile runtime verification
+
+Most importantly, verify the REAL rendered game.
+
+Report:
+1. exact files changed
+2. exact match timing
+3. fracture timing
+4. break timing
+5. particle/shard approach
+6. cascade escalation
+7. confirmation that player input remains responsive
+8. live 390×844 result
+
+ONE VFX CHANGE SET ONLY.
+
+Do not change layout, gameplay, falling, gems, HUD or unrelated effects.
