@@ -1,0 +1,72 @@
+CHRONO CLASH — ANNOUNCER VOICE TIMING + DELIVERY PASS
+
+Change ONLY the spoken announcer/callout delivery for:
+- COMBO
+- SUPER COMBO
+- ULTIMATE
+- MEGA STRIKE
+- ENERGY BURST
+- other gameplay achievement callouts
+
+DO NOT change gameplay, VFX logic, scoring, powers, HUD layout, or existing sound effects.
+
+CURRENT PROBLEM:
+The announcer speaks too quickly. The words are rushed and difficult to understand.
+
+TARGET:
+Use a polished mobile match-3 champion-announcer feel:
+- warm
+- confident
+- energetic
+- playful
+- clearly articulated
+- satisfying
+- premium
+- NOT aggressive
+- NOT robotic
+- NOT extremely fast
+
+TIMING:
+1. Slow the spoken voice playback to approximately 85–90% of its current speed.
+2. Do NOT pitch-shift the voice when slowing it down.
+3. Add a small natural pause before the callout: approximately 80–120ms.
+4. Add a natural pause between separate words when needed: approximately 50–100ms.
+5. Let the final word finish completely before the next VFX/audio event.
+6. Do not overlap two announcer callouts.
+7. Never cut the voice tail short.
+
+DELIVERY:
+The announcer should sound like a champion celebrating the player's move.
+
+Examples:
+"COMBO!"
+→ confident, bright, clearly pronounced, with a tiny dramatic pause before the word.
+
+"ULTIMATE!"
+→ stronger and more exciting, but still clearly spoken.
+
+"MEGA STRIKE!"
+→ energetic champion announcement, with clear separation between the two words.
+
+"SUPER COMBO!"
+→ playful and triumphant, not rushed.
+
+IMPORTANT:
+Do NOT simply increase the duration of the VFX.
+Only improve the spoken voice timing/playback.
+
+If the current audio files are pre-recorded:
+- preserve the original files
+- adjust playback rate/pitch-preserving time-stretch if supported
+- do NOT regenerate or replace the voice files unless necessary.
+
+If the current system uses Web Audio:
+prefer pitch-preserving playback/time-stretch where practical.
+Do NOT use a simple pitch-lowering playbackRate change if it makes the voice sound unnaturally deep.
+
+TEST:
+Verify on mobile at 390x844.
+Trigger COMBO, SUPER COMBO, ULTIMATE and MEGA STRIKE.
+Confirm every word is easy to understand and the announcer never sounds rushed.
+
+Do not modify anything else.
