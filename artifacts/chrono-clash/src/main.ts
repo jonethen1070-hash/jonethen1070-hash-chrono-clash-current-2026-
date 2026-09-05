@@ -1337,12 +1337,13 @@ ui.emailForm.addEventListener("submit", (event) => {
   });
 });
 $("#menuGuest").addEventListener("click", () => {
-  unlockGameAudio(audio, settings.music);
+  unlockGameAudio(audio, settings.music, false);
   pressUi();
   // TEMPORARY DIRECT GAMEPLAY BYPASS — REMOVE AFTER GAMEPLAY TESTING
   session.clearOnlineMatch();
   session.startMatch();
   syncScreenNow();
+  if (settings.music) audio.syncBed("battle");
 });
 $("#hudMute").addEventListener("click", () => {
   const muted = !isMatchAudioMuted(settings);
