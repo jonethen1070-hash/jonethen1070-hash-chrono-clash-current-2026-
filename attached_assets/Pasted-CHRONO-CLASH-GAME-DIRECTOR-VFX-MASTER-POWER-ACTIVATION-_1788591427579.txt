@@ -1,0 +1,586 @@
+CHRONO CLASH — GAME DIRECTOR + VFX MASTER
+POWER ACTIVATION / TARGETING / IMPACT EXPERIENCE
+
+I am appointing you to implement the final premium gameplay presentation for the existing Energy Burst and Mega Strike powers.
+
+IMPORTANT:
+The underlying powers already WORK.
+
+Do NOT redesign or rewrite the power mechanics.
+
+The problem is that the current presentation is too subtle. When the player presses a power button, the game does not give enough immediate visual/physical feedback to communicate:
+
+"I PRESSED THE POWER."
+"I AM NOW AIMING."
+"THIS IS WHERE THE POWER WILL HIT."
+"BOOM."
+
+We need a premium, energetic, satisfying match-3 power experience.
+
+Think AAA mobile game quality:
+responsive button feedback
+→ immediate board response
+→ clear targeting
+→ dramatic but controlled impact
+→ satisfying crystalline destruction
+→ clean return to gameplay.
+
+Do NOT copy any proprietary game's exact effects/assets.
+Use the following as design inspiration only:
+premium modern match-3 games + sci-fi crystalline game VFX.
+
+==================================================
+CORE EXPERIENCE
+==================================================
+
+Every power must have three clearly readable beats:
+
+1. PRESS
+2. ARM / TARGET
+3. IMPACT
+
+The player must receive visible feedback within the first frame of pressing the power button.
+
+Never let the player wonder:
+"Did my button press work?"
+
+==================================================
+1. POWER BUTTON PRESS FEEDBACK
+==================================================
+
+When ENERGY BURST or MEGA STRIKE is tapped:
+
+Immediately:
+
+- button visually compresses/depresses
+- scale approximately 1.00 → 0.94 → 1.00
+- duration approximately 80–120ms
+- add a bright internal highlight
+- add a short cyan/white energy pulse
+- add a tiny localized glow expansion
+- return smoothly to normal scale
+
+Do NOT use a cheap UI flash.
+
+The button should feel like a physical futuristic control being activated.
+
+For MEGA STRIKE:
+make the response approximately 25–35% stronger than ENERGY BURST.
+
+Use:
+- brighter core
+- slightly larger pulse
+- slightly stronger glow
+- subtle shockwave
+
+No huge screen flash.
+
+==================================================
+2. IMMEDIATE BOARD RESPONSE
+==================================================
+
+The instant the power becomes armed:
+
+The BOARD itself must acknowledge the power.
+
+Do not wait for the target tap.
+
+Create a subtle but obvious power-ready atmosphere.
+
+ENERGY BURST:
+- cyan energy sweep across the board
+- soft crystalline glow
+- small controlled particles
+- subtle edge illumination
+- eligible target cells become visually alive
+
+MEGA STRIKE:
+- stronger cyan/white energy sweep
+- brief board-wide energy surge
+- subtle dark-to-bright contrast shift
+- thin energy veins/light traces around the crystalline board
+- controlled particles
+- board feels "charged"
+
+Keep the effect short:
+approximately 100–180ms for the initial activation response.
+
+Then transition into a persistent but subtle targeting state.
+
+==================================================
+3. TARGETING STATE
+==================================================
+
+While the power is armed:
+
+The player must immediately understand which board cells are valid targets.
+
+DO NOT use ugly square outlines.
+
+DO NOT use rectangular selection boxes.
+
+DO NOT cover the gems.
+
+Use the existing gem/crystal rendering system.
+
+For valid target gems:
+
+- subtle colored rim light
+- internal crystalline glow
+- tiny energy particles
+- gentle pulse
+- occasional small highlight sweep
+- very soft halo
+
+ENERGY BURST:
+cyan/white.
+
+MEGA STRIKE:
+cyan/white with stronger intensity.
+
+The effect must make the gems look "charged", not selected by a UI rectangle.
+
+Targeting animation should be calm enough that it does not become distracting.
+
+Use a gentle 500–800ms breathing/pulse cycle while armed.
+
+==================================================
+4. FINGER / POINTER TARGET FEEDBACK
+==================================================
+
+When the player moves/touches a valid target:
+
+The target gem should immediately react.
+
+Do NOT wait for the power to execute.
+
+Target:
+
+- brighten
+- slightly scale 1.00 → approximately 1.04
+- internal highlight intensifies
+- small energy ring forms around it
+- tiny particles converge toward it
+- optional subtle beam/energy connection from the board's power origin
+
+This must feel like:
+
+"TARGET ACQUIRED."
+
+MEGA STRIKE should have a stronger lock-on feeling than ENERGY BURST.
+
+Keep it elegant.
+
+No giant crosshair.
+
+No square.
+
+No HUD obstruction.
+
+==================================================
+5. ENERGY BURST — HERO BEHAVIOR
+==================================================
+
+ENERGY BURST should feel fast and concentrated.
+
+Activation:
+
+PRESS
+↓
+cyan button pulse
+↓
+board energy sweep
+↓
+target gems become charged
+↓
+target selected
+↓
+focused energy gathers
+↓
+impact
+
+On target confirmation:
+
+0–60ms:
+target brightens.
+
+60–120ms:
+energy concentrates toward target.
+
+120–180ms:
+tight cyan/white impact ring.
+
+180–300ms:
+targeted gems brighten and begin crystalline fracture.
+
+300–450ms:
+crystalline break/shards.
+
+Then:
+normal gravity/cascade.
+
+The power should feel like concentrated energy detonating inside the crystals.
+
+==================================================
+6. MEGA STRIKE — SIGNATURE POWER
+==================================================
+
+MEGA STRIKE must feel significantly more powerful.
+
+This is the signature ability of Chrono Clash.
+
+Sequence:
+
+PRESS
+↓
+physical button compression
+↓
+hero cyan/white flash
+↓
+board energy surge
+↓
+targeting mode
+↓
+target acquisition
+↓
+weapon charge
+↓
+STRIKE
+↓
+shockwave
+↓
+crystalline destruction
+↓
+cascade
+
+When target is confirmed:
+
+A very short charge-up:
+
+approximately 100–160ms.
+
+During charge:
+
+- energy converges toward target
+- target becomes white/cyan hot
+- crystalline light travels through nearby gems
+- subtle directional beam/arc forms
+
+Then:
+
+IMPACT.
+
+Use:
+
+- concentrated cyan/white beam
+- bright crystalline core
+- expanding shockwave ring
+- localized radial energy
+- controlled particles
+- crystalline shards
+- internal cracks
+- bright fracture flash
+
+The target area should briefly become the visual focus.
+
+Do NOT make the entire screen white.
+
+Do NOT use excessive bloom.
+
+Do NOT obscure the board.
+
+==================================================
+7. CRYSTALLINE DESTRUCTION
+==================================================
+
+Reuse the existing premium gem destruction system.
+
+The destruction sequence should be:
+
+LIGHT UP
+→ INTERNAL CRACK
+→ FRACTURE
+→ BREAK
+→ SHARDS
+→ ENERGY DISSIPATION
+→ FALL
+
+Use a short stagger between gems.
+
+Approximately:
+10–25ms between nearby gem destruction events.
+
+This creates the feeling of a powerful wave moving through the board.
+
+Do not destroy everything on exactly the same frame.
+
+==================================================
+8. MEGA STRIKE BOARD IMPULSE
+==================================================
+
+At the exact impact moment:
+
+Apply a very subtle board impulse.
+
+Approximately:
+
+2–4px maximum.
+
+Duration:
+60–90ms.
+
+Use smooth easing.
+
+No shaking/jittering.
+
+The board should feel like it physically received an impact.
+
+Immediately settle back into its exact original position.
+
+==================================================
+9. PARTICLE DESIGN
+==================================================
+
+Particles must feel crystalline and expensive.
+
+Use:
+
+- tiny crystal fragments
+- cyan energy motes
+- white-hot spark points
+- short directional streaks
+- small shard particles
+- occasional larger crystal fragments
+
+Avoid:
+
+- random noise
+- huge particle clouds
+- fireworks
+- excessive bloom
+- generic circles everywhere
+
+Particles should follow the energy direction.
+
+MEGA STRIKE can use approximately 1.5–2x the particle intensity of ENERGY BURST.
+
+==================================================
+10. LIGHTING LANGUAGE
+==================================================
+
+Chrono Clash visual language:
+
+CYAN
++
+WHITE
++
+CRYSTALLINE HIGHLIGHTS
+
+Energy Burst:
+controlled cyan/white.
+
+Mega Strike:
+cyan/white with stronger white-hot center.
+
+Keep the gems readable.
+
+The VFX should enhance the existing 2.5D premium board rather than flatten it.
+
+==================================================
+11. AUDIO / HAPTICS
+==================================================
+
+DO NOT replace or redesign the existing audio system.
+
+DO NOT create duplicate audio triggers.
+
+Preserve current power audio routing.
+
+If existing haptics are already available:
+
+Button press:
+very short light haptic.
+
+Target acquisition:
+very subtle haptic.
+
+Mega Strike impact:
+stronger short haptic.
+
+Do NOT add long vibration.
+
+==================================================
+12. INPUT
+==================================================
+
+ABSOLUTELY NO PLAYER LOCK.
+
+Do not introduce:
+
+LOCKED
+FREEZE
+INPUT BLOCK
+LONG INPUT LOCK
+
+The player must remain responsive.
+
+If visual cleanup is occurring, input must still remain responsive.
+
+==================================================
+13. PERFORMANCE
+==================================================
+
+Target:
+
+60 FPS mobile.
+
+390x844
+360x740
+
+Use the existing Canvas/VFX infrastructure.
+
+Do not introduce another renderer.
+
+Do not create expensive full-screen effects.
+
+Keep particle counts bounded.
+
+All effects must have deterministic cleanup.
+
+No leaked particles.
+
+No permanent animation loops after the power ends.
+
+==================================================
+14. IMPORTANT EXISTING FUNCTIONALITY
+==================================================
+
+PRESERVE:
+
+Energy Burst mechanics
+Mega Strike mechanics
+target selection
+energy costs
+energy generation
+board destruction
+scoring
+timers
+cascade
+audio routing
+Match SFX
+Rewind
+normal gem swap
+normal match VFX
+
+Do not change the underlying engine logic.
+
+This is a presentation/VFX/interaction-feedback upgrade.
+
+==================================================
+15. REAL DEVICE VALIDATION
+==================================================
+
+Test the actual player flow.
+
+ENERGY BURST:
+
+charge energy
+→ tap ENERGY BURST
+→ verify immediate button feedback
+→ verify immediate board response
+→ verify targeting state
+→ tap target
+→ verify impact
+→ verify actual targeted destruction
+→ verify cascade
+→ verify cleanup
+
+MEGA STRIKE:
+
+charge energy
+→ tap MEGA STRIKE
+→ verify stronger button feedback
+→ verify board energy surge
+→ verify targeting state
+→ tap target
+→ verify charge
+→ verify beam/strike
+→ verify shockwave
+→ verify crystalline destruction
+→ verify cascade
+→ verify cleanup
+
+Test:
+
+390x844
+360x740
+
+Use real touch/pointer interaction.
+
+==================================================
+SUCCESS CRITERIA
+==================================================
+
+The player experience must read instantly:
+
+POWER BUTTON:
+"I pressed it."
+
+BOARD:
+"The power is armed."
+
+TARGET:
+"I am aiming here."
+
+IMPACT:
+"That was powerful."
+
+DESTRUCTION:
+"Those crystals got hit."
+
+CASCADE:
+"The power changed the board."
+
+The final result should feel:
+PREMIUM
+ENERGETIC
+CRYSTALLINE
+RESPONSIVE
+SATISFYING
+CONTROLLED
+
+Not:
+NOISY
+CHEAP
+OVERBLOOMED
+CONFUSING
+FLAT
+GENERIC
+
+IMPORTANT:
+Before changing anything, inspect the existing power VFX implementation and reuse its infrastructure.
+
+Do not create duplicate event systems.
+
+Do not duplicate audio.
+
+Do not modify gameplay mechanics.
+
+After implementation report:
+
+1. Exact files changed.
+2. Exact power-button feedback added.
+3. Exact targeting feedback added.
+4. Exact Energy Burst impact sequence.
+5. Exact Mega Strike impact sequence.
+6. Particle limits.
+7. Timing values.
+8. Confirmation of real 390x844 test.
+9. Confirmation of real 360x740 test.
+10. Confirmation that targeted destruction still works.
+11. Confirmation that no player lock/freeze was introduced.
+12. Typecheck result.
+13. Build result.
+14. Focused test result.
+
+Do not claim success based only on unit tests.
