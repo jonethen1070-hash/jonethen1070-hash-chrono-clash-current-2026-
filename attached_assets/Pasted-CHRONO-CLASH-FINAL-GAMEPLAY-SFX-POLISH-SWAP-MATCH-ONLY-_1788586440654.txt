@@ -1,0 +1,222 @@
+CHRONO CLASH — FINAL GAMEPLAY SFX POLISH
+SWAP + MATCH ONLY
+
+We now have the approved Swap and Match SFX assets.
+
+DO NOT redesign or regenerate the sounds.
+DO NOT change Arena Pulse music.
+DO NOT change gameplay, board physics, VFX, touch/swipe behavior, or UI sounds.
+
+GOAL:
+Make Swap + Match audio feel like a premium, polished modern match-3 game.
+
+==================================================
+1. SWAP SFX
+==================================================
+
+Use the approved Swap SFX asset.
+
+Play exactly ONE Swap SFX only when a VALID player swap is committed.
+
+Timing:
+- Trigger at the moment the swap visually begins.
+- It must feel attached to the gem movement.
+- Keep the existing direct-manipulation motion unchanged.
+
+NEVER play Swap SFX during:
+- pointerdown
+- dragging
+- pointermove
+- threshold detection
+- invalid swap
+- cancelled swipe
+- gem selection
+- landing/settling
+
+Exactly:
+VALID SWAP = 1 Swap SFX
+INVALID SWAP = 0 Swap SFX
+
+==================================================
+2. MATCH SFX
+==================================================
+
+Use the five approved Match SFX assets:
+
+match_1.wav
+match_2.wav
+match_3.wav
+match_4.wav
+match_5.wav
+
+Progression:
+
+Match wave 1 → match_1.wav
+Match wave 2 → match_2.wav
+Match wave 3 → match_3.wav
+Match wave 4 → match_4.wav
+Match wave 5+ → match_5.wav
+
+CRITICAL:
+
+ONE MATCH WAVE = ONE SOUND.
+
+A 3-gem match must produce ONE Match SFX.
+
+A 4-gem match must produce ONE Match SFX.
+
+A 5-gem match must produce ONE Match SFX.
+
+NEVER play the Match SFX once per gem.
+
+==================================================
+3. FIX THE "PRIIINGGG" PROBLEM
+==================================================
+
+There must NEVER be simultaneous playback of:
+
+match_1.wav
+match_2.wav
+match_3.wav
+match_4.wav
+match_5.wav
+
+during one match event.
+
+Only the single asset selected by the current wave number may start.
+
+Do not preload/decode/play all five as audible sources.
+
+Preloading/decoding is allowed only if it does NOT create playback.
+
+For every match-wave event:
+
+wave number
+→ matchWaveAsset(wave)
+→ exactly ONE AudioBufferSourceNode
+→ exactly ONE playback
+
+==================================================
+4. CASCADE FEEL
+==================================================
+
+Initial player match:
+Swap SFX
+→ match_1.wav
+
+First automatic cascade:
+match_2.wav
+
+Second cascade:
+match_3.wav
+
+Third cascade:
+match_4.wav
+
+Fourth+ cascade:
+match_5.wav
+
+The progression resets when a completely new player move begins.
+
+Do NOT reset the progression between individual gems inside the same resolve sequence.
+
+==================================================
+5. MIX / POLISH
+==================================================
+
+Keep the approved sound files unchanged.
+
+Only adjust playback-level polish if necessary:
+
+- no clipping
+- no distortion
+- no excessive gain
+- no artificial long reverb
+- no unnecessary delay
+- no duplicate layering
+- no pitch modification unless already part of the approved asset
+
+Match SFX should sit clearly above the Arena music without overpowering it.
+
+Swap should be shorter and more subtle than Match.
+
+Match should feel like the reward.
+
+==================================================
+6. AUDIO PRIORITY
+==================================================
+
+Use this priority:
+
+VALID SWAP
+↓
+MATCH RECOGNITION
+↓
+MATCH SFX
+↓
+CASCADE MATCH SFX
+
+Do not let the Match SFX retrigger because of:
+- individual gem destruction
+- individual particle effects
+- combo banner
+- score popup
+- VFX
+- animation callbacks
+- multiple clear events representing the same wave
+
+The canonical match-wave event is the ONLY trigger.
+
+==================================================
+7. VERIFICATION — REQUIRED
+==================================================
+
+Perform live runtime instrumentation.
+
+Test:
+
+A) Simple 3-gem match
+Expected:
+1 Swap SFX
+1 Match SFX
+
+B) 4-gem match
+Expected:
+1 Swap SFX
+1 Match SFX
+
+C) Match with one cascade
+Expected:
+1 Swap SFX
+Match 1
+then Match 2
+
+D) Multiple cascades
+Expected:
+Match 1 → Match 2 → Match 3 → Match 4 → Match 5
+
+E) Invalid swap
+Expected:
+0 Swap SFX
+0 Match SFX
+
+F) Dragging without committing
+Expected:
+0 Swap SFX
+0 Match SFX
+
+For each test report:
+- audio URL
+- wave number
+- playback start count
+- number of AudioBufferSourceNodes
+- whether any other match WAV started simultaneously
+
+IMPORTANT:
+If the current runtime still produces the "priiinggg" sound, STOP and diagnose the duplicate playback source instead of changing volumes or replacing assets.
+
+Do not touch Arena Pulse.
+
+Run focused audio tests, typecheck and build.
+
+Report only the files changed and the measured playback counts.
