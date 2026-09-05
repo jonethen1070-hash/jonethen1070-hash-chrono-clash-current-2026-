@@ -445,6 +445,68 @@ test("real touch gestures play only the committed swap WAV progression", async (
     touchPoints: [],
   });
   await expect.poll(async () => (await swapStartsSinceBaseline()).length).toBe(beforeInvalid);
+
+  const firstMatchStarts = await startsSinceBaseline();
+  const matchWaveDurations = [245, 250, 255, 260, 265];
+  const swapWaveDurations = [100, 105];
+  expect(firstMatchStarts.filter((duration) => swapWaveDurations.includes(duration))).toEqual([
+    105,
+    100,
+    105,
+    100,
+    105,
+    105,
+  ]);
+  expect(firstMatchStarts.some((duration) => matchWaveDurations.includes(duration))).toBe(true);
+  expect(firstMatchStarts.filter((duration) => matchWaveDurations.includes(duration)).every((duration) => !swapWaveDurations.includes(duration))).toBe(true);
+
+  await page.evaluate(() => {
+    const session = (window as Window & { __chrono?: { session?: { toMenu: () => void } } }).__chrono?.session;
+    if (!session) throw new Error("Missing Chrono session");
+    session.toMenu();
+  });
+  await expect(page.locator("#menu.active")).toBeVisible();
+
+  const secondMatchBaseline = await page.evaluate(() => {
+    const probe = (window as Window & { __swapAudioProbe?: { starts: number[] } }).__swapAudioProbe;
+    if (!probe) throw new Error("Missing swap audio probe");
+    return probe.starts.length;
+  });
+  await page.locator("#menuGuest").click();
+  await expect(page.locator("#match.active")).toBeVisible();
+  await expect.poll(async () => page.locator("#overlay").evaluate((el) => el.classList.contains("hidden"))).toBe(true);
+  await page.evaluate(async () => {
+    const chrono = (window as Window & { __chrono?: { audioReady?: () => Promise<unknown> } }).__chrono;
+    if (!chrono?.audioReady) throw new Error("Missing Chrono audio probe");
+    await chrono.audioReady();
+  });
+
+  const secondBoard = page.locator("#playerBoard");
+  const secondBoardBox = await secondBoard.boundingBox();
+  expect(secondBoardBox).not.toBeNull();
+  const secondMove = await nextValidMove();
+  await touchSwipe(
+    cdp,
+    cellCenter(secondBoardBox!, secondMove.from.r, secondMove.from.c),
+    cellCenter(secondBoardBox!, secondMove.to.r, secondMove.to.c),
+    50,
+  );
+  await expect.poll(async () => {
+    const starts = await page.evaluate((start) => {
+      const probe = (window as Window & { __swapAudioProbe?: { starts: number[] } }).__swapAudioProbe;
+      if (!probe) throw new Error("Missing swap audio probe");
+      return probe.starts.slice(start);
+    }, secondMatchBaseline);
+    return starts.filter((duration) => swapWaveDurations.includes(duration));
+  }).toEqual([105]);
+
+  const secondMatchStarts = await page.evaluate((start) => {
+    const probe = (window as Window & { __swapAudioProbe?: { starts: number[] } }).__swapAudioProbe;
+    if (!probe) throw new Error("Missing swap audio probe");
+    return probe.starts.slice(start);
+  }, secondMatchBaseline);
+  expect(secondMatchStarts.some((duration) => matchWaveDurations.includes(duration))).toBe(true);
+  expect(secondMatchStarts.filter((duration) => swapWaveDurations.includes(duration))).toEqual([105]);
 });
 
 test.describe("mobile cascade visibility", () => {
