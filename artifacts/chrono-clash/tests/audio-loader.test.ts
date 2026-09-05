@@ -11,11 +11,11 @@ describe("audio file resolver", () => {
       "/audio/music-lobby.ogg",
     ]);
     expect(candidateUrls("sfx-freeze.wav")[0]).toBe("/audio/sfx-freeze.mp3");
-    expect(candidateUrls("Arena_Pulse_1788563386140.m4a")).toEqual([
-      "/audio/Arena_Pulse_1788563386140.m4a",
-      "/audio/Arena_Pulse_1788563386140.mp3",
-      "/audio/Arena_Pulse_1788563386140.wav",
-      "/audio/Arena_Pulse_1788563386140.ogg",
+    expect(candidateUrls("Arena_Pulse_Replit.m4a")).toEqual([
+      "/audio/Arena_Pulse_Replit.m4a",
+      "/audio/Arena_Pulse_Replit.mp3",
+      "/audio/Arena_Pulse_Replit.wav",
+      "/audio/Arena_Pulse_Replit.ogg",
     ]);
   });
 

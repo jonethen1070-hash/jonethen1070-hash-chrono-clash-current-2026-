@@ -20,12 +20,12 @@
     },
     {
       "id": "music-battle",
-      "files": ["Arena_Pulse_1788563386140.m4a"],
+      "files": ["Arena_Pulse_Replit.m4a"],
       "loop": true,
       "loopStartSec": 0,
       "loopEndSec": 224.4,
       "durationSec": 224.4,
-      "role": "Arena gameplay theme. Uploaded Arena Pulse master. Loop."
+      "role": "Arena gameplay theme. Uploaded Arena Pulse Replit master. Loop."
     },
     {
       "id": "music-victory",

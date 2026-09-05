@@ -90,11 +90,11 @@ export const MUSIC_FILES: Record<Exclude<MusicBed, "none">, AudioAsset> = {
   ),
   battle: asset(
     "music-battle",
-    "Arena_Pulse_1788563386140.m4a",
+    "Arena_Pulse_Replit.m4a",
     "music",
     true,
     224.4,
-    "Arena gameplay theme. Uploaded Arena Pulse master. Loop.",
+    "Arena gameplay theme. Uploaded Arena Pulse Replit master. Loop.",
   ),
   victory: asset(
     "music-victory",
