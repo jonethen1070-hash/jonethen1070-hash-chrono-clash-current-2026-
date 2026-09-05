@@ -1,0 +1,736 @@
+CHRONO CLASH — VFX MASTER DIRECTOR / CINEMATIC REALISM PASS
+
+I want you to act as the VFX MASTER and CINEMATIC GAME VFX DIRECTOR for Chrono Clash.
+
+Do not treat this as a simple glow/CSS polish.
+
+The current power targeting has circular light highlights around gems, but the effect feels like a UI highlight. I want you to transform the entire power VFX language into something that feels PREMIUM, CINEMATIC, PHYSICAL, CRYSTALLINE, ENERGETIC and REAL.
+
+Use the current screenshot/game presentation as the visual baseline.
+
+The goal is:
+
+NOT:
+- flat glow
+- generic neon circles
+- cheap particle spam
+- UI selection rings
+- simple opacity pulsing
+
+YES:
+- believable light interaction
+- volumetric-looking energy
+- crystalline refraction
+- controlled particle motion
+- light traveling through/around gems
+- energy accumulation
+- impact force
+- realistic fracture
+- beautiful afterglow
+- cinematic timing
+- premium AAA-inspired presentation
+
+Do NOT copy any proprietary game's assets or effects.
+
+==================================================
+FIRST — INSPECT BEFORE MODIFYING
+==================================================
+
+Inspect the existing:
+
+- power VFX implementation
+- Canvas renderer
+- gem rendering
+- particle system
+- shockwave system
+- board effects
+- targeting highlight
+- Energy Burst
+- Mega Strike
+- Rewind
+- existing match fracture/destruction VFX
+- existing easing/timing utilities
+- CSS overlays related to power effects
+
+Reuse the existing rendering architecture wherever possible.
+
+Do NOT create a second competing VFX architecture.
+
+Do NOT blindly add more glow.
+
+Find the correct existing VFX primitives and upgrade them.
+
+==================================================
+VFX MASTER PRINCIPLE
+==================================================
+
+Every power interaction must feel like ENERGY interacting with REAL CRYSTALLINE MATERIAL.
+
+Think:
+
+ENERGY SOURCE
+→ ENERGY TRAVEL
+→ ENERGY CONCENTRATION
+→ LIGHT RESPONSE
+→ CRYSTAL RESPONSE
+→ FRACTURE
+→ IMPACT
+→ SHARDS
+→ DISSIPATION
+
+Everything should have cause and effect.
+
+If energy moves toward a gem,
+the gem should react before the explosion.
+
+If the gem is hit,
+the crystal should illuminate internally before breaking.
+
+If it breaks,
+shards should inherit the direction and force of the impact.
+
+This is what makes VFX feel physical rather than decorative.
+
+==================================================
+1. POWER BUTTON — PHYSICAL ACTIVATION
+==================================================
+
+When the player presses ENERGY BURST or MEGA STRIKE:
+
+The button must feel physically pressed.
+
+Sequence:
+
+0–20ms
+- immediate compression
+- subtle brightness increase
+- internal energy core reacts
+
+20–70ms
+- cyan/white energy pulse expands from button
+
+70–120ms
+- button returns smoothly
+
+Do NOT use a generic flash.
+
+Make the button feel like a futuristic energy device being physically activated.
+
+MEGA STRIKE should have a stronger response.
+
+==================================================
+2. BOARD ENERGY WAKE-UP
+==================================================
+
+Immediately after power activation:
+
+The board should visibly react.
+
+Create a controlled energy sweep across the board.
+
+The sweep should:
+
+- travel rather than simply appear
+- have a bright leading edge
+- have a softer trailing glow
+- slightly illuminate nearby gems
+- disappear quickly
+
+Think of energy physically passing through the arena.
+
+Duration:
+approximately 100–180ms.
+
+Do not leave a permanent overlay.
+
+==================================================
+3. TARGETING GLOW — REBUILD IT
+==================================================
+
+The current circular light around the gems is too much like a UI selection indicator.
+
+KEEP THE CIRCLE CONCEPT.
+
+But transform it into a believable ENERGY FIELD.
+
+The circle should NOT look like:
+
+"○"
+
+It should feel like:
+
+a thin crystalline energy field hovering around the gem.
+
+Use:
+
+- soft outer halo
+- thin irregular energy ring
+- internal reflected light
+- tiny moving particles
+- subtle rotational energy
+- intermittent highlight
+- slight depth/parallax impression
+
+The ring should breathe slowly.
+
+Approximately:
+500–800ms cycle.
+
+Very subtle.
+
+The gem itself must remain the hero.
+
+==================================================
+4. CRYSTAL LIGHT INTERACTION
+==================================================
+
+This is extremely important.
+
+When a gem is a valid target:
+
+DO NOT simply increase its opacity.
+
+Instead:
+
+- brighten internal crystal core
+- create a small white specular highlight
+- increase edge refraction
+- add a soft colored internal glow
+- allow light to appear to travel through the crystal
+- tiny particles should orbit/converge
+
+The gem should look energized from INSIDE.
+
+Use the existing gem geometry/rendering.
+
+Do not redesign the gem shapes.
+
+==================================================
+5. TARGET ACQUISITION
+==================================================
+
+When the player touches a valid target:
+
+Create a very fast lock-on event.
+
+Approximately:
+
+0–30ms
+- target brightens
+
+30–70ms
+- energy ring tightens
+
+70–110ms
+- particles converge
+
+110–150ms
+- target becomes white/cyan hot
+
+Then immediately execute the power.
+
+This should feel like:
+
+TARGET ACQUIRED.
+
+Not like:
+BUTTON CLICKED.
+
+==================================================
+6. ENERGY BURST — CINEMATIC VFX
+==================================================
+
+ENERGY BURST should feel like concentrated crystalline energy detonating at the selected location.
+
+Sequence:
+
+PRESS
+→ BOARD WAKE
+→ TARGET
+→ ENERGY CONVERGENCE
+→ CORE CHARGE
+→ IMPACT
+→ CRYSTAL FRACTURE
+→ SHARDS
+→ CASCADE
+
+During charge:
+
+- energy spirals inward
+- small particles accelerate toward the target
+- target crystal becomes brighter internally
+- thin energy filaments connect surrounding affected gems
+
+Impact:
+
+- bright central flash
+- expanding thin energy ring
+- soft secondary ring
+- crystalline shockwave
+- controlled outward particles
+
+Then affected gems:
+
+LIGHT
+→ INTERNAL CRACK
+→ FRACTURE
+→ BREAK
+→ SHARDS
+
+Avoid one-frame disappearance.
+
+==================================================
+7. MEGA STRIKE — SIGNATURE CINEMATIC EVENT
+==================================================
+
+MEGA STRIKE must be the most impressive power in the game.
+
+It should feel like the arena itself is delivering a devastating energy strike.
+
+Sequence:
+
+BUTTON PRESS
+→ BOARD CHARGE
+→ TARGET ACQUISITION
+→ WEAPON CHARGE
+→ STRIKE
+→ IMPACT
+→ CRYSTAL FRACTURE
+→ SHARDS
+→ CASCADE
+→ ENERGY DISSIPATION
+
+CHARGE:
+
+100–160ms.
+
+During charge:
+
+- energy gathers toward target
+- surrounding gems respond with subtle light
+- directional energy lines appear
+- target becomes increasingly bright
+- tiny particles accelerate
+
+STRIKE:
+
+Use a concentrated cyan/white directional energy beam or arc.
+
+It should be:
+
+- narrow
+- bright
+- fast
+- directional
+- short-lived
+
+Do NOT make it a giant laser permanently covering the board.
+
+IMPACT:
+
+At the exact impact frame:
+
+- white-hot core
+- cyan outer glow
+- expanding shockwave
+- crystalline light burst
+- directional particles
+- small crystal fragments
+- subtle board impulse
+
+Board impulse:
+
+2–4px maximum
+60–90ms
+smooth easing
+NO shaking/jitter.
+
+==================================================
+8. CINEMATIC LIGHTING
+==================================================
+
+Use a layered lighting hierarchy:
+
+LEVEL 1:
+white-hot core
+
+LEVEL 2:
+cyan energy
+
+LEVEL 3:
+soft atmospheric glow
+
+LEVEL 4:
+tiny particle highlights
+
+The center should be brightest.
+
+Edges should be softer.
+
+Do NOT make the entire board equally bright.
+
+The player should naturally look at the impact point.
+
+==================================================
+9. REALISTIC CRYSTAL FRACTURE
+==================================================
+
+Upgrade the existing gem destruction response.
+
+Before destruction:
+
+- internal light builds
+- thin cracks appear
+- cracks brighten
+- crystal becomes unstable
+
+Then:
+
+FRACTURE.
+
+Use:
+
+- small shard fragments
+- directional shard velocity
+- varied shard sizes
+- short-lived bright fragments
+- tiny energy sparks
+
+Shards must inherit the direction of the impact.
+
+Do not simply spawn random particles.
+
+The destruction should look physically motivated.
+
+==================================================
+10. PARTICLE MOTION
+==================================================
+
+Particles should have PURPOSE.
+
+Energy particles:
+move toward energy source/target.
+
+Impact particles:
+move outward from impact.
+
+Shards:
+move according to impact direction.
+
+Afterglow particles:
+slow down and disappear.
+
+Use velocity, acceleration and damping where appropriate.
+
+Avoid random floating dots.
+
+Particle motion should feel intentional.
+
+==================================================
+11. SOFTNESS / REALISM
+==================================================
+
+The VFX should be soft and cinematic.
+
+Avoid:
+
+- harsh outlines
+- hard circular borders
+- excessive bloom
+- giant white flashes
+- noisy particles
+- excessive screen shake
+- cheap neon filters
+- flat radial gradients sitting over everything
+
+Use layered transparency and smooth falloff.
+
+The player should see:
+
+CRYSTAL
++ LIGHT
++ ENERGY
++ DEPTH
+
+not:
+
+GLOW EFFECT.
+
+==================================================
+12. CASCADE CONNECTION
+==================================================
+
+Power destruction must connect naturally to the existing match/cascade VFX.
+
+Do not abruptly switch visual styles.
+
+Power impact:
+strong.
+
+Normal cascade:
+controlled.
+
+If multiple waves occur:
+
+Wave 1:
+strong.
+
+Wave 2:
+slightly elevated.
+
+Wave 3+:
+more energy, particles and light.
+
+But keep the board readable.
+
+==================================================
+13. MEGA STRIKE vs ENERGY BURST
+==================================================
+
+They must have different personalities.
+
+ENERGY BURST:
+
+FAST
+CONCENTRATED
+CLEAN
+CRYSTALLINE
+CONTROLLED
+
+MEGA STRIKE:
+
+HEAVY
+POWERFUL
+CINEMATIC
+DIRECTIONAL
+HERO MOMENT
+
+Mega Strike should feel approximately 1.5–2x more visually powerful.
+
+Not simply 2x more particles.
+
+Increase:
+
+- charge intensity
+- light intensity
+- directional energy
+- impact strength
+- crystal response
+- shockwave presence
+
+==================================================
+14. REWIND
+==================================================
+
+Preserve the existing Rewind mechanics.
+
+Upgrade its visual language separately:
+
+- cyan/blue temporal energy
+- temporal ring
+- reverse-moving particles
+- ghost-like crystal trails
+- reverse light movement
+- elegant temporal distortion
+- board restoration visually synchronized with the actual state restoration
+
+It should feel like TIME is moving backward.
+
+==================================================
+15. PERFORMANCE
+==================================================
+
+Target 60 FPS on:
+
+390x844
+360x740
+
+Keep particle counts bounded.
+
+Use pooled/reused particles if the existing architecture supports it.
+
+No uncontrolled animation loops.
+
+Every VFX event must clean itself up.
+
+No memory leaks.
+
+No permanent canvas layers.
+
+==================================================
+16. INPUT
+==================================================
+
+ABSOLUTELY NO:
+
+LOCKED
+FREEZE
+LONG INPUT LOCK
+TOUCH BLOCKING
+
+The player must remain responsive.
+
+VFX must never make the game feel frozen.
+
+==================================================
+17. AUDIO
+==================================================
+
+DO NOT change the existing audio system.
+
+Do not add duplicate audio triggers.
+
+Preserve:
+
+Swap SFX
+Match SFX
+Power audio
+Arena music
+
+VFX timing must synchronize with existing audio rather than replacing it.
+
+==================================================
+18. MOST IMPORTANT DESIGN RULE
+==================================================
+
+Do not make everything glow all the time.
+
+Premium VFX depends on CONTRAST.
+
+Normal state:
+controlled.
+
+Power armed:
+energy begins appearing.
+
+Target:
+energy concentrates.
+
+Impact:
+short intense peak.
+
+After impact:
+energy rapidly dissipates.
+
+Then:
+back to clean gameplay.
+
+The player should experience:
+
+CALM
+→ ANTICIPATION
+→ FOCUS
+→ IMPACT
+→ RELEASE
+→ CALM
+
+That contrast is what makes the impact satisfying.
+
+==================================================
+19. REAL DEVICE TEST
+==================================================
+
+Do not rely only on unit tests.
+
+Test actual mobile interaction:
+
+390x844
+360x740
+
+Test:
+
+ENERGY BURST:
+button press
+→ board response
+→ targeting
+→ target acquisition
+→ impact
+→ fracture
+→ cascade
+→ cleanup
+
+MEGA STRIKE:
+button press
+→ board response
+→ targeting
+→ target acquisition
+→ charge
+→ strike
+→ impact
+→ fracture
+→ cascade
+→ cleanup
+
+Verify the VFX is clearly visible in the actual gameplay viewport.
+
+==================================================
+20. STRICT SCOPE
+==================================================
+
+Do NOT modify:
+
+- board layout
+- gem size
+- game rules
+- power costs
+- energy generation
+- scoring
+- timers
+- networking
+- touch mechanics
+- power mechanics
+- audio routing
+
+This is a VFX and visual-feedback MASTER PASS.
+
+==================================================
+FINAL QUALITY BAR
+==================================================
+
+Before declaring success, ask:
+
+Does pressing the button FEEL physical?
+
+Does the board visibly WAKE UP?
+
+Does targeting feel like ENERGY rather than a UI selection?
+
+Does the target crystal look energized from INSIDE?
+
+Does the energy MOVE with purpose?
+
+Does the impact have a clear peak?
+
+Do the crystals visibly FRACTURE before breaking?
+
+Do shards inherit impact direction?
+
+Does Mega Strike feel like a HERO POWER?
+
+Does Energy Burst feel fast and concentrated?
+
+Does the VFX settle cleanly back into normal gameplay?
+
+Does it still look premium on a real 390x844 phone?
+
+If the answer to any is NO, continue refining that specific VFX component before reporting completion.
+
+After implementation report:
+
+- files changed
+- VFX systems upgraded
+- exact timing values
+- particle limits
+- Energy Burst sequence
+- Mega Strike sequence
+- Rewind sequence
+- real-device observations
+- 390x844 result
+- 360x740 result
+- focused tests
+- typecheck
+- production build
+
+DO NOT claim "designer-level" based only on tests.
+
+The final standard is the ACTUAL PLAYER EXPERIENCE.
