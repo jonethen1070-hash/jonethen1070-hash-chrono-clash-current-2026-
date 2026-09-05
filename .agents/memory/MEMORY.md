@@ -8,3 +8,4 @@
 - [Cascade regression checks](cascade-regression-checks.md) — transient Canvas motion needs deterministic fixtures, fast polling, and renderer pose assertions.
 - [Matched swap impact](matched-swap-impact.md) — synchronous resolves can remove swapped IDs before paint; preserve their socket targets in dying overlays.
 - [Gameplay callout separation](gameplay-callout-separation.md) — preserve in-match callout text and impact VFX independently when spoken announcer cues are disabled.
+- [Audio bed cleanup](audio-bed-cleanup.md) — pending music fades must retain source references until disposal or canceled timers can strand connected loops across scene re-entry.

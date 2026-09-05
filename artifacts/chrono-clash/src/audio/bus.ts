@@ -73,6 +73,8 @@ export class AudioBus {
   private bedOsc: OscillatorNode[] = [];
   private bedExtras: AudioNode[] = [];
   private musicSource: AudioBufferSourceNode | null = null;
+  private musicSources = new Set<AudioBufferSourceNode>();
+  private fadingSources = new Set<AudioBufferSourceNode>();
   private director = new MusicDirector();
   private timers = new Set<ReturnType<typeof setTimeout>>();
   private lastCueAt = new Map<Cue, number>();
@@ -97,12 +99,12 @@ export class AudioBus {
   }
 
   get musicNodeCount(): number {
-    return this.bedOsc.length + (this.musicSource ? 1 : 0);
+    return this.bedOsc.length + this.musicSources.size;
   }
 
   get musicPlayback(): "file" | "procedural" | "none" {
     if (this.director.bed === "none" || !this.musicOn) return "none";
-    if (this.musicSource) return "file";
+    if (this.musicSources.size) return "file";
     if (this.bedOsc.length) return "procedural";
     return "none";
   }
@@ -468,6 +470,7 @@ export class AudioBus {
       src.connect(bus);
       src.start(t);
       src.onended = () => {
+        this.musicSources.delete(src);
         if (this.musicSource === src) this.musicSource = null;
         try {
           src.disconnect();
@@ -475,6 +478,7 @@ export class AudioBus {
           /* ignore */
         }
       };
+      this.musicSources.add(src);
       this.musicSource = src;
       return;
     }
@@ -530,33 +534,40 @@ export class AudioBus {
     const nodes = this.bedOsc;
     const extras = this.bedExtras;
     const gain = this.musicBus;
-    const source = this.musicSource;
+    const sources = new Set([...this.musicSources, ...this.fadingSources]);
+    if (this.musicSource) sources.add(this.musicSource);
     this.bedOsc = [];
     this.bedExtras = [];
+    this.musicSources.clear();
+    this.fadingSources.clear();
     this.musicBus = null;
     this.musicSource = null;
     if (!gain) {
-      this.disposeBed(nodes, extras, gain, source);
+      this.disposeBed(nodes, extras, gain, [...sources]);
       return;
     }
     if (!fade || !this.ctx) {
-      this.disposeBed(nodes, extras, gain, source);
+      this.disposeBed(nodes, extras, gain, [...sources]);
       return;
     }
+    for (const source of sources) this.fadingSources.add(source);
     const t = this.ctx.currentTime;
     gain.gain.cancelScheduledValues(t);
     gain.gain.setValueAtTime(Math.max(0.0001, gain.gain.value), t);
     gain.gain.linearRampToValueAtTime(0.0001, t + 0.22);
-    this.defer(() => this.disposeBed(nodes, extras, gain, source), 260);
+    this.defer(() => {
+      this.disposeBed(nodes, extras, gain, [...sources]);
+      for (const source of sources) this.fadingSources.delete(source);
+    }, 260);
   }
 
   private disposeBed(
     nodes: OscillatorNode[],
     extras: AudioNode[],
     gain: GainNode | null,
-    source: AudioBufferSourceNode | null,
+    sources: AudioBufferSourceNode[],
   ): void {
-    if (source) {
+    for (const source of sources) {
       try {
         source.stop();
       } catch {
@@ -850,11 +861,12 @@ export class AudioBus {
     }
   }
 
-  private promoteBedToFile(): void {
-    const bed = this.director.bed;
+  private promoteBedToFile(requestedBed?: MusicBed): void {
+    const bed = requestedBed ?? this.director.bed;
+    if (bed !== this.director.bed) return;
     const asset = musicAsset(bed);
     if (!this.musicOn || !asset || !this.buffers.has(asset.id)) return;
-    if (this.musicSource) return;
+    if (this.musicSources.size) return;
     this.stopBed(false);
     this.spawnBed(bed);
   }
@@ -895,6 +907,7 @@ export class AudioBus {
         this.buffers.set(item.id, buffer);
         this.loadedFrom.set(item.id, cached.url);
         this.raw.delete(item.id);
+        if (item.id === "music-battle") this.promoteBedToFile("battle");
         return;
       } catch {
         this.raw.delete(item.id);
@@ -907,6 +920,7 @@ export class AudioBus {
         const buffer = await decodeAudioBuffer(ctx, found.data);
         this.buffers.set(item.id, buffer);
         this.loadedFrom.set(item.id, found.url);
+        if (item.id === "music-battle") this.promoteBedToFile("battle");
         return;
       } catch {
         /* iOS cannot decode ogg; try the next format */
