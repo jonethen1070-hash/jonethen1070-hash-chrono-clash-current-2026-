@@ -7,12 +7,13 @@ import {
   playerBoardDestroyCue,
 } from "../src/audio/events";
 import { GameSession } from "../src/engine/session";
+import { matchWaveAsset } from "../src/audio/catalog";
 
 describe("battle audio events", () => {
   it("plays one player glass shatter per resolve and keeps the rival board silent", () => {
-    expect(battleCuesFromFx({ kind: "clear", text: "+120", combo: 1 })).toEqual(["match"]);
-    expect(battleCuesFromFx({ kind: "clear", text: "+240", combo: 2, side: "player" })).toEqual(["combo"]);
-    expect(battleCuesFromFx({ kind: "clear", text: "+400", combo: 4, side: "player" })).toEqual(["bigCombo"]);
+    expect(battleCuesFromFx({ kind: "clear", text: "+120", combo: 1 })).toEqual(["matchWave"]);
+    expect(battleCuesFromFx({ kind: "clear", text: "+240", combo: 2, side: "player" })).toEqual(["matchWave"]);
+    expect(battleCuesFromFx({ kind: "clear", text: "+400", combo: 4, side: "player" })).toEqual(["matchWave"]);
     expect(battleCuesFromFx({ kind: "combo", text: "NICE!", combo: 3, side: "player" })).toEqual([]);
     expect(battleCuesFromFx({ kind: "combo", text: "GREAT!", combo: 4, side: "player" })).toEqual([]);
     expect(
@@ -20,13 +21,35 @@ describe("battle audio events", () => {
         ...battleCuesFromFx({ kind: "clear", text: "+240", combo: 3, side: "player" }),
         ...battleCuesFromFx({ kind: "combo", text: "NICE!", combo: 3, side: "player" }),
       ],
-    ).toEqual(["combo"]);
+    ).toEqual(["matchWave"]);
     expect(battleCuesFromFx({ kind: "clear", text: "+80", combo: 1, side: "opponent" })).toEqual([]);
     expect(battleCuesFromFx({ kind: "clear", text: "+240", combo: 3, side: "opponent" })).toEqual([]);
     expect(battleCuesFromFx({ kind: "combo", text: "COMBO x2", combo: 2, side: "opponent" })).toEqual([]);
     expect(isRivalBoardFx({ kind: "clear", text: "+80", side: "opponent" })).toBe(true);
     expect(isRivalBoardFx({ kind: "clear", text: "+80", side: "player" })).toBe(false);
     expect(playerBoardDestroyCue({ kind: "combo", text: "NICE!", combo: 3, side: "player" })).toBe(null);
+  });
+
+  it("maps match waves one-to-one and clamps fourth-plus cascades to match_5.wav", () => {
+    expect([1, 2, 3, 4, 5, 6].map((wave) => matchWaveAsset(wave).file)).toEqual([
+      "match_1.wav",
+      "match_2.wav",
+      "match_3.wav",
+      "match_4.wav",
+      "match_5.wav",
+      "match_5.wav",
+    ]);
+  });
+
+  it("routes one match-wave cue per clear event and leaves combo banners without audio", () => {
+    const bus = new AudioBus();
+    const waves: number[] = [];
+    bus.playMatchWave = ((wave: number) => waves.push(wave)) as AudioBus["playMatchWave"];
+    const clear = { kind: "clear", text: "+240", combo: 2, side: "player" };
+    const banner = { kind: "combo", text: "COMBO x2", combo: 2, side: "player" };
+    playBattleCuesForTest(bus, clear);
+    playBattleCuesForTest(bus, banner);
+    expect(waves).toEqual([2]);
   });
 
   it("emits no board-destroy cues from opponent resolves in a live session", () => {
@@ -180,3 +203,7 @@ describe("battle audio events", () => {
     }
   });
 });
+
+function playBattleCuesForTest(bus: AudioBus, fx: { kind: string; text: string; combo?: number; side?: string }): void {
+  for (const cue of battleCuesFromFx(fx)) playBattleCue(bus, cue, fx.combo ?? 1, fx.text);
+}

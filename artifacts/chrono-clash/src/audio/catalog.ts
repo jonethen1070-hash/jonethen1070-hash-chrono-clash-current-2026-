@@ -55,6 +55,8 @@ export interface AudioAsset {
   note: string;
 }
 
+export type MatchWave = 1 | 2 | 3 | 4 | 5;
+
 export const AUDIO_DIR = "/audio";
 
 function asset(
@@ -156,6 +158,14 @@ export const SFX_FILES: Record<Cue, AudioAsset> = {
   livesreset: asset("sfx-livesreset", "sfx-livesreset.wav", "sfx", false, 1.15, "UTC daily lives restored."),
 };
 
+export const MATCH_WAVE_FILES: Record<MatchWave, AudioAsset> = {
+  1: asset("sfx-match-1", "match_1.wav", "sfx", false, 0.245, "Initial player match wave."),
+  2: asset("sfx-match-2", "match_2.wav", "sfx", false, 0.255, "First automatic cascade match wave."),
+  3: asset("sfx-match-3", "match_3.wav", "sfx", false, 0.265, "Second automatic cascade match wave."),
+  4: asset("sfx-match-4", "match_4.wav", "sfx", false, 0.25, "Third automatic cascade match wave."),
+  5: asset("sfx-match-5", "match_5.wav", "sfx", false, 0.26, "Fourth and later automatic cascade match waves."),
+};
+
 export type VoiceCalloutId = "locked" | "combo" | "ultimate";
 
 export const VOICE_FILES: Record<VoiceCalloutId, AudioAsset> = {
@@ -185,6 +195,7 @@ export function sfxVariantIds(cue: Cue): string[] {
 export const AUDIO_ASSETS: AudioAsset[] = [
   ...Object.values(MUSIC_FILES),
   ...new Map(Object.values(SFX_FILES).map((item) => [item.file, item])).values(),
+  ...Object.values(MATCH_WAVE_FILES),
   ...SFX_VARIANT_FILES,
   ...Object.values(VOICE_FILES),
 ];
@@ -201,6 +212,11 @@ export function musicAsset(bed: MusicBed): AudioAsset | null {
 
 export function sfxAsset(cue: Cue): AudioAsset {
   return SFX_FILES[cue];
+}
+
+export function matchWaveAsset(wave: number): AudioAsset {
+  const normalized = Math.min(5, Math.max(1, Math.trunc(wave))) as MatchWave;
+  return MATCH_WAVE_FILES[normalized];
 }
 
 export function voiceAsset(id: string): AudioAsset | null {

@@ -1,6 +1,7 @@
 import { Intensity } from "../engine/types";
 import { VoiceIntensity } from "./voice";
 import {
+  matchWaveAsset,
   musicAsset,
   sfxVariantIds,
   uniqueAudioAssets,
@@ -292,6 +293,13 @@ export class AudioBus {
     if (cue === "clash") this.duck(0.28, 0.28);
     if (this.playAssetCue(cue, combo)) return;
     this.playSynthCue(cue, combo);
+  }
+
+  /** Plays exactly one uploaded match-wave sample; waves 5+ share match_5.wav. */
+  playMatchWave(wave = 1): void {
+    if (!this.sfxOn || this.sfxVoices >= MAX_SFX_VOICES) return;
+    if (this.playAssetById(matchWaveAsset(wave).id, "match", wave)) return;
+    this.playSynthCue("match", wave);
   }
 
   /** Spoken gameplay callouts ride a dedicated bus so they sit above crystal SFX without extra duck. */
@@ -607,14 +615,19 @@ export class AudioBus {
 
   private playAssetCue(cue: Cue, combo = 1): boolean {
     const ids = sfxVariantIds(cue);
-    let buffer: AudioBuffer | undefined;
+    let id: string | undefined;
     if (ids.length > 1) {
       const idx = this.variantAt.get(cue) ?? 0;
       this.variantAt.set(cue, idx + 1);
-      buffer = this.buffers.get(ids[idx % ids.length]!) ?? this.buffers.get(ids[0]!);
+      id = ids[idx % ids.length]!;
     } else {
-      buffer = this.buffers.get(ids[0]!);
+      id = ids[0];
     }
+    return id ? this.playAssetById(id, cue, combo) : false;
+  }
+
+  private playAssetById(id: string, cue: Cue, combo = 1): boolean {
+    const buffer = this.buffers.get(id);
     const ctx = this.ctx;
     if (!buffer || !ctx || !this.sfxGain || typeof ctx.createBufferSource !== "function") return false;
     const src = ctx.createBufferSource();

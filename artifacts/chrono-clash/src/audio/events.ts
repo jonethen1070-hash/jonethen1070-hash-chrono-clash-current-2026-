@@ -3,6 +3,7 @@ import { AudioBus } from "./bus";
 export type BattleCue =
   | "tileSwap"
   | "match"
+  | "matchWave"
   | "cascade"
   | "combo"
   | "bigCombo"
@@ -45,10 +46,7 @@ export function isPlayerBoardFx(fx: BattleFx): boolean {
 export function playerBoardDestroyCue(fx: BattleFx): BattleCue | null {
   if (isRivalBoardFx(fx)) return null;
   if (fx.kind !== "clear" || fx.side === "opponent") return null;
-  const combo = fx.combo ?? 1;
-  if (combo >= 4) return "bigCombo";
-  if (combo >= 2) return "combo";
-  return "match";
+  return "matchWave";
 }
 
 export function battleCuesFromFx(fx: BattleFx): BattleCue[] {
@@ -88,6 +86,9 @@ export function playBattleCue(bus: AudioBus, cue: BattleCue, combo = 1, text = "
       break;
     case "match":
       bus.play("match", combo);
+      break;
+    case "matchWave":
+      bus.playMatchWave(combo);
       break;
     case "cascade":
       bus.play("combo", combo);
