@@ -1,0 +1,42 @@
+CHRONO CLASH — ARENA MUSIC START TIMING ONLY
+
+The correct Arena music file is now working:
+ /audio/Arena_Pulse.m4a
+
+Do NOT change the audio file, codec, volume, music mix, AudioBus architecture, gameplay, SFX, or Arena music itself.
+
+Problem:
+When the player enters Arena, Arena Pulse starts several moments after the Arena becomes visible. I want the music to begin immediately when the Arena gameplay state becomes active.
+
+Required behavior:
+1. Start the Arena music at the exact moment the Arena/Battle state is entered.
+2. Do NOT wait for the first gameplay interaction, first swipe, first render frame, or delayed timer.
+3. Do NOT start procedural/oscillator fallback.
+4. The first playable Arena Pulse source should be created immediately when Arena becomes active.
+5. Preserve the existing AudioBus/file playback path and current AAC file.
+6. If the browser requires the user's gesture for audio autoplay, use the existing user gesture that enters/starts the Arena to unlock/resume AudioContext, then start Arena Pulse in that same interaction. Do not add a separate tap requirement.
+7. Do not preload/play it earlier during Lobby just to fake immediate Arena playback.
+8. Do not restart the track unnecessarily when React/render state changes.
+9. Keep loop=true and loopEnd=224.4s exactly as currently configured.
+10. Keep current music volume exactly unchanged.
+
+Implementation target:
+Find the exact Arena-entry/state-transition code that changes the music bed to `battle`. Trigger `Arena Pulse` there rather than relying on a later decode/promotion/timer/render callback.
+
+IMPORTANT:
+Do not make broad audio changes.
+Do not modify SFX.
+Do not modify AudioBus behavior outside the minimum Arena-entry timing path.
+
+Verification:
+- Fresh load → enter Arena.
+- Measure timestamp from Arena state activation to first `AudioBufferSourceNode.start()`.
+- Target: same interaction/frame as Arena activation, effectively 0ms intentional delay.
+- Confirm procedural battle oscillator starts = 0.
+- Confirm exactly 1 Arena music source.
+- Confirm URL = `/audio/Arena_Pulse.m4a`.
+- Confirm loopEnd = 224.4.
+- Confirm no duplicate Arena music starts.
+- Run focused audio tests + typecheck/build.
+
+Report exactly what code path was changed and the measured Arena-entry → music-start delay.
