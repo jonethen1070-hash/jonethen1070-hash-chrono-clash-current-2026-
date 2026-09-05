@@ -1,0 +1,68 @@
+Upgrade ONLY the gem VFX to make the gems feel premium, colorful, crystalline, and cinematic.
+
+Do NOT change gameplay, gem positions, matching logic, Mega Strike logic, scoring, or board behavior.
+
+GEM APPEARANCE
+
+Make every gem feel like a dimensional crystal:
+
+* Strong 3D/crystalline depth
+* Transparent or semi-transparent crystal edges
+* Internal colored energy/glow
+* Bright specular highlights
+* Subtle refraction/shine
+* Clean silhouette so the gem remains easy to recognize
+* Each gem color should have its own luminous energy identity
+
+WHEN A GEM IS CLEARED
+
+When a gem disappears:
+
+1. The gem briefly becomes brighter.
+2. Add a fast internal energy pulse.
+3. Create a small colorful flash matching that gem’s color.
+4. The crystal visually fractures/cracks for a split second.
+5. The gem bursts into small glowing crystal shards.
+6. Add matching-color particles flying outward.
+7. Add a thin expanding energy ring.
+8. Add a few tiny sparks/embers.
+9. Fade everything smoothly and quickly.
+
+The entire effect should feel like the crystal is exploding with energy, not simply being deleted.
+
+COLOR-MATCHED VFX
+
+Blue gem → cyan/blue crystal shards and energy
+Red gem → red/crimson energy
+Green gem → emerald/neon-green energy
+Yellow gem → golden/electric-yellow energy
+Purple gem → violet/cosmic-purple energy
+
+The VFX color must come from the actual gem’s color/type dynamically.
+
+MULTIPLE GEMS
+
+When multiple gems disappear:
+
+* Give each gem its own localized explosion.
+* Synchronize the timing slightly so it feels cinematic.
+* Add a subtle wave of energy passing through the clearing gems.
+* Do not merge all effects into one giant effect that hides the board.
+
+MEGA STRIKE
+
+When Mega Strike clears all gems matching the selected gem’s color:
+
+* Each matching gem gets the same premium destruction VFX.
+* Add a visible energy pulse traveling between the matching gems.
+* The selected color should dominate the entire effect.
+* Non-selected-color gems must receive no destruction VFX and must remain visible.
+
+QUALITY
+
+Aim for:
+premium AAA-inspired crystalline sci-fi VFX — bright, colorful, sharp, energetic, cinematic, but clean and readable.
+
+Keep effects short and responsive so the game remains smooth on mobile.
+
+First inspect the existing gem rendering and VFX system and enhance it rather than replacing working gameplay code.
