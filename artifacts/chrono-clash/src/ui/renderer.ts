@@ -108,6 +108,7 @@ interface CrystalShard {
   max: number;
   size: number;
   color: string;
+  trail?: number;
 }
 
 interface SocketPulse {
@@ -368,12 +369,12 @@ export class BoardRenderer {
     const tile = [...this.playerView.tiles.values()].find((t) => t.r === at.r && t.c === at.c && !t.dying);
     if (!tile) return;
     const cell = this.lastPlayerCell;
-    const strength = targeting.kind === "mega" ? 1.45 : 1.2;
-    tile.flash = Math.max(tile.flash, 0.5 * strength);
-    tile.glow = Math.max(tile.glow, 0.42 * strength);
+    const strength = targeting.kind === "mega" ? 1.85 : 1.58;
+    tile.flash = Math.max(tile.flash, 0.78 * strength);
+    tile.glow = Math.max(tile.glow, 0.62 * strength);
     const cx = tile.x + cell / 2;
     const cy = tile.y + cell / 2;
-    const moteCount = targeting.kind === "mega" ? 6 : 4;
+    const moteCount = targeting.kind === "mega" ? 8 : 6;
     for (let i = 0; i < moteCount; i++) {
       const angle = (Math.PI * 2 * i) / moteCount + 0.24;
       const orbit = cell * (0.32 + (i % 2) * 0.08);
@@ -383,26 +384,26 @@ export class BoardRenderer {
         y: cy + Math.sin(angle) * orbit,
         vx: -Math.sin(angle) * tangent,
         vy: Math.cos(angle) * tangent,
-        life: targeting.kind === "mega" ? 0.42 : 0.34,
-        max: targeting.kind === "mega" ? 0.42 : 0.34,
-        size: cell * (targeting.kind === "mega" ? 0.036 : 0.03),
+         life: targeting.kind === "mega" ? 0.54 : 0.44,
+         max: targeting.kind === "mega" ? 0.54 : 0.44,
+         size: cell * (targeting.kind === "mega" ? 0.046 : 0.038),
         color: i % 2 ? "#EAFBFF" : "#7CF5FF",
         g: 0,
         targetX: cx,
         targetY: cy,
         pull: targeting.kind === "mega" ? 0.045 : 0.035,
         drag: 0.96,
-        streak: targeting.kind === "mega" ? 0.8 : 0.58,
+         streak: targeting.kind === "mega" ? 1.05 : 0.8,
       });
     }
     this.addShockwave(
       this.playerView,
       cx,
       cy,
-      cell * (targeting.kind === "mega" ? 0.21 : 0.16),
+       cell * (targeting.kind === "mega" ? 0.28 : 0.22),
       "#EAFBFF",
-      targeting.kind === "mega" ? 240 : 200,
-      targeting.kind === "mega" ? 1.9 : 1.45,
+       targeting.kind === "mega" ? 260 : 220,
+       targeting.kind === "mega" ? 2.35 : 1.85,
     );
   }
 
@@ -1315,6 +1316,7 @@ export class BoardRenderer {
     }
 
     this.drawPowerEffects(view, now);
+    this.drawPowerArenaLight(view, ox, oy, size, cell, now, isPlayer);
 
     const dieDur = gemDieDuration(anim, reduced);
     for (const tile of view.tiles.values()) {
@@ -1772,7 +1774,7 @@ export class BoardRenderer {
     const angle = rewind ? -0.42 : mega ? 0.22 : -0.14;
     const leadX = ox + size * (-0.16) + Math.cos(angle) * travel;
     const leadY = oy + size * (rewind ? 1.08 : 0.08) + Math.sin(angle) * travel;
-    const width = size * (mega ? 0.16 : 0.12);
+    const width = size * (mega ? 0.2 : 0.16);
     const ctxGradient = ctx.createLinearGradient(
       leadX - Math.cos(angle) * width,
       leadY - Math.sin(angle) * width,
@@ -1786,16 +1788,84 @@ export class BoardRenderer {
 
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
-    ctx.globalAlpha = 0.88;
+    ctx.globalAlpha = 0.98;
     ctx.translate(leadX, leadY);
     ctx.rotate(angle);
     ctx.fillStyle = ctxGradient;
-    ctx.fillRect(-size * 0.12, -size * 0.66, size * 0.24, size * 1.32);
-    ctx.globalAlpha = 0.7 * fade;
+    ctx.fillRect(-size * 0.18, -size * 0.74, size * 0.36, size * 1.48);
+    ctx.globalAlpha = 0.78 * fade;
     ctx.fillStyle = rewind ? "#B9E8FF" : "#EAFBFF";
     ctx.shadowColor = rewind ? "#2E9BFF" : "#00D9FF";
-    ctx.shadowBlur = size * (mega ? 0.08 : 0.055);
-    ctx.fillRect(-Math.max(0.8, size * 0.007), -size * 0.58, Math.max(1.2, size * 0.014), size * 1.16);
+    ctx.shadowBlur = size * (mega ? 0.12 : 0.08);
+    ctx.fillRect(-Math.max(1, size * 0.01), -size * 0.66, Math.max(1.6, size * 0.02), size * 1.32);
+    ctx.globalAlpha = 0.34 * fade;
+    ctx.fillStyle = rewind ? "#2E9BFF" : "#00D9FF";
+    ctx.fillRect(-size * 0.32, -size * 0.86, size * 0.64, size * 1.72);
+    ctx.restore();
+  }
+
+  private drawPowerArenaLight(
+    view: BoardView,
+    ox: number,
+    oy: number,
+    size: number,
+    cell: number,
+    now: number,
+    isPlayer: boolean,
+  ): void {
+    const effect = [...view.powerEffects]
+      .reverse()
+      .find((candidate) => candidate.kind !== "rewind" && now - candidate.born >= 0);
+    if (!effect || this.fx.quality === "low" || this.fx.reducedMotion) return;
+    const age = now - effect.born;
+    const peakCenter = effect.kind === "mega" ? 146 : 92;
+    const peakWidth = effect.kind === "mega" ? 58 : 42;
+    const peak = Math.max(0, 1 - Math.abs(age - peakCenter) / peakWidth);
+    if (peak <= 0.01) return;
+
+    const ctx = this.ctx;
+    const radius = effect.kind === "mega" ? cell * 3.1 : cell * 2.35;
+    const pulse = ctx.createRadialGradient(effect.x, effect.y, cell * 0.16, effect.x, effect.y, radius);
+    pulse.addColorStop(0, `rgba(255,255,255,${0.16 * peak})`);
+    pulse.addColorStop(0.18, `rgba(124,245,255,${0.12 * peak})`);
+    pulse.addColorStop(0.62, `rgba(0,217,255,${0.045 * peak})`);
+    pulse.addColorStop(1, "rgba(0,217,255,0)");
+
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.fillStyle = pulse;
+    ctx.globalAlpha = isPlayer ? 1 : 0.72;
+    ctx.fillRect(ox + FRAME, oy + FRAME, size - FRAME * 2, size - FRAME * 2);
+
+    ctx.globalAlpha = (effect.kind === "mega" ? 0.52 : 0.36) * peak;
+    ctx.strokeStyle = effect.kind === "mega" ? "#EAFBFF" : "#7CF5FF";
+    ctx.lineWidth = Math.max(1.2, cell * (effect.kind === "mega" ? 0.028 : 0.02));
+    ctx.shadowColor = "#00D9FF";
+    ctx.shadowBlur = cell * (effect.kind === "mega" ? 0.16 : 0.1);
+    chamferedRect(ctx, ox + 2, oy + 2, size - 4, Math.min(14, size * 0.085));
+    ctx.stroke();
+
+    // Light catches the nearest socket rims without rebuilding the static well sheet.
+    const ix = ox + FRAME;
+    const iy = oy + FRAME;
+    const targetCol = Math.round((effect.x - ix - cell / 2) / (cell + GAP));
+    const targetRow = Math.round((effect.y - iy - cell / 2) / (cell + GAP));
+    ctx.lineWidth = Math.max(0.8, cell * 0.012);
+    ctx.globalAlpha = (effect.kind === "mega" ? 0.24 : 0.16) * peak;
+    for (let r = Math.max(0, targetRow - 2); r <= Math.min(ROWS - 1, targetRow + 2); r++) {
+      for (let c = Math.max(0, targetCol - 2); c <= Math.min(COLS - 1, targetCol + 2); c++) {
+        const dx = c - targetCol;
+        const dy = r - targetRow;
+        const distance = Math.hypot(dx, dy);
+        if (distance > 2.35) continue;
+        const sx = ix + GAP + c * (cell + GAP) + cell / 2;
+        const sy = iy + GAP + r * (cell + GAP) + cell / 2;
+        ctx.globalAlpha = (effect.kind === "mega" ? 0.24 : 0.16) * peak * (1 - distance / 3.2);
+        ctx.beginPath();
+        ctx.arc(sx, sy, cell * 0.42, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    }
     ctx.restore();
   }
 
@@ -1888,47 +1958,61 @@ export class BoardRenderer {
             ? "#FF9D00"
             : hex;
 
-    const shardCount = this.fx.quality === "medium" ? 2 : combo >= 5 ? 5 : combo >= 4 ? 4 : 3;
+    const hero = [...view.powerEffects]
+      .reverse()
+      .find((candidate) => candidate.kind !== "rewind" && performance.now() - candidate.born < 620)?.kind;
+    const megaHero = hero === "mega";
+    const burstHero = hero === "burst";
+    const heroMul = megaHero ? 1.8 : burstHero ? 1.42 : 1;
+    const shardCount = this.fx.quality === "medium"
+      ? megaHero ? 4 : burstHero ? 3 : 2
+      : Math.min(8, Math.max(3, Math.round((combo >= 5 ? 5 : combo >= 4 ? 4 : 3) * heroMul)));
     for (let i = 0; i < shardCount; i++) {
-      const a = (Math.PI * 2 * i) / shardCount + 0.18;
-      const sp = 1.7 + Math.min(0.7, combo * 0.1) + Math.random() * 0.42;
+      const a = (Math.PI * 2 * i) / shardCount + 0.18 + (megaHero ? directionX * 0.18 : 0);
+      const sp = (1.7 + Math.min(0.7, combo * 0.1) + Math.random() * 0.42) * heroMul;
+      const shardTier = i % 3;
       this.spawnCrystalShard(view, {
         x: x + Math.cos(a) * cell * 0.08,
         y: y + Math.sin(a) * cell * 0.08,
-        vx: Math.cos(a) * sp + directionX * 0.62,
-        vy: Math.sin(a) * sp - 0.62 + directionY * 0.62,
+        vx: Math.cos(a) * sp + directionX * (megaHero ? 1.1 : 0.82),
+        vy: Math.sin(a) * sp - (megaHero ? 0.88 : 0.62) + directionY * (megaHero ? 1.1 : 0.82),
         rotation: a,
-        spin: (i % 2 ? 1 : -1) * (0.08 + Math.random() * 0.06),
-        life: 0.24,
-        max: 0.24,
-        size: cell * (0.06 + Math.random() * 0.018),
+        spin: (i % 2 ? 1 : -1) * (0.08 + Math.random() * 0.06) * (megaHero ? 1.35 : 1),
+        life: megaHero ? 0.38 : burstHero ? 0.31 : 0.24,
+        max: megaHero ? 0.38 : burstHero ? 0.31 : 0.24,
+        size: cell * ((shardTier === 0 ? 0.052 : shardTier === 1 ? 0.078 : 0.112) + Math.random() * (megaHero ? 0.022 : 0.014)),
         color: i % 2 ? "#EAFBFF" : accent,
+        trail: megaHero ? 1.35 : burstHero ? 1.05 : 0.72,
       });
     }
 
-    const particleCount = Math.min(12, n + (combo >= 5 ? 3 : combo >= 4 ? 2 : combo >= 3 ? 1 : 0));
+    const particleCount = Math.min(
+      megaHero ? 24 : burstHero ? 18 : 12,
+      Math.max(1, Math.round((n + (combo >= 5 ? 3 : combo >= 4 ? 2 : combo >= 3 ? 1 : 0)) * heroMul)),
+    );
     for (let i = 0; i < particleCount; i++) {
       const a = (Math.PI * 2 * i) / particleCount + Math.random() * 0.35;
-      const sp = 1.35 + Math.min(0.8, combo * 0.12) + Math.random() * 1.1;
+      const sp = (1.35 + Math.min(0.8, combo * 0.12) + Math.random() * 1.1) * (megaHero ? 1.32 : burstHero ? 1.14 : 1);
       this.spawnParticle(view, {
         x,
         y,
-         vx: Math.cos(a) * sp + directionX * 0.42,
-         vy: Math.sin(a) * sp - 1.55 + directionY * 0.42,
-        life: 0.18,
-        max: 0.18,
-        size: cell * (0.032 + Math.random() * 0.026),
+        vx: Math.cos(a) * sp + directionX * (megaHero ? 0.86 : 0.58),
+        vy: Math.sin(a) * sp - (megaHero ? 1.8 : 1.55) + directionY * (megaHero ? 0.86 : 0.58),
+        life: megaHero ? 0.28 : burstHero ? 0.23 : 0.18,
+        max: megaHero ? 0.28 : burstHero ? 0.23 : 0.18,
+        size: cell * ((megaHero ? 0.038 : burstHero ? 0.035 : 0.032) + Math.random() * (megaHero ? 0.032 : 0.026)),
         color: i % 3 === 0 ? "#EAFBFF" : i % 2 === 0 ? hex : accent,
+        streak: megaHero ? 1.15 : burstHero ? 0.92 : 0.6,
       });
     }
     this.addShockwave(
       view,
       x,
       y,
-      cell * (0.14 + Math.min(0.06, combo * 0.01)),
+      cell * (0.18 + Math.min(0.08, combo * 0.012)) * (megaHero ? 1.18 : burstHero ? 1.08 : 1),
       crystalAccent(color).bloom,
-      150 + Math.min(50, combo * 8),
-      0.85 + Math.min(0.35, combo * 0.05),
+      megaHero ? 205 : burstHero ? 180 : 150 + Math.min(50, combo * 8),
+      (0.95 + Math.min(0.42, combo * 0.06)) * (megaHero ? 1.18 : burstHero ? 1.08 : 1),
     );
     this.capParticles(view);
   }
@@ -1965,7 +2049,7 @@ export class BoardRenderer {
   }
 
   private particleCap(): number {
-    return this.fx.quality === "medium" ? 20 : this.fx.quality === "low" ? 8 : 32;
+    return this.fx.quality === "medium" ? 28 : this.fx.quality === "low" ? 8 : 48;
   }
 
   private addShockwave(
@@ -2007,6 +2091,14 @@ export class BoardRenderer {
       ctx.beginPath();
       ctx.arc(wave.x, wave.y, 4 + wave.radius * eased * (wave.hero ? 0.78 : 0.72), 0, Math.PI * 2);
       ctx.stroke();
+        if (wave.hero) {
+          ctx.globalAlpha = alpha * 0.22;
+          ctx.lineWidth = Math.max(0.5, wave.width * 0.24 * (1 - t));
+          ctx.shadowBlur = 2 + wave.width * 0.7;
+          ctx.beginPath();
+          ctx.arc(wave.x, wave.y, 4 + wave.radius * eased * 1.28, 0, Math.PI * 2);
+          ctx.stroke();
+        }
     }
     ctx.restore();
   }
@@ -2033,25 +2125,25 @@ export class BoardRenderer {
       view.powerEffects.push({ kind: effect, x, y, cell, born: now });
       view.powerWake = {
         born: now,
-        life: effect === "mega" ? 170 : effect === "rewind" ? 180 : 150,
+        life: effect === "mega" ? 178 : effect === "rewind" ? 180 : 142,
         kind: effect,
       };
       if (view.powerEffects.length > 4) view.powerEffects.splice(0, view.powerEffects.length - 4);
     }
     view.flash = Math.max(
       view.flash,
-      (freeze ? 0.32 : rewind ? 0.16 : mega ? 0.2 : burst ? 0.13 : 0.24) * Math.max(0.35, mul),
+      (freeze ? 0.32 : rewind ? 0.16 : mega ? 0.72 : burst ? 0.42 : 0.24) * Math.max(0.35, mul),
     );
     view.shake = Math.max(
       view.shake,
-      (freeze ? 4.6 : rewind ? 1.6 : mega ? 0 : burst ? 1.6 : 3.4) * mul,
+      (freeze ? 4.6 : rewind ? 1.6 : mega ? 0 : burst ? 2.4 : 3.4) * mul,
     );
     if (mega && !this.fx.reducedMotion) {
       view.powerImpactImpulse = {
         born: now + 120,
         life: 78,
-        dx: isPlayer ? 2.8 : -2.8,
-        dy: 1.2,
+        dx: isPlayer ? 3.8 : -3.8,
+        dy: 1.45,
       };
     }
     if (freeze) {
@@ -2061,10 +2153,10 @@ export class BoardRenderer {
         view,
         x,
         y,
-        cell * (mega ? 1.55 : 1.15),
+        cell * (mega ? 2.15 : 1.48),
         "#EAFBFF",
-        mega ? 250 : 220,
-        mega ? 2.8 : 2.15,
+        mega ? 210 : 190,
+        mega ? 3.7 : 2.8,
         now,
         true,
       );
@@ -2072,11 +2164,22 @@ export class BoardRenderer {
         view,
         x,
         y,
-        cell * (mega ? 1.08 : 0.78),
+        cell * (mega ? 1.55 : 1.04),
         powerColor,
-        mega ? 310 : 270,
-        mega ? 1.5 : 1.1,
-        now + (mega ? 24 : 18),
+        mega ? 270 : 230,
+        mega ? 2.15 : 1.55,
+        now + (mega ? 12 : 10),
+        true,
+      );
+      this.addShockwave(
+        view,
+        x,
+        y,
+        cell * (mega ? 2.9 : 1.95),
+        mega ? "#7CF5FF" : "#00D9FF",
+        mega ? 330 : 280,
+        mega ? 1.1 : 0.82,
+        now + (mega ? 28 : 22),
         true,
       );
     }
@@ -2142,12 +2245,12 @@ export class BoardRenderer {
     let write = 0;
     for (const effect of view.powerEffects) {
       const age = now - effect.born;
-      const life = effect.kind === "rewind" ? 620 : effect.kind === "mega" ? 430 : 320;
+       const life = effect.kind === "rewind" ? 620 : effect.kind === "mega" ? 520 : 380;
       if (age >= life) continue;
       view.powerEffects[write++] = effect;
       const t = Math.max(0, Math.min(1, age / life));
-      const coreT = Math.max(0, Math.min(1, age / (effect.kind === "mega" ? 145 : effect.kind === "burst" ? 160 : 220)));
-      const decay = Math.pow(1 - t, 1.6);
+       const coreT = Math.max(0, Math.min(1, age / (effect.kind === "mega" ? 150 : effect.kind === "burst" ? 118 : 220)));
+       const decay = Math.pow(1 - t, effect.kind === "mega" ? 2.05 : 1.8);
       const build = 1 - Math.pow(1 - coreT, 3);
       const cx = effect.x;
       const cy = effect.y;
@@ -2155,8 +2258,8 @@ export class BoardRenderer {
       const color = effect.kind === "rewind" ? "#2E9BFF" : "#00D9FF";
       const pale = effect.kind === "rewind" ? "#B9E8FF" : "#EAFBFF";
       const hero = effect.kind !== "rewind";
-      const peakCenter = effect.kind === "mega" ? 108 : 82;
-      const peakWidth = effect.kind === "mega" ? 52 : 40;
+       const peakCenter = effect.kind === "mega" ? 146 : 92;
+       const peakWidth = effect.kind === "mega" ? 58 : 42;
       const peak = hero ? Math.max(0, 1 - Math.abs(age - peakCenter) / peakWidth) : 0;
 
       ctx.save();
@@ -2193,46 +2296,52 @@ export class BoardRenderer {
         }
       } else {
         const mega = effect.kind === "mega";
-        const impactStart = mega ? 60 : 48;
-        const impactT = Math.max(0, Math.min(1, (age - impactStart) / (mega ? 120 : 104)));
+         const impactStart = mega ? 98 : 44;
+         const impactT = Math.max(0, Math.min(1, (age - impactStart) / (mega ? 78 : 64)));
         const impact = 1 - Math.pow(1 - impactT, 3);
-        const ringRadius = cell * (0.28 + build * (mega ? 0.9 : 0.68) + impact * (mega ? 2.7 : 1.8));
-        ctx.globalAlpha = (0.18 + build * 0.25 + impact * (mega ? 0.4 : 0.3) + peak * 0.12) * decay;
+         const ringRadius = cell * (0.24 + build * (mega ? 0.86 : 0.66) + impact * (mega ? 3.1 : 2.05));
+         ctx.globalAlpha = (0.22 + build * 0.32 + impact * (mega ? 0.52 : 0.42) + peak * 0.18) * decay;
         ctx.strokeStyle = pale;
-        ctx.lineWidth = Math.max(1.4, cell * (mega ? 0.036 : 0.026));
+         ctx.lineWidth = Math.max(1.6, cell * (mega ? 0.044 : 0.032));
         ctx.shadowColor = color;
-        ctx.shadowBlur = cell * (mega ? 0.22 : 0.14);
+         ctx.shadowBlur = cell * (mega ? 0.28 : 0.18);
         ctx.beginPath();
         ctx.arc(cx, cy, ringRadius, 0, Math.PI * 2);
         ctx.stroke();
-        ctx.globalAlpha = (0.22 + peak * 0.16) * build * decay;
+         ctx.globalAlpha = (0.3 + peak * 0.22) * build * decay;
         ctx.strokeStyle = color;
-        ctx.lineWidth = Math.max(0.9, cell * (mega ? 0.017 : 0.014));
+         ctx.lineWidth = Math.max(1, cell * (mega ? 0.021 : 0.017));
         ctx.beginPath();
         ctx.arc(cx, cy, ringRadius * (mega ? 0.7 : 0.68), 0, Math.PI * 2);
         ctx.stroke();
+         ctx.globalAlpha = (0.16 + impact * 0.22 + peak * 0.1) * decay;
+         ctx.strokeStyle = mega ? "#7CF5FF" : color;
+         ctx.lineWidth = Math.max(0.7, cell * 0.011);
+         ctx.beginPath();
+         ctx.arc(cx, cy, ringRadius * (mega ? 1.3 : 1.22), 0, Math.PI * 2);
+         ctx.stroke();
 
         if (mega) {
-          const angle = -Math.PI / 4;
-          const beam = cell * (1.35 + impact * 3.65 + peak * 0.35);
-          ctx.globalAlpha = (0.14 + impact * 0.4 + peak * 0.18) * decay;
+           const angle = -Math.PI / 4;
+           const beam = cell * (1.35 + impact * 4.1 + peak * 0.5);
+           ctx.globalAlpha = (0.18 + impact * 0.52 + peak * 0.26) * decay;
           ctx.strokeStyle = pale;
-          ctx.lineWidth = Math.max(1.5, cell * 0.055);
+           ctx.lineWidth = Math.max(1.8, cell * 0.068);
           ctx.shadowColor = pale;
-          ctx.shadowBlur = cell * 0.12;
+           ctx.shadowBlur = cell * 0.18;
           ctx.beginPath();
           ctx.moveTo(cx - Math.cos(angle) * beam, cy - Math.sin(angle) * beam);
           ctx.lineTo(cx + Math.cos(angle) * beam, cy + Math.sin(angle) * beam);
           ctx.stroke();
-          ctx.globalAlpha = (0.16 + impact * 0.28 + peak * 0.12) * decay;
+           ctx.globalAlpha = (0.2 + impact * 0.38 + peak * 0.18) * decay;
           ctx.strokeStyle = color;
-          ctx.lineWidth = Math.max(0.9, cell * 0.018);
+           ctx.lineWidth = Math.max(1, cell * 0.022);
           ctx.beginPath();
           ctx.moveTo(cx - Math.cos(angle) * beam * 0.82, cy - Math.sin(angle) * beam * 0.82);
           ctx.lineTo(cx + Math.cos(angle) * beam * 0.82, cy + Math.sin(angle) * beam * 0.82);
           ctx.stroke();
-          ctx.globalAlpha = (0.12 + peak * 0.24) * decay;
-          ctx.lineWidth = Math.max(0.7, cell * 0.012);
+           ctx.globalAlpha = (0.18 + peak * 0.32) * decay;
+           ctx.lineWidth = Math.max(0.8, cell * 0.014);
           for (let i = -1; i <= 1; i += 2) {
             const offset = i * cell * 0.085;
             ctx.beginPath();
@@ -2246,23 +2355,35 @@ export class BoardRenderer {
             );
             ctx.stroke();
           }
+           for (let i = 0; i < 6; i++) {
+             const radial = -Math.PI / 4 + (Math.PI * 2 * i) / 6;
+             const start = cell * (0.34 + peak * 0.12);
+             const end = cell * (1.18 + impact * 2.1);
+             ctx.globalAlpha = (0.12 + impact * 0.26 + peak * 0.2) * decay;
+             ctx.lineWidth = Math.max(0.8, cell * 0.012);
+             ctx.beginPath();
+             ctx.moveTo(cx + Math.cos(radial) * start, cy + Math.sin(radial) * start);
+             ctx.lineTo(cx + Math.cos(radial) * end, cy + Math.sin(radial) * end);
+             ctx.stroke();
+           }
         }
 
-        const coreRadius = cell * (0.24 + build * 0.24 + peak * (mega ? 0.2 : 0.14));
+         const coreRadius = cell * (0.26 + build * 0.28 + impact * 0.08 + peak * (mega ? 0.26 : 0.18));
         const core = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreRadius);
-        core.addColorStop(0, `rgba(255,255,255,${(0.58 + peak * 0.34) * decay})`);
-        core.addColorStop(0.3, colorWithAlpha(pale, (0.34 + peak * 0.22) * decay));
+         core.addColorStop(0, `rgba(255,255,255,${(0.72 + peak * 0.28) * decay})`);
+         core.addColorStop(0.24, colorWithAlpha(pale, (0.5 + peak * 0.3) * decay));
+         core.addColorStop(0.48, colorWithAlpha(color, (0.25 + impact * 0.2) * decay));
         core.addColorStop(1, colorWithAlpha(color, 0));
         ctx.fillStyle = core;
         ctx.beginPath();
         ctx.arc(cx, cy, coreRadius, 0, Math.PI * 2);
         ctx.fill();
-        ctx.globalAlpha = (0.45 + peak * 0.42) * decay;
+         ctx.globalAlpha = (0.58 + peak * 0.42) * decay;
         ctx.fillStyle = "#FFFFFF";
         ctx.shadowColor = pale;
         ctx.shadowBlur = cell * (0.08 + peak * 0.07);
         ctx.beginPath();
-        ctx.arc(cx, cy, cell * (0.06 + peak * 0.065), 0, Math.PI * 2);
+         ctx.arc(cx, cy, cell * (0.07 + peak * (mega ? 0.09 : 0.075)), 0, Math.PI * 2);
         ctx.fill();
       }
       ctx.restore();
@@ -2275,13 +2396,13 @@ export class BoardRenderer {
       .reverse()
       .find((candidate) => candidate.kind !== "rewind" && now - candidate.born >= 0);
     if (!effect || this.fx.reducedMotion || this.fx.quality === "low") return;
-    const center = effect.kind === "mega" ? 108 : 82;
-    const width = effect.kind === "mega" ? 58 : 46;
+    const center = effect.kind === "mega" ? 146 : 92;
+    const width = effect.kind === "mega" ? 64 : 48;
     const peak = Math.max(0, 1 - Math.abs(now - effect.born - center) / width);
     if (peak <= 0.01) return;
 
     const ctx = this.ctx;
-    const radius = effect.cell * (effect.kind === "mega" ? 2.5 : 2.05);
+    const radius = effect.cell * (effect.kind === "mega" ? 2.8 : 2.3);
     const gradient = ctx.createRadialGradient(
       effect.x,
       effect.y,
@@ -2293,7 +2414,7 @@ export class BoardRenderer {
     gradient.addColorStop(0, "rgba(0,0,0,0)");
     gradient.addColorStop(0.42, "rgba(0,0,0,0)");
     gradient.addColorStop(0.72, `rgba(0,0,0,${0.08 * peak})`);
-    gradient.addColorStop(1, `rgba(0,0,0,${0.22 * peak})`);
+    gradient.addColorStop(1, `rgba(0,0,0,${(effect.kind === "mega" ? 0.3 : 0.26) * peak})`);
     ctx.save();
     ctx.globalCompositeOperation = "multiply";
     ctx.globalAlpha = 0.9;
@@ -2418,7 +2539,18 @@ export class BoardRenderer {
       ctx.globalAlpha = alpha * 0.92;
       ctx.fillStyle = shard.color;
       ctx.shadowColor = shard.color;
-      ctx.shadowBlur = Math.max(2, size * 1.8);
+      ctx.shadowBlur = Math.max(2, size * 2.2);
+      if (shard.trail && (Math.abs(shard.vx) > 0.12 || Math.abs(shard.vy) > 0.12)) {
+        ctx.globalAlpha = alpha * 0.48;
+        ctx.strokeStyle = shard.color;
+        ctx.lineWidth = Math.max(0.7, size * 0.18);
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(-shard.vx * shard.trail * (0.22 + alpha * 0.18), -shard.vy * shard.trail * (0.22 + alpha * 0.18));
+        ctx.lineTo(0, 0);
+        ctx.stroke();
+        ctx.globalAlpha = alpha * 0.92;
+      }
       ctx.beginPath();
       ctx.moveTo(-size * 0.62, size * 0.34);
       ctx.lineTo(-size * 0.12, -size * 0.58);
@@ -3054,27 +3186,27 @@ export class BoardRenderer {
     const color = COLORS[colorIndex - 1] ?? "#FFFFFF";
     const lockIn = Math.min(1, Math.max(0, (now - targeting.targetBorn) / 110));
     const mega = targeting.kind === "mega";
-    const pulse = 0.72 + Math.sin(now / (mega ? 180 : 220)) * 0.14;
-    const peak = Math.max(0, 1 - Math.abs(now - targeting.targetBorn - 132) / 38);
+    const pulse = 0.78 + Math.sin(now / (mega ? 180 : 220)) * 0.18;
+    const peak = Math.max(0, 1 - Math.abs(now - targeting.targetBorn - 132) / 42);
 
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
     jewelPath(ctx, cx, cy, s * 0.88, colorIndex);
     ctx.clip();
     const core = ctx.createRadialGradient(cx - s * 0.1, cy - s * 0.16, 0, cx, cy, s * 0.5);
-    core.addColorStop(0, `rgba(255,255,255,${0.5 * pulse + lockIn * 0.2 + peak * 0.3})`);
-    core.addColorStop(0.2, colorWithAlpha(crystal.core, 0.7 + lockIn * 0.2 + peak * 0.1));
-    core.addColorStop(0.52, colorWithAlpha(color, 0.16 + lockIn * 0.18 + peak * 0.08));
+    core.addColorStop(0, `rgba(255,255,255,${0.62 * pulse + lockIn * 0.24 + peak * 0.38})`);
+    core.addColorStop(0.2, colorWithAlpha(crystal.core, 0.82 + lockIn * 0.18 + peak * 0.12));
+    core.addColorStop(0.52, colorWithAlpha(color, 0.22 + lockIn * 0.22 + peak * 0.12));
     core.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.globalAlpha = 0.82 + lockIn * 0.12 + peak * 0.12;
+    ctx.globalAlpha = 0.92 + lockIn * 0.08 + peak * 0.16;
     ctx.fillStyle = core;
     ctx.fillRect(cx - s * 0.55, cy - s * 0.55, s * 1.1, s * 1.1);
 
-    ctx.globalAlpha = 0.34 + lockIn * 0.28 + peak * 0.18;
+    ctx.globalAlpha = 0.5 + lockIn * 0.32 + peak * 0.22;
     ctx.strokeStyle = mega ? "#EAFBFF" : crystal.edge;
     ctx.lineWidth = Math.max(0.7, s * 0.012);
     ctx.shadowColor = mega ? "#EAFBFF" : crystal.bloom;
-    ctx.shadowBlur = s * (0.07 + peak * 0.04);
+    ctx.shadowBlur = s * (0.1 + peak * 0.07);
     const phase = now / (mega ? 260 : 330);
     for (let i = 0; i < (mega ? 4 : 3); i++) {
       const angle = phase + i * (Math.PI * 2 / (mega ? 4 : 3));
@@ -3089,10 +3221,10 @@ export class BoardRenderer {
       ctx.stroke();
     }
 
-    ctx.globalAlpha = 0.68 + lockIn * 0.2 + peak * 0.12;
+    ctx.globalAlpha = 0.82 + lockIn * 0.18 + peak * 0.16;
     ctx.fillStyle = "#FFFFFF";
     ctx.shadowColor = "#EAFBFF";
-    ctx.shadowBlur = s * 0.06;
+    ctx.shadowBlur = s * 0.1;
     ctx.beginPath();
     ctx.ellipse(cx - s * 0.2, cy - s * 0.23, s * 0.06, s * 0.12, -0.55, 0, Math.PI * 2);
     ctx.fill();
@@ -3114,7 +3246,7 @@ export class BoardRenderer {
     const pulse = 0.5 + Math.sin(now / (mega ? 265 : 330)) * 0.5;
     const sweepT = Math.min(1, age / 180);
     const sweepFade = Math.max(0, 1 - sweepT);
-    const edgeAlpha = (mega ? 0.34 : 0.24) * intro + pulse * (mega ? 0.07 : 0.05);
+    const edgeAlpha = (mega ? 0.56 : 0.42) * intro + pulse * (mega ? 0.11 : 0.08);
     const ctx = this.ctx;
 
     ctx.save();
@@ -3127,7 +3259,7 @@ export class BoardRenderer {
        sweep.addColorStop(0.5, mega ? "rgba(234, 251, 255, 0.44)" : "rgba(124, 245, 255, 0.34)");
       sweep.addColorStop(1, "rgba(0, 217, 255, 0)");
       ctx.fillStyle = sweep;
-       ctx.globalAlpha = sweepFade * (mega ? 1 : 0.86);
+      ctx.globalAlpha = sweepFade * (mega ? 1.2 : 1.04);
       ctx.fillRect(sweepX - size * 0.14, oy + 3, size * 0.28, size - 6);
     }
 
@@ -3135,13 +3267,13 @@ export class BoardRenderer {
     ctx.strokeStyle = mega
       ? `rgba(234, 251, 255, ${edgeAlpha})`
       : `rgba(124, 245, 255, ${edgeAlpha})`;
-     ctx.lineWidth = mega ? 2.2 : 1.7;
+      ctx.lineWidth = mega ? 3 : 2.25;
     ctx.shadowColor = mega ? "#EAFBFF" : "#7CF5FF";
-     ctx.shadowBlur = mega ? 15 : 11;
+      ctx.shadowBlur = mega ? 22 : 16;
     ctx.stroke();
 
     if (mega) {
-       ctx.globalAlpha = 0.14 + pulse * 0.07;
+       ctx.globalAlpha = 0.22 + pulse * 0.1;
       ctx.lineWidth = 0.8;
       ctx.shadowBlur = 4;
       for (let i = 0; i < 4; i++) {
@@ -3175,7 +3307,7 @@ export class BoardRenderer {
     const breath = 0.5 + Math.sin(now / (mega ? 300 : 360)) * 0.5;
     const lockIn = acquired ? Math.min(1, targetAge / 110) : 0;
     const peak = acquired ? Math.max(0, 1 - Math.abs(targetAge - 132) / 38) : 0;
-    const intensity = intro * (mega ? 0.42 : 0.3) + breath * (mega ? 0.12 : 0.085) + peak * (mega ? 0.22 : 0.16);
+    const intensity = intro * (mega ? 0.72 : 0.52) + breath * (mega ? 0.18 : 0.13) + peak * (mega ? 0.34 : 0.25);
     const cx = x + size / 2;
     const cy = y + size / 2;
     const radius =
@@ -3184,7 +3316,7 @@ export class BoardRenderer {
 
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
-    ctx.globalAlpha = intensity + lockIn * (mega ? 0.18 : 0.13);
+    ctx.globalAlpha = intensity + lockIn * (mega ? 0.28 : 0.2);
     const halo = ctx.createRadialGradient(cx, cy, size * 0.2, cx, cy, size * 0.75);
     halo.addColorStop(0, mega ? "rgba(234,251,255,0.16)" : "rgba(124,245,255,0.12)");
     halo.addColorStop(0.52, mega ? "rgba(0,217,255,0.08)" : "rgba(0,217,255,0.055)");
@@ -3194,9 +3326,9 @@ export class BoardRenderer {
     ctx.arc(cx, cy, size * 0.75, 0, Math.PI * 2);
     ctx.fill();
     ctx.strokeStyle = mega ? "#EAFBFF" : "#7CF5FF";
-    ctx.lineWidth = Math.max(1.05, size * (acquired ? (mega ? 0.036 : 0.031) : (mega ? 0.022 : 0.019)));
+    ctx.lineWidth = Math.max(1.25, size * (acquired ? (mega ? 0.046 : 0.039) : (mega ? 0.028 : 0.024)));
     ctx.shadowColor = mega ? "#EAFBFF" : "#7CF5FF";
-    ctx.shadowBlur = size * (acquired ? (mega ? 0.16 : 0.13) : (mega ? 0.09 : 0.075));
+    ctx.shadowBlur = size * (acquired ? (mega ? 0.22 : 0.18) : (mega ? 0.13 : 0.1));
     const rotation = now / (mega ? 310 : 390);
     drawIrregularEnergyArc(ctx, cx, cy, radius, rotation - 2.55, 1.82, rotation);
     drawIrregularEnergyArc(ctx, cx, cy, radius * 0.97, rotation + 0.72, 1.46, rotation + 1.8);
@@ -3204,7 +3336,7 @@ export class BoardRenderer {
       drawIrregularEnergyArc(ctx, cx, cy, radius * 0.82, rotation - 0.38, 1.05, rotation + 0.7);
     }
 
-    ctx.globalAlpha = (mega ? 0.11 : 0.085) + lockIn * 0.14 + peak * 0.1;
+      ctx.globalAlpha = (mega ? 0.18 : 0.14) + lockIn * 0.18 + peak * 0.15;
     const inner = ctx.createRadialGradient(cx, cy - size * 0.05, size * 0.04, cx, cy, size * 0.48);
     inner.addColorStop(0, mega ? "rgba(234, 251, 255, 0.3)" : "rgba(124, 245, 255, 0.24)");
     inner.addColorStop(0.55, "rgba(0, 217, 255, 0.08)");
@@ -3215,8 +3347,8 @@ export class BoardRenderer {
     ctx.fill();
 
     if (acquired) {
-      ctx.globalAlpha = 0.42 + lockIn * (mega ? 0.4 : 0.3) + peak * 0.18;
-      ctx.lineWidth = Math.max(1.25, size * (mega ? 0.024 : 0.021));
+      ctx.globalAlpha = 0.58 + lockIn * (mega ? 0.42 : 0.34) + peak * 0.24;
+      ctx.lineWidth = Math.max(1.5, size * (mega ? 0.03 : 0.026));
       drawIrregularEnergyArc(
         ctx,
         cx,
@@ -3226,7 +3358,7 @@ export class BoardRenderer {
         Math.PI * 1.52,
         rotation + 2.2,
       );
-      ctx.globalAlpha = (mega ? 0.88 : 0.7) + peak * 0.1;
+      ctx.globalAlpha = (mega ? 1 : 0.84) + peak * 0.14;
       ctx.fillStyle = "#EAFBFF";
       for (let i = 0; i < (mega ? 5 : 3); i++) {
         const angle = now / (mega ? 310 : 390) + (Math.PI * 2 * i) / (mega ? 5 : 3);
@@ -3260,9 +3392,9 @@ export class BoardRenderer {
     const ctx = this.ctx;
     const crystal = crystalAccent(colorIndex);
     const color = COLORS[colorIndex - 1] ?? "#FFFFFF";
-    const crackProgress = Math.min(1, progress * 1.55);
-    const fade = Math.max(0, 1 - progress * 0.72);
-    const arms = strength >= 5 ? 5 : strength >= 4 ? 4 : 3;
+    const crackProgress = Math.min(1, progress * 1.82);
+    const fade = Math.max(0, 1 - progress * 0.62);
+    const arms = strength >= 5 ? 7 : strength >= 4 ? 6 : 4;
 
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
@@ -3270,7 +3402,7 @@ export class BoardRenderer {
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
     ctx.shadowColor = crystal.bloom;
-    ctx.shadowBlur = s * 0.08;
+      ctx.shadowBlur = s * 0.12;
     for (let i = 0; i < arms; i++) {
       const angle = seed + (Math.PI * 2 * i) / arms;
       const reach = s * (0.16 + crackProgress * (0.26 + Math.min(0.05, strength * 0.008)));
@@ -3285,14 +3417,14 @@ export class BoardRenderer {
       ctx.moveTo(cx + px * inner, cy + py * inner);
       ctx.lineTo(cx + px * kink + nx * bend, cy + py * kink + ny * bend);
       ctx.lineTo(cx + px * reach, cy + py * reach);
-      ctx.strokeStyle = colorWithAlpha("#EAFBFF", 0.76);
-      ctx.lineWidth = Math.max(0.9, s * 0.018);
+      ctx.strokeStyle = colorWithAlpha("#FFFFFF", 0.9);
+      ctx.lineWidth = Math.max(1.1, s * 0.023);
       ctx.stroke();
       ctx.beginPath();
       ctx.moveTo(cx + px * (inner + s * 0.02), cy + py * (inner + s * 0.02));
       ctx.lineTo(cx + px * reach * 0.92, cy + py * reach * 0.92);
-      ctx.strokeStyle = colorWithAlpha(color, 0.58);
-      ctx.lineWidth = Math.max(0.55, s * 0.009);
+      ctx.strokeStyle = colorWithAlpha(color, 0.72);
+      ctx.lineWidth = Math.max(0.7, s * 0.012);
       ctx.stroke();
 
       if (strength >= 4) {
@@ -3308,8 +3440,8 @@ export class BoardRenderer {
           cx + Math.cos(branchAngle) * branchReach,
           cy + Math.sin(branchAngle) * branchReach,
         );
-        ctx.strokeStyle = colorWithAlpha("#EAFBFF", 0.52);
-        ctx.lineWidth = Math.max(0.65, s * 0.012);
+         ctx.strokeStyle = colorWithAlpha("#EAFBFF", 0.7);
+         ctx.lineWidth = Math.max(0.8, s * 0.015);
         ctx.stroke();
       }
     }
@@ -3318,10 +3450,10 @@ export class BoardRenderer {
     core.addColorStop(0, "#FFFFFF");
     core.addColorStop(0.2, crystal.core);
     core.addColorStop(1, colorWithAlpha(color, 0));
-    ctx.globalAlpha = Math.min(0.7, 0.2 + progress * 0.5);
+    ctx.globalAlpha = Math.min(0.92, 0.28 + progress * 0.62);
     ctx.fillStyle = core;
     ctx.beginPath();
-    ctx.arc(cx, cy, s * (0.1 + progress * 0.1), 0, Math.PI * 2);
+    ctx.arc(cx, cy, s * (0.12 + progress * 0.14), 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
   }

@@ -199,7 +199,7 @@ describe("landing feedback", () => {
     expect(renderer).toContain("const MATCH_STAGGER_MIN_MS = 12");
     expect(renderer).toContain("const MATCH_STAGGER_STEP_MS = 7");
     expect(renderer).toContain("const cascadeHold");
-    expect(renderer).toContain("life: 0.18");
+    expect(renderer).toContain("life: megaHero ? 0.28 : burstHero ? 0.23 : 0.18");
     expect(renderer).toContain("const charge =");
     expect(renderer).toContain("branchAngle");
   });
