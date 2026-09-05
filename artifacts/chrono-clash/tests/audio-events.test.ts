@@ -7,7 +7,7 @@ import {
   playerBoardDestroyCue,
 } from "../src/audio/events";
 import { GameSession } from "../src/engine/session";
-import { matchWaveAsset } from "../src/audio/catalog";
+import { matchWaveAsset, swapWaveAsset } from "../src/audio/catalog";
 
 describe("battle audio events", () => {
   it("plays one player glass shatter per resolve and keeps the rival board silent", () => {
@@ -39,6 +39,57 @@ describe("battle audio events", () => {
       "match_5.wav",
       "match_5.wav",
     ]);
+  });
+
+  it("maps consecutive valid swaps one-to-one and clamps later swaps to swap_5.wav", () => {
+    expect([1, 2, 3, 4, 5, 6].map((wave) => swapWaveAsset(wave).file)).toEqual([
+      "swap_1.wav",
+      "swap_2.wav",
+      "swap_3.wav",
+      "swap_4.wav",
+      "swap_5.wav",
+      "swap_5.wav",
+    ]);
+  });
+
+  it("plays exactly one selected swap asset per committed swap", () => {
+    const bus = new AudioBus();
+    const played: Array<{ id: string; cue: string; wave: number }> = [];
+    (bus as unknown as { playAssetById: (id: string, cue: string, wave: number) => boolean }).playAssetById = (
+      id,
+      cue,
+      wave,
+    ) => {
+      played.push({ id, cue, wave });
+      return true;
+    };
+
+    for (let i = 0; i < 6; i += 1) bus.playSwapWave();
+
+    expect(played).toEqual([
+      { id: "sfx-swap-1", cue: "swap", wave: 1 },
+      { id: "sfx-swap-2", cue: "swap", wave: 2 },
+      { id: "sfx-swap-3", cue: "swap", wave: 3 },
+      { id: "sfx-swap-4", cue: "swap", wave: 4 },
+      { id: "sfx-swap-5", cue: "swap", wave: 5 },
+      { id: "sfx-swap-5", cue: "swap", wave: 5 },
+    ]);
+  });
+
+  it("restarts the swap progression at swap_1 for a new match", () => {
+    const bus = new AudioBus();
+    const played: string[] = [];
+    (bus as unknown as { playAssetById: (id: string) => boolean }).playAssetById = (id) => {
+      played.push(id);
+      return true;
+    };
+
+    bus.playSwapWave();
+    bus.playSwapWave();
+    bus.resetSwapWave();
+    bus.playSwapWave();
+
+    expect(played).toEqual(["sfx-swap-1", "sfx-swap-2", "sfx-swap-1"]);
   });
 
   it("routes one match-wave cue per clear event and leaves combo banners without audio", () => {

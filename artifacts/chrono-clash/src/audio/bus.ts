@@ -4,6 +4,7 @@ import {
   matchWaveAsset,
   musicAsset,
   sfxVariantIds,
+  swapWaveAsset,
   uniqueAudioAssets,
   voiceAsset,
   type Cue,
@@ -89,6 +90,7 @@ export class AudioBus {
   private catalogReady = false;
   private ready: Promise<void> = Promise.resolve();
   private sfxVoices = 0;
+  private swapWave = 0;
   sfxOn = true;
   musicOn = true;
   sfxVolume = DEFAULT_SFX_VOLUME;
@@ -300,6 +302,19 @@ export class AudioBus {
     if (!this.sfxOn || this.sfxVoices >= MAX_SFX_VOICES) return;
     if (this.playAssetById(matchWaveAsset(wave).id, "match", wave)) return;
     this.playSynthCue("match", wave);
+  }
+
+  /** Plays exactly one uploaded swap sample for each committed valid player swap. */
+  playSwapWave(): void {
+    this.swapWave = Math.min(5, this.swapWave + 1);
+    const wave = this.swapWave;
+    if (!this.sfxOn || this.sfxVoices >= MAX_SFX_VOICES) return;
+    if (this.playAssetById(swapWaveAsset(wave).id, "swap", wave)) return;
+    this.playSynthCue("swap", wave);
+  }
+
+  resetSwapWave(): void {
+    this.swapWave = 0;
   }
 
   /** Spoken gameplay callouts ride a dedicated bus so they sit above crystal SFX without extra duck. */

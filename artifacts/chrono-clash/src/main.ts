@@ -1139,6 +1139,7 @@ async function applyMatchState(state: { status: string; matchId: string | null; 
     ui.onlineStatus.textContent = `OPPONENT ${state.opponentId}`;
     audio.play("found");
     audio.startMusic();
+    audio.resetSwapWave();
     session.beginOnlineTimeBattle({
       matchId: state.matchId,
       opponentId: state.opponentId,
@@ -1341,6 +1342,7 @@ $("#menuGuest").addEventListener("click", () => {
   pressUi();
   // TEMPORARY DIRECT GAMEPLAY BYPASS — REMOVE AFTER GAMEPLAY TESTING
   session.clearOnlineMatch();
+  audio.resetSwapWave();
   session.startMatch();
   syncScreenNow();
   if (settings.music) audio.syncBed("battle");
@@ -1484,12 +1486,14 @@ $("#toRewards").addEventListener("click", () => {
 $("#retryMatch").addEventListener("click", () => {
   pressUi("confirm");
   audio.startMusic();
+  audio.resetSwapWave();
   session.playAgain();
   syncScreenNow();
 });
 $("#again").addEventListener("click", () => {
   pressUi("confirm");
   audio.startMusic();
+  audio.resetSwapWave();
   session.playAgain();
   syncScreenNow();
 });
@@ -1970,7 +1974,7 @@ function swipeMin(): number {
 function commitSwipe(from: Coord, target: Coord, now: number, gestureDx = 0, gestureDy = 0): boolean {
   renderer.primeSwapPose(from, target, gestureDx, gestureDy, now);
   if (session.tryPlayerSwap(from, target, now)) {
-    audio.play("swap");
+    audio.playSwapWave();
     renderer.flashSwap(from, target, now);
     sendOnlineAction({ type: "swap", a: from, b: target });
     return true;

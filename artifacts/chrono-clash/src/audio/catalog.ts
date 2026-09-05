@@ -56,6 +56,7 @@ export interface AudioAsset {
 }
 
 export type MatchWave = 1 | 2 | 3 | 4 | 5;
+export type SwapWave = 1 | 2 | 3 | 4 | 5;
 
 export const AUDIO_DIR = "/audio";
 
@@ -166,6 +167,14 @@ export const MATCH_WAVE_FILES: Record<MatchWave, AudioAsset> = {
   5: asset("sfx-match-5", "match_5.wav", "sfx", false, 0.26, "Fourth and later automatic cascade match waves."),
 };
 
+export const SWAP_WAVE_FILES: Record<SwapWave, AudioAsset> = {
+  1: asset("sfx-swap-1", "swap_1.wav", "sfx", false, 0.105, "Initial valid player swap."),
+  2: asset("sfx-swap-2", "swap_2.wav", "sfx", false, 0.1, "Second consecutive valid player swap."),
+  3: asset("sfx-swap-3", "swap_3.wav", "sfx", false, 0.105, "Third consecutive valid player swap."),
+  4: asset("sfx-swap-4", "swap_4.wav", "sfx", false, 0.1, "Fourth consecutive valid player swap."),
+  5: asset("sfx-swap-5", "swap_5.wav", "sfx", false, 0.105, "Fifth and later consecutive valid player swaps."),
+};
+
 export type VoiceCalloutId = "locked" | "combo" | "ultimate";
 
 export const VOICE_FILES: Record<VoiceCalloutId, AudioAsset> = {
@@ -196,6 +205,7 @@ export const AUDIO_ASSETS: AudioAsset[] = [
   ...Object.values(MUSIC_FILES),
   ...new Map(Object.values(SFX_FILES).map((item) => [item.file, item])).values(),
   ...Object.values(MATCH_WAVE_FILES),
+  ...Object.values(SWAP_WAVE_FILES),
   ...SFX_VARIANT_FILES,
   ...Object.values(VOICE_FILES),
 ];
@@ -217,6 +227,11 @@ export function sfxAsset(cue: Cue): AudioAsset {
 export function matchWaveAsset(wave: number): AudioAsset {
   const normalized = Math.min(5, Math.max(1, Math.trunc(wave))) as MatchWave;
   return MATCH_WAVE_FILES[normalized];
+}
+
+export function swapWaveAsset(wave: number): AudioAsset {
+  const normalized = Math.min(5, Math.max(1, Math.trunc(wave))) as SwapWave;
+  return SWAP_WAVE_FILES[normalized];
 }
 
 export function voiceAsset(id: string): AudioAsset | null {

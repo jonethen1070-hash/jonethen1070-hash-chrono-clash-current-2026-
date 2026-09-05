@@ -157,7 +157,7 @@ describe("AudioBus music safety", () => {
     expect(landingEnd).toBeGreaterThan(landingStart);
 
     const commitPath = src.slice(commitStart, pointerDownStart);
-    expect(commitPath).toContain('audio.play("swap")');
+    expect(commitPath).toContain("audio.playSwapWave()");
     expect(commitPath).not.toContain('audio.play("invalid")');
     expect(src.slice(pointerDownStart, pointerEnd)).not.toContain("audio.play(");
     expect(src.slice(landingStart, landingEnd)).not.toContain("audio.play(");
