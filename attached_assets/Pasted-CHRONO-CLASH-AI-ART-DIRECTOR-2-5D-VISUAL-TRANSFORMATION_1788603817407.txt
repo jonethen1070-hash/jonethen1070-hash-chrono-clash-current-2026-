@@ -1,0 +1,852 @@
+CHRONO CLASH — AI ART DIRECTOR / 2.5D VISUAL TRANSFORMATION MASTER PASS
+
+I am appointing you as the LEAD ART DIRECTOR, 2.5D LOOK-DEVELOPMENT ARTIST, LIGHTING DIRECTOR, MATERIAL/VFX DIRECTOR and VISUAL QUALITY ENGINEER for Chrono Clash.
+
+I want you to use your own AI reasoning and visual judgement to determine how good this game can realistically look.
+
+DO NOT make a superficial "2.5D CSS pass."
+
+I want a genuine transformation of the OVERALL VISUAL PRESENTATION so the game feels like a premium, dimensional, polished sci-fi mobile game.
+
+The attached/current gameplay screenshot is the baseline.
+
+CURRENT PROBLEM:
+
+The gems are visually detailed, but the overall scene still reads mostly as a flat 2D interface with 3D-looking objects placed on it.
+
+I want the entire scene to read as:
+
+REAL 3D DEPTH
++
+2.5D CAMERA COMPOSITION
++
+PREMIUM MATERIALS
++
+CINEMATIC LIGHTING
++
+ATMOSPHERIC DEPTH
++
+CRYSTALLINE GEM MATERIALS
++
+PHYSICAL BOARD DEPTH
++
+STRONG COLOR SEPARATION
++
+SMOOTH MOTION
+
+The final result should look substantially more expensive than the current screenshot.
+
+==================================================
+NON-NEGOTIABLE PRINCIPLE
+==================================================
+
+Do not ask:
+
+"How can I add a 2.5D effect?"
+
+Ask:
+
+"How would a professional game art team build this entire scene so that it naturally reads as 2.5D?"
+
+Use that thinking throughout the implementation.
+
+Explore every technically reasonable possibility available inside the existing web/Canvas architecture.
+
+You may experiment with:
+
+- lighting
+- layered depth
+- gradients
+- perspective
+- parallax
+- shadows
+- ambient occlusion-style shading
+- material highlights
+- rim lighting
+- reflections
+- refraction-style effects
+- depth-separated layers
+- atmospheric particles
+- board bevels
+- board thickness
+- gem contact shadows
+- gem highlights
+- environmental illumination
+- color grading
+- contrast
+- edge lighting
+- subtle camera motion
+- VFX depth
+- foreground/background separation
+- animation easing
+- compositing
+
+BUT:
+
+Do not change gameplay mechanics.
+
+Do not change board dimensions.
+
+Do not change 8x8 gameplay.
+
+Do not change power mechanics.
+
+Do not change scoring.
+
+Do not change energy generation.
+
+Do not change timers.
+
+Do not change networking.
+
+Do not change touch/swipe behavior.
+
+Do not change audio.
+
+Do not replace the existing game architecture with an unrelated framework.
+
+==================================================
+1. BUILD A REAL 2.5D VISUAL HIERARCHY
+==================================================
+
+Create clear visual depth between:
+
+BACKGROUND
+↓
+ARENA ENVIRONMENT
+↓
+BOARD OUTER STRUCTURE
+↓
+BOARD SURFACE
+↓
+GEMS
+↓
+VFX
+↓
+HUD / FOREGROUND
+
+These layers must NOT all appear to sit on the same plane.
+
+The viewer should be able to perceive depth immediately.
+
+==================================================
+2. BACKGROUND DEPTH
+==================================================
+
+The current background is too flat.
+
+Develop a premium sci-fi environment behind the board.
+
+Use existing assets/graphics and procedural techniques where appropriate.
+
+Create depth using:
+
+- dark atmospheric gradients
+- distant structures/light fields
+- subtle perspective lines
+- soft environmental glow
+- distant particles
+- faint depth layers
+- controlled vignette
+- subtle parallax
+
+The background must remain dark enough for the board to dominate.
+
+Do NOT create a busy wallpaper.
+
+It should feel like the board exists inside a futuristic arena.
+
+==================================================
+3. BOARD AS A PHYSICAL OBJECT
+==================================================
+
+This is extremely important.
+
+The board must look like a physical 3D object sitting inside the arena.
+
+Improve:
+
+- outer thickness
+- bevel perception
+- edge lighting
+- inner recess
+- surface depth
+- contact shadows
+- glass/crystal surface impression
+- metallic frame response
+
+The player should feel:
+
+"The board has physical thickness."
+
+Not:
+
+"There is a cyan border around a rectangle."
+
+Use layered lighting and shadow to create depth.
+
+==================================================
+4. BOARD RECESS / GEM CHAMBERS
+==================================================
+
+Each gem position should feel like a physical socket/chamber.
+
+Create subtle depth behind each gem using:
+
+- recessed darkness
+- contact shadow
+- inner bevel
+- localized reflected light
+- soft ambient occlusion-style shading
+
+The gem should visually sit INSIDE the board rather than float above it.
+
+This is one of the highest-priority improvements.
+
+==================================================
+5. GEMS — MAKE THEM FEEL PHYSICAL
+==================================================
+
+Do NOT replace the current gem shapes.
+
+Upgrade how they are rendered.
+
+Every gem should have:
+
+- bright but controlled specular highlight
+- darker shaded side
+- internal light
+- rim/refraction-like highlight
+- contact shadow
+- soft reflected light from its environment
+- depth separation from the socket
+
+The light should NOT be evenly distributed around the entire gem.
+
+Create a believable lighting direction.
+
+For example:
+
+bright upper/forward edge
++
+controlled internal glow
++
+darker opposite edge
++
+soft contact shadow underneath.
+
+This creates volume.
+
+==================================================
+6. GEM MATERIAL DIFFERENTIATION
+==================================================
+
+Each gem color should feel like a different crystalline material while sharing the same physical world.
+
+CYAN:
+translucent energetic crystal
+
+BLUE:
+deep luminous crystal
+
+GREEN:
+emerald-like energy crystal
+
+PINK:
+magenta/pink crystal with bright internal core
+
+PURPLE:
+dense violet energy crystal
+
+GOLD:
+warm metallic/crystalline hybrid appearance
+
+Do NOT simply use different flat colors.
+
+Use:
+
+color
++
+brightness
++
+internal light
++
+specular response
++
+shadow
++
+edge highlight.
+
+==================================================
+7. COLOR DEPTH
+==================================================
+
+The current palette is visually strong but compressed.
+
+Improve color hierarchy.
+
+Use:
+
+DARK ENVIRONMENT
+→
+MID-TONE BOARD
+→
+BRIGHT CRYSTALS
+→
+WHITE SPECULAR HIGHLIGHTS
+
+The brightest pixels should be intentional.
+
+Reserve near-white intensity for:
+
+- gem highlights
+- power impacts
+- important VFX
+- active interactions
+
+Do NOT make every surface equally bright.
+
+This is critical for premium appearance.
+
+==================================================
+8. CONTRAST
+==================================================
+
+Increase perceived depth through contrast, not simply brightness.
+
+The scene should have:
+
+deep blacks
++
+rich dark blues
++
+controlled cyan
++
+strong gem colors
++
+white highlights.
+
+Avoid washing the entire scene in cyan.
+
+Create localized contrast.
+
+When a gem is bright:
+
+its surrounding socket should remain darker.
+
+When a power fires:
+
+the impact area becomes the visual focus.
+
+==================================================
+9. LIGHTING DIRECTION
+==================================================
+
+Establish a consistent virtual light direction for the entire scene.
+
+The board, gems, UI and VFX should feel like they exist under the same lighting environment.
+
+Avoid each object appearing to generate unrelated light.
+
+Create:
+
+KEY LIGHT
++
+RIM LIGHT
++
+ENVIRONMENT LIGHT
++
+LOCAL GEM LIGHT
++
+POWER LIGHT.
+
+Power effects can temporarily override the normal lighting hierarchy.
+
+==================================================
+10. CONTACT SHADOWS
+==================================================
+
+Add subtle contact shadows where appropriate.
+
+Especially:
+
+gem → socket
+board → environment
+frame → board surface
+VFX → board surface
+
+Contact shadows are extremely important for making the scene feel 3D.
+
+Keep them soft.
+
+Never use ugly hard black shadows.
+
+==================================================
+11. DEPTH / PARALLAX
+==================================================
+
+Where technically possible, introduce subtle parallax.
+
+Different layers should move at slightly different rates during:
+
+- power impacts
+- board response
+- transitions
+- subtle idle motion
+
+Example:
+
+background:
+very slow
+
+arena:
+slightly slower
+
+board:
+minimal
+
+VFX:
+responsive
+
+HUD:
+mostly stable
+
+The player should perceive depth without feeling motion sickness.
+
+==================================================
+12. CAMERA / BOARD PRESENCE
+==================================================
+
+Give the board a subtle sense of camera perspective.
+
+Do NOT rotate the entire game aggressively.
+
+Use tiny perspective/depth cues.
+
+During normal gameplay:
+almost stable.
+
+During major power impact:
+subtle 2.5D response.
+
+Mega Strike may have a tiny camera/board response.
+
+Keep it premium.
+
+==================================================
+13. VFX DEPTH
+==================================================
+
+All VFX must respect the scene's depth.
+
+Particles should not look like flat dots pasted on the screen.
+
+Use:
+
+- foreground particles
+- board-level particles
+- background particles
+- depth-scaled particles
+- different blur/opacity levels where possible.
+
+Near particles:
+slightly larger/brighter.
+
+Far particles:
+smaller/softer.
+
+This creates spatial depth.
+
+==================================================
+14. POWER LIGHTING
+==================================================
+
+Energy Burst and Mega Strike should temporarily illuminate the environment.
+
+ENERGY BURST:
+
+localized cyan light response.
+
+MEGA STRIKE:
+
+stronger cyan/white environmental response.
+
+When Mega Strike hits:
+
+board
++
+gems
++
+nearby frame
++
+VFX
+
+should briefly respond to the same light source.
+
+This is much more convincing than adding a larger glow to the explosion.
+
+==================================================
+15. GEM HIGHLIGHTS
+==================================================
+
+Improve the moving highlights on the crystals.
+
+Use controlled highlight sweeps that make the material appear polished.
+
+Do NOT animate the entire gem brightness constantly.
+
+Highlights should travel across surfaces.
+
+This creates the perception of glossy/crystalline material.
+
+==================================================
+16. SMOOTHNESS
+==================================================
+
+Every visual transition must use high-quality easing.
+
+Eliminate:
+
+- sudden opacity changes
+- snapping
+- teleporting
+- linear-looking movement
+- harsh scale changes
+- abrupt glow changes.
+
+Use appropriate:
+
+ease-out
+ease-in-out
+cubic
+spring/settle
+critically damped motion
+
+where appropriate.
+
+Motion must remain frame-rate independent.
+
+==================================================
+17. IDLE LIFE
+==================================================
+
+The arena should not feel dead when nothing is happening.
+
+Add extremely subtle environmental life:
+
+- distant particles
+- slow light movement
+- occasional crystal highlight
+- extremely subtle atmospheric motion
+
+But keep it restrained.
+
+The game should feel alive without becoming distracting.
+
+==================================================
+18. HUD DEPTH
+==================================================
+
+Preserve the current HUD design language.
+
+Do not redesign the HUD from scratch.
+
+Instead improve:
+
+- separation from background
+- depth
+- bevel perception
+- internal gradients
+- glass/metal material feel
+- lighting consistency
+- hierarchy.
+
+The HUD should feel like it belongs to the same physical sci-fi world.
+
+==================================================
+19. POWER BUTTON MATERIALS
+==================================================
+
+Energy Burst and Mega Strike buttons should feel like physical futuristic controls.
+
+Improve:
+
+- depth
+- bevel
+- inner surface
+- edge highlight
+- press animation
+- energy core
+- lighting response.
+
+When pressed:
+
+the button should physically depress.
+
+The lighting should respond to the press.
+
+==================================================
+20. SCREEN COMPOSITION
+==================================================
+
+Do not make everything brighter.
+
+Instead create a visual hierarchy.
+
+The viewer's eye should naturally move:
+
+PLAYER
+→
+BOARD
+→
+GEMS
+→
+ACTIVE EVENT
+→
+POWER IMPACT.
+
+The board should remain the hero.
+
+==================================================
+21. 2.5D "REALISM" TEST
+==================================================
+
+At the end, temporarily hide/disable:
+
+- VFX
+- animations
+- power effects.
+
+Look only at the static board.
+
+Ask:
+
+Does this still look 2.5D?
+
+If NO:
+
+continue improving:
+
+- shadows
+- bevels
+- material response
+- depth layers
+- lighting
+- contrast
+- socket depth
+- gem volume.
+
+The 2.5D effect must exist even when nothing is happening.
+
+==================================================
+22. EXTREME QUALITY EXPLORATION
+==================================================
+
+You are explicitly allowed to experiment.
+
+Try multiple visual techniques internally and compare their results.
+
+If technique A is weak, replace it.
+
+If technique B improves depth, keep it.
+
+If combining techniques produces a better result, combine them.
+
+Do not stop at the first technically working implementation.
+
+Use your AI visual reasoning to decide what looks best.
+
+The goal is not:
+
+"technically completed."
+
+The goal is:
+
+"visually convincing."
+
+==================================================
+23. PERFORMANCE
+==================================================
+
+Maintain:
+
+60 FPS target.
+
+Test:
+
+390x844
+360x740
+
+Do not sacrifice responsiveness.
+
+Use efficient Canvas techniques.
+
+Avoid uncontrolled blur/filter operations.
+
+Avoid massive particle counts.
+
+Reuse existing rendering infrastructure.
+
+If an expensive effect produces little visual benefit, remove it.
+
+Prioritize effects with high visual return.
+
+==================================================
+24. ABSOLUTELY PRESERVE
+==================================================
+
+Do not modify:
+
+GAMEPLAY
+BOARD LOGIC
+8x8 BOARD
+GEM TYPES
+SWIPE MECHANICS
+MATCH LOGIC
+CASCADE LOGIC
+POWER MECHANICS
+ENERGY
+SCORING
+TIMERS
+NETWORKING
+AUDIO
+MATCH SFX
+ARENA MUSIC
+REWIND FUNCTIONALITY
+
+This is a VISUAL TRANSFORMATION.
+
+==================================================
+25. IMPORTANT — DO NOT CREATE A FLAT FILTER
+==================================================
+
+Do NOT solve this by placing:
+
+- one giant gradient
+- one giant glow
+- one giant vignette
+- one color overlay
+- one CSS filter
+
+over the entire game.
+
+2.5D must come from MULTIPLE INTERACTING VISUAL LAYERS.
+
+==================================================
+26. FINAL ART-DIRECTION TARGET
+==================================================
+
+I want Chrono Clash to visually communicate:
+
+A futuristic crystalline battle arena.
+
+The board has physical depth.
+
+The gems have volume.
+
+Light interacts with crystals.
+
+The environment exists behind the board.
+
+VFX occupy space.
+
+The HUD belongs to the same world.
+
+Powers illuminate the arena.
+
+Motion has weight.
+
+Everything feels polished and intentional.
+
+The result should feel:
+
+PREMIUM
+3D-INSPIRED
+2.5D
+CRYSTALLINE
+SCI-FI
+CINEMATIC
+DEEP
+SMOOTH
+ENERGETIC
+MODERN
+
+NOT:
+
+FLAT
+2D
+NEON-OVERLOADED
+GLOWY
+PLASTIC
+GENERIC
+CLUTTERED.
+
+==================================================
+27. FINAL VALIDATION
+==================================================
+
+Perform real visual validation at:
+
+390x844
+360x740
+
+Check:
+
+STATIC BOARD
+GEM DEPTH
+SOCKET DEPTH
+BOARD THICKNESS
+BACKGROUND DEPTH
+COLOR CONTRAST
+LIGHTING
+SHADOWS
+MATERIALS
+PARALLAX
+VFX DEPTH
+HUD DEPTH
+POWER BUTTONS
+POWER IMPACTS
+MOTION SMOOTHNESS.
+
+Do not declare success merely because tests/build pass.
+
+The visual result is the acceptance criterion.
+
+Before finishing, compare the result against the original screenshot and identify the biggest remaining visual weakness.
+
+If a visual weakness remains, fix it before reporting completion.
+
+==================================================
+FINAL REPORT
+==================================================
+
+Report:
+
+1. Files changed.
+2. Visual systems changed.
+3. How 2.5D depth was created.
+4. How gem depth was improved.
+5. How board depth was improved.
+6. How background depth was improved.
+7. Lighting system changes.
+8. Shadow/contact-depth changes.
+9. Color/contrast changes.
+10. Parallax/depth changes.
+11. VFX depth changes.
+12. Motion/easing improvements.
+13. Performance measurements.
+14. 390x844 result.
+15. 360x740 result.
+16. Typecheck.
+17. Build.
+18. Tests.
+
+MOST IMPORTANT:
+
+Do not optimize for speed of implementation.
+
+Optimize for the BEST POSSIBLE VISUAL RESULT while preserving the existing game.
+
+Use your AI imagination and visual judgement.
+
+Keep iterating until the game genuinely reads as a premium 2.5D crystalline sci-fi arena.
