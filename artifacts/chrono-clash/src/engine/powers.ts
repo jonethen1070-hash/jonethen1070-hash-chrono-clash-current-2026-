@@ -1,6 +1,7 @@
-import { resolveBoard } from "./board";
+import { makePiece, resolveBoard, scoreForClear } from "./board";
 import {
   Board,
+  COLOR_COUNT,
   COLS,
   Coord,
   ENERGY_BURST,
@@ -116,7 +117,6 @@ function validTarget(board: Board, target: Coord): boolean {
 
 export function targetedPowerCells(board: Board, id: TargetedPowerId, target: Coord): Coord[] | null {
   if (!validTarget(board, target)) return null;
-  const selected = board[target.r]![target.c]!;
   const cells: Coord[] = [];
   if (id === "burst") {
     for (let dr = -1; dr <= 1; dr++) {
@@ -129,12 +129,60 @@ export function targetedPowerCells(board: Board, id: TargetedPowerId, target: Co
     return cells;
   }
 
-  for (let r = 0; r < ROWS; r++) {
-    for (let c = 0; c < COLS; c++) {
-      if (board[r]![c]?.color === selected.color) cells.push({ r, c });
+  return [target];
+}
+
+function formsMatchAt(board: Board, target: Coord, color: number): boolean {
+  const countDirection = (dr: number, dc: number): number => {
+    let count = 0;
+    let r = target.r + dr;
+    let c = target.c + dc;
+    while (r >= 0 && r < ROWS && c >= 0 && c < COLS && board[r]![c]?.color === color) {
+      count += 1;
+      r += dr;
+      c += dc;
     }
+    return count;
+  };
+
+  return (
+    countDirection(0, -1) + countDirection(0, 1) >= 2 ||
+    countDirection(-1, 0) + countDirection(1, 0) >= 2
+  );
+}
+
+function replacementColor(board: Board, target: Coord, rng: () => number): number {
+  const start = Math.floor(rng() * COLOR_COUNT);
+  for (let offset = 0; offset < COLOR_COUNT; offset++) {
+    const color = ((start + offset) % COLOR_COUNT) + 1;
+    if (!formsMatchAt(board, target, color)) return color;
   }
-  return cells;
+  return start + 1;
+}
+
+function resolveSingleTargetPower(board: Board, rng: () => number, target: Coord): ResolveResult | null {
+  if (!validTarget(board, target)) return null;
+
+  const piece = board[target.r]![target.c];
+  if (!piece) return null;
+
+  // Mega Strike is intentionally cell-scoped. Remove the selected piece and
+  // refill only that same socket; do not run match detection, gravity, special
+  // blasts, cascades, or board reshuffling.
+  board[target.r]![target.c] = null;
+  board[target.r]![target.c] = makePiece(replacementColor(board, target, rng));
+
+  return {
+    board,
+    scoreDelta: scoreForClear(1, 1, "three"),
+    comboPeak: 1,
+    energyDelta: 11,
+    cleared: 1,
+    events: [
+      { type: "clear", combo: 1, score: scoreForClear(1, 1, "three"), cells: [target] },
+      { type: "fill", combo: 1, score: 0, cells: [target] },
+    ],
+  };
 }
 
 export function resolveTargetedPower(
@@ -143,6 +191,7 @@ export function resolveTargetedPower(
   id: TargetedPowerId,
   target: Coord,
 ): ResolveResult | null {
+  if (id === "megaStrike") return resolveSingleTargetPower(board, rng, target);
   const cells = targetedPowerCells(board, id, target);
   return cells ? resolveBoard(board, rng, cells) : null;
 }

@@ -19,17 +19,41 @@ describe("targeted powers", () => {
     );
   });
 
-  it("selects every original gem matching the mega-strike target color", () => {
+  it("selects only the exact mega-strike target cell", () => {
     const board = generateBoard(createSeededRng(12));
     const target = { r: 3, c: 4 };
-    const color = board[target.r]![target.c]!.color;
     const cells = targetedPowerCells(board, "megaStrike", target)!;
 
-    expect(cells.length).toBeGreaterThan(0);
-    expect(cells.every(({ r, c }) => board[r]![c]!.color === color)).toBe(true);
-    expect(cells.length).toBe(
-      board.flat().filter((piece) => piece?.color === color).length,
-    );
+    expect(cells).toEqual([target]);
+  });
+
+  it("removes and refills only the clicked mega-strike socket", () => {
+    for (const [seed, target] of [
+      [21, { r: 0, c: 0 }],
+      [22, { r: 3, c: 4 }],
+      [23, { r: 7, c: 7 }],
+    ] as const) {
+      resetIds();
+      const board = generateBoard(createSeededRng(seed));
+      const before = cloneBoard(board);
+      const clickedId = board[target.r]![target.c]!.id;
+      const result = resolveTargetedPower(board, createSeededRng(seed + 100), "megaStrike", target);
+
+      expect(result).not.toBeNull();
+      expect(result!.cleared).toBe(1);
+      expect(result!.comboPeak).toBe(1);
+      expect(result!.events).toEqual([
+        { type: "clear", combo: 1, score: 18, cells: [target] },
+        { type: "fill", combo: 1, score: 0, cells: [target] },
+      ]);
+      expect(board[target.r]![target.c]!.id).not.toBe(clickedId);
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          if (r === target.r && c === target.c) continue;
+          expect(board[r]![c]).toEqual(before[r]![c]);
+        }
+      }
+    }
   });
 
   it("shares invalid-target behavior for local and server callers", () => {
