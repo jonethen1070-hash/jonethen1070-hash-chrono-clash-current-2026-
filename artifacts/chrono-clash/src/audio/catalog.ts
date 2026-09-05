@@ -90,7 +90,7 @@ export const MUSIC_FILES: Record<Exclude<MusicBed, "none">, AudioAsset> = {
   ),
   battle: asset(
     "music-battle",
-    "Arena_Pulse_Replit.m4a",
+    "Arena_Pulse.m4a",
     "music",
     true,
     224.4,

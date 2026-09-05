@@ -20,7 +20,7 @@
     },
     {
       "id": "music-battle",
-      "files": ["Arena_Pulse_Replit.m4a"],
+      "files": ["Arena_Pulse.m4a"],
       "loop": true,
       "loopStartSec": 0,
       "loopEndSec": 224.4,
