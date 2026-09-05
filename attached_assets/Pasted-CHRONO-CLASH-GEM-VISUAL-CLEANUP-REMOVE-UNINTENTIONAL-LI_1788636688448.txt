@@ -1,0 +1,100 @@
+CHRONO CLASH — GEM VISUAL CLEANUP / REMOVE UNINTENTIONAL LIGHT ARCS
+
+STOP adding more VFX for now.
+
+Inspect the current gem rendering shown in the latest live screenshot.
+
+There is a visible visual problem:
+
+Many normal gems now have cyan/white curved arc-like light strokes around their edges.
+
+These appear on pink, green, purple and other gems even when no power is actively targeting them.
+
+They make the gems look like they have permanent UI selection indicators.
+
+THIS IS NOT DESIRED.
+
+Diagnose exactly which renderer/VFX layer is producing these curved arcs.
+
+Determine whether they come from:
+- targeting highlight
+- gem rim effect
+- power armed state
+- particle system
+- CSS overlay
+- canvas stroke
+- accidental persistent animation
+- another VFX layer
+
+Do NOT guess.
+
+Once identified:
+
+REMOVE ONLY THE UNINTENTIONAL/PERSISTENT ARC EFFECT FROM NORMAL GEMS.
+
+IMPORTANT:
+
+Normal gems should NOT have animated cyan/white arcs around them.
+
+Keep:
+- existing gem artwork
+- gem colors
+- internal crystal lighting
+- legitimate material highlights
+- existing gem depth
+- legitimate power targeting feedback
+- legitimate match VFX
+- legitimate power impact VFX
+
+The visual hierarchy must become:
+
+NORMAL GEM:
+physical crystal material + controlled highlight + depth.
+
+POWER ARMED:
+special energy targeting effect.
+
+TARGET ACQUIRED:
+stronger focused effect.
+
+POWER IMPACT:
+aggressive cinematic VFX.
+
+Do NOT make the normal gem state look like every gem is currently selected.
+
+Do NOT change:
+- gem shapes
+- gem size
+- board size
+- gameplay
+- match logic
+- swipe
+- powers
+- audio
+- scoring.
+
+Test the board with NO power armed.
+
+There should be ZERO unexplained cyan/white animated arcs around normal gems.
+
+Then test:
+- normal gameplay
+- power armed
+- target selection
+- match
+- cascade
+
+Make sure legitimate effects still work.
+
+Do not add new VFX in this task.
+
+This is a CLEANUP/DIAGNOSTIC PASS ONLY.
+
+Report:
+1. Exact source of the arcs.
+2. Exact file/function responsible.
+3. What was removed/disabled.
+4. Confirmation that normal gems are clean.
+5. Confirmation that power targeting still works.
+6. Confirmation that match VFX still works.
+7. Tests/build/typecheck.
