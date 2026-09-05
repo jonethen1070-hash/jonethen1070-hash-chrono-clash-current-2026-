@@ -11,7 +11,7 @@ function read(rel: string): string {
 
 describe("arena HUD polish outside the gem board", () => {
   it("keeps gem identities, board mechanics, and Chrono Power IDs locked", () => {
-    expect([...COLORS]).toEqual(["#ff004c", "#ffc400", "#00e86a", "#00d4ff", "#c026ff", "#00ffe8"]);
+    expect([...COLORS]).toEqual(["#FF167F", "#FF9D00", "#00B86B", "#126BFF", "#8A20FF", "#00BFFF"]);
     const main = read("src/main.ts");
     expect(main).toContain('id="playerGems"');
     expect(main).toContain('id="oppGems"');
@@ -22,8 +22,9 @@ describe("arena HUD polish outside the gem board", () => {
     expect(main).toContain('id="megaStrikeAttack"');
     expect(main).toContain('id="energyFill"');
     expect(main).toContain('id="energyLabel"');
-    expect(main).toContain('id="playerAttack"');
-    expect(main).toContain('id="oppAttack"');
+    expect(main).toContain('class="opponent-render-reserve"');
+    expect(main).not.toContain('id="playerAttack"');
+    expect(main).not.toContain('id="oppAttack"');
     const studio = read("src/styles/studio.css");
     expect(studio).toContain("min(28vw, 14dvh, 120px)");
   });

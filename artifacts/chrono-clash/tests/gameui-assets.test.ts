@@ -64,7 +64,7 @@ describe("GameUI reskin assets", () => {
     const atlasBranch = drawGem.slice(drawGem.indexOf("if (useAtlas && atlas)"), drawGem.indexOf("} else {"));
     expect(atlasBranch).not.toContain("jewelPath");
     expect(atlasBranch).not.toContain("drawProceduralGem");
-    expect(drawGem).toContain("roundRect(ctx, x + 1.6, y + 1.6, size - 3.2, size - 3.2, ring)");
+    expect(drawGem).toContain("roundRect(ctx, x + 0.8, y + 0.8, size - 1.6, size - 1.6");
     expect(drawGem).not.toMatch(/if \(selected \|\| hinted\)[\s\S]*jewelPath/);
   });
 

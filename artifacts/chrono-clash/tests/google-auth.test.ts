@@ -158,8 +158,8 @@ describe("Chrono Clash Google Web client", () => {
     }
   });
 
-  it("live preview publishes the saved Web client and no secret", async () => {
-    const res = await fetch("http://127.0.0.1:5173/v1/auth/config");
+  it.skipIf(!process.env.CHRONO_PREVIEW_URL)("live preview publishes the saved Web client and no secret", async () => {
+    const res = await fetch(`${process.env.CHRONO_PREVIEW_URL}/v1/auth/config`);
     expect(res.ok).toBe(true);
     const json = (await res.json()) as {
       google: { enabled: boolean; clientId: string; redirectUri: string };

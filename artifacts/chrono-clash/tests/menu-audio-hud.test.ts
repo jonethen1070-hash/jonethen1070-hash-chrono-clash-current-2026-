@@ -7,12 +7,11 @@ import { applyMatchAudioMute, DEFAULT_SETTINGS, isMatchAudioMuted } from "../src
 describe("main menu Sign In / Guest and match HUD audio", () => {
   it("adds Sign In and Continue as Guest to the existing main menu without a second auth system", () => {
     const src = readFileSync("src/main.ts", "utf8");
-    expect(src).toContain('id="menuSignIn">SIGN IN');
-    expect(src).toContain('id="menuGuest">CONTINUE AS GUEST');
-    expect(src).toContain('id="play">PLAY');
-    expect(src).toContain('id="toOnline">ONLINE 1v1');
-    expect(src).toContain('id="findOnlineMatch"');
-    expect(src).toContain('signInWith("guest")');
+    expect(src).toContain('id="menuGoogle"');
+    expect(src).toContain('id="menuGuest"');
+    expect(src).toContain('id="menuEmail"');
+    expect(src).toContain('id="battleRandom"');
+    expect(src).toContain('signInWith("google")');
     expect(src).toContain("unlockGameAudio(audio, settings.music)");
     expect(src).toContain("armFirstGestureAudio");
     expect(src).toContain("audio.prefetch()");
@@ -27,7 +26,7 @@ describe("main menu Sign In / Guest and match HUD audio", () => {
     const identity = readFileSync("src/net/identity.ts", "utf8");
     expect(identity).toContain("if ((!config || config.guest) && allowed.includes(\"guest\"))");
     const src = readFileSync("src/main.ts", "utf8");
-    expect(src).toContain("visibleAuthProviders");
+    expect(src).toContain("Guest pilot · Player ID ready.");
     expect(src).toContain("guestDeviceToken()");
   });
 

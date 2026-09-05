@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { findAnyValidSwap } from "../src/engine/board";
 import { GameSession } from "../src/engine/session";
 import { withPowerStock } from "../src/engine/economy";
+import { join } from "node:path";
 import {
   ENERGY_FREEZE,
   ENERGY_REWIND,
@@ -104,7 +105,8 @@ describe("phase 3 verification checklist", () => {
     log("22. settings scoreTarget persisted via setScoreTarget: " + scoreGame.scoreTarget);
     log("23. checklist simulation PASS");
 
-    mkdirSync("/opt/cursor/artifacts", { recursive: true });
-    writeFileSync("/opt/cursor/artifacts/phase3_checklist_log.txt", lines.join("\n") + "\n");
+    const logDir = join(process.cwd(), ".test-artifacts");
+    mkdirSync(logDir, { recursive: true });
+    writeFileSync(join(logDir, "phase3_checklist_log.txt"), lines.join("\n") + "\n");
   });
 });

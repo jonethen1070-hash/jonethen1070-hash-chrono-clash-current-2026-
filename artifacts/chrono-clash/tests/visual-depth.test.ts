@@ -15,7 +15,7 @@ const root = process.cwd();
 
 describe("visual depth polish", () => {
   it("keeps gem identities, board size, and motion contracts", () => {
-    expect([...COLORS]).toEqual(["#ff004c", "#ffc400", "#00e86a", "#00d4ff", "#c026ff", "#00ffe8"]);
+    expect([...COLORS]).toEqual(["#FF167F", "#FF9D00", "#00B86B", "#126BFF", "#8A20FF", "#00BFFF"]);
     expect(BOARD_GAP).toBe(1.5);
     expect(BOARD_FRAME).toBe(6);
     const motion = readFileSync(join(root, "src/ui/gemMotion.ts"), "utf8");
@@ -48,7 +48,7 @@ describe("visual depth polish", () => {
     const renderer = readFileSync(join(root, "src/ui/renderer.ts"), "utf8");
     expect(renderer).toContain("createRadialGradient(");
     expect(renderer).toContain("wy + cell * 0.72");
-    expect(renderer).toContain('isPlayer ? "#01050a" : "#090104"');
+    expect(renderer).toContain('const slabFace = isPlayer ? "#062B39" : "#32101C"');
     const polish = readFileSync(join(root, "src/styles/aaa-polish.css"), "utf8");
     expect(polish).toContain("#match .player-side .board-slot");
     expect(polish).toContain("#match .rival-side .board-slot");

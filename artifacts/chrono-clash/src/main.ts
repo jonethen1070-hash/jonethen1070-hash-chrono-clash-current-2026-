@@ -28,6 +28,7 @@ import { RewardGrant, grantHasBounty, xpToNext } from "./engine/progress";
 import { paintAvatarElement } from "./ui/avatarFace";
 import { mountAvatarPhotoFlow } from "./ui/avatarPhotoFlow";
 import { hasAvatarPhoto } from "./engine/avatarPhoto";
+import { startArenaParallax } from "./ui/arenaParallax";
 import { ChronoClient, isAuthFailure } from "./net/client";
 import type { BattleActionInput } from "./server/battle";
 import { detectPlatform, guestDeviceToken } from "./net/identity";
@@ -474,6 +475,8 @@ if (!ctx) throw new Error("Canvas unsupported");
 const renderer = new BoardRenderer(ctx);
 renderer.setBoardLayers(canvas2d(playerGems), canvas2d(oppGems));
 prefetchGemAtlas();
+const spaceLayer = app.querySelector<HTMLElement>(".space-layer");
+if (spaceLayer) startArenaParallax(spaceLayer, app);
 
 const ui = {
   splash: $("#splash"),

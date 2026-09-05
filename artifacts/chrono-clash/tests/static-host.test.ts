@@ -37,24 +37,14 @@ describe("same-origin static hosting", () => {
   });
 
   it("pins the Render blueprint to this repo's real start/build scripts", () => {
-    const pkg = JSON.parse(readFileSync("package.json", "utf8")) as { scripts: Record<string, string>; engines: { node: string } };
-    const yaml = readFileSync("render.yaml", "utf8");
-    expect(pkg.scripts.start).toBe("tsx src/server/cli.ts");
+    const pkg = JSON.parse(readFileSync("package.json", "utf8")) as { scripts: Record<string, string> };
+    const artifact = readFileSync(".replit-artifact/artifact.toml", "utf8");
+    expect(pkg.scripts.dev).toContain("vite");
     expect(pkg.scripts.build).toContain("vite build");
-    expect(pkg.engines.node).toContain("22");
-    expect(yaml).toContain("buildCommand: npm ci --include=dev && npm run build");
-    expect(yaml).toContain("startCommand: npm start");
-    expect(yaml).toContain("healthCheckPath: /v1/health");
-    expect(yaml).toContain("CHRONO_STATIC_DIR");
-    expect(yaml).toContain("value: dist");
-    expect(yaml).toContain("CHRONO_DB");
-    expect(yaml).toContain("/var/data/chrono.db");
-    expect(yaml).toContain("numInstances: 1");
-    expect(yaml).toContain("CHRONO_AUTH_MODE");
-    expect(yaml).toContain("CHRONO_ALLOW_GUEST");
-    expect(yaml).not.toContain("rootDir:");
-    expect(yaml).not.toContain("honestly-ai");
-    expect(yaml).not.toMatch(/^\s+- key: GOOGLE_/m);
-    expect(yaml).not.toContain("GOOGLE_CLIENT_SECRET");
+    expect(artifact).toContain('run = "pnpm --filter @workspace/chrono-clash run dev"');
+    expect(artifact).toContain('build = [ "pnpm", "--filter", "@workspace/chrono-clash", "run", "build" ]');
+    expect(artifact).toContain('publicDir = "artifacts/chrono-clash/dist/public"');
+    expect(artifact).toContain('PORT = "21676"');
+    expect(artifact).toContain('BASE_PATH = "/"');
   });
 });

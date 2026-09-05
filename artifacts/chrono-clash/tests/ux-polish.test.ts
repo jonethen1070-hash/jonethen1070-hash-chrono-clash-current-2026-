@@ -9,13 +9,13 @@ const root = process.cwd();
 describe("premium UX polish", () => {
   it("keeps the main menu actions and live cosmic presentation", () => {
     const main = readFileSync(join(root, "src/main.ts"), "utf8");
-    expect(main).toContain('id="play">PLAY');
-    expect(main).toContain('id="toOnline">ONLINE 1v1');
+    expect(main).toContain('id="menuGoogle"');
+    expect(main).toContain('id="menuGuest"');
     expect(main).toContain('id="toProfile">PROFILE');
     expect(main).toContain('id="toTrophies">TROPHIES');
     expect(main).toContain('id="toSettings">SETTINGS');
-    expect(main).toContain('id="menuSignIn">SIGN IN');
-    expect(main).toContain('id="menuGuest">CONTINUE AS GUEST');
+    expect(main).toContain('id="menuEmail"');
+    expect(main).toContain('id="menuFacebook"');
     expect(main).toContain("pressUi");
     expect(main).toContain("pulseUxEnter");
     const views = readFileSync(join(root, "src/ui/metaViews.ts"), "utf8");
@@ -59,7 +59,7 @@ describe("premium UX polish", () => {
         notes: [],
       }),
     ).toBe(true);
-    expect([...COLORS]).toEqual(["#ff004c", "#ffc400", "#00e86a", "#00d4ff", "#c026ff", "#00ffe8"]);
+    expect([...COLORS]).toEqual(["#FF167F", "#FF9D00", "#00B86B", "#126BFF", "#8A20FF", "#00BFFF"]);
   });
 
   it("uses fast cinematic screen motion and tactile buttons without 3D gimmicks", () => {

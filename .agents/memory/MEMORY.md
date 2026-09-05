@@ -11,3 +11,4 @@
 - [Audio bed cleanup](audio-bed-cleanup.md) — pending music fades must retain source references until disposal or canceled timers can strand connected loops across scene re-entry.
 - [Arena entry timing](arena-entry-timing.md) — set the battle bed in the user gesture that enters match; do not wait for the render loop to begin file playback.
 - [Browser audio regression testing](browser-audio-regression-testing.md) — distinguish procedural bed voices from legitimate oscillator-based UI cues by tracking source buffers and frequency signatures.
+- [Artifact test contracts](artifact-test-contracts.md) — source-contract tests must follow current artifact boundaries, media containers, and preview workflow ownership.

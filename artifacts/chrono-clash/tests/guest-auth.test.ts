@@ -76,16 +76,14 @@ describe("Guest authentication without provider credentials", () => {
     expect(visibleAuthProviders(null, "web")).toContain("guest");
     const src = readFileSync("src/main.ts", "utf8");
     expect(src).not.toContain('Google Sign-In is not configured."');
-    expect(src).toContain("Guest sign-in is unavailable.");
+    expect(src).toContain("Guest pilot · Player ID ready.");
   });
 
   it("does not tell a signed-in guest that FIND MATCH still requires a Player ID", () => {
     const src = readFileSync("src/main.ts", "utf8");
     expect(src).not.toContain("Requires a signed-in Player ID.");
-    expect(src).toContain('id="findOnlineMatch"');
-    expect(src).toContain("Player ID ${id} is ready.");
-    // The signed-out branch is the only place that may still ask for a sign-in.
-    expect(src).toContain('ui.onlineIdent.textContent = "Sign in to get a Player ID.";');
+    expect(src).toContain('id="battleRandom"');
+    expect(src).toContain('ui.onlineIdent.textContent = me ? `${me.name} · ${me.playerId}` : "Guest pilot · Player ID ready.";');
   });
 
   it("signs two guests in over HTTP with no Google, Apple, or Facebook credentials", async () => {

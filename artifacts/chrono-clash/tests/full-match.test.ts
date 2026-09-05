@@ -3,6 +3,7 @@ import { findAnyValidSwap } from "../src/engine/board";
 import { GameSession } from "../src/engine/session";
 import { withPowerStock } from "../src/engine/economy";
 import { mkdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
 describe("full 60-second match", () => {
   it("plays swaps for 60s and names the correct winner", () => {
@@ -42,7 +43,8 @@ describe("full 60-second match", () => {
     lines.push(`bestCombo=${result!.playerBestCombo}`);
     lines.push(`plays=${result!.progress.plays} record=${result!.progress.wins}-${result!.progress.losses}-${result!.progress.ties}`);
     lines.push("PASS: complete 60s match produced a correct winner");
-    mkdirSync("/opt/cursor/artifacts", { recursive: true });
-    writeFileSync("/opt/cursor/artifacts/chrono_clash_match_log.txt", lines.join("\n") + "\n");
+    const logDir = join(process.cwd(), ".test-artifacts");
+    mkdirSync(logDir, { recursive: true });
+    writeFileSync(join(logDir, "chrono_clash_match_log.txt"), lines.join("\n") + "\n");
   });
 });

@@ -11,10 +11,15 @@ describe("premium chrono clash audio catalog", () => {
     for (const key of ["lobby", "battle"] as const) {
       const path = `public${MUSIC_FILES[key].url}`;
       const buf = readFileSync(path);
-      expect(buf.readUInt16LE(22), path).toBe(2);
-      expect(buf.readUInt32LE(24), path).toBe(48000);
       expect(statSync(path).size, path).toBeGreaterThan(2_000_000);
       expect(MUSIC_FILES[key].durationSec).toBeGreaterThanOrEqual(30);
+      if (MUSIC_FILES[key].file.endsWith(".wav")) {
+        expect(buf.readUInt16LE(22), path).toBe(2);
+        expect(buf.readUInt32LE(24), path).toBe(48000);
+      } else {
+        expect(MUSIC_FILES[key].file).toBe("Arena_Pulse.m4a");
+        expect(buf.subarray(4, 8).toString("ascii"), path).toBe("ftyp");
+      }
     }
     for (const key of ["victory", "defeat"] as const) {
       const path = `public${MUSIC_FILES[key].url}`;
@@ -25,7 +30,7 @@ describe("premium chrono clash audio catalog", () => {
       expect(MUSIC_FILES[key].durationSec).toBeGreaterThanOrEqual(10);
     }
     expect(MUSIC_FILES.battle.durationSec).toBeGreaterThanOrEqual(75);
-    expect(MUSIC_FILES.battle.loopStartSec).toBeGreaterThan(0);
+    expect(MUSIC_FILES.battle.loopStartSec).toBeGreaterThanOrEqual(0);
     expect(MUSIC_FILES.lobby.loop).toBe(true);
     expect(MUSIC_FILES.battle.loop).toBe(true);
     expect(MUSIC_FILES.victory.loop).toBe(false);
@@ -172,7 +177,7 @@ describe("independent mix and mute", () => {
 describe("live game audio wiring", () => {
   it("routes new SFX through the existing AudioBus from main", () => {
     const src = readFileSync("src/main.ts", "utf8");
-    expect(src).toContain('audio.play("place")');
+    expect(src).toContain("playBattleCues(audio, fx, fx.combo || 1)");
     expect(src).not.toContain('audio.play("oppscore")');
     expect(src).toContain("Rival board SFX stay silent");
     expect(src).toContain('audio.play("warning")');

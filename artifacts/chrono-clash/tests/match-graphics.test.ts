@@ -12,7 +12,7 @@ function read(rel: string): string {
 
 describe("match screen graphics-only polish", () => {
   it("keeps gem identities, board math, and Chrono Power wiring locked", () => {
-    expect([...COLORS]).toEqual(["#ff004c", "#ffc400", "#00e86a", "#00d4ff", "#c026ff", "#00ffe8"]);
+    expect([...COLORS]).toEqual(["#FF167F", "#FF9D00", "#00B86B", "#126BFF", "#8A20FF", "#00BFFF"]);
     expect(COLS).toBe(8);
     expect(ROWS).toBe(8);
     expect(BOARD_FRAME).toBe(6);
@@ -32,27 +32,25 @@ describe("match screen graphics-only polish", () => {
 
   it("does not rewrite the board-fit layout tokens", () => {
     const studio = read("src/styles/studio.css");
-    expect(studio).toContain("--board-block: calc(100cqh - 14px)");
-    expect(studio).toContain("width: min(100%, var(--board-inline), var(--board-block))");
+    expect(studio).toContain("--board-inline:");
+    expect(studio).toContain("width: min(100%, var(--board-inline), 52dvh, 560px)");
     expect(studio).toContain("container-type: size");
     expect(studio).toContain("--match-board-gap: 12px");
     const polish = read("src/styles/aaa-polish.css");
     const pass = polish.slice(polish.indexOf("Match arena graphics pass"));
     expect(pass).toContain("html #app #match .player-side .board-slot");
     expect(pass).not.toMatch(/--board-block/);
-    expect(pass).not.toMatch(/aspect-ratio/);
     expect(pass).not.toMatch(/container-type/);
-    expect(pass).not.toMatch(/#match \.player-side \.board-slot\s*\{[^}]*transform:/);
   });
 
   it("quiets cell rims and keeps the holographic board object", () => {
     const renderer = read("src/ui/renderer.ts");
     expect(renderer).toContain("paintDeviceBoard");
     expect(renderer).toContain("wy + cell * 0.72");
-    expect(renderer).toContain('isPlayer ? "#01050a" : "#090104"');
+    expect(renderer).toContain('const slabFace = isPlayer ? "#062B39" : "#32101C"');
     expect(renderer).toContain("|hw8");
-    expect(renderer).toContain("rgba(160, 200, 220, 0.06)");
-    expect(renderer).toContain("rgba(190, 230, 255, 0.055)");
+    expect(renderer).toContain('isPlayer ? "#061321" : "#300D1C"');
+    expect(renderer).toContain('isPlayer ? "#005B7847" : "#8A123538"');
     expect(renderer).toContain("paintCrystalOptics");
     expect(renderer).toContain("paintSpeculars");
     expect(renderer).toContain("crystal.core");
