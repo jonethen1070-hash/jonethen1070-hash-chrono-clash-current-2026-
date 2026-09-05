@@ -79,6 +79,10 @@ interface Particle {
   size: number;
   color: string;
   g?: number;
+  targetX?: number;
+  targetY?: number;
+  pull?: number;
+  drag?: number;
 }
 
 interface Shockwave {
@@ -134,6 +138,12 @@ interface PowerImpactImpulse {
   life: number;
   dx: number;
   dy: number;
+}
+
+interface PowerWake {
+  born: number;
+  life: number;
+  kind: "burst" | "mega" | "rewind";
 }
 
 interface FloatText {
@@ -212,6 +222,8 @@ class BoardView {
   powerEffects: PowerEffect[] = [];
   powerTargeting: PowerTargeting | null = null;
   powerImpactImpulse: PowerImpactImpulse | null = null;
+  powerCastTarget: { at: Coord; born: number } | null = null;
+  powerWake: PowerWake | null = null;
   floats: FloatText[] = [];
   seenFx = new Set<number>();
   recognitionCount = 0;
@@ -235,6 +247,8 @@ class BoardView {
     this.powerEffects = [];
     this.powerTargeting = null;
     this.powerImpactImpulse = null;
+    this.powerCastTarget = null;
+    this.powerWake = null;
     this.floats = [];
     this.seenFx.clear();
     this.recognitionCount = 0;
@@ -355,15 +369,42 @@ export class BoardRenderer {
     const strength = targeting.kind === "mega" ? 1.25 : 1;
     tile.flash = Math.max(tile.flash, 0.34 * strength);
     tile.glow = Math.max(tile.glow, 0.28 * strength);
+    const cx = tile.x + cell / 2;
+    const cy = tile.y + cell / 2;
+    const moteCount = targeting.kind === "mega" ? 6 : 4;
+    for (let i = 0; i < moteCount; i++) {
+      const angle = (Math.PI * 2 * i) / moteCount + 0.24;
+      const orbit = cell * (0.32 + (i % 2) * 0.08);
+      const tangent = targeting.kind === "mega" ? 0.72 : 0.5;
+      this.spawnParticle(this.playerView, {
+        x: cx + Math.cos(angle) * orbit,
+        y: cy + Math.sin(angle) * orbit,
+        vx: -Math.sin(angle) * tangent,
+        vy: Math.cos(angle) * tangent,
+        life: targeting.kind === "mega" ? 0.36 : 0.3,
+        max: targeting.kind === "mega" ? 0.36 : 0.3,
+        size: cell * (targeting.kind === "mega" ? 0.027 : 0.022),
+        color: i % 2 ? "#EAFBFF" : "#7CF5FF",
+        g: 0,
+        targetX: cx,
+        targetY: cy,
+        pull: targeting.kind === "mega" ? 0.045 : 0.035,
+        drag: 0.96,
+      });
+    }
     this.addShockwave(
       this.playerView,
-      tile.x + cell / 2,
-      tile.y + cell / 2,
+      cx,
+      cy,
       cell * (targeting.kind === "mega" ? 0.21 : 0.16),
       "#EAFBFF",
       targeting.kind === "mega" ? 220 : 180,
       targeting.kind === "mega" ? 1.4 : 1.1,
     );
+  }
+
+  setPowerCastTarget(at: Coord | null, now: number): void {
+    this.playerView.powerCastTarget = at ? { at, born: now } : null;
   }
 
   primeSwapPose(from: Coord, to: Coord, dx: number, dy: number, now: number): void {
@@ -825,6 +866,7 @@ export class BoardRenderer {
     this.drawBoardEnergy(ctx, ox, oy, size, isPlayer, boosted, frozen, now);
     if (isPlayer) {
       this.drawPowerTargetingAtmosphere(view, ox, oy, size, now);
+      this.drawPowerWake(view, ctx, ox, oy, size, now);
     }
 
     ctx.save();
@@ -1177,7 +1219,17 @@ export class BoardRenderer {
       tile.burstEmitted = impactRemaining + tile.dieStaggerMs <= 0;
       if (tile.burstEmitted) {
         view.fractureCount += 1;
-        this.burst(view, tile.x + cell / 2, tile.y + cell / 2, tile.color, cell, tile.breakStrength);
+        const direction = this.powerFractureDirection(view, tile.x + cell / 2, tile.y + cell / 2, now);
+        this.burst(
+          view,
+          tile.x + cell / 2,
+          tile.y + cell / 2,
+          tile.color,
+          cell,
+          tile.breakStrength,
+          direction.x,
+          direction.y,
+        );
       }
       if (isPlayer) view.shake = Math.max(view.shake, 0.9);
     }
@@ -1203,7 +1255,14 @@ export class BoardRenderer {
       }
       view.seenFx.add(fxEvent.id);
       if (fxEvent.kind === "power" || fxEvent.kind === "rewind") {
-        this.castPower(view, fxEvent.text, ox + size / 2, oy + size / 2, cell, isPlayer, now);
+        const castTarget =
+          isPlayer && view.powerCastTarget && now - view.powerCastTarget.born < 900
+            ? view.powerCastTarget.at
+            : fxEvent.at;
+        const castX = castTarget ? ix + GAP + castTarget.c * (cell + GAP) + cell / 2 : ox + size / 2;
+        const castY = castTarget ? iy + GAP + castTarget.r * (cell + GAP) + cell / 2 : oy + size / 2;
+        this.castPower(view, fxEvent.text, castX, castY, cell, isPlayer, now);
+        if (isPlayer) view.powerCastTarget = null;
         if (fxEvent.kind === "rewind" && isPlayer && !this.fx.reducedMotion) {
           for (const tile of view.tiles.values()) {
             tile.glow = Math.max(tile.glow, 0.3);
@@ -1269,7 +1328,17 @@ export class BoardRenderer {
       if (!tile.burstEmitted && tile.dieAge >= 0) {
         tile.burstEmitted = true;
         view.fractureCount += 1;
-        this.burst(view, tile.x + cell / 2, tile.y + cell / 2, tile.color, cell, tile.breakStrength);
+        const direction = this.powerFractureDirection(view, tile.x + cell / 2, tile.y + cell / 2, now);
+        this.burst(
+          view,
+          tile.x + cell / 2,
+          tile.y + cell / 2,
+          tile.color,
+          cell,
+          tile.breakStrength,
+          direction.x,
+          direction.y,
+        );
       }
       const pose = easeCrystalDie(Math.max(0, tile.dieAge) / dieDur);
       if (reduced) {
@@ -1348,6 +1417,7 @@ export class BoardRenderer {
         lift,
         now,
         Boolean(sel && drag) || tile.moveKind !== "idle",
+        isPlayer ? view.powerTargeting : null,
       );
       if (isPlayer && !tile.dying) {
         this.drawPowerTargetGem(
@@ -1618,6 +1688,56 @@ export class BoardRenderer {
     ctx.restore();
   }
 
+  private drawPowerWake(
+    view: BoardView,
+    ctx: CanvasRenderingContext2D,
+    ox: number,
+    oy: number,
+    size: number,
+    now: number,
+  ): void {
+    const wake = view.powerWake;
+    if (!wake || this.fx.quality === "low" || this.fx.reducedMotion) return;
+    const age = now - wake.born;
+    if (age >= wake.life) {
+      view.powerWake = null;
+      return;
+    }
+    const t = Math.max(0, Math.min(1, age / wake.life));
+    const fade = Math.sin(Math.PI * t);
+    const mega = wake.kind === "mega";
+    const rewind = wake.kind === "rewind";
+    const travel = t * (size * 1.36);
+    const angle = rewind ? -0.42 : mega ? 0.22 : -0.14;
+    const leadX = ox + size * (-0.16) + Math.cos(angle) * travel;
+    const leadY = oy + size * (rewind ? 1.08 : 0.08) + Math.sin(angle) * travel;
+    const width = size * (mega ? 0.16 : 0.12);
+    const ctxGradient = ctx.createLinearGradient(
+      leadX - Math.cos(angle) * width,
+      leadY - Math.sin(angle) * width,
+      leadX + Math.cos(angle) * width,
+      leadY + Math.sin(angle) * width,
+    );
+    const cyan = rewind ? "46, 155, 255" : mega ? "234, 251, 255" : "124, 245, 255";
+    ctxGradient.addColorStop(0, `rgba(${cyan}, 0)`);
+    ctxGradient.addColorStop(0.5, `rgba(${cyan}, ${0.28 * fade})`);
+    ctxGradient.addColorStop(1, `rgba(${cyan}, 0)`);
+
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.globalAlpha = 0.88;
+    ctx.translate(leadX, leadY);
+    ctx.rotate(angle);
+    ctx.fillStyle = ctxGradient;
+    ctx.fillRect(-size * 0.12, -size * 0.66, size * 0.24, size * 1.32);
+    ctx.globalAlpha = 0.7 * fade;
+    ctx.fillStyle = rewind ? "#B9E8FF" : "#EAFBFF";
+    ctx.shadowColor = rewind ? "#2E9BFF" : "#00D9FF";
+    ctx.shadowBlur = size * (mega ? 0.08 : 0.055);
+    ctx.fillRect(-Math.max(0.8, size * 0.007), -size * 0.58, Math.max(1.2, size * 0.014), size * 1.16);
+    ctx.restore();
+  }
+
   private spawnParticle(view: BoardView, init: Particle): void {
     const p = this.particlePool.pop() ?? init;
     if (p !== init) {
@@ -1630,6 +1750,10 @@ export class BoardRenderer {
       p.size = init.size;
       p.color = init.color;
       p.g = init.g;
+      p.targetX = init.targetX;
+      p.targetY = init.targetY;
+      p.pull = init.pull;
+      p.drag = init.drag;
     }
     view.particles.push(p);
   }
@@ -1667,7 +1791,28 @@ export class BoardRenderer {
     return sheet;
   }
 
-  private burst(view: BoardView, x: number, y: number, color: number, cell: number, combo = 1): void {
+  private powerFractureDirection(view: BoardView, x: number, y: number, now: number): { x: number; y: number } {
+    const effect = [...view.powerEffects]
+      .reverse()
+      .find((candidate) => candidate.kind !== "rewind" && now - candidate.born >= 0 && now - candidate.born < 520);
+    if (!effect) return { x: 0, y: 0 };
+    const dx = x - effect.x;
+    const dy = y - effect.y;
+    const distance = Math.hypot(dx, dy);
+    if (distance < 1) return { x: 0, y: 0 };
+    return { x: dx / distance, y: dy / distance };
+  }
+
+  private burst(
+    view: BoardView,
+    x: number,
+    y: number,
+    color: number,
+    cell: number,
+    combo = 1,
+    directionX = 0,
+    directionY = 0,
+  ): void {
     const n = particleBudget(this.fx.quality, this.fx.reducedMotion);
     if (!n) return;
     const hex = COLORS[color - 1] ?? "#fff";
@@ -1687,8 +1832,8 @@ export class BoardRenderer {
       this.spawnCrystalShard(view, {
         x: x + Math.cos(a) * cell * 0.08,
         y: y + Math.sin(a) * cell * 0.08,
-        vx: Math.cos(a) * sp,
-        vy: Math.sin(a) * sp - 0.62,
+        vx: Math.cos(a) * sp + directionX * 0.62,
+        vy: Math.sin(a) * sp - 0.62 + directionY * 0.62,
         rotation: a,
         spin: (i % 2 ? 1 : -1) * (0.08 + Math.random() * 0.06),
         life: 0.24,
@@ -1705,8 +1850,8 @@ export class BoardRenderer {
       this.spawnParticle(view, {
         x,
         y,
-        vx: Math.cos(a) * sp,
-        vy: Math.sin(a) * sp - 1.55,
+         vx: Math.cos(a) * sp + directionX * 0.42,
+         vy: Math.sin(a) * sp - 1.55 + directionY * 0.42,
         life: 0.18,
         max: 0.18,
         size: cell * (0.032 + Math.random() * 0.026),
@@ -1822,6 +1967,11 @@ export class BoardRenderer {
     const powerColor = freeze ? "#00D9FF" : rewind ? "#2E9BFF" : mega ? "#00D9FF" : burst ? "#7CF5FF" : "#A855F7";
     if (effect) {
       view.powerEffects.push({ kind: effect, x, y, cell, born: now });
+      view.powerWake = {
+        born: now,
+        life: effect === "mega" ? 170 : effect === "rewind" ? 180 : 150,
+        kind: effect,
+      };
       if (view.powerEffects.length > 4) view.powerEffects.splice(0, view.powerEffects.length - 4);
     }
     view.flash = Math.max(
@@ -2030,9 +2180,18 @@ export class BoardRenderer {
     let write = 0;
     for (let i = 0; i < list.length; i++) {
       const p = list[i]!;
+      if (p.targetX !== undefined && p.targetY !== undefined) {
+        p.vx += (p.targetX - p.x) * (p.pull ?? 0.035) * frameScale;
+        p.vy += (p.targetY - p.y) * (p.pull ?? 0.035) * frameScale;
+      }
       p.x += p.vx * frameScale;
       p.y += p.vy * frameScale;
       p.vy += (p.g ?? 0.12) * frameScale;
+      if (p.drag !== undefined) {
+        const damping = Math.pow(p.drag, frameScale);
+        p.vx *= damping;
+        p.vy *= damping;
+      }
       p.life -= dt;
       if (p.life > 0) list[write++] = p;
       else this.recycleParticle(p);
@@ -2405,6 +2564,7 @@ export class BoardRenderer {
     lift: number,
     now: number,
     dragging = false,
+    powerTargeting: PowerTargeting | null = null,
   ): void {
     const ctx = this.ctx;
     const color = COLORS[tile.color - 1] ?? "#FFFFFF";
@@ -2507,6 +2667,16 @@ export class BoardRenderer {
     } else {
       this.drawProceduralGem(cx, cy, s, tile.color, color, selected);
     }
+    const targeting = powerTargeting;
+    if (
+      targeting &&
+      targeting.target?.r === tile.r &&
+      targeting.target?.c === tile.c &&
+      !tile.dying &&
+      !this.fx.reducedMotion
+    ) {
+      this.drawTargetCrystalResponse(cx, cy, s, tile.color, targeting, now);
+    }
 
     if (tile.flash > 0.04) {
       if (useAtlas) {
@@ -2565,6 +2735,63 @@ export class BoardRenderer {
         tile.breakStrength,
       );
     }
+    ctx.restore();
+  }
+
+  private drawTargetCrystalResponse(
+    cx: number,
+    cy: number,
+    s: number,
+    colorIndex: number,
+    targeting: PowerTargeting,
+    now: number,
+  ): void {
+    const ctx = this.ctx;
+    const crystal = crystalAccent(colorIndex);
+    const color = COLORS[colorIndex - 1] ?? "#FFFFFF";
+    const lockIn = Math.min(1, Math.max(0, (now - targeting.targetBorn) / 110));
+    const mega = targeting.kind === "mega";
+    const pulse = 0.72 + Math.sin(now / (mega ? 180 : 220)) * 0.14;
+
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    jewelPath(ctx, cx, cy, s * 0.88, colorIndex);
+    ctx.clip();
+    const core = ctx.createRadialGradient(cx - s * 0.1, cy - s * 0.16, 0, cx, cy, s * 0.5);
+    core.addColorStop(0, `rgba(255,255,255,${0.42 * pulse + lockIn * 0.18})`);
+    core.addColorStop(0.2, colorWithAlpha(crystal.core, 0.6 + lockIn * 0.2));
+    core.addColorStop(0.52, colorWithAlpha(color, 0.12 + lockIn * 0.16));
+    core.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.globalAlpha = 0.72 + lockIn * 0.16;
+    ctx.fillStyle = core;
+    ctx.fillRect(cx - s * 0.55, cy - s * 0.55, s * 1.1, s * 1.1);
+
+    ctx.globalAlpha = 0.24 + lockIn * 0.24;
+    ctx.strokeStyle = mega ? "#EAFBFF" : crystal.edge;
+    ctx.lineWidth = Math.max(0.7, s * 0.012);
+    ctx.shadowColor = mega ? "#EAFBFF" : crystal.bloom;
+    ctx.shadowBlur = s * 0.055;
+    const phase = now / (mega ? 260 : 330);
+    for (let i = 0; i < (mega ? 4 : 3); i++) {
+      const angle = phase + i * (Math.PI * 2 / (mega ? 4 : 3));
+      const inner = s * 0.08;
+      const outer = s * (0.25 + lockIn * 0.14);
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(angle) * inner, cy + Math.sin(angle) * inner);
+      ctx.lineTo(
+        cx + Math.cos(angle + 0.28) * outer,
+        cy + Math.sin(angle + 0.28) * outer,
+      );
+      ctx.stroke();
+    }
+
+    ctx.globalAlpha = 0.62 + lockIn * 0.22;
+    ctx.fillStyle = "#FFFFFF";
+    ctx.shadowColor = "#EAFBFF";
+    ctx.shadowBlur = s * 0.06;
+    ctx.beginPath();
+    ctx.ellipse(cx - s * 0.2, cy - s * 0.23, s * 0.06, s * 0.12, -0.55, 0, Math.PI * 2);
+    ctx.fill();
     ctx.restore();
   }
 
@@ -2646,7 +2873,9 @@ export class BoardRenderer {
     const intensity = intro * (mega ? 0.22 : 0.14) + breath * (mega ? 0.07 : 0.045);
     const cx = x + size / 2;
     const cy = y + size / 2;
-    const radius = size * (acquired ? 0.41 : 0.36) + (acquired ? breath * size * 0.025 : 0);
+    const radius =
+      size * (acquired ? 0.47 - lockIn * 0.055 : 0.36) +
+      (acquired ? breath * size * 0.02 : 0);
 
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
@@ -2655,10 +2884,12 @@ export class BoardRenderer {
     ctx.lineWidth = Math.max(0.9, size * (acquired ? 0.024 : 0.014));
     ctx.shadowColor = mega ? "#EAFBFF" : "#7CF5FF";
     ctx.shadowBlur = size * (acquired ? 0.1 : 0.055);
-    ctx.beginPath();
-    ctx.arc(cx, cy, radius, -Math.PI * 0.82, Math.PI * 0.2);
-    ctx.arc(cx, cy, radius, Math.PI * 0.34, Math.PI * 1.28);
-    ctx.stroke();
+    const rotation = now / (mega ? 310 : 390);
+    drawIrregularEnergyArc(ctx, cx, cy, radius, rotation - 2.55, 1.82, rotation);
+    drawIrregularEnergyArc(ctx, cx, cy, radius * 0.97, rotation + 0.72, 1.46, rotation + 1.8);
+    if (acquired) {
+      drawIrregularEnergyArc(ctx, cx, cy, radius * 0.82, rotation - 0.38, 1.05, rotation + 0.7);
+    }
 
     ctx.globalAlpha = (mega ? 0.06 : 0.04) + lockIn * 0.1;
     const inner = ctx.createRadialGradient(cx, cy - size * 0.05, size * 0.04, cx, cy, size * 0.48);
@@ -2673,9 +2904,15 @@ export class BoardRenderer {
     if (acquired) {
       ctx.globalAlpha = 0.28 + lockIn * (mega ? 0.34 : 0.24);
       ctx.lineWidth = Math.max(1.1, size * 0.018);
-      ctx.beginPath();
-      ctx.arc(cx, cy, size * (0.44 + breath * 0.025), 0, Math.PI * 2);
-      ctx.stroke();
+      drawIrregularEnergyArc(
+        ctx,
+        cx,
+        cy,
+        size * (0.44 + breath * 0.025),
+        rotation + 0.18,
+        Math.PI * 1.52,
+        rotation + 2.2,
+      );
       ctx.globalAlpha = mega ? 0.72 : 0.56;
       ctx.fillStyle = "#EAFBFF";
       for (let i = 0; i < (mega ? 5 : 3); i++) {
@@ -2990,6 +3227,29 @@ function boardLayout(x: number, y: number, w: number, h: number): {
   const inner = size - FRAME * 2;
   const cell = (inner - GAP * (COLS + 1)) / COLS;
   return { size, ox, oy, cell, ix: ox + FRAME, iy: oy + FRAME };
+}
+
+function drawIrregularEnergyArc(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  radius: number,
+  start: number,
+  sweep: number,
+  phase: number,
+): void {
+  const steps = Math.max(8, Math.ceil(Math.abs(sweep) * 5));
+  ctx.beginPath();
+  for (let i = 0; i <= steps; i++) {
+    const progress = i / steps;
+    const angle = start + sweep * progress;
+    const variation = 1 + Math.sin(phase + i * 1.73) * 0.018 + Math.cos(phase * 0.7 + i * 0.91) * 0.01;
+    const px = cx + Math.cos(angle) * radius * variation;
+    const py = cy + Math.sin(angle) * radius * variation;
+    if (i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.stroke();
 }
 
 function crystalAccent(colorIndex: number): { core: string; edge: string; bloom: string } {

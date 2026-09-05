@@ -2053,6 +2053,7 @@ ui.playerBoard.addEventListener(
       const target = hitPlayer(e) ?? from;
       const button = id === "burst" ? ui.energyBurstAttack : ui.megaStrikeAttack;
       renderer.setPowerTarget(target, now);
+      renderer.setPowerCastTarget(target, now);
       swipe = null;
       setArmedEnergyPower(null);
       if (session.usePower(id, now, target)) {
