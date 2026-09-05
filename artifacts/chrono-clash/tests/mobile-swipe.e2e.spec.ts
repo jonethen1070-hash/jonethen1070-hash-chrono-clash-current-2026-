@@ -1,4 +1,5 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+import { LARGE_MATCH_VFX_FIXTURES, type LargeMatchVfxFixtureName } from "./vfxFixtures";
 
 type BoardBox = {
   x: number;
@@ -16,6 +17,51 @@ type TouchPoint = {
 type Move = {
   from: { r: number; c: number };
   to: { r: number; c: number };
+};
+
+type RenderTile = {
+  id: number;
+  x: number;
+  y: number;
+  fromX: number;
+  fromY: number;
+  toX: number;
+  toY: number;
+  moveKind: string;
+  moveAge: number;
+  moveDur: number;
+  dying: boolean;
+  alpha: number;
+  dieAge: number;
+  dieStaggerMs: number;
+  burstEmitted: boolean;
+  settleAge: number;
+  settleDur: number;
+};
+
+type RenderState = {
+  cell: number;
+  tiles: RenderTile[];
+  moving: RenderTile[];
+  dying: RenderTile[];
+  visibleEmptySockets: Array<{ r: number; c: number }>;
+  vfx: {
+    particleCount: number;
+    particleCap: number;
+    particleCapHits: number;
+    recognitionCount: number;
+    fractureCount: number;
+    staggerCount: number;
+    settleCount: number;
+    shardCount: number;
+    shockwaveCount: number;
+    socketPulseCount: number;
+  };
+};
+
+type RenderSample = {
+  at: number;
+  state: RenderState | null;
 };
 
 const BOARD_FRAME = 6;
@@ -52,6 +98,38 @@ async function touchSwipe(
     type: "touchEnd",
     touchPoints: [],
   });
+}
+
+async function collectVfxTimeline(page: Page, timeoutMs: number): Promise<RenderSample[]> {
+  return page.evaluate((limit) => new Promise<RenderSample[]>((resolve) => {
+    const samples: RenderSample[] = [];
+    const started = performance.now();
+    let quietFrames = 0;
+    const step = (at: number) => {
+      const chrono = (window as Window & {
+        __chrono?: { renderState?: () => RenderState };
+      }).__chrono;
+      const state = chrono?.renderState?.() ?? null;
+      samples.push({ at, state });
+      const settled =
+        state !== null &&
+        state.tiles.length === 64 &&
+        state.dying.length === 0 &&
+        state.moving.length === 0 &&
+        state.vfx.particleCount === 0 &&
+        state.vfx.shardCount === 0 &&
+        state.vfx.shockwaveCount === 0 &&
+        state.vfx.socketPulseCount === 0;
+      if (settled) quietFrames += 1;
+      else quietFrames = 0;
+      if (quietFrames >= 10 || at - started >= limit) {
+        resolve(samples);
+        return;
+      }
+      requestAnimationFrame((nextAt) => window.setTimeout(() => step(nextAt), 0));
+    };
+    requestAnimationFrame((nextAt) => window.setTimeout(() => step(nextAt), 0));
+  }), timeoutMs);
 }
 
 test.beforeEach(async ({ page }) => {
@@ -668,5 +746,178 @@ test.describe("mobile cascade visibility", () => {
     expect(landed).toMatchObject({ moveKind: "idle", settleDur: expect.any(Number) });
     expect(Math.abs(landed!.x - landed!.toX)).toBeLessThan(1);
     expect(Math.abs(landed!.y - landed!.toY)).toBeLessThan(1);
+  });
+
+  test("captures deterministic large-match VFX timing without locking the mobile board", async ({ page }) => {
+    const consoleErrors: string[] = [];
+    const pageErrors: string[] = [];
+    page.on("console", (message) => {
+      if (message.type() === "error") consoleErrors.push(message.text());
+    });
+    page.on("pageerror", (error) => pageErrors.push(error.message));
+
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, "vibrate", {
+        configurable: true,
+        value: () => true,
+      });
+    });
+    await page.goto("/");
+    await expect(page.locator("#menu.active")).toBeVisible();
+    await page.locator("#menuGuest").click();
+    await expect(page.locator("#match.active")).toBeVisible();
+    await expect.poll(async () => page.locator("#overlay").evaluate((el) => el.classList.contains("hidden"))).toBe(true);
+    await expect.poll(async () => page.evaluate(() => {
+      const chrono = (window as Window & {
+        __chrono?: { session?: { phase?: string }; renderState?: () => RenderState };
+      }).__chrono;
+      return chrono?.session?.phase === "playing" && (chrono.renderState?.().tiles.length ?? 0) >= 64;
+    })).toBe(true);
+
+    const board = page.locator("#playerBoard");
+    const boardBox = await board.boundingBox();
+    expect(boardBox).not.toBeNull();
+    const box = boardBox!;
+
+    const fixtureNames: LargeMatchVfxFixtureName[] = [
+      "threeGem",
+      "fourGem",
+      "fivePlusGem",
+      "oneCascade",
+      "multipleCascade",
+      "longFall",
+    ];
+    const completed: Array<{ name: LargeMatchVfxFixtureName; samples: number }> = [];
+    let staggerObserved = false;
+    let particleCapObserved = false;
+
+    for (const name of fixtureNames) {
+      const fixture = LARGE_MATCH_VFX_FIXTURES[name];
+      await expect.poll(async () => page.evaluate(() => {
+        const session = (window as Window & {
+          __chrono?: { session?: { isInteractive: (now: number) => boolean } };
+        }).__chrono?.session;
+        return session?.isInteractive(performance.now()) ?? false;
+      }), { timeout: 5_000 }).toBe(true);
+
+      const baselineVfx = await page.evaluate(() => {
+        const chrono = (window as Window & { __chrono?: { renderState?: () => RenderState } }).__chrono;
+        return chrono?.renderState?.().vfx ?? null;
+      });
+      expect(baselineVfx).not.toBeNull();
+      const trigger = await page.evaluate((fixture) => {
+        const chrono = (window as Window & {
+          __chrono?: {
+            session?: {
+              player: { board: Array<Array<{ color: number; kind: string }>> };
+              rng: () => number;
+              tryPlayerSwap: (a: { r: number; c: number }, b: { r: number; c: number }, now: number) => boolean;
+              snapshot: (now: number) => {
+                player: { combo: number };
+                fx: Array<{ kind: string; side?: string; born: number; cells?: Array<{ r: number; c: number }> }>;
+              };
+            };
+          };
+        }).__chrono;
+        const session = chrono?.session;
+        if (!session) throw new Error("Missing live Chrono session");
+        fixture.board.forEach((row, r) => row.forEach((color, c) => {
+          const piece = session.player.board[r]?.[c];
+          if (!piece) throw new Error(`Missing fixture cell ${r},${c}`);
+          piece.color = color;
+          piece.kind = "normal";
+        }));
+        let seed = fixture.rngSeed >>> 0;
+        session.rng = () => {
+          seed = (seed + 0x6d2b79f5) >>> 0;
+          let value = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+          value ^= value + Math.imul(value ^ (value >>> 7), 61 | value);
+          return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+        };
+        const triggerAt = performance.now();
+        const accepted = session.tryPlayerSwap(fixture.from, fixture.to, triggerAt);
+        const snapshot = session.snapshot(triggerAt);
+        const clear = snapshot.fx.find(
+          (event) => event.kind === "clear" && event.side === "player" && event.born >= triggerAt,
+        );
+        if (!clear) throw new Error("Missing fixture clear event");
+        clear.born = triggerAt;
+        return {
+          accepted,
+          clearCount: clear?.cells?.length ?? 0,
+          combo: snapshot.player.combo,
+        };
+      }, fixture);
+      expect(trigger.accepted, `${name} fixture swap accepted`).toBe(true);
+      expect(trigger.clearCount, `${name} first clear wave`).toBe(fixture.expectedFirstWave);
+      expect(trigger.combo, `${name} combo peak`).toBe(fixture.expectedComboPeak);
+
+      const samples = await collectVfxTimeline(page, name === "multipleCascade" || name === "longFall" ? 4_000 : 2_400);
+      const states = samples.flatMap((sample) => sample.state ? [sample.state] : []);
+      expect(states.length, `${name} produced renderer samples`).toBeGreaterThan(0);
+      expect(states.some((state) => state.dying.length >= fixture.expectedFirstWave), `${name} showed match recognition`).toBe(true);
+      const recognitionSample = samples.find((sample) =>
+        (sample.state?.vfx.recognitionCount ?? 0) > baselineVfx!.recognitionCount,
+      );
+      const fractureSample = samples.find((sample) =>
+        (sample.state?.vfx.fractureCount ?? 0) > baselineVfx!.fractureCount,
+      );
+      expect(recognitionSample, `${name} recorded match recognition timing`).toBeDefined();
+      expect(fractureSample, `${name} recorded fracture timing`).toBeDefined();
+      expect(recognitionSample!.at).toBeLessThanOrEqual(fractureSample!.at);
+      staggerObserved ||= states.some((state) => state.vfx.staggerCount > baselineVfx!.staggerCount);
+      expect(states.some((state) => state.vfx.settleCount > baselineVfx!.settleCount), `${name} recorded landing settle`).toBe(true);
+      expect(states.some((state) => state.vfx.shardCount > 0), `${name} showed crystal shards`).toBe(true);
+      expect(states.some((state) => state.vfx.particleCount > 0), `${name} showed particles`).toBe(true);
+      expect(states.every((state) => state.vfx.particleCount <= state.vfx.particleCap), `${name} respected particle cap`).toBe(true);
+      particleCapObserved ||= states.some((state) => state.vfx.particleCapHits > baselineVfx!.particleCapHits);
+
+      await expect.poll(async () => page.evaluate(() => {
+        const chrono = (window as Window & { __chrono?: { renderState?: () => RenderState } }).__chrono;
+        const state = chrono?.renderState?.();
+        return Boolean(
+          state &&
+          state.tiles.length === 64 &&
+          state.dying.length === 0 &&
+          state.moving.length === 0 &&
+          state.vfx.particleCount === 0 &&
+          state.vfx.shardCount === 0 &&
+          state.vfx.shockwaveCount === 0 &&
+          state.vfx.socketPulseCount === 0,
+        );
+      }), { timeout: 2_000, intervals: [16, 32, 64] }).toBe(true);
+      const final = await page.evaluate(() => {
+        const chrono = (window as Window & { __chrono?: { renderState?: () => RenderState } }).__chrono;
+        return chrono?.renderState?.() ?? null;
+      });
+      expect(final).not.toBeNull();
+      expect(final.tiles).toHaveLength(64);
+      expect(final.dying).toHaveLength(0);
+      expect(final.moving).toHaveLength(0);
+      expect(final.vfx, `${name} cleaned permanent VFX`).toMatchObject({
+        particleCount: 0,
+        shardCount: 0,
+        shockwaveCount: 0,
+        socketPulseCount: 0,
+      });
+      expect(final.tiles.every((tile) =>
+        [tile.x, tile.y, tile.fromX, tile.fromY, tile.toX, tile.toY, tile.alpha].every(Number.isFinite),
+      ), `${name} board remained readable`).toBe(true);
+
+      completed.push({ name, samples: samples.length });
+    }
+
+    expect(completed).toHaveLength(fixtureNames.length);
+    expect(staggerObserved, "large-match fixtures recorded stagger timing").toBe(true);
+    expect(particleCapObserved, "large-match fixtures recorded particle-cap timing").toBe(true);
+    expect(await page.locator("#overlay").evaluate((el) => ({
+      hidden: el.classList.contains("hidden"),
+      text: el.textContent?.trim() ?? "",
+    }))).toMatchObject({ hidden: true });
+    expect(await page.locator("#overlay").textContent()).not.toContain("LOCKED");
+    expect(page.viewportSize()?.width).toBe(390);
+    expect(box.width).toBeGreaterThan(300);
+    expect(consoleErrors).toEqual([]);
+    expect(pageErrors).toEqual([]);
   });
 });

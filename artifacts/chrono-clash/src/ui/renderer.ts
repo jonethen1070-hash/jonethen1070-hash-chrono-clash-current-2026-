@@ -155,16 +155,32 @@ export interface RenderTileInspection {
   moveKind: GemMoveKind | "idle";
   dying: boolean;
   alpha: number;
+  dieAge: number;
+  dieStaggerMs: number;
+  burstEmitted: boolean;
   settleAge: number;
   settleDur: number;
 }
 
+export interface RenderVfxInspection {
+  particleCount: number;
+  particleCap: number;
+  particleCapHits: number;
+  recognitionCount: number;
+  fractureCount: number;
+  staggerCount: number;
+  settleCount: number;
+  shardCount: number;
+  shockwaveCount: number;
+  socketPulseCount: number;
+}
 export interface BoardRenderInspection {
   cell: number;
   tiles: RenderTileInspection[];
   moving: RenderTileInspection[];
   dying: RenderTileInspection[];
   visibleEmptySockets: Coord[];
+  vfx: RenderVfxInspection;
 }
 
 class BoardView {
@@ -180,6 +196,11 @@ class BoardView {
   powerEffects: PowerEffect[] = [];
   floats: FloatText[] = [];
   seenFx = new Set<number>();
+  recognitionCount = 0;
+  fractureCount = 0;
+  staggerCount = 0;
+  settleCount = 0;
+  particleCapHits = 0;
   shake = 0;
   flash = 0;
 
@@ -196,6 +217,11 @@ class BoardView {
     this.powerEffects = [];
     this.floats = [];
     this.seenFx.clear();
+    this.recognitionCount = 0;
+    this.fractureCount = 0;
+    this.staggerCount = 0;
+    this.settleCount = 0;
+    this.particleCapHits = 0;
     this.shake = 0;
     this.flash = 0;
   }
@@ -391,6 +417,9 @@ export class BoardRenderer {
       moveKind: tile.moveKind,
       dying: tile.dying,
       alpha: tile.alpha,
+      dieAge: tile.dieAge,
+      dieStaggerMs: tile.dieStaggerMs,
+      burstEmitted: tile.burstEmitted,
       settleAge: tile.settleAge,
       settleDur: tile.settleDur,
     }));
@@ -418,6 +447,18 @@ export class BoardRenderer {
       moving: inspected.filter((tile) => !tile.dying && tile.moveKind !== "idle"),
       dying: inspected.filter((tile) => tile.dying),
       visibleEmptySockets: empty,
+      vfx: {
+        particleCount: this.playerView.particles.length,
+        particleCap: this.particleCap(),
+        particleCapHits: this.playerView.particleCapHits,
+        recognitionCount: this.playerView.recognitionCount,
+        fractureCount: this.playerView.fractureCount,
+        staggerCount: this.playerView.staggerCount,
+        settleCount: this.playerView.settleCount,
+        shardCount: this.playerView.shards.length,
+        shockwaveCount: this.playerView.shockwaves.length,
+        socketPulseCount: this.playerView.socketPulses.length,
+      },
     };
   }
 
@@ -964,6 +1005,7 @@ export class BoardRenderer {
                   const settle = Math.min(3.2, Math.max(2, moveDistance * 0.055));
                   tile.settleAge = 0;
                   tile.settleDur = 0.052;
+                  view.settleCount += 1;
                   tile.settleX = (moveX / moveDistance) * settle;
                   tile.settleY = (moveY / moveDistance) * settle;
                   tile.scale = 0.985;
@@ -984,6 +1026,7 @@ export class BoardRenderer {
                   const direction = Math.sign(tile.toY - tile.fromY) || 1;
                   tile.settleAge = 0;
                   tile.settleDur = 0.06;
+                  view.settleCount += 1;
                   tile.settleX = 0;
                   tile.settleY = direction * Math.min(2, Math.max(1, Math.abs(tile.toY - tile.fromY) * 0.012));
                   tile.scale = 1.015;
@@ -1030,6 +1073,7 @@ export class BoardRenderer {
     for (const [id, tile] of view.tiles) {
       if (live.has(id) || tile.dying) continue;
       tile.dying = true;
+      view.recognitionCount += 1;
       const swapTarget = view.pendingSwapTargets.get(id);
       if (swapTarget) {
         tile.fromX = tile.x;
@@ -1046,6 +1090,7 @@ export class BoardRenderer {
       tile.dieStaggerMs = Number.isFinite(recentClearBorn)
         ? MATCH_STAGGER_MIN_MS + ((tile.id + tile.r + tile.c) % 3) * MATCH_STAGGER_STEP_MS
         : 0;
+      if (tile.dieStaggerMs > 0) view.staggerCount += 1;
       const impactRemaining = hasMatchPresentation
         ? Math.max(0, impactDelay - (Number.isFinite(recentClearBorn) ? now - recentClearBorn : 0))
         : 0;
@@ -1055,6 +1100,7 @@ export class BoardRenderer {
       tile.glow = hasMatchPresentation ? 0.82 : 1;
       tile.burstEmitted = impactRemaining + tile.dieStaggerMs <= 0;
       if (tile.burstEmitted) {
+        view.fractureCount += 1;
         this.burst(view, tile.x + cell / 2, tile.y + cell / 2, tile.color, cell, tile.breakStrength);
       }
       if (isPlayer) view.shake = Math.max(view.shake, 0.9);
@@ -1146,6 +1192,7 @@ export class BoardRenderer {
       tile.dieAge += dt;
       if (!tile.burstEmitted && tile.dieAge >= 0) {
         tile.burstEmitted = true;
+        view.fractureCount += 1;
         this.burst(view, tile.x + cell / 2, tile.y + cell / 2, tile.color, cell, tile.breakStrength);
       }
       const pose = easeCrystalDie(Math.max(0, tile.dieAge) / dieDur);
@@ -1615,11 +1662,16 @@ export class BoardRenderer {
   }
 
   private capParticles(view: BoardView): void {
-    const cap = this.fx.quality === "medium" ? 20 : this.fx.quality === "low" ? 8 : 32;
+    const cap = this.particleCap();
     if (view.particles.length > cap) {
+      view.particleCapHits += 1;
       const extra = view.particles.splice(0, view.particles.length - cap);
       for (const p of extra) this.recycleParticle(p);
     }
+  }
+
+  private particleCap(): number {
+    return this.fx.quality === "medium" ? 20 : this.fx.quality === "low" ? 8 : 32;
   }
 
   private addShockwave(

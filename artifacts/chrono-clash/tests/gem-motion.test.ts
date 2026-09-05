@@ -17,6 +17,7 @@ import {
 } from "../src/ui/gemMotion";
 import { COLS, INVALID_RETURN_MS, ROWS } from "../src/engine/types";
 import { cloneBoard, createSeededRng, findMatches, makePiece, resetIds, trySwap } from "../src/engine/board";
+import { LARGE_MATCH_VFX_FIXTURES } from "./vfxFixtures";
 
 const THREE_ROW_CASCADE_FIXTURE = [
   [4, 1, 4, 6, 6, 2, 4, 5],
@@ -141,6 +142,42 @@ describe("three-row cascade visibility fixture", () => {
     const longest = falls.reduce((max, fall) => Math.max(max, fall.to.r - fall.from.r), 0);
     expect(longest).toBeGreaterThanOrEqual(3);
     expect(falls.some((fall) => fall.from.r === 0 && fall.to.r === 3 && fall.to.c === 4)).toBe(true);
+  });
+});
+
+describe("large-match VFX fixtures", () => {
+  it("keeps deterministic 3, 4, and 5+ gem recognition cases", () => {
+    for (const [name, fixture] of Object.entries(LARGE_MATCH_VFX_FIXTURES).slice(0, 3)) {
+      resetIds();
+      const board = fixture.board.map((row) => row.map((color) => makePiece(color)));
+      expect(findMatches(board), `${name} starts without a match`).toHaveLength(0);
+      const result = trySwap(board, fixture.from, fixture.to, createSeededRng(fixture.rngSeed));
+      expect(result, `${name} accepts its fixture swap`).not.toBeNull();
+      expect(result!.events.find((event) => event.type === "clear")?.cells).toHaveLength(fixture.expectedFirstWave);
+      expect(result!.comboPeak).toBe(fixture.expectedComboPeak);
+    }
+  });
+
+  it("keeps one-wave, multi-wave, and long-fall resolver paths distinct", () => {
+    for (const name of ["oneCascade", "multipleCascade", "longFall"] as const) {
+      const fixture = LARGE_MATCH_VFX_FIXTURES[name];
+      resetIds();
+      const before = fixture.board.map((row) => row.map((color) => makePiece(color)));
+      const originalPositions = new Map(
+        before.flatMap((row, r) => row.map((piece, c) => [piece.id, { r, c }] as const)),
+      );
+      const board = cloneBoard(before);
+      const result = trySwap(board, fixture.from, fixture.to, createSeededRng(fixture.rngSeed));
+      expect(result, `${name} accepts its fixture swap`).not.toBeNull();
+      expect(result!.comboPeak).toBe(fixture.expectedComboPeak);
+      const maxFall = board.reduce((max, row, r) =>
+        row.reduce((columnMax, piece, c) => {
+          const from = piece && originalPositions.get(piece.id);
+          return from && from.c === c ? Math.max(columnMax, r - from.r) : columnMax;
+        }, max),
+      0);
+      expect(maxFall).toBeGreaterThanOrEqual(fixture.expectedMaxFall);
+    }
   });
 });
 
