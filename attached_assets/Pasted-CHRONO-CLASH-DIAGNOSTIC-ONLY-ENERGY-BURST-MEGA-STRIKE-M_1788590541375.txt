@@ -1,0 +1,93 @@
+CHRONO CLASH — DIAGNOSTIC ONLY: ENERGY BURST + MEGA STRIKE/MЕGA BLAST NOT WORKING
+
+STOP. Do not modify code, CSS, VFX, audio, gameplay, input, or assets yet.
+
+I am reporting a real player-facing bug:
+
+ENERGY BURST and MEGA STRIKE / MEGA BLAST are NOT WORKING when I try to use them in the actual game.
+
+Your previous verification said the powers activate successfully, but that does NOT match the actual gameplay experience.
+
+We need to find the exact break point before making any fix.
+
+Trace the COMPLETE live path for BOTH powers:
+
+UI button
+→ pointer/touch/click handler
+→ power activation handler
+→ energy/charge validation
+→ power state change
+→ engine/session power function
+→ actual board/gameplay effect
+→ FxEvent / VFX event
+→ renderer
+→ cleanup
+
+For each power, report:
+
+1. Exact UI element/button selector or DOM identifier.
+2. Exact event handler receiving the tap.
+3. Exact function called after the tap.
+4. Whether the handler is actually reached during a REAL mobile-style tap.
+5. Whether the power has enough charge/energy.
+6. Whether activation is rejected by any condition.
+7. Exact session/engine function responsible for the gameplay effect.
+8. Whether that function actually executes.
+9. Whether the board is actually modified/destroyed/affected.
+10. Exact FxEvent emitted.
+11. Whether renderer receives that event.
+12. Whether the VFX renderer actually draws visible pixels.
+13. Whether any CSS layer is covering/hiding the VFX.
+14. Whether the power is being immediately cancelled/reset/cleaned up.
+15. Whether any input lock, phase check, cooldown, or state guard prevents activation.
+
+IMPORTANT:
+Do NOT rely only on unit tests or synthetic browser probes.
+
+Perform a REAL live browser interaction using the same interaction path as the player.
+
+Test at:
+- 390x844 mobile viewport
+- touch/pointer interaction
+- actual visible Energy Burst button
+- actual visible Mega Strike/Mega Blast button
+
+For EACH power perform exactly ONE activation and log:
+
+POWER:
+BUTTON TAP RECEIVED: yes/no
+HANDLER ENTERED: yes/no
+ENERGY VALID: yes/no
+ACTIVATION ACCEPTED: yes/no
+ENGINE POWER FUNCTION ENTERED: yes/no
+BOARD EFFECT EXECUTED: yes/no
+FX EVENT EMITTED: yes/no
+FX EVENT RECEIVED BY RENDERER: yes/no
+VISIBLE VFX DRAWN: yes/no
+POWER CLEANED UP: yes/no
+
+Also report the exact reason if any step is "no".
+
+CRITICAL:
+Do not change anything.
+Do not rewrite the implementation.
+Do not add fallbacks.
+Do not change timing.
+Do not change VFX.
+Do not change audio.
+Do not change gameplay.
+
+This is a root-cause diagnostic only.
+
+At the end give me a short conclusion:
+
+ENERGY BURST FAILURE POINT:
+<exact function/state/handler>
+
+MEGA STRIKE FAILURE POINT:
+<exact function/state/handler>
+
+MOST LIKELY ROOT CAUSE:
+<one specific explanation>
+
+Then stop and wait for my instruction.
