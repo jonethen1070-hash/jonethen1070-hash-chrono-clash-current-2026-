@@ -129,7 +129,13 @@ export function targetedPowerCells(board: Board, id: TargetedPowerId, target: Co
     return cells;
   }
 
-  return [target];
+  const selectedColor = board[target.r]![target.c]!.color;
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (board[r]![c]?.color === selectedColor) cells.push({ r, c });
+    }
+  }
+  return cells;
 }
 
 function formsMatchAt(board: Board, target: Coord, color: number): boolean {
@@ -151,36 +157,37 @@ function formsMatchAt(board: Board, target: Coord, color: number): boolean {
   );
 }
 
-function replacementColor(board: Board, target: Coord, rng: () => number): number {
+function replacementColor(board: Board, target: Coord, rng: () => number, excludedColor: number): number {
   const start = Math.floor(rng() * COLOR_COUNT);
   for (let offset = 0; offset < COLOR_COUNT; offset++) {
     const color = ((start + offset) % COLOR_COUNT) + 1;
-    if (!formsMatchAt(board, target, color)) return color;
+    if (color !== excludedColor && !formsMatchAt(board, target, color)) return color;
   }
-  return start + 1;
+  return excludedColor === 1 ? 2 : 1;
 }
 
-function resolveSingleTargetPower(board: Board, rng: () => number, target: Coord): ResolveResult | null {
-  if (!validTarget(board, target)) return null;
+function resolveMegaStrike(board: Board, rng: () => number, target: Coord): ResolveResult | null {
+  const cells = targetedPowerCells(board, "megaStrike", target);
+  if (!cells) return null;
 
-  const piece = board[target.r]![target.c];
-  if (!piece) return null;
-
-  // Mega Strike is intentionally cell-scoped. Remove the selected piece and
-  // refill only that same socket; do not run match detection, gravity, special
-  // blasts, cascades, or board reshuffling.
-  board[target.r]![target.c] = null;
-  board[target.r]![target.c] = makePiece(replacementColor(board, target, rng));
+  const selectedColor = board[target.r]![target.c]!.color;
+  // Clear every piece with the selected model color, then refill only those
+  // sockets. Non-matching pieces stay in place and cannot enter a cascade.
+  for (const cell of cells) board[cell.r]![cell.c] = null;
+  for (const cell of cells) {
+    board[cell.r]![cell.c] = makePiece(replacementColor(board, cell, rng, selectedColor));
+  }
+  const score = scoreForClear(cells.length, 1, "three");
 
   return {
     board,
-    scoreDelta: scoreForClear(1, 1, "three"),
+    scoreDelta: score,
     comboPeak: 1,
-    energyDelta: 11,
-    cleared: 1,
+    energyDelta: 8 + cells.length + 2,
+    cleared: cells.length,
     events: [
-      { type: "clear", combo: 1, score: scoreForClear(1, 1, "three"), cells: [target] },
-      { type: "fill", combo: 1, score: 0, cells: [target] },
+      { type: "clear", combo: 1, score, cells },
+      { type: "fill", combo: 1, score: 0, cells },
     ],
   };
 }
@@ -191,7 +198,7 @@ export function resolveTargetedPower(
   id: TargetedPowerId,
   target: Coord,
 ): ResolveResult | null {
-  if (id === "megaStrike") return resolveSingleTargetPower(board, rng, target);
+  if (id === "megaStrike") return resolveMegaStrike(board, rng, target);
   const cells = targetedPowerCells(board, id, target);
   return cells ? resolveBoard(board, rng, cells) : null;
 }

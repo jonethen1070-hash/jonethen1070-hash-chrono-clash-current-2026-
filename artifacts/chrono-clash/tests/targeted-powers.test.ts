@@ -19,38 +19,56 @@ describe("targeted powers", () => {
     );
   });
 
-  it("selects only the exact mega-strike target cell", () => {
+  it("selects every board cell with the dynamically clicked gem color", () => {
     const board = generateBoard(createSeededRng(12));
-    const target = { r: 3, c: 4 };
-    const cells = targetedPowerCells(board, "megaStrike", target)!;
+    const colors = [...new Set(board.flat().map((piece) => piece!.color))].slice(0, 4);
 
-    expect(cells).toEqual([target]);
+    expect(colors.length).toBeGreaterThanOrEqual(3);
+    for (const color of colors) {
+      const target = board
+        .flatMap((row, r) => row.map((piece, c) => (piece?.color === color ? { r, c } : null)))
+        .find(Boolean)!;
+      const expected = board.flatMap((row, r) =>
+        row.flatMap((piece, c) => (piece?.color === color ? [{ r, c }] : [])),
+      );
+
+      expect(targetedPowerCells(board, "megaStrike", target)).toEqual(expected);
+    }
   });
 
-  it("removes and refills only the clicked mega-strike socket", () => {
-    for (const [seed, target] of [
-      [21, { r: 0, c: 0 }],
-      [22, { r: 3, c: 4 }],
-      [23, { r: 7, c: 7 }],
-    ] as const) {
-      resetIds();
-      const board = generateBoard(createSeededRng(seed));
+  it("clears every matching color and leaves every other gem unchanged", () => {
+    resetIds();
+    const original = generateBoard(createSeededRng(21));
+    const colors = [...new Set(original.flat().map((piece) => piece!.color))].slice(0, 4);
+
+    for (const [index, color] of colors.entries()) {
+      const board = cloneBoard(original);
       const before = cloneBoard(board);
-      const clickedId = board[target.r]![target.c]!.id;
-      const result = resolveTargetedPower(board, createSeededRng(seed + 100), "megaStrike", target);
+      const target = board
+        .flatMap((row, r) => row.map((piece, c) => (piece?.color === color ? { r, c } : null)))
+        .find(Boolean)!;
+      const matching = targetedPowerCells(board, "megaStrike", target)!;
+      const result = resolveTargetedPower(board, createSeededRng(100 + index), "megaStrike", target);
 
       expect(result).not.toBeNull();
-      expect(result!.cleared).toBe(1);
+      expect(result!.cleared).toBe(matching.length);
       expect(result!.comboPeak).toBe(1);
       expect(result!.events).toEqual([
-        { type: "clear", combo: 1, score: 18, cells: [target] },
-        { type: "fill", combo: 1, score: 0, cells: [target] },
+        {
+          type: "clear",
+          combo: 1,
+          score: result!.scoreDelta,
+          cells: matching,
+        },
+        { type: "fill", combo: 1, score: 0, cells: matching },
       ]);
-      expect(board[target.r]![target.c]!.id).not.toBe(clickedId);
       for (let r = 0; r < ROWS; r++) {
         for (let c = 0; c < COLS; c++) {
-          if (r === target.r && c === target.c) continue;
-          expect(board[r]![c]).toEqual(before[r]![c]);
+          if (before[r]![c]!.color === color) {
+            expect(board[r]![c]!.id).not.toBe(before[r]![c]!.id);
+          } else {
+            expect(board[r]![c]).toEqual(before[r]![c]);
+          }
         }
       }
     }
