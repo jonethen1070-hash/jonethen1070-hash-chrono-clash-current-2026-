@@ -1,0 +1,413 @@
+CHRONO CLASH — AAA GEM SWAP / MATCH VFX MASTER POLISH
+
+Perform a TOP-LEVEL visual polish pass ONLY on GEM SWAP, GEM MATCH, GEM BREAK and GEM FALL VFX.
+
+The goal is:
+PREMIUM • SOFT • CRYSTALLINE • PHYSICAL • RESPONSIVE • SATISFYING
+
+Think of the tactile satisfaction of a premium modern match-3 game, but create an ORIGINAL Chrono Clash visual identity.
+
+DO NOT redesign the game.
+DO NOT change gameplay logic.
+DO NOT change board dimensions.
+DO NOT change gem artwork/materials unless absolutely required for VFX integration.
+DO NOT change HUD.
+DO NOT change Arena music or SFX.
+DO NOT change touch/swipe mechanics.
+DO NOT add player-facing LOCKED/FROZEN states.
+DO NOT introduce long input blocking.
+DO NOT generate or request images.
+
+==================================================
+1. GEM SWAP — PHYSICAL + SOFT
+==================================================
+
+The gem must feel physically attached to the player's finger during drag.
+
+During the live drag:
+- selected gem follows the finger continuously
+- preserve the grab offset
+- no teleporting
+- no snapping back before the swap commits
+- very subtle scale lift: approximately 1.00 → 1.02
+- very subtle depth/lift impression
+- soft glow increase while selected
+- no hard square selection outline
+- no aggressive bloom
+
+When the swap commits:
+
+A) Initial movement:
+- extremely smooth acceleration
+- no sudden jump
+- no mechanical linear movement
+
+B) Travel:
+- smooth ease-in/ease-out
+- slight physical momentum
+- neighboring gem should visually respond naturally
+
+C) Destination:
+- soft magnetic socket attraction
+- final 10–15% of travel should feel like the gem is gently settling into its cell
+- no bounce
+- no overshoot
+- no rubber-band effect
+
+D) Landing:
+- tiny 1–2% scale compression
+- return to 1.00
+- approximately 40–60ms
+- subtle crystalline light pulse at the socket
+
+The result should feel:
+"click → glide → settle"
+
+NOT:
+"move → teleport → stop"
+
+==================================================
+2. SWAP VFX
+==================================================
+
+Add extremely subtle VFX that reinforce movement without clutter.
+
+At swap start:
+- tiny soft crystalline energy trail
+- very short-lived
+- follows the actual gem path
+- fade smoothly
+
+During movement:
+- 1–3 very subtle particles maximum
+- particles should follow the direction of travel
+- no particle explosion
+
+At destination:
+- soft localized ring/pulse
+- approximately 50–80ms
+- centered precisely on the destination socket
+- fade smoothly
+- no giant flash
+
+Keep the board readable.
+
+==================================================
+3. MATCH RECOGNITION
+==================================================
+
+Do NOT destroy matched gems immediately.
+
+Create a short visual anticipation sequence.
+
+Target:
+approximately 60–90ms.
+
+Matched gems should:
+- subtly brighten
+- develop a crystalline inner glow
+- slightly tighten/pulse
+- feel like energy is building inside the crystal
+
+Use smooth easing.
+
+No flashing strobe.
+No excessive bloom.
+No screen-wide effect.
+
+==================================================
+4. MATCH BREAK — PREMIUM CRYSTAL FRACTURE
+==================================================
+
+When the match resolves:
+
+The gem should visually fracture before disappearing.
+
+Sequence:
+
+RECOGNIZE
+→ CHARGE
+→ FRACTURE
+→ BREAK
+→ SHARDS
+→ FADE
+→ BOARD RESOLVES
+
+Break duration:
+approximately 120–180ms.
+
+Use:
+- internal crack/light effect
+- small crystalline shards
+- tiny directional fragments
+- soft energy burst
+- subtle glow dissipation
+
+The fracture should feel like a REAL CRYSTAL breaking.
+
+Avoid:
+- cartoon explosion
+- firework effect
+- generic white flash
+- huge particle cloud
+- noisy screen shake
+
+==================================================
+5. COLOR-AWARE MATCH VFX
+==================================================
+
+Match VFX should inherit the gem's own color.
+
+For each gem:
+- cyan gem → cyan/white crystal energy
+- red gem → red/white crystal energy
+- other gem colors → corresponding energy tint
+
+Keep highlights slightly toward white so the effect looks like illuminated crystal rather than flat colored particles.
+
+==================================================
+6. MULTI-GEM MATCH
+==================================================
+
+For a 3+ gem match:
+
+Do NOT destroy every gem on the exact same frame.
+
+Use a tiny stagger:
+
+approximately 10–25ms between individual gem break events.
+
+The stagger must be subtle.
+
+Example:
+
+Gem A
+↓ 12ms
+Gem B
+↓ 14ms
+Gem C
+
+This should create a satisfying "crack-crack-crack" visual rhythm.
+
+For larger matches, maintain the same controlled rhythm.
+
+Never make it feel slow.
+
+==================================================
+7. MATCH IMPACT
+==================================================
+
+At the moment the match breaks:
+
+Create a localized impact around the matched group.
+
+Use:
+- soft radial energy pulse
+- tiny crystal fragments
+- short glow expansion
+- controlled opacity fade
+
+Keep the effect localized to the matched area.
+
+Do NOT shake or flash the entire screen.
+
+If screen feedback already exists, keep it extremely subtle.
+
+==================================================
+8. GEM FALL / LANDING POLISH
+==================================================
+
+Preserve the existing correct fall trajectory and timing.
+
+Do NOT redesign falling physics.
+
+Only improve visual softness:
+
+- gems should maintain consistent scale while falling
+- no popping
+- no sudden opacity changes
+- no teleporting
+- slight soft motion blur/trail only if the existing Canvas architecture supports it efficiently
+- tiny landing compression: 1.00 → 1.015 → 1.00
+- landing settle approximately 40–60ms
+
+New gems entering from above should feel naturally introduced into the board rather than appearing abruptly.
+
+==================================================
+9. CASCADE ESCALATION
+==================================================
+
+Each cascade should feel slightly more energetic.
+
+Cascade 1:
+subtle
+
+Cascade 2:
+slightly brighter
+
+Cascade 3:
+slightly stronger
+
+Cascade 4+:
+premium energetic peak
+
+Increase primarily through:
+- particle count
+- brightness
+- small sparkle density
+- localized energy pulse
+
+Do NOT make later cascades huge or chaotic.
+
+The board must remain readable.
+
+==================================================
+10. SOFTNESS / RENDER QUALITY
+==================================================
+
+The overall visual language must be SOFT and PREMIUM.
+
+Avoid:
+- harsh edges
+- excessive bloom
+- overexposure
+- square particles
+- cheap UI-like flashes
+- noisy particle spam
+- constant glow
+- giant shockwaves
+- excessive screen shake
+
+Prefer:
+- smooth alpha curves
+- soft additive highlights
+- short-lived particles
+- elegant crystal fragments
+- controlled bloom
+- subtle depth
+- clean easing
+
+Every effect should have:
+START → PEAK → FADE
+
+Nothing should simply appear/disappear.
+
+==================================================
+11. PERFORMANCE
+==================================================
+
+This is a mobile game.
+
+Maintain smooth performance.
+
+Do not create large particle systems.
+
+Use:
+- pooled/reused particles where possible
+- bounded particle counts
+- short lifetimes
+- no unnecessary per-frame allocations
+- no expensive blur operations
+- no full-screen canvas effects for individual gem events
+
+Target stable 60 FPS on supported mobile hardware.
+
+If an effect risks performance, simplify the effect rather than reducing gameplay responsiveness.
+
+==================================================
+12. IMPORTANT — NEVER BLOCK THE PLAYER
+==================================================
+
+VFX must NEVER freeze, lock or disable the player.
+
+Do NOT introduce:
+- input locks
+- visible LOCKED states
+- long interaction cooldowns
+- artificial waiting periods
+
+If internal sequencing is required for visual correctness, queue the visual event while keeping the player interaction system responsive.
+
+The player should never feel that the game stopped responding because of VFX.
+
+==================================================
+13. EXISTING ARCHITECTURE
+==================================================
+
+Use the existing Chrono Clash Canvas/rendering/VFX infrastructure.
+
+Do NOT create a second rendering system.
+
+Do NOT rewrite the board.
+
+Do NOT replace the existing gem rendering.
+
+Modify only the minimum VFX/rendering code required.
+
+Preserve all existing gameplay behavior.
+
+==================================================
+14. FRAME-RATE INDEPENDENCE
+==================================================
+
+All animation/easing must be time-based, not frame-count based.
+
+The visual result should remain consistent at:
+30 FPS
+60 FPS
+120 FPS
+
+Do not make particle or animation timing dependent on number of rendered frames.
+
+==================================================
+15. LIVE VISUAL VERIFICATION
+==================================================
+
+Test on mobile-sized viewport:
+
+390 × 844
+
+Test:
+
+A) Single valid swap
+B) Invalid swap
+C) 3-gem match
+D) 4-gem match
+E) 5+ gem match
+F) One cascade
+G) Multiple cascades
+H) Long falling distance
+
+Verify visually:
+
+- no teleporting
+- no hard snapping
+- no excessive flash
+- no particle explosion
+- no overlap that destroys gem readability
+- no frozen input
+- no LOCKED overlay
+- no VFX remaining permanently
+- no console errors
+- no performance regression
+
+IMPORTANT:
+Before finishing, compare the result against the current implementation and make sure this is a genuine visual improvement, not merely a code refactor.
+
+Do NOT touch unrelated systems.
+
+Run:
+- focused tests
+- typecheck
+- production build
+
+Then report:
+1. Exact files changed
+2. Swap VFX timing
+3. Match recognition timing
+4. Match fracture timing
+5. Cascade stagger timing
+6. Landing settle timing
+7. Any particle-count limits added
+8. Confirmation that gameplay/input/audio were not changed
+9. Test results
