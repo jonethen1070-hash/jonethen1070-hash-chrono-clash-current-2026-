@@ -204,7 +204,7 @@ describe("AudioBus music safety", () => {
     expect(battleCuesFromFx(draw.fx.find((f) => f.kind === "finale")!)).toEqual(["draw"]);
   });
 
-  it("disposes the previous bed immediately on stopMusic so lobby cannot stack a silent bed", () => {
+  it("does not start a procedural battle bed before the file is ready", () => {
     const src = readFileSync("src/audio/bus.ts", "utf8");
     expect(src).toMatch(/stopMusic\(\): void \{[\s\S]*?this\.stopBed\(false\);[\s\S]*?this\.clearTimers\(\);/);
 
@@ -269,10 +269,10 @@ describe("AudioBus music safety", () => {
       const bus = new AudioBus();
       bus.configure(true, true, "high");
       bus.syncBed("battle");
-      expect(started).toBe(6);
+      expect(started).toBe(0);
       expect(stopped).toBe(0);
       bus.stopMusic();
-      expect(stopped).toBe(6);
+      expect(stopped).toBe(0);
       expect(bus.musicNodeCount).toBe(0);
       bus.syncBed("lobby");
       expect(started - stopped).toBe(5);

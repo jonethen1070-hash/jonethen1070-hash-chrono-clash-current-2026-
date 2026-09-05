@@ -448,14 +448,15 @@ export class AudioBus {
     if (!this.musicOn || bed === "none" || this.musicNodeCount) return;
     const ctx = this.audio();
     if (!ctx || !this.musicGain) return;
+    const asset = musicAsset(bed);
+    const buffer = asset ? this.buffers.get(asset.id) : undefined;
+    if (bed === "battle" && !buffer) return;
     const bus = ctx.createGain();
     bus.gain.value = 0.0001;
     const t = ctx.currentTime;
     bus.gain.linearRampToValueAtTime(this.bedLevel(bed), t + (bed === "battle" ? 0.18 : bed === "lobby" ? 0.05 : 0.06));
     bus.connect(this.musicGain);
     this.musicBus = bus;
-    const asset = musicAsset(bed);
-    const buffer = asset ? this.buffers.get(asset.id) : undefined;
     if (buffer && typeof ctx.createBufferSource === "function") {
       const src = ctx.createBufferSource();
       src.buffer = buffer;
