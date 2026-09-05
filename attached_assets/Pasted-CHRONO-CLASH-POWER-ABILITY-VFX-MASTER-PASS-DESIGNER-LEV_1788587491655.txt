@@ -1,0 +1,589 @@
+CHRONO CLASH — POWER ABILITY VFX MASTER PASS
+DESIGNER-LEVEL IMPLEMENTATION
+
+I want you to treat this as if you are the VFX director and gameplay designer responsible for the final visual identity of Chrono Clash.
+
+We are polishing ONLY these three existing powers:
+
+1. ENERGY BURST
+2. MEGA STRIKE / MEGA BLAST
+3. REWIND
+
+The goal is premium, spectacular, readable, fast and satisfying — AAA-inspired mobile game quality with Chrono Clash's crystalline sci-fi identity.
+
+IMPORTANT:
+The powers must actually WORK through the existing gameplay system.
+Do not create fake visual buttons or cosmetic-only effects.
+
+==================================================
+CORE DESIGN RULE
+==================================================
+
+Every power must have a clear visual story:
+
+PLAYER ACTIVATES
+→ POWER CHARGES
+→ TARGET / BOARD RESPONSE
+→ POWER IMPACT
+→ GEM DESTRUCTION / BOARD EFFECT
+→ ENERGY DISSIPATES
+→ BOARD RETURNS TO NORMAL
+
+The player must immediately understand:
+"MY POWER ACTIVATED"
+"THIS IS WHAT IT DID"
+"THAT WAS POWERFUL"
+
+Keep the entire sequence fast and responsive.
+
+NO LONG INPUT LOCKS.
+NO PLAYER-FACING LOCKED STATE.
+NO FREEZING THE GAME.
+
+If internal resolution sequencing is necessary, keep player input responsive and queue safely rather than blocking the player.
+
+==================================================
+1. ENERGY BURST
+==================================================
+
+DESIGN INTENT:
+
+Energy Burst should feel like a concentrated release of stored crystalline energy.
+
+It should be:
+FAST
+BRIGHT
+POWERFUL
+CLEAN
+SATISFYING
+
+NOT:
+a generic explosion
+a fireball
+a screen flash
+a noisy particle cloud
+
+ACTIVATION:
+
+When the player activates Energy Burst:
+
+0–80ms:
+- selected power button reacts immediately
+- compact energy charge forms
+- crystalline particles pull inward
+- small radial glow builds around the power origin
+
+80–160ms:
+- energy reaches peak charge
+- subtle cyan/white core
+- thin energy rings form
+- tiny crystalline fragments orbit briefly
+
+IMPACT:
+
+At release:
+- sharp radial energy burst
+- expanding luminous ring
+- short crystalline shockwave
+- affected gems receive a visible energy hit
+
+The impact should be localized and readable.
+
+GEMS:
+
+Affected gems should:
+- brighten rapidly
+- develop internal energy cracks
+- fracture
+- break into small crystal fragments
+- dissolve/fade cleanly
+
+Do NOT make every gem explode independently with huge particles.
+
+Use a controlled synchronized destruction wave.
+
+Timing target:
+approximately 150–250ms total visual impact.
+
+AFTER EFFECT:
+
+After the burst:
+- particles continue outward briefly
+- energy fragments fade
+- glow collapses naturally
+- board becomes visually clean again
+
+No permanent glow.
+
+==================================================
+2. MEGA STRIKE / MEGA BLAST
+==================================================
+
+This is the HERO power.
+
+It must feel substantially more powerful than Energy Burst.
+
+DESIGN INTENT:
+
+Mega Strike should feel like a massive futuristic crystalline weapon activating inside the arena.
+
+Think:
+"the arena itself just fired a devastating energy strike."
+
+ACTIVATION:
+
+0–100ms:
+- power button reacts immediately
+- arena lighting subtly responds
+- energy begins gathering toward the strike origin
+- surrounding gems receive a subtle light response
+
+100–250ms:
+- large concentrated energy core forms
+- multiple thin crystalline energy rings
+- directional energy lines converge
+- bright core builds
+
+Do NOT hold the player for a long cinematic.
+
+Maximum anticipation:
+~250ms.
+
+STRIKE:
+
+Release with a powerful directional impact.
+
+Use:
+- bright crystalline core
+- sharp energy beam/arc
+- expanding shockwave
+- controlled particle burst
+- crystal shards
+- short-lived light streaks
+
+The strike should have a strong beginning and extremely fast impact.
+
+IMPACT TIMING:
+~80–140ms.
+
+BOARD RESPONSE:
+
+Affected gems should respond in a cascading visual sequence.
+
+Example:
+
+STRIKE
+↓
+impact wave
+↓
+gems flash
+↓
+cracks appear
+↓
+gems fracture
+↓
+crystal shards
+↓
+clear
+↓
+gravity/cascade
+
+Do not simply delete the gems.
+
+The player must visually understand the destructive power.
+
+==================================================
+MEGA STRIKE — SCREEN FEEDBACK
+==================================================
+
+Use VERY subtle global feedback:
+
+- brief arena brightness lift
+- tiny camera/board impulse if existing architecture supports it
+- very subtle screen shake
+
+Maximum screen shake:
+~2–4px equivalent.
+
+Duration:
+~60–90ms.
+
+Do NOT make the entire screen shake violently.
+
+The effect should feel expensive, not chaotic.
+
+==================================================
+3. REWIND
+==================================================
+
+Rewind should feel completely different from destructive powers.
+
+DESIGN INTENT:
+
+The player is bending time.
+
+Visual language:
+TEMPORAL
+CRYSTALLINE
+FUTURISTIC
+CONTROLLED
+
+Use:
+- cyan/blue temporal trails
+- ghost images
+- reverse-moving particles
+- subtle circular time rings
+- crystalline distortion
+- backward energy motion
+
+SEQUENCE:
+
+ACTIVATION
+→ temporal ring
+→ board state visually pulls backward
+→ gems travel along reverse trajectories
+→ previous state restored
+→ temporal energy collapses
+
+The effect must communicate:
+
+"TIME IS MOVING BACKWARD."
+
+Do NOT simply teleport the board to its previous state.
+
+==================================================
+4. POWER COLOR LANGUAGE
+==================================================
+
+Use consistent Chrono Clash visual language.
+
+Energy Burst:
+CYAN / WHITE
+
+Mega Strike:
+CYAN + WHITE CORE + controlled deeper energy accents
+
+Rewind:
+CYAN / BLUE temporal energy
+
+Highlights should approach white at peak intensity.
+
+Avoid flat neon colors.
+
+The gems themselves must remain recognizable.
+
+==================================================
+5. GEM DESTRUCTION QUALITY
+==================================================
+
+Power destruction should reuse the premium crystalline destruction system.
+
+Use:
+- internal crack
+- bright core
+- small shards
+- tiny fragments
+- controlled energy particles
+- smooth fade
+
+No cheap generic particle explosion.
+
+No giant opaque smoke.
+
+No cartoon fire.
+
+The gem should look like an illuminated crystal being broken by energy.
+
+==================================================
+6. CASCADE SYNERGY
+==================================================
+
+Power effects must transition naturally into the existing match/cascade system.
+
+Example:
+
+POWER IMPACT
+↓
+GEMS BREAK
+↓
+BOARD SETTLES
+↓
+MATCH DETECTED
+↓
+MATCH VFX
+↓
+CASCADE
+↓
+BOARD RESTABILIZES
+
+Do NOT create duplicate match VFX.
+
+Do NOT trigger duplicate Match SFX.
+
+Do NOT interfere with the existing match-wave audio progression.
+
+==================================================
+7. AUDIO MUST REMAIN SEPARATE
+==================================================
+
+Do not replace or redesign audio.
+
+Keep:
+- Arena Pulse
+- approved Swap SFX
+- approved Match SFX
+- existing power audio
+
+VFX timing should synchronize naturally with the existing audio events.
+
+Do not add random sounds.
+
+==================================================
+8. VFX MOTION QUALITY
+==================================================
+
+All VFX must use smooth time-based animation.
+
+Prefer:
+- cubic ease-out
+- cubic ease-in-out
+- exponential decay
+- controlled spring only where appropriate
+
+Avoid:
+- linear movement
+- instant opacity changes
+- frame-count timing
+- excessive bouncing
+
+Every effect needs:
+
+START
+→ BUILD
+→ PEAK
+→ DECAY
+
+==================================================
+9. PARTICLE DISCIPLINE
+==================================================
+
+Premium does NOT mean maximum particles.
+
+Use fewer, better particles.
+
+Particles should have:
+- short lifetime
+- directional motion
+- size variation
+- alpha fade
+- color variation within the power palette
+
+Avoid particle spam.
+
+Mobile performance is critical.
+
+Use pooling/reuse where practical.
+
+No large per-frame allocations.
+
+==================================================
+10. BOARD READABILITY
+==================================================
+
+During every power:
+
+The player must still understand:
+- which gems are affected
+- what the power did
+- where the board is
+- what happens next
+
+Never cover the entire board with opaque VFX.
+
+Keep the center of the action bright while preserving gem silhouettes.
+
+==================================================
+11. BUTTON FEEDBACK
+==================================================
+
+When a power is activated:
+
+The corresponding power button should have a polished response:
+
+PRESS
+→ glow
+→ energy transfer
+→ activation
+
+Use:
+- subtle scale response
+- controlled glow
+- energy pulse moving away from the button
+
+Do not redesign the button.
+
+Do not add UI clutter.
+
+==================================================
+12. RESPONSIVENESS
+==================================================
+
+Power activation must feel immediate.
+
+Target:
+
+Player tap
+→ visual acknowledgement: <50ms
+
+Then power sequence begins.
+
+Do not wait for long animations before acknowledging the player.
+
+Never show:
+LOCKED
+WAIT
+FROZEN
+
+Do not disable touch unnecessarily.
+
+==================================================
+13. MOBILE PERFORMANCE
+==================================================
+
+Target stable 60 FPS.
+
+Test at:
+
+390 × 844
+360 × 740
+
+Stress test:
+- Mega Strike
+- multiple gem destruction
+- cascade immediately after power
+- repeated power activation where gameplay permits
+
+If performance drops:
+reduce particle quantity,
+NOT responsiveness.
+
+==================================================
+14. EXISTING ARCHITECTURE
+==================================================
+
+Use the existing Chrono Clash rendering/VFX infrastructure.
+
+Do NOT create another rendering engine.
+
+Do NOT replace Canvas.
+
+Do NOT rewrite the board.
+
+Do NOT change gameplay rules.
+
+Find the existing implementations of:
+- Energy Burst
+- Mega Strike/Mega Blast
+- Rewind
+
+Improve their existing VFX and execution paths.
+
+Preserve all existing power mechanics.
+
+==================================================
+15. CRITICAL FUNCTIONAL TESTING
+==================================================
+
+Verify each power actually performs its intended gameplay action.
+
+ENERGY BURST:
+- activates
+- affects intended gems/area
+- gems actually clear
+- board resolves
+- cascade works
+
+MEGA STRIKE:
+- activates
+- intended large-area effect occurs
+- gems actually clear
+- board resolves
+- cascade works
+
+REWIND:
+- activates
+- previous board state is correctly restored
+- visual reverse-time sequence matches the actual state change
+- no duplicated gems
+- no missing gems
+- no corrupted board state
+
+==================================================
+16. NO REGRESSIONS
+==================================================
+
+Do NOT change:
+
+- normal swap
+- match behavior
+- gem fall
+- Match SFX
+- Swap SFX
+- Arena Pulse
+- HUD layout
+- board size
+- touch controls
+- scoring
+- combo logic
+- existing power rules
+
+Only improve the three power experiences.
+
+==================================================
+17. FINAL QUALITY BAR
+==================================================
+
+Before finishing, ask:
+
+Does Energy Burst feel powerful?
+
+Does Mega Strike feel like the HERO ability?
+
+Does Rewind clearly communicate time manipulation?
+
+Do the gems react physically?
+
+Are the effects soft and premium rather than noisy?
+
+Can the player still read the board?
+
+Does the effect begin immediately?
+
+Does the board recover smoothly afterward?
+
+If any answer is NO, refine that effect before finishing.
+
+==================================================
+18. VERIFICATION REPORT
+==================================================
+
+After implementation report:
+
+1. Exact files changed
+2. Energy Burst sequence timings
+3. Mega Strike sequence timings
+4. Rewind sequence timings
+5. Particle limits
+6. Confirmation that gameplay mechanics were preserved
+7. Confirmation that input was never visibly locked
+8. Confirmation that existing audio was not changed
+9. Mobile viewport test results
+10. Typecheck result
+11. Build result
+12. Focused test result
+
+IMPORTANT:
+Do not make unrelated improvements.
+Do not modify audio.
+Do not modify normal gem swap/match/fall.
+Do not stop at "implemented" — verify the actual visual and functional result in the running game.
