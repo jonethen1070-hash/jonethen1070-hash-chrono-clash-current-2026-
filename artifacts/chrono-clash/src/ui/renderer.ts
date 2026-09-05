@@ -17,9 +17,9 @@ export const BOARD_FRAME = 6;
 export { LIVE_GEM_MAX_IN_CELL_DROP, liveGemDrawOrigin } from "./gemMotion";
 const GAP = BOARD_GAP;
 const FRAME = BOARD_FRAME;
-const MATCH_IMPACT_MS = 64;
+const MATCH_IMPACT_MS = 72;
 const GEM_VISUAL_SCALE = 1.06;
-const MATCH_STAGGER_MIN_MS = 10;
+const MATCH_STAGGER_MIN_MS = 12;
 const MATCH_STAGGER_STEP_MS = 7;
 const MATCH_STAGGER_MAX_MS = MATCH_STAGGER_MIN_MS + MATCH_STAGGER_STEP_MS * 2;
 const DRAG_FOLLOW = 0.985;
@@ -1216,8 +1216,8 @@ export class BoardRenderer {
       );
     }
 
-    this.stepParticles(view);
-    this.stepCrystalShards(view);
+    this.stepParticles(view, dt);
+    this.stepCrystalShards(view, dt);
     this.drawParticles(view);
     this.drawCrystalShards(view);
     this.drawShockwaves(view, now);
@@ -1532,17 +1532,17 @@ export class BoardRenderer {
     const shardCount = this.fx.quality === "medium" ? 2 : combo >= 5 ? 5 : combo >= 4 ? 4 : 3;
     for (let i = 0; i < shardCount; i++) {
       const a = (Math.PI * 2 * i) / shardCount + 0.18;
-      const sp = 2.1 + combo * 0.14 + Math.random() * 0.55;
+      const sp = 1.7 + Math.min(0.7, combo * 0.1) + Math.random() * 0.42;
       this.spawnCrystalShard(view, {
         x: x + Math.cos(a) * cell * 0.08,
         y: y + Math.sin(a) * cell * 0.08,
         vx: Math.cos(a) * sp,
-        vy: Math.sin(a) * sp - 0.85,
+        vy: Math.sin(a) * sp - 0.62,
         rotation: a,
         spin: (i % 2 ? 1 : -1) * (0.08 + Math.random() * 0.06),
-        life: 0.2,
-        max: 0.2,
-        size: cell * (0.07 + Math.random() * 0.022),
+        life: 0.24,
+        max: 0.24,
+        size: cell * (0.06 + Math.random() * 0.018),
         color: i % 2 ? "#EAFBFF" : accent,
       });
     }
@@ -1550,18 +1550,27 @@ export class BoardRenderer {
     const particleCount = Math.min(12, n + (combo >= 5 ? 3 : combo >= 4 ? 2 : combo >= 3 ? 1 : 0));
     for (let i = 0; i < particleCount; i++) {
       const a = (Math.PI * 2 * i) / particleCount + Math.random() * 0.35;
-      const sp = 1.8 + Math.random() * 1.8;
+      const sp = 1.35 + Math.min(0.8, combo * 0.12) + Math.random() * 1.1;
       this.spawnParticle(view, {
         x,
         y,
         vx: Math.cos(a) * sp,
-        vy: Math.sin(a) * sp - 2.2,
-        life: 0.13,
-        max: 0.13,
-        size: cell * (0.04 + Math.random() * 0.035),
+        vy: Math.sin(a) * sp - 1.55,
+        life: 0.18,
+        max: 0.18,
+        size: cell * (0.032 + Math.random() * 0.026),
         color: i % 3 === 0 ? "#EAFBFF" : i % 2 === 0 ? hex : accent,
       });
     }
+    this.addShockwave(
+      view,
+      x,
+      y,
+      cell * (0.14 + Math.min(0.06, combo * 0.01)),
+      crystalAccent(color).bloom,
+      150 + Math.min(50, combo * 8),
+      0.85 + Math.min(0.35, combo * 0.05),
+    );
     this.capParticles(view);
   }
 
@@ -1724,30 +1733,32 @@ export class BoardRenderer {
     this.capParticles(view);
   }
 
-  private stepParticles(view: BoardView): void {
+  private stepParticles(view: BoardView, dt: number): void {
     const list = view.particles;
+    const frameScale = Math.min(2, Math.max(0.35, dt * 60));
     let write = 0;
     for (let i = 0; i < list.length; i++) {
       const p = list[i]!;
-      p.x += p.vx;
-      p.y += p.vy;
-      p.vy += p.g ?? 0.12;
-      p.life -= 0.032;
+      p.x += p.vx * frameScale;
+      p.y += p.vy * frameScale;
+      p.vy += (p.g ?? 0.12) * frameScale;
+      p.life -= dt;
       if (p.life > 0) list[write++] = p;
       else this.recycleParticle(p);
     }
     list.length = write;
   }
 
-  private stepCrystalShards(view: BoardView): void {
+  private stepCrystalShards(view: BoardView, dt: number): void {
+    const frameScale = Math.min(2, Math.max(0.35, dt * 60));
     let write = 0;
     for (let i = 0; i < view.shards.length; i++) {
       const shard = view.shards[i]!;
-      shard.x += shard.vx;
-      shard.y += shard.vy;
-      shard.vy += 0.1;
-      shard.rotation += shard.spin;
-      shard.life -= 0.032;
+      shard.x += shard.vx * frameScale;
+      shard.y += shard.vy * frameScale;
+      shard.vy += 0.1 * frameScale;
+      shard.rotation += shard.spin * frameScale;
+      shard.life -= dt;
       if (shard.life > 0) view.shards[write++] = shard;
     }
     view.shards.length = write;

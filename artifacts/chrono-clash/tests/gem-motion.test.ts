@@ -77,9 +77,9 @@ describe("crystal gem motion curves", () => {
   });
 
   it("blooms then dissolves matched crystals instead of popping them", () => {
-    expect(gemDieDuration("high", false)).toBe(0.105);
-    expect(gemDieDuration("medium", false)).toBe(0.092);
-    expect(gemDieDuration("low", false)).toBe(0.072);
+    expect(gemDieDuration("high", false)).toBe(0.15);
+    expect(gemDieDuration("medium", false)).toBe(0.135);
+    expect(gemDieDuration("low", false)).toBe(0.12);
     const start = easeCrystalDie(0);
     const bloom = easeCrystalDie(0.15);
     const end = easeCrystalDie(1);
@@ -158,17 +158,18 @@ describe("landing feedback", () => {
     expect(renderer).toContain("tile.scale = 1.015");
     expect(renderer).toContain("primeSwapPose");
     expect(renderer).toContain("life: 64");
-    expect(renderer).toContain("const MATCH_IMPACT_MS = 64");
+    expect(renderer).toContain("const MATCH_IMPACT_MS = 72");
+    expect(renderer).toContain("const MATCH_STAGGER_MIN_MS = 12");
     expect(renderer).toContain("const MATCH_STAGGER_STEP_MS = 7");
     expect(renderer).toContain("const cascadeHold");
-    expect(renderer).toContain("life: 0.13");
+    expect(renderer).toContain("life: 0.18");
     expect(renderer).toContain("const charge =");
     expect(renderer).toContain("branchAngle");
   });
 });
 
 describe("match impact VFX", () => {
-  it("keeps match resolution crystalline without circular ripple calls", () => {
+  it("keeps match resolution crystalline with a localized impact pulse", () => {
     const renderer = readFileSync("src/ui/renderer.ts", "utf8");
     const clearStart = renderer.indexOf('if (fxEvent.kind === "clear")');
     const comboStart = renderer.indexOf('if (fxEvent.kind === "combo")');
@@ -185,9 +186,9 @@ describe("match impact VFX", () => {
     expect(renderer.slice(clearStart, comboStart)).not.toContain("view.flash");
     expect(renderer.slice(comboStart, dieStart)).not.toContain("ringBurst");
     expect(renderer.slice(comboStart, dieStart)).not.toContain("addShockwave");
-    expect(renderer.slice(burstStart, impactStart)).not.toContain("addShockwave");
     expect(renderer.slice(burstStart, impactStart)).not.toContain("socketPulses.push");
     expect(renderer.slice(burstStart, impactStart)).toContain("spawnCrystalShard");
     expect(renderer.slice(burstStart, impactStart)).toContain("spawnParticle");
+    expect(renderer.slice(burstStart, impactStart)).toContain("this.addShockwave");
   });
 });
