@@ -439,7 +439,7 @@ export class AudioBus {
     const asset = musicAsset(bed);
     const file = Boolean(asset && this.buffers.has(asset.id));
     const table: Record<Exclude<MusicBed, "none">, number> = file
-      ? { lobby: 0.38, battle: 0.2, victory: 0.46, defeat: 0.4, draw: 0.34 }
+      ? { lobby: 0.38, battle: 0.75, victory: 0.46, defeat: 0.4, draw: 0.34 }
       : { lobby: 0.075, battle: 0.048, victory: 0.09, defeat: 0.08, draw: 0.07 };
     return table[bed];
   }
