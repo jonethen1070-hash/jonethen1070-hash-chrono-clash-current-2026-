@@ -79,6 +79,17 @@ describe("GameUI reskin assets", () => {
     expect(paint).not.toContain("ellipse(cx - s * 0.16");
   });
 
+  it("keeps normal atlas gems free of static cyan-white arc overlays", () => {
+    const renderer = readFileSync(join(process.cwd(), "src/ui/renderer.ts"), "utf8");
+    const paint = renderer.slice(renderer.indexOf("private paintAtlasGem("), renderer.indexOf("private drawProceduralGem("));
+    const targetResponse = renderer.slice(
+      renderer.indexOf("private drawPowerTargetGem("),
+      renderer.indexOf("private drawCrystalFracture("),
+    );
+    expect(paint).not.toContain('ctx.arc(cx - s * 0.1, cy - s * 0.14');
+    expect(targetResponse).toContain("drawIrregularEnergyArc");
+  });
+
   it("isolates one atlas gem per 256 cell instead of drawing the sheet split", () => {
     const atlas = readFileSync(join(process.cwd(), "src/ui/gemAtlas.ts"), "utf8");
     expect(atlas).toContain("isolateAtlasGems");

@@ -3573,12 +3573,6 @@ export class BoardRenderer {
     ctx.stroke();
     ctx.globalAlpha = 1;
 
-    ctx.globalCompositeOperation = "source-over";
-    ctx.strokeStyle = "rgba(255,255,255,0.34)";
-    ctx.lineWidth = Math.max(0.7, s * 0.012);
-    ctx.beginPath();
-    ctx.arc(cx - s * 0.1, cy - s * 0.14, s * 0.26, -0.95, 0.5);
-    ctx.stroke();
     ctx.restore();
 
     ctx.save();
