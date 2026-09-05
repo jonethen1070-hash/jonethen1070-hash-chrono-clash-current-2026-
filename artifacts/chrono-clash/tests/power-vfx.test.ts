@@ -8,6 +8,7 @@ describe("power ability VFX presentation", () => {
     expect(renderer).toContain('kind: "burst" | "mega" | "rewind"');
     expect(renderer).toContain("private drawPowerEffects");
     expect(renderer).toContain("private drawPowerWake");
+    expect(renderer).toContain("private drawPowerContrast");
     expect(renderer).toContain("private drawTargetCrystalResponse");
     expect(renderer).toContain('const effect = burst ? "burst" : mega ? "mega" : rewind ? "rewind" : null');
     expect(renderer).toContain('rewind ? "#2E9BFF" : mega ? "#00D9FF" : burst ? "#7CF5FF"');
@@ -16,6 +17,10 @@ describe("power ability VFX presentation", () => {
     expect(renderer).toContain("view.powerEffects.length > 4");
     expect(renderer).toContain("view.powerWake =");
     expect(renderer).toContain("powerFractureDirection");
+    expect(renderer).toContain("const peakCenter = effect.kind === \"mega\" ? 108 : 82");
+    expect(renderer).toContain("hero = false");
+    expect(renderer).toContain("streak: mega ? 0.95 : 0.68");
+    expect(renderer).toContain("globalCompositeOperation = \"multiply\"");
     expect(renderer).toContain("targetX: cx");
     expect(renderer).toContain("this.stepParticles(view, dt)");
     expect(renderer).toContain("this.stepCrystalShards(view, dt)");
@@ -37,7 +42,7 @@ describe("power ability VFX presentation", () => {
     expect(renderer).toContain("born: now + 120");
     expect(renderer).toContain("life: 78");
     expect(renderer).toContain('effect.kind === "mega" ? 145');
-    expect(renderer).toContain('(mega ? 120 : 120)');
+    expect(renderer).toContain("const impactStart = mega ? 60 : 48");
     expect(main).toContain("renderer.setPowerTargeting");
     expect(main).toContain("renderer.setPowerTarget(hitPlayer(e)");
     expect(main).toContain("renderer.setPowerCastTarget(target, now)");
