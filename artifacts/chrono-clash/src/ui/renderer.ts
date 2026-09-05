@@ -120,6 +120,22 @@ interface PowerEffect {
   born: number;
 }
 
+type PowerTargetKind = "burst" | "mega";
+
+interface PowerTargeting {
+  kind: PowerTargetKind;
+  born: number;
+  target: Coord | null;
+  targetBorn: number;
+}
+
+interface PowerImpactImpulse {
+  born: number;
+  life: number;
+  dx: number;
+  dy: number;
+}
+
 interface FloatText {
   x: number;
   y: number;
@@ -194,6 +210,8 @@ class BoardView {
   shockwaves: Shockwave[] = [];
   socketPulses: SocketPulse[] = [];
   powerEffects: PowerEffect[] = [];
+  powerTargeting: PowerTargeting | null = null;
+  powerImpactImpulse: PowerImpactImpulse | null = null;
   floats: FloatText[] = [];
   seenFx = new Set<number>();
   recognitionCount = 0;
@@ -215,6 +233,8 @@ class BoardView {
     this.shockwaves = [];
     this.socketPulses = [];
     this.powerEffects = [];
+    this.powerTargeting = null;
+    this.powerImpactImpulse = null;
     this.floats = [];
     this.seenFx.clear();
     this.recognitionCount = 0;
@@ -305,6 +325,45 @@ export class BoardRenderer {
     );
     this.impactSpark(this.playerView, tile.x + cell / 2, tile.y + cell / 2, tile.color, cell);
     void now;
+  }
+
+  setPowerTargeting(kind: PowerTargetKind | null, now: number): void {
+    if (!kind) {
+      this.playerView.powerTargeting = null;
+      return;
+    }
+    const current = this.playerView.powerTargeting;
+    if (current?.kind === kind) return;
+    this.playerView.powerTargeting = {
+      kind,
+      born: now,
+      target: null,
+      targetBorn: now,
+    };
+  }
+
+  setPowerTarget(at: Coord | null, now: number): void {
+    const targeting = this.playerView.powerTargeting;
+    if (!targeting) return;
+    if (targeting.target?.r === at?.r && targeting.target?.c === at?.c) return;
+    targeting.target = at;
+    targeting.targetBorn = now;
+    if (!at) return;
+    const tile = [...this.playerView.tiles.values()].find((t) => t.r === at.r && t.c === at.c && !t.dying);
+    if (!tile) return;
+    const cell = this.lastPlayerCell;
+    const strength = targeting.kind === "mega" ? 1.25 : 1;
+    tile.flash = Math.max(tile.flash, 0.34 * strength);
+    tile.glow = Math.max(tile.glow, 0.28 * strength);
+    this.addShockwave(
+      this.playerView,
+      tile.x + cell / 2,
+      tile.y + cell / 2,
+      cell * (targeting.kind === "mega" ? 0.21 : 0.16),
+      "#EAFBFF",
+      targeting.kind === "mega" ? 220 : 180,
+      targeting.kind === "mega" ? 1.4 : 1.1,
+    );
   }
 
   primeSwapPose(from: Coord, to: Coord, dx: number, dy: number, now: number): void {
@@ -708,9 +767,23 @@ export class BoardRenderer {
     const shakeAmt = view.shake * mul;
     const sx = shakeAmt > 0.05 ? (Math.random() - 0.5) * Math.min(shakeAmt, 5) : 0;
     const sy = shakeAmt > 0.05 ? (Math.random() - 0.5) * Math.min(shakeAmt, 5) * 0.6 : 0;
+    let impulseX = 0;
+    let impulseY = 0;
+    if (view.powerImpactImpulse) {
+      const impact = view.powerImpactImpulse;
+      const impactAge = now - impact.born;
+      if (impactAge >= impact.life) {
+        view.powerImpactImpulse = null;
+      } else if (impactAge >= 0) {
+        const impactT = Math.max(0, Math.min(1, impactAge / impact.life));
+        const envelope = Math.sin(Math.PI * impactT);
+        impulseX = impact.dx * envelope;
+        impulseY = impact.dy * envelope;
+      }
+    }
 
     ctx.save();
-    ctx.translate(sx, sy);
+    ctx.translate(sx + impulseX, sy + impulseY);
 
     const slabEdge = isPlayer ? "#007A9E" : "#8E1740";
     const slabFace = isPlayer ? "#062B39" : "#32101C";
@@ -750,6 +823,9 @@ export class BoardRenderer {
     ctx.restore();
 
     this.drawBoardEnergy(ctx, ox, oy, size, isPlayer, boosted, frozen, now);
+    if (isPlayer) {
+      this.drawPowerTargetingAtmosphere(view, ox, oy, size, now);
+    }
 
     ctx.save();
     if (isPlayer) chamferedRect(ctx, ox + 1, oy + 1, size - 2, 13);
@@ -1273,6 +1349,16 @@ export class BoardRenderer {
         now,
         Boolean(sel && drag) || tile.moveKind !== "idle",
       );
+      if (isPlayer && !tile.dying) {
+        this.drawPowerTargetGem(
+          view,
+          tile,
+          origin.x,
+          origin.y,
+          cell,
+          now,
+        );
+      }
     }
 
     this.stepParticles(view, dt);
@@ -1744,8 +1830,16 @@ export class BoardRenderer {
     );
     view.shake = Math.max(
       view.shake,
-      (freeze ? 4.6 : rewind ? 1.6 : mega ? 3.2 : burst ? 1.6 : 3.4) * mul,
+      (freeze ? 4.6 : rewind ? 1.6 : mega ? 0 : burst ? 1.6 : 3.4) * mul,
     );
+    if (mega && !this.fx.reducedMotion) {
+      view.powerImpactImpulse = {
+        born: now + 120,
+        life: 78,
+        dx: isPlayer ? 2.8 : -2.8,
+        dy: 1.2,
+      };
+    }
     if (freeze) {
       this.addShockwave(view, x, y, cell * 2.2, powerColor, 660, 3.2);
     }
@@ -1814,7 +1908,7 @@ export class BoardRenderer {
       if (age >= life) continue;
       view.powerEffects[write++] = effect;
       const t = Math.max(0, Math.min(1, age / life));
-      const coreT = Math.max(0, Math.min(1, age / (effect.kind === "mega" ? 250 : effect.kind === "burst" ? 160 : 220)));
+       const coreT = Math.max(0, Math.min(1, age / (effect.kind === "mega" ? 145 : effect.kind === "burst" ? 160 : 220)));
       const decay = Math.pow(1 - t, 1.6);
       const build = 1 - Math.pow(1 - coreT, 3);
       const cx = effect.x;
@@ -1857,7 +1951,7 @@ export class BoardRenderer {
         }
       } else {
         const mega = effect.kind === "mega";
-        const impactT = Math.max(0, Math.min(1, (age - (mega ? 210 : 120)) / (mega ? 140 : 160)));
+         const impactT = Math.max(0, Math.min(1, (age - (mega ? 120 : 120)) / (mega ? 130 : 160)));
         const impact = 1 - Math.pow(1 - impactT, 3);
         const ringRadius = cell * (0.28 + build * (mega ? 0.82 : 0.58) + impact * (mega ? 2.4 : 1.55));
         ctx.globalAlpha = (0.13 + build * 0.2 + impact * 0.24) * decay;
@@ -2470,6 +2564,136 @@ export class BoardRenderer {
         tile.fractureSeed,
         tile.breakStrength,
       );
+    }
+    ctx.restore();
+  }
+
+  private drawPowerTargetingAtmosphere(
+    view: BoardView,
+    ox: number,
+    oy: number,
+    size: number,
+    now: number,
+  ): void {
+    const targeting = view.powerTargeting;
+    if (!targeting || this.fx.reducedMotion) return;
+    const age = Math.max(0, now - targeting.born);
+    const intro = Math.min(1, age / 150);
+    const mega = targeting.kind === "mega";
+    const pulse = 0.5 + Math.sin(now / (mega ? 265 : 330)) * 0.5;
+    const sweepT = Math.min(1, age / 180);
+    const sweepFade = Math.max(0, 1 - sweepT);
+    const edgeAlpha = (mega ? 0.2 : 0.13) * intro + pulse * 0.035;
+    const ctx = this.ctx;
+
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.globalAlpha = 1;
+    if (sweepFade > 0.01) {
+      const sweepX = ox + size * (-0.12 + sweepT * 1.24);
+      const sweep = ctx.createLinearGradient(sweepX - size * 0.14, 0, sweepX + size * 0.14, 0);
+      sweep.addColorStop(0, "rgba(0, 217, 255, 0)");
+      sweep.addColorStop(0.5, mega ? "rgba(234, 251, 255, 0.28)" : "rgba(124, 245, 255, 0.2)");
+      sweep.addColorStop(1, "rgba(0, 217, 255, 0)");
+      ctx.fillStyle = sweep;
+      ctx.globalAlpha = sweepFade * (mega ? 0.8 : 0.62);
+      ctx.fillRect(sweepX - size * 0.14, oy + 3, size * 0.28, size - 6);
+    }
+
+    roundRect(ctx, ox + 2, oy + 2, size - 4, size - 4, 18);
+    ctx.strokeStyle = mega
+      ? `rgba(234, 251, 255, ${edgeAlpha})`
+      : `rgba(124, 245, 255, ${edgeAlpha})`;
+    ctx.lineWidth = mega ? 1.8 : 1.35;
+    ctx.shadowColor = mega ? "#EAFBFF" : "#7CF5FF";
+    ctx.shadowBlur = mega ? 10 : 7;
+    ctx.stroke();
+
+    if (mega) {
+      ctx.globalAlpha = 0.08 + pulse * 0.045;
+      ctx.lineWidth = 0.8;
+      ctx.shadowBlur = 4;
+      for (let i = 0; i < 4; i++) {
+        const inset = 12 + i * (size * 0.18);
+        ctx.beginPath();
+        ctx.moveTo(ox + inset, oy + 8);
+        ctx.lineTo(ox + inset + size * 0.12, oy + size * 0.22);
+        ctx.lineTo(ox + inset - size * 0.06, oy + size * 0.46);
+        ctx.stroke();
+      }
+    }
+    ctx.restore();
+  }
+
+  private drawPowerTargetGem(
+    view: BoardView,
+    tile: VisualTile,
+    x: number,
+    y: number,
+    size: number,
+    now: number,
+  ): void {
+    const targeting = view.powerTargeting;
+    if (!targeting || this.fx.reducedMotion) return;
+    const ctx = this.ctx;
+    const mega = targeting.kind === "mega";
+    const acquired = targeting.target?.r === tile.r && targeting.target?.c === tile.c;
+    const age = Math.max(0, now - targeting.born);
+    const targetAge = Math.max(0, now - targeting.targetBorn);
+    const intro = Math.min(1, age / 150);
+    const breath = 0.5 + Math.sin(now / (mega ? 300 : 360)) * 0.5;
+    const lockIn = acquired ? Math.min(1, targetAge / 110) : 0;
+    const intensity = intro * (mega ? 0.22 : 0.14) + breath * (mega ? 0.07 : 0.045);
+    const cx = x + size / 2;
+    const cy = y + size / 2;
+    const radius = size * (acquired ? 0.41 : 0.36) + (acquired ? breath * size * 0.025 : 0);
+
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.globalAlpha = intensity + lockIn * (mega ? 0.18 : 0.13);
+    ctx.strokeStyle = mega ? "#EAFBFF" : "#7CF5FF";
+    ctx.lineWidth = Math.max(0.9, size * (acquired ? 0.024 : 0.014));
+    ctx.shadowColor = mega ? "#EAFBFF" : "#7CF5FF";
+    ctx.shadowBlur = size * (acquired ? 0.1 : 0.055);
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, -Math.PI * 0.82, Math.PI * 0.2);
+    ctx.arc(cx, cy, radius, Math.PI * 0.34, Math.PI * 1.28);
+    ctx.stroke();
+
+    ctx.globalAlpha = (mega ? 0.06 : 0.04) + lockIn * 0.1;
+    const inner = ctx.createRadialGradient(cx, cy - size * 0.05, size * 0.04, cx, cy, size * 0.48);
+    inner.addColorStop(0, mega ? "rgba(234, 251, 255, 0.3)" : "rgba(124, 245, 255, 0.24)");
+    inner.addColorStop(0.55, "rgba(0, 217, 255, 0.08)");
+    inner.addColorStop(1, "rgba(0, 217, 255, 0)");
+    ctx.fillStyle = inner;
+    ctx.beginPath();
+    ctx.arc(cx, cy, size * 0.46, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (acquired) {
+      ctx.globalAlpha = 0.28 + lockIn * (mega ? 0.34 : 0.24);
+      ctx.lineWidth = Math.max(1.1, size * 0.018);
+      ctx.beginPath();
+      ctx.arc(cx, cy, size * (0.44 + breath * 0.025), 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.globalAlpha = mega ? 0.72 : 0.56;
+      ctx.fillStyle = "#EAFBFF";
+      for (let i = 0; i < (mega ? 5 : 3); i++) {
+        const angle = now / (mega ? 310 : 390) + (Math.PI * 2 * i) / (mega ? 5 : 3);
+        const orbit = size * (0.47 + (i % 2) * 0.025);
+        ctx.beginPath();
+        ctx.arc(cx + Math.cos(angle) * orbit, cy + Math.sin(angle) * orbit, Math.max(0.8, size * 0.014), 0, Math.PI * 2);
+        ctx.fill();
+      }
+      if (mega) {
+        ctx.globalAlpha = 0.16 + lockIn * 0.18;
+        ctx.lineWidth = Math.max(0.7, size * 0.01);
+        ctx.beginPath();
+        ctx.moveTo(cx - size * 0.55, cy - size * 0.55);
+        ctx.lineTo(cx, cy);
+        ctx.lineTo(cx + size * 0.55, cy + size * 0.55);
+        ctx.stroke();
+      }
     }
     ctx.restore();
   }

@@ -16,6 +16,30 @@ describe("power ability VFX presentation", () => {
     expect(renderer).toContain("this.stepCrystalShards(view, dt)");
   });
 
+  it("keeps armed targeting in the existing Canvas renderer", () => {
+    const renderer = readFileSync("src/ui/renderer.ts", "utf8");
+    const main = readFileSync("src/main.ts", "utf8");
+    const styles = readFileSync("src/styles/aaa-polish.css", "utf8");
+
+    expect(renderer).toContain("setPowerTargeting(kind: PowerTargetKind | null");
+    expect(renderer).toContain("drawPowerTargetingAtmosphere");
+    expect(renderer).toContain("drawPowerTargetGem");
+    expect(renderer).toContain("this.playerView.powerTargeting = null");
+    expect(renderer).toContain("view.shockwaves.length > 12");
+    expect(renderer).toContain("powerImpactImpulse");
+    expect(renderer).toContain("born: now + 120");
+    expect(renderer).toContain("life: 78");
+    expect(renderer).toContain('effect.kind === "mega" ? 145');
+    expect(renderer).toContain('(mega ? 120 : 120)');
+    expect(main).toContain("renderer.setPowerTargeting");
+    expect(main).toContain("renderer.setPowerTarget(hitPlayer(e)");
+    expect(main).toContain('renderer.setPowerTarget(null, performance.now())');
+    expect(main).toContain('pressPowerButton(button)');
+    expect(styles).toContain("@keyframes cc-power-press-burst");
+    expect(styles).toContain("@keyframes cc-power-press-mega");
+    expect(styles).toContain('scale(0.94)');
+  });
+
   it("keeps real power resolution in the session path", () => {
     const session = readFileSync("src/engine/session.ts", "utf8");
 

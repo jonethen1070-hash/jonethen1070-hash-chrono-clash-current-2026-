@@ -1567,6 +1567,7 @@ ui.rewind.addEventListener("click", () => {
 function setArmedEnergyPower(id: "burst" | "megaStrike" | null): void {
   armedEnergyPower = id;
   session.setDrag(null);
+  renderer.setPowerTargeting(id === "megaStrike" ? "mega" : id === "burst" ? "burst" : null, performance.now());
   ui.energyBurstAttack.setAttribute("aria-pressed", id === "burst" ? "true" : "false");
   ui.megaStrikeAttack.setAttribute("aria-pressed", id === "megaStrike" ? "true" : "false");
 }
@@ -1579,7 +1580,7 @@ function useEnergyAttack(id: "burst" | "megaStrike", button: HTMLButtonElement):
   }
   const next = armedEnergyPower === id ? null : id;
   setArmedEnergyPower(next);
-  if (next) ping(button);
+  if (next) pressPowerButton(button);
   else audio.play("ui");
 }
 ui.energyBurstAttack.addEventListener("click", () => useEnergyAttack("burst", ui.energyBurstAttack));
@@ -1959,6 +1960,11 @@ function ping(btn: HTMLButtonElement): void {
   restartAnim(btn, "active");
 }
 
+function pressPowerButton(btn: HTMLButtonElement): void {
+  restartAnim(btn, "power-press");
+  window.setTimeout(() => btn.classList.remove("power-press"), 170);
+}
+
 let cachedCellSize = 0;
 
 function cellSize(): number {
@@ -1997,6 +2003,7 @@ ui.playerBoard.addEventListener(
     e.preventDefault();
     swipe = { id: e.pointerId, r: cell.r, c: cell.c, x: e.clientX, y: e.clientY, dx: 0, dy: 0 };
     session.setDrag(cell, 0, 0);
+    if (armedEnergyPower) renderer.setPowerTarget(cell, now);
     renderer.flashSelect(cell, now);
     try {
       ui.playerBoard.setPointerCapture(e.pointerId);
@@ -2018,6 +2025,9 @@ ui.playerBoard.addEventListener(
     swipe.dx = drag.dx;
     swipe.dy = drag.dy;
     session.updateDrag(swipe.dx, swipe.dy);
+    if (armedEnergyPower) {
+      renderer.setPowerTarget(hitPlayer(e), performance.now());
+    }
     if (!armedEnergyPower) {
       const target = neighborFromSwipe({ r: swipe.r, c: swipe.c }, dx, dy, swipeMin());
       if (target) {
@@ -2042,10 +2052,11 @@ ui.playerBoard.addEventListener(
       const id = armedEnergyPower;
       const target = hitPlayer(e) ?? from;
       const button = id === "burst" ? ui.energyBurstAttack : ui.megaStrikeAttack;
+      renderer.setPowerTarget(target, now);
       swipe = null;
       setArmedEnergyPower(null);
       if (session.usePower(id, now, target)) {
-        ping(button);
+        pressPowerButton(button);
         flashCast(id === "burst" ? "cast-burst" : "cast-mega", button);
         sendOnlineAction({ type: "power", id, target });
       } else {
@@ -2074,6 +2085,7 @@ ui.playerBoard.addEventListener(
 function finishSwipe(): void {
   swipe = null;
   session.setDrag(null);
+  renderer.setPowerTarget(null, performance.now());
 }
 ui.playerBoard.addEventListener("pointercancel", finishSwipe);
 ui.playerBoard.addEventListener("lostpointercapture", finishSwipe);
