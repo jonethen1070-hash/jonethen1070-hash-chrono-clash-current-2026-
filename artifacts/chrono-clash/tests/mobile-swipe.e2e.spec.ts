@@ -13,6 +13,11 @@ type TouchPoint = {
   id: number;
 };
 
+type Move = {
+  from: { r: number; c: number };
+  to: { r: number; c: number };
+};
+
 const BOARD_FRAME = 6;
 const BOARD_GAP = 1.5;
 const BOARD_SIZE = 8;
@@ -253,6 +258,193 @@ test("guest mobile matches survive rapid swipes, cancellation, and layout checks
   expect(state.scroll).toBe(0);
   expect(state.scrollY).toBe(0);
   expect(state.scrollTop).toBe(0);
+});
+
+test("real touch gestures play only the committed swap WAV progression", async ({ page, context }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      "chrono-clash-settings-v2",
+      JSON.stringify({
+        sfx: true,
+        music: false,
+        sfxVolume: 0.84,
+        musicVolume: 0.72,
+        haptics: false,
+        effects: "low",
+        animation: "low",
+        showComboEffects: false,
+        scoreTarget: 3000,
+        introSeen: true,
+      }),
+    );
+
+    const probe = { starts: [] as number[] };
+    (window as Window & { __swapAudioProbe?: typeof probe }).__swapAudioProbe = probe;
+
+    const contextPrototype = AudioContext.prototype;
+    const originalCreateBufferSource = contextPrototype.createBufferSource;
+    contextPrototype.createBufferSource = function () {
+      const source = originalCreateBufferSource.call(this);
+      const originalStart = source.start.bind(source);
+      source.start = ((...args: any[]) => {
+        const duration = source.buffer?.duration;
+        if (typeof duration === "number") probe.starts.push(Math.round(duration * 1000));
+        return originalStart(...args);
+      }) as typeof source.start;
+      return source;
+    };
+  });
+
+  await page.goto("/");
+  await expect(page.locator("#menu.active")).toBeVisible();
+  await page.locator("#menuGuest").click();
+  await expect(page.locator("#match.active")).toBeVisible();
+  await expect.poll(async () => page.locator("#overlay").evaluate((el) => el.classList.contains("hidden"))).toBe(true);
+
+  await page.evaluate(async () => {
+    const chrono = (window as Window & {
+      __chrono?: { audioReady?: () => Promise<unknown> };
+    }).__chrono;
+    if (!chrono?.audioReady) throw new Error("Missing Chrono audio probe");
+    await chrono.audioReady();
+  });
+
+  const board = page.locator("#playerBoard");
+  const boardBox = await board.boundingBox();
+  expect(boardBox).not.toBeNull();
+  const box = boardBox!;
+  const cdp = await context.newCDPSession(page);
+  const baselineStarts = await page.evaluate(() => {
+    const probe = (window as Window & { __swapAudioProbe?: { starts: number[] } }).__swapAudioProbe;
+    if (!probe) throw new Error("Missing swap audio probe");
+    return probe.starts.length;
+  });
+
+  const startsSinceBaseline = () => page.evaluate((start) => {
+    const probe = (window as Window & { __swapAudioProbe?: { starts: number[] } }).__swapAudioProbe;
+    if (!probe) throw new Error("Missing swap audio probe");
+    return probe.starts.slice(start);
+  }, baselineStarts);
+  const swapStartsSinceBaseline = async () => {
+    const starts = await startsSinceBaseline();
+    return starts.filter((duration) => [100, 105].includes(duration));
+  };
+
+  const nextValidMove = async (): Promise<Move> => {
+    const handle = await page.waitForFunction(() => {
+      const session = (window as Window & {
+        __chrono?: {
+          session?: {
+            isInteractive: (now: number) => boolean;
+            hintCells: (now: number) => Array<{ r: number; c: number }>;
+          };
+        };
+      }).__chrono?.session;
+      if (!session?.isInteractive(performance.now())) return false;
+      const hint = session.hintCells(performance.now());
+      const from = hint[0];
+      const to = hint[1];
+      return from && to ? { from, to } : false;
+    });
+    const move = (await handle.jsonValue()) as Move;
+    await handle.dispose();
+    return move;
+  };
+
+  for (let index = 0; index < 6; index += 1) {
+    const move = await nextValidMove();
+    await touchSwipe(
+      cdp,
+      cellCenter(box, move.from.r, move.from.c),
+      cellCenter(box, move.to.r, move.to.c),
+      20 + index,
+    );
+    await expect.poll(swapStartsSinceBaseline).toHaveLength(index + 1);
+  }
+
+  const swapStarts = await startsSinceBaseline();
+  expect(swapStarts.filter((duration) => [100, 105].includes(duration))).toEqual([
+    105,
+    100,
+    105,
+    100,
+    105,
+    105,
+  ]);
+  expect(swapStarts.filter((duration) => [245, 250, 255, 260, 265].includes(duration)).length).toBeGreaterThan(0);
+
+  const invalidMove = await page.waitForFunction(() => {
+    const session = (window as Window & {
+      __chrono?: {
+        session?: {
+          isInteractive: (now: number) => boolean;
+          player: { board: Array<Array<{ color: number; kind: string } | null>> };
+        };
+      };
+    }).__chrono?.session;
+    if (!session?.isInteractive(performance.now())) return false;
+    const board = session.player.board.map((row) => row.map((piece) => (piece ? { ...piece } : null)));
+    const hasMatch = (cells: Array<Array<{ color: number } | null>>): boolean => {
+      for (let r = 0; r < 8; r += 1) {
+        for (let c = 0; c < 8; c += 1) {
+          const color = cells[r]?.[c]?.color;
+          if (color == null) continue;
+          if (
+            c >= 2 &&
+            cells[r]?.[c - 1]?.color === color &&
+            cells[r]?.[c - 2]?.color === color
+          ) return true;
+          if (
+            r >= 2 &&
+            cells[r - 1]?.[c]?.color === color &&
+            cells[r - 2]?.[c]?.color === color
+          ) return true;
+        }
+      }
+      return false;
+    };
+    for (let r = 0; r < 8; r += 1) {
+      for (let c = 0; c < 8; c += 1) {
+        for (const [dr, dc] of [[0, 1], [1, 0]]) {
+          const nr = r + dr;
+          const nc = c + dc;
+          const from = board[r]?.[c];
+          const to = board[nr]?.[nc];
+          if (!from || !to || from.kind !== "normal" || to.kind !== "normal") continue;
+          [board[r]![c], board[nr]![nc]] = [to, from];
+          const invalid = !hasMatch(board);
+          [board[r]![c], board[nr]![nc]] = [from, to];
+          if (invalid) return { from: { r, c }, to: { r: nr, c: nc } };
+        }
+      }
+    }
+    return false;
+  });
+  const invalid = (await invalidMove.jsonValue()) as Move;
+  await invalidMove.dispose();
+  const beforeInvalid = (await swapStartsSinceBaseline()).length;
+  await touchSwipe(
+    cdp,
+    cellCenter(box, invalid.from.r, invalid.from.c),
+    cellCenter(box, invalid.to.r, invalid.to.c),
+    40,
+  );
+  await expect.poll(async () => (await swapStartsSinceBaseline()).length).toBe(beforeInvalid);
+
+  const quietMove = await nextValidMove();
+  const quietStart = cellCenter(box, quietMove.from.r, quietMove.from.c);
+  await touchSwipe(cdp, quietStart, { x: quietStart.x + 2, y: quietStart.y }, 41);
+  await expect.poll(async () => (await swapStartsSinceBaseline()).length).toBe(beforeInvalid);
+
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchStart",
+    touchPoints: [{ ...quietStart, id: 42 }],
+  });
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchCancel",
+    touchPoints: [],
+  });
+  await expect.poll(async () => (await swapStartsSinceBaseline()).length).toBe(beforeInvalid);
 });
 
 test.describe("mobile cascade visibility", () => {
