@@ -9385,3 +9385,59 @@ html body #app #match .energy-attack.strike.power-press::after {
   }
 }
 
+/* 2.5D material pass — the renderer supplies the recessed sockets and
+   crystals; these surfaces keep the surrounding UI in the same machined
+   arena language. */
+html body #app #match .player-side .board-slot,
+html body #app #match .rival-side .board-slot {
+  isolation: isolate;
+  transform: translateZ(0);
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.12), transparent 18% 74%, rgba(0, 0, 0, 0.32)),
+    linear-gradient(180deg, rgba(9, 22, 32, 0.92), rgba(1, 5, 10, 0.98));
+}
+
+html body #app #match .player-side .board-slot {
+  border-color: rgba(88, 224, 238, 0.7);
+  box-shadow:
+    0 0 0 1px #010208,
+    0 14px 28px rgba(0, 0, 0, 0.64),
+    0 0 18px rgba(0, 212, 255, 0.22),
+    inset 2px 2px 0 rgba(228, 255, 255, 0.16),
+    inset -3px -8px 16px rgba(0, 0, 0, 0.5);
+}
+
+html body #app #match .rival-side .board-slot {
+  border-color: rgba(218, 44, 91, 0.74);
+  background:
+    linear-gradient(225deg, rgba(255, 220, 230, 0.1), transparent 18% 74%, rgba(0, 0, 0, 0.36)),
+    linear-gradient(180deg, rgba(34, 8, 17, 0.94), rgba(5, 1, 6, 0.98));
+  box-shadow:
+    0 0 0 1px #010208,
+    0 14px 28px rgba(0, 0, 0, 0.64),
+    0 0 16px rgba(255, 0, 76, 0.18),
+    inset -2px 2px 0 rgba(255, 228, 236, 0.13),
+    inset 3px -8px 16px rgba(0, 0, 0, 0.54);
+}
+
+html body #app #match .energy-attack {
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0 1px, transparent 13px),
+    radial-gradient(circle at 50% 20%, rgba(92, 230, 244, 0.12), transparent 58%),
+    linear-gradient(180deg, #183445 0%, #091721 48%, #03070c 100%);
+  box-shadow:
+    0 2px 0 rgba(230, 255, 255, 0.12),
+    0 11px 18px rgba(0, 0, 0, 0.52),
+    inset 0 2px 0 rgba(240, 255, 255, 0.2),
+    inset 0 -11px 16px rgba(0, 0, 0, 0.54);
+}
+
+html body #app #match .energy-attack.strike {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0 1px, transparent 13px),
+    radial-gradient(circle at 50% 20%, rgba(0, 217, 255, 0.16), transparent 58%),
+    linear-gradient(180deg, #1a3a4d 0%, #091823 48%, #03070c 100%);
+}
+

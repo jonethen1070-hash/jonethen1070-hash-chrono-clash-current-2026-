@@ -611,6 +611,9 @@ export class BoardRenderer {
     const parent = this.canvasOrigin();
     this.ctx.save();
     this.ctx.globalAlpha = boardAlpha;
+    if (snap.screen === "match") {
+      this.drawArenaEnvironment(w, h, playerRect, opponentRect, parent, now);
+    }
     const playerDrag = snap.drag ?? (snap.bounce ? { from: snap.bounce.from, dx: snap.bounce.dx, dy: snap.bounce.dy } : null);
     this.paintBoardLayer(
       this.oppLayer,
@@ -852,6 +855,7 @@ export class BoardRenderer {
     ctx.restore();
 
     this.blitWells(ctx, ox, oy, size, cell, isPlayer);
+    this.drawBoardDepth(ctx, ox, oy, size, isPlayer, boosted, frozen);
     this.drawSocketPulses(view, now);
 
     ctx.save();
@@ -1636,6 +1640,59 @@ export class BoardRenderer {
     }
   }
 
+  private drawBoardDepth(
+    ctx: CanvasRenderingContext2D,
+    ox: number,
+    oy: number,
+    size: number,
+    isPlayer: boolean,
+    boosted: boolean,
+    frozen: boolean,
+  ): void {
+    const rim = frozen ? "#B9F8FF" : isPlayer ? "#39D8EA" : "#D72B61";
+    const hot = boosted ? "#F4FFFF" : isPlayer ? "#B9F8FF" : "#FFD6E2";
+    const chamfer = Math.min(16, Math.max(10, size * 0.085));
+
+    ctx.save();
+    ctx.lineJoin = "round";
+    ctx.shadowColor = "rgba(0, 0, 0, 0.72)";
+    ctx.shadowBlur = Math.max(5, size * 0.028);
+    ctx.shadowOffsetX = size * 0.018;
+    ctx.shadowOffsetY = size * 0.028;
+    chamferedRect(ctx, ox + 2.4, oy + 3.8, size - 4.8, chamfer);
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.72)";
+    ctx.lineWidth = Math.max(2.8, size * 0.018);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+
+    const topRail = ctx.createLinearGradient(ox, oy, ox + size, oy + size * 0.16);
+    topRail.addColorStop(0, colorWithAlpha(hot, 0.66));
+    topRail.addColorStop(0.28, colorWithAlpha(rim, 0.28));
+    topRail.addColorStop(0.7, "rgba(255,255,255,0.03)");
+    topRail.addColorStop(1, colorWithAlpha(rim, 0.34));
+    chamferedRect(ctx, ox + 2.2, oy + 2.2, size - 4.4, chamfer - 1);
+    ctx.strokeStyle = topRail;
+    ctx.lineWidth = Math.max(1.2, size * 0.009);
+    ctx.stroke();
+
+    ctx.globalCompositeOperation = "lighter";
+    ctx.globalAlpha = boosted ? 0.34 : 0.16;
+    ctx.strokeStyle = rim;
+    ctx.lineWidth = Math.max(0.8, size * 0.006);
+    ctx.beginPath();
+    ctx.moveTo(ox + chamfer + 8, oy + 1.8);
+    ctx.lineTo(ox + size - chamfer - 8, oy + 1.8);
+    ctx.moveTo(ox + 1.8, oy + chamfer + 8);
+    ctx.lineTo(ox + 1.8, oy + size - chamfer - 8);
+    ctx.stroke();
+
+    ctx.globalCompositeOperation = "source-over";
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  }
+
   private blitWells(ctx: CanvasRenderingContext2D, ox: number, oy: number, size: number, cell: number, isPlayer: boolean): void {
     const theme = this.fx.boardTheme;
     const key = `${Math.round(size)}|${Math.round(cell * 10)}|${isPlayer ? "p" : "o"}|${theme}|hw8`;
@@ -1787,6 +1844,7 @@ export class BoardRenderer {
     g.imageSmoothingEnabled = true;
     g.imageSmoothingQuality = "high";
     this.paintAtlasGem(atlas, q / 2, q / 2, q, colorIndex, color, selected);
+    paintStaticGemDepth(g, q / 2, q / 2, q, colorIndex, color);
     this.ctx = prev;
     this.gemSprites.set(key, sheet);
     if (this.gemSprites.size > 40) {
@@ -2407,6 +2465,91 @@ export class BoardRenderer {
     ctx.restore();
   }
 
+  private drawArenaEnvironment(
+    w: number,
+    h: number,
+    playerRect: DOMRect,
+    opponentRect: DOMRect,
+    parent: { left: number; top: number },
+    now: number,
+  ): void {
+    const ctx = this.ctx;
+    const playerX = playerRect.left - parent.left + playerRect.width / 2;
+    const playerY = playerRect.top - parent.top + playerRect.height / 2;
+    const opponentX = opponentRect.left - parent.left + opponentRect.width / 2;
+    const opponentY = opponentRect.top - parent.top + opponentRect.height / 2;
+    const drift = this.fx.reducedMotion ? 0 : Math.sin(now / 4200) * 3;
+
+    ctx.save();
+    ctx.globalCompositeOperation = "source-over";
+    const depth = ctx.createLinearGradient(0, 0, 0, h);
+    depth.addColorStop(0, "rgba(2, 8, 18, 0.18)");
+    depth.addColorStop(0.48, "rgba(1, 4, 12, 0.06)");
+    depth.addColorStop(1, "rgba(0, 1, 5, 0.28)");
+    ctx.fillStyle = depth;
+    ctx.fillRect(0, 0, w, h);
+
+    const leftField = ctx.createRadialGradient(playerX - w * 0.18 + drift, playerY, 0, playerX, playerY, w * 0.66);
+    leftField.addColorStop(0, "rgba(0, 164, 214, 0.12)");
+    leftField.addColorStop(0.42, "rgba(0, 84, 132, 0.045)");
+    leftField.addColorStop(1, "rgba(0, 24, 54, 0)");
+    ctx.fillStyle = leftField;
+    ctx.fillRect(0, 0, w, h);
+
+    const rightField = ctx.createRadialGradient(opponentX + w * 0.16 - drift, opponentY, 0, opponentX, opponentY, w * 0.62);
+    rightField.addColorStop(0, "rgba(214, 22, 78, 0.1)");
+    rightField.addColorStop(0.44, "rgba(102, 10, 52, 0.04)");
+    rightField.addColorStop(1, "rgba(34, 3, 22, 0)");
+    ctx.fillStyle = rightField;
+    ctx.fillRect(0, 0, w, h);
+
+    const horizonY = h * 0.54;
+    const vanishingX = w * 0.5 + drift * 0.35;
+    ctx.globalAlpha = 0.16;
+    ctx.strokeStyle = "#4A9CB3";
+    ctx.lineWidth = 0.7;
+    for (let i = -5; i <= 5; i++) {
+      const bottomX = w * (0.5 + i * 0.22);
+      ctx.beginPath();
+      ctx.moveTo(vanishingX, horizonY);
+      ctx.lineTo(bottomX, h * 1.04);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 0.12;
+    for (let i = 0; i < 5; i++) {
+      const y = horizonY + Math.pow(i / 5, 1.55) * h * 0.43;
+      ctx.beginPath();
+      ctx.moveTo(w * 0.08, y);
+      ctx.quadraticCurveTo(w * 0.5, y - 5 - i * 2, w * 0.92, y);
+      ctx.stroke();
+    }
+
+    ctx.globalAlpha = 0.14;
+    ctx.strokeStyle = "#63E8F4";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(w * 0.5, horizonY + h * 0.1, w * 0.46, h * 0.22, 0, Math.PI * 1.08, Math.PI * 1.92);
+    ctx.stroke();
+    ctx.strokeStyle = "#D84878";
+    ctx.beginPath();
+    ctx.ellipse(w * 0.5, horizonY + h * 0.12, w * 0.58, h * 0.28, 0, Math.PI * 0.06, Math.PI * 0.94);
+    ctx.stroke();
+
+    ctx.globalCompositeOperation = "lighter";
+    for (let i = 0; i < 18; i++) {
+      const phase = (now / (6500 + i * 220) + i * 0.173) % 1;
+      const mx = ((i * 67.31 + drift * (i % 3)) % (w + 40)) - 20;
+      const my = h * (0.12 + ((i * 0.137 + phase * 0.04) % 0.78));
+      const radius = 0.45 + (i % 3) * 0.35;
+      ctx.globalAlpha = 0.08 + (i % 4) * 0.018;
+      ctx.fillStyle = i % 5 === 0 ? "#FF8DAF" : "#9CECF6";
+      ctx.beginPath();
+      ctx.arc(mx, my, radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
   private consumeAttacks(snap: GameSnapshot, now: number): void {
     for (const fxEvent of snap.fx) {
       if (fxEvent.kind !== "attack") continue;
@@ -2773,6 +2916,7 @@ export class BoardRenderer {
     } else {
       this.drawProceduralGem(cx, cy, s, tile.color, color, selected);
     }
+    this.drawGemMaterialLighting(cx, cy, s, tile.color, color, now, selected);
     const targeting = powerTargeting;
     if (
       targeting &&
@@ -2841,6 +2985,59 @@ export class BoardRenderer {
         tile.breakStrength,
       );
     }
+    ctx.restore();
+  }
+
+  private drawGemMaterialLighting(
+    cx: number,
+    cy: number,
+    s: number,
+    colorIndex: number,
+    color: string,
+    now: number,
+    selected: boolean,
+  ): void {
+    if (!selected && !this.playerView.powerTargeting) return;
+    const ctx = this.ctx;
+    const phase = this.fx.reducedMotion ? 0.32 : (now / 4200 + (cx + cy) * 0.0008) % 1;
+    const sweepX = cx - s * 0.82 + phase * s * 1.64;
+    const crystal = crystalAccent(colorIndex);
+
+    ctx.save();
+    jewelPath(ctx, cx, cy, s * 0.92, colorIndex);
+    ctx.clip();
+
+    const sweep = ctx.createLinearGradient(sweepX - s * 0.22, cy - s, sweepX + s * 0.22, cy + s);
+    sweep.addColorStop(0, "rgba(255,255,255,0)");
+    sweep.addColorStop(0.44, `rgba(255,255,255,${selected ? 0.2 : 0.105})`);
+    sweep.addColorStop(0.52, `rgba(255,255,255,${selected ? 0.32 : 0.16})`);
+    sweep.addColorStop(0.62, colorWithAlpha(crystal.edge, selected ? 0.15 : 0.08));
+    sweep.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.globalCompositeOperation = "lighter";
+    ctx.fillStyle = sweep;
+    ctx.fillRect(cx - s, cy - s, s * 2, s * 2);
+
+    const shadow = ctx.createLinearGradient(cx - s * 0.45, cy - s * 0.5, cx + s * 0.62, cy + s * 0.62);
+    shadow.addColorStop(0, "rgba(255,255,255,0)");
+    shadow.addColorStop(0.56, "rgba(0, 4, 12, 0.03)");
+    shadow.addColorStop(1, "rgba(0, 4, 12, 0.3)");
+    ctx.globalCompositeOperation = "multiply";
+    ctx.globalAlpha = 0.62;
+    ctx.fillStyle = shadow;
+    ctx.fillRect(cx - s, cy - s, s * 2, s * 2);
+    ctx.restore();
+
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    const rim = ctx.createLinearGradient(cx - s * 0.56, cy - s * 0.56, cx + s * 0.5, cy + s * 0.58);
+    rim.addColorStop(0, colorWithAlpha("#FFFFFF", selected ? 0.55 : 0.28));
+    rim.addColorStop(0.24, colorWithAlpha(crystal.edge, selected ? 0.36 : 0.18));
+    rim.addColorStop(0.62, colorWithAlpha(color, 0.04));
+    rim.addColorStop(1, colorWithAlpha("#06101A", 0.24));
+    jewelPath(ctx, cx, cy, s * 0.94, colorIndex);
+    ctx.strokeStyle = rim;
+    ctx.lineWidth = Math.max(0.8, s * 0.014);
+    ctx.stroke();
     ctx.restore();
   }
 
@@ -3584,6 +3781,21 @@ function paintDeviceBoard(
       roundRect(g, wx + pad, wy + pad, cell - pad * 2, cell - pad * 2, Math.max(2, wellR - 1.5));
        g.fillStyle = (r + c) % 2 === 0 ? "#02060D" : "#06111C";
       g.fill();
+       const contact = g.createRadialGradient(
+         wx + cell * 0.52,
+         wy + cell * 0.72,
+         cell * 0.04,
+         wx + cell * 0.52,
+         wy + cell * 0.72,
+         cell * 0.5,
+       );
+       contact.addColorStop(0, "rgba(0, 0, 0, 0.54)");
+       contact.addColorStop(0.52, "rgba(0, 0, 0, 0.18)");
+       contact.addColorStop(1, "rgba(0, 0, 0, 0)");
+       g.fillStyle = contact;
+       g.beginPath();
+       g.ellipse(wx + cell * 0.52, wy + cell * 0.7, cell * 0.36, cell * 0.2, 0, 0, Math.PI * 2);
+       g.fill();
       const dent = g.createLinearGradient(wx, wy, wx, wy + cell);
       dent.addColorStop(0, "#FFFFFF0D");
       dent.addColorStop(0.32, "#01050A00");
@@ -3617,6 +3829,15 @@ function paintDeviceBoard(
       g.lineWidth = 0.55;
       roundRect(g, wx + 0.5, wy + 0.5, cell - 1, cell - 1, wellR);
       g.stroke();
+       const socketRim = g.createLinearGradient(wx, wy, wx + cell, wy + cell);
+       socketRim.addColorStop(0, isPlayer ? "#B9F8FF42" : "#FFD6E22E");
+       socketRim.addColorStop(0.3, isPlayer ? "#00D9FF12" : "#FF174F0B");
+       socketRim.addColorStop(0.72, "#01050A00");
+       socketRim.addColorStop(1, "#00000070");
+       g.strokeStyle = socketRim;
+       g.lineWidth = Math.max(0.65, cell * 0.014);
+       roundRect(g, wx + pad * 0.62, wy + pad * 0.62, cell - pad * 1.24, cell - pad * 1.24, Math.max(2, wellR - 1.2));
+       g.stroke();
        g.strokeStyle = isPlayer ? "#12394A2E" : "#8F163D22";
       g.lineWidth = 0.55;
       roundRect(g, wx + pad * 0.45, wy + pad * 0.45, cell - pad * 0.9, cell - pad * 0.9, Math.max(2, wellR - 1));
@@ -3733,6 +3954,51 @@ function paintSpeculars(ctx: CanvasRenderingContext2D, cx: number, cy: number, s
     ctx.arc(x, y, s * rad, 0, Math.PI * 2);
     ctx.fill();
   }
+}
+
+function paintStaticGemDepth(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  s: number,
+  colorIndex: number,
+  color: string,
+): void {
+  const accent = crystalAccent(colorIndex);
+  ctx.save();
+  jewelPath(ctx, cx, cy, s * 0.92, colorIndex);
+  ctx.clip();
+
+  const key = ctx.createLinearGradient(cx - s * 0.62, cy - s * 0.68, cx + s * 0.64, cy + s * 0.68);
+  key.addColorStop(0, "rgba(255,255,255,0.1)");
+  key.addColorStop(0.28, colorWithAlpha(accent.edge, 0.08));
+  key.addColorStop(0.62, "rgba(0, 2, 10, 0.04)");
+  key.addColorStop(1, "rgba(0, 4, 12, 0.25)");
+  ctx.globalCompositeOperation = "multiply";
+  ctx.fillStyle = key;
+  ctx.fillRect(cx - s, cy - s, s * 2, s * 2);
+
+  const core = ctx.createRadialGradient(cx - s * 0.18, cy - s * 0.22, 0, cx, cy, s * 0.68);
+  core.addColorStop(0, colorWithAlpha("#FFFFFF", 0.1));
+  core.addColorStop(0.26, colorWithAlpha(color, 0.08));
+  core.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.globalCompositeOperation = "lighter";
+  ctx.fillStyle = core;
+  ctx.fillRect(cx - s, cy - s, s * 2, s * 2);
+  ctx.restore();
+
+  ctx.save();
+  const rim = ctx.createLinearGradient(cx - s * 0.58, cy - s * 0.58, cx + s * 0.58, cy + s * 0.6);
+  rim.addColorStop(0, colorWithAlpha("#FFFFFF", 0.26));
+  rim.addColorStop(0.3, colorWithAlpha(accent.edge, 0.14));
+  rim.addColorStop(0.72, colorWithAlpha(color, 0.03));
+  rim.addColorStop(1, "rgba(0, 4, 12, 0.22)");
+  jewelPath(ctx, cx, cy, s * 0.94, colorIndex);
+  ctx.globalCompositeOperation = "lighter";
+  ctx.strokeStyle = rim;
+  ctx.lineWidth = Math.max(0.8, s * 0.014);
+  ctx.stroke();
+  ctx.restore();
 }
 
 function paintCrystalOptics(

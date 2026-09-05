@@ -43,6 +43,12 @@ const SFX_GAP: Partial<Record<Cue, number>> = {
   deny: 220,
 };
 
+function urlsForAudioAsset(item: { id: string; file: string }): string[] {
+  const urls = candidateUrls(item.file);
+  if (item.id !== "music-battle") return urls;
+  return ["/audio/Arena_Pulse_Replit.m4a", ...urls.filter((url) => !url.endsWith("/Arena_Pulse_Replit.m4a"))];
+}
+
 const MAX_SFX_VOICES = 10;
 const DEFAULT_SFX_VOLUME = 0.84;
 const DEFAULT_MUSIC_VOLUME = 0.72;
@@ -918,7 +924,7 @@ export class AudioBus {
 
   private async fetchRaw(item: ReturnType<typeof uniqueAudioAssets>[number]): Promise<void> {
     if (this.raw.has(item.id) || this.buffers.has(item.id)) return;
-    for (const url of candidateUrls(item.file)) {
+    for (const url of urlsForAudioAsset(item)) {
       const found = await fetchAudioBuffer([url]);
       if (!found) continue;
       this.raw.set(item.id, found);
@@ -941,7 +947,7 @@ export class AudioBus {
         this.raw.delete(item.id);
       }
     }
-    for (const url of candidateUrls(item.file)) {
+    for (const url of urlsForAudioAsset(item)) {
       const found = await fetchAudioBuffer([url]);
       if (!found) continue;
       try {
