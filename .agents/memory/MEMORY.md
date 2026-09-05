@@ -13,3 +13,4 @@
 - [Browser audio regression testing](browser-audio-regression-testing.md) — distinguish procedural bed voices from legitimate oscillator-based UI cues by tracking source buffers and frequency signatures.
 - [Artifact test contracts](artifact-test-contracts.md) — source-contract tests must follow current artifact boundaries, media containers, and preview workflow ownership.
 - [VFX clock independence](vfx-clock-independence.md) — particle and shard motion must advance from renderer delta time, not a fixed per-frame decrement.
+- [Power VFX cohesion](power-vfx-cohesion.md) — hero power colors must stay aligned across Canvas, legacy board overlays, and late CSS overrides.
