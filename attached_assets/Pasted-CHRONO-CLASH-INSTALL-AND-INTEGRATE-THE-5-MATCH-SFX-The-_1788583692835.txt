@@ -1,0 +1,78 @@
+CHRONO CLASH — INSTALL AND INTEGRATE THE 5 MATCH SFX
+
+The uploaded ZIP contains:
+match_1.wav
+match_2.wav
+match_3.wav
+match_4.wav
+match_5.wav
+
+The ZIP is confirmed accessible at:
+attached_assets/Chrono_Clash_Match_SFX_UPLOAD_PACK_2_1788583492608.zip
+
+Extract/copy the five WAV files into the project's active public audio asset directory.
+
+Then integrate them into the EXISTING active audio system.
+
+MATCH SFX BEHAVIOR:
+
+Match wave #1 → match_1.wav
+Match wave #2 → match_2.wav
+Match wave #3 → match_3.wav
+Match wave #4 → match_4.wav
+Match wave #5 and every match wave after that → match_5.wav
+
+IMPORTANT:
+A "match wave" means one complete group of gems recognized/cleared together.
+
+Example:
+A 3-gem match = ONE Match SFX.
+A 4-gem match = ONE Match SFX.
+A 5-gem match = ONE Match SFX.
+
+NEVER play the Match SFX once per individual gem.
+
+CASCADE:
+Initial match → match_1.wav
+First automatic cascade match → match_2.wav
+Second automatic cascade match → match_3.wav
+Third automatic cascade match → match_4.wav
+Fourth and later cascade matches → match_5.wav
+
+The progression counter should reset when a completely new player move begins.
+
+A valid player swap should NOT play a Match SFX until a match wave is actually recognized.
+
+Do NOT change:
+- Arena Pulse music
+- Arena music timing
+- Swap SFX
+- VFX
+- gameplay logic
+- board physics
+- touch/swipe behavior
+- volume settings
+- AudioBus architecture
+
+Use the existing active audio catalog/resolver/event system. Do not modify legacy unused audio code.
+
+IMPORTANT:
+Do not trigger multiple Match SFX from different code paths for the same match wave. There must be exactly ONE Match SFX trigger per resolved match wave.
+
+Verification:
+1. Make a normal 3-gem match → exactly 1 match_1.wav.
+2. Cause a cascade → next match wave plays match_2.wav.
+3. Continue cascades → match_3.wav, then match_4.wav, then match_5.wav.
+4. 6th+ match wave continues using match_5.wav.
+5. New player move resets progression to match_1.wav.
+6. No sound during dragging.
+7. No Match SFX on invalid swap.
+8. Arena Pulse remains unchanged.
+9. Confirm the five files exist in the final active public audio directory.
+10. Run focused audio tests, typecheck and build.
+
+Report:
+- exact destination paths
+- exact event/function used to trigger Match SFX
+- confirmation that one sound fires per match wave, not per gem
+- test results.
