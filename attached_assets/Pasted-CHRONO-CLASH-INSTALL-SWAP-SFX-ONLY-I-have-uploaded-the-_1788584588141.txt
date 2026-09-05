@@ -1,0 +1,82 @@
+CHRONO CLASH — INSTALL SWAP SFX ONLY
+
+I have uploaded the new Swap SFX choice pack.
+
+IMPORTANT:
+Do NOT modify anything until you have confirmed the ZIP contents.
+
+First inspect the uploaded ZIP and confirm it contains:
+- swap_1.wav
+- swap_2.wav
+- swap_3.wav
+- swap_4.wav
+- swap_5.wav
+
+Then integrate the five Swap SFX into the EXISTING active Chrono Clash audio system.
+
+SWAP SFX BEHAVIOR:
+
+A valid player swap must play exactly ONE Swap SFX.
+
+Use this progression:
+Swap 1 → swap_1.wav
+Swap 2 → swap_2.wav
+Swap 3 → swap_3.wav
+Swap 4 → swap_4.wav
+Swap 5+ → swap_5.wav
+
+IMPORTANT:
+This progression is for consecutive VALID PLAYER SWAPS.
+
+A new match/cascade does NOT trigger another Swap SFX.
+
+Swap SFX must NOT play:
+- while dragging
+- on pointerdown
+- on pointermove
+- on invalid swap
+- on cancelled gesture
+- once per gem
+- once per matched tile
+- during automatic cascade movement
+
+The Swap sound should trigger exactly once when the valid player swap is committed.
+
+Do NOT change:
+- Match SFX
+- Match SFX progression
+- Arena Pulse music
+- Arena music start timing
+- VFX
+- gameplay
+- board physics
+- touch/swipe behavior
+- volume settings
+- AudioBus architecture
+
+Use the existing active audio catalog/resolver/event system.
+Do not modify legacy unused audio code.
+
+CRITICAL:
+Do not accidentally preload/play all five WAV files.
+Loading/decoding all five files is fine, but ONLY the selected Swap WAV may create an AudioBufferSourceNode/start for a given swap event.
+
+VERIFY WITH RUNTIME:
+1. Perform one valid swap → exactly one Swap SFX.
+2. Perform a second valid swap → exactly one Swap SFX, using swap_2.wav.
+3. Continue through five valid swaps and verify 1→2→3→4→5.
+4. Sixth valid swap uses swap_5.wav.
+5. Invalid swap → zero Swap SFX.
+6. Dragging → zero Swap SFX.
+7. Match → zero additional Swap SFX.
+8. Match sounds remain untouched.
+9. Arena Pulse remains untouched.
+
+Run focused audio tests, typecheck and build.
+
+Report:
+- exact destination paths
+- exact active event/function used
+- which Swap asset is selected for each swap number
+- confirmation that only ONE Swap source starts per valid swap
+- test results.
