@@ -1,0 +1,450 @@
+CHRONO CLASH — VFX INTENSITY / READABILITY MASTER PASS
+
+The current power VFX are working, but they are TOO LIGHT and difficult to notice during actual gameplay.
+
+This is NOT a functionality problem.
+
+This is NOT a power-mechanics problem.
+
+This is NOT a layout problem.
+
+The problem is VISUAL INTENSITY and READABILITY.
+
+Act as the VFX MASTER and correct the existing VFX so the player can immediately see and FEEL the power activation.
+
+IMPORTANT:
+Do NOT simply add a giant permanent glow.
+
+We need stronger cinematic impact with controlled contrast.
+
+==================================================
+CORE TARGET
+==================================================
+
+Normal gameplay:
+clean and readable.
+
+Power armed:
+clearly noticeable.
+
+Target acquired:
+obviously focused.
+
+Power impact:
+dramatic and unmistakable.
+
+After impact:
+quickly return to normal.
+
+The visual hierarchy must be:
+
+NORMAL GEM
+<
+POWER TARGET
+<
+POWER CHARGE
+<
+POWER IMPACT
+
+The power must NEVER visually compete equally with its own normal gem state.
+
+==================================================
+1. POWER BUTTON MUST BE OBVIOUS
+==================================================
+
+When ENERGY BURST is pressed:
+
+Immediately create a visible button response:
+
+- scale compression
+- bright cyan/white core flash
+- strong internal illumination
+- short expanding energy pulse
+- soft outer glow
+
+The response should be clearly visible on a phone.
+
+MEGA STRIKE:
+
+Make it approximately 1.5–2x stronger than Energy Burst.
+
+The player must instantly know:
+
+"I ACTIVATED THE POWER."
+
+==================================================
+2. ARMED BOARD STATE MUST BE OBVIOUS
+==================================================
+
+When the power becomes armed:
+
+Do NOT use a barely visible glow.
+
+Create a clearly readable board-wide energy response.
+
+ENERGY BURST:
+
+- strong cyan energy sweep
+- visible moving light
+- targetable gems receive bright cyan rim light
+- internal crystal illumination increases
+- small energy motes become visible
+
+MEGA STRIKE:
+
+- stronger cyan/white board surge
+- brighter energy sweep
+- target gems become visibly charged
+- subtle energy veins/light movement
+- stronger atmospheric response
+
+The effect should remain elegant but must be visible immediately.
+
+==================================================
+3. TARGET GEM INTENSITY
+==================================================
+
+The currently highlighted circular effect around the gems is too weak.
+
+Upgrade it.
+
+The targeting field should have:
+
+1. soft outer halo
+2. bright thin energy ring
+3. internal crystal illumination
+4. moving highlight
+5. small energy particles
+
+The ring must remain soft and premium.
+
+But increase visibility approximately 2–3x from the current implementation.
+
+DO NOT create square selection boxes.
+
+DO NOT cover the gem.
+
+==================================================
+4. TARGET ACQUIRED
+==================================================
+
+When the player touches a valid target:
+
+Create an obvious lock-on moment.
+
+Sequence:
+
+0–30ms:
+target brightens strongly.
+
+30–70ms:
+ring contracts toward the gem.
+
+70–110ms:
+internal crystal core becomes brighter.
+
+110–150ms:
+white/cyan energy peak.
+
+Then execute the existing power.
+
+The target should look like it has been charged with dangerous energy.
+
+==================================================
+5. ENERGY BURST IMPACT
+==================================================
+
+ENERGY BURST must have a clearly visible impact peak.
+
+At impact:
+
+- bright cyan/white central flash
+- visible shockwave ring
+- second softer ring
+- directional particles
+- crystal light burst
+- visible fracture illumination
+- shards
+
+Increase the existing effect intensity rather than creating an entirely new renderer.
+
+Impact should be approximately 2–3x stronger than the current subtle effect.
+
+But keep duration short.
+
+The power should feel energetic, not constantly bright.
+
+==================================================
+6. MEGA STRIKE IMPACT
+==================================================
+
+MEGA STRIKE is the HERO POWER.
+
+Make the impact unmistakable.
+
+Sequence:
+
+CHARGE
+→ WHITE/CYAN CORE
+→ DIRECTIONAL STRIKE
+→ BRIGHT IMPACT
+→ SHOCKWAVE
+→ CRYSTAL FRACTURE
+→ SHARDS
+→ CASCADE
+
+At the impact frame:
+
+- strongest white/cyan flash
+- clearly visible directional beam
+- bright impact core
+- expanding shockwave
+- strong crystal illumination
+- visible shard burst
+- energy particles moving outward
+- subtle board recoil
+
+MEGA STRIKE should feel approximately 1.5–2x stronger than ENERGY BURST.
+
+Do NOT achieve this only by multiplying particle count.
+
+Increase:
+
+- core brightness
+- contrast
+- light radius
+- directional energy
+- shockwave visibility
+- crystal response
+- particle brightness
+
+==================================================
+7. CONTRAST IS MORE IMPORTANT THAN RAW BRIGHTNESS
+==================================================
+
+This is critical.
+
+The existing board and gems are already bright.
+
+Therefore simply increasing glow does not solve the problem.
+
+Use contrast.
+
+During the strongest 50–100ms of the power:
+
+- slightly reduce surrounding VFX brightness
+- make the target/impact area significantly brighter
+- concentrate attention on the event
+
+The eye should immediately move to the power impact.
+
+Do NOT darken the whole screen dramatically.
+
+Only create a subtle localized contrast response.
+
+==================================================
+8. CRYSTAL INTERNAL LIGHT
+==================================================
+
+The gems should not look like flat objects with a glow placed on top.
+
+During power interaction:
+
+- core brightens
+- inner light expands
+- edges catch light
+- internal highlights intensify
+- cracks become illuminated
+
+For the brief impact moment, the crystal should look almost white-hot inside.
+
+Then rapidly fall back to its normal material appearance.
+
+==================================================
+9. PARTICLES
+==================================================
+
+Particles need to be brighter and more directional.
+
+ENERGY BURST:
+controlled medium particle intensity.
+
+MEGA STRIKE:
+high but bounded particle intensity.
+
+Use:
+
+- bright energy motes
+- crystalline shards
+- short streaks
+- impact fragments
+- tiny sparks
+
+Avoid random particle noise.
+
+Particles must have visible movement.
+
+==================================================
+10. SHOCKWAVES
+==================================================
+
+Current shockwaves are too subtle.
+
+Make them readable.
+
+Use:
+
+- bright thin leading edge
+- soft trailing falloff
+- rapid expansion
+- fast fade
+
+Do NOT leave a large circle sitting on the board.
+
+The shockwave should communicate FORCE.
+
+==================================================
+11. CINEMATIC PEAK
+==================================================
+
+Every power must have a very short visual peak.
+
+ENERGY BURST:
+approximately 60–100ms peak.
+
+MEGA STRIKE:
+approximately 80–120ms peak.
+
+This peak should be the brightest moment.
+
+Then rapidly dissipate.
+
+This creates:
+
+anticipation
+→ impact
+→ release.
+
+Do NOT make the entire animation equally bright.
+
+==================================================
+12. SCREEN / BOARD RESPONSE
+==================================================
+
+Keep board impulse subtle:
+
+2–4px maximum.
+
+60–90ms.
+
+No jitter.
+
+No uncontrolled camera shake.
+
+If existing screen flash is too weak, increase its visibility slightly.
+
+Maximum flash duration:
+approximately 50–80ms.
+
+==================================================
+13. IMPORTANT MOBILE READABILITY TEST
+==================================================
+
+Test on actual mobile viewport:
+
+390x844
+360x740
+
+The effect must remain clearly visible without zooming.
+
+Test against the actual dark board and bright gems.
+
+If the VFX disappears when viewed at normal phone size, it is still too weak.
+
+==================================================
+14. PERFORMANCE
+==================================================
+
+Do not solve readability by unlimited particles.
+
+Maintain:
+
+60 FPS target.
+
+Keep particle counts bounded.
+
+Reuse existing Canvas/VFX infrastructure.
+
+No new renderer.
+
+No permanent overlays.
+
+No memory leaks.
+
+==================================================
+15. DO NOT TOUCH
+==================================================
+
+Do NOT change:
+
+- board layout
+- gem size
+- power mechanics
+- energy costs
+- energy generation
+- scoring
+- timers
+- networking
+- touch mechanics
+- audio
+- Match SFX
+- Arena music
+
+Do NOT introduce LOCKED or FREEZE states.
+
+Do NOT change the existing power functionality.
+
+==================================================
+SUCCESS CRITERIA
+==================================================
+
+I should be able to look at the phone screen and immediately answer:
+
+"Did I press the power?"
+YES.
+
+"Is the power armed?"
+YES.
+
+"Which gem am I targeting?"
+OBVIOUS.
+
+"Did the power hit?"
+YES.
+
+"Was Mega Strike powerful?"
+ABSOLUTELY.
+
+The VFX should feel:
+
+BRIGHT
+ENERGETIC
+CRYSTALLINE
+CINEMATIC
+PHYSICAL
+PREMIUM
+
+while still being:
+
+CLEAN
+CONTROLLED
+READABLE
+60FPS FRIENDLY.
+
+IMPORTANT:
+
+Do not report success just because the tests pass.
+
+The acceptance criterion is actual visual readability on the 390x844 and 360x740 gameplay viewport.
+
+After implementation report the actual intensity/timing changes and confirm real mobile visual testing.
