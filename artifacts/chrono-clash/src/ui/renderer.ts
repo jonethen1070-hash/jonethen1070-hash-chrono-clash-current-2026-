@@ -1317,6 +1317,21 @@ export class BoardRenderer {
 
     this.drawPowerEffects(view, now);
     this.drawPowerArenaLight(view, ox, oy, size, cell, now, isPlayer);
+    const megaClear = fx.find(
+      (fxEvent) =>
+        fxEvent.kind === "clear" &&
+        Boolean(fxEvent.cells?.length) &&
+        fx.some(
+          (powerEvent) =>
+            powerEvent.kind === "power" &&
+            powerEvent.text.toUpperCase().includes("MEGA STRIKE") &&
+            Math.abs(powerEvent.born - fxEvent.born) < 40 &&
+            (!powerEvent.side || powerEvent.side === fxEvent.side),
+        ),
+    );
+    if (megaClear?.cells?.length) {
+      this.drawMegaStrikeWave(view, megaClear.cells, ix, iy, cell, now);
+    }
 
     const dieDur = gemDieDuration(anim, reduced);
     for (const tile of view.tiles.values()) {
@@ -1949,6 +1964,7 @@ export class BoardRenderer {
     const n = particleBudget(this.fx.quality, this.fx.reducedMotion);
     if (!n) return;
     const hex = COLORS[color - 1] ?? "#fff";
+    const crystal = crystalAccent(color);
     const accent =
       this.fx.vfxTheme === "nova-fx"
         ? "#FFD447"
@@ -1981,7 +1997,7 @@ export class BoardRenderer {
         life: megaHero ? 0.38 : burstHero ? 0.31 : 0.24,
         max: megaHero ? 0.38 : burstHero ? 0.31 : 0.24,
         size: cell * ((shardTier === 0 ? 0.052 : shardTier === 1 ? 0.078 : 0.112) + Math.random() * (megaHero ? 0.022 : 0.014)),
-        color: i % 2 ? "#EAFBFF" : accent,
+        color: i % 4 === 0 ? crystal.edge : i % 2 ? accent : hex,
         trail: megaHero ? 1.35 : burstHero ? 1.05 : 0.72,
       });
     }
@@ -2001,7 +2017,7 @@ export class BoardRenderer {
         life: megaHero ? 0.28 : burstHero ? 0.23 : 0.18,
         max: megaHero ? 0.28 : burstHero ? 0.23 : 0.18,
         size: cell * ((megaHero ? 0.038 : burstHero ? 0.035 : 0.032) + Math.random() * (megaHero ? 0.032 : 0.026)),
-        color: i % 3 === 0 ? "#EAFBFF" : i % 2 === 0 ? hex : accent,
+        color: i % 4 === 0 ? crystal.edge : i % 2 === 0 ? hex : accent,
         streak: megaHero ? 1.15 : burstHero ? 0.92 : 0.6,
       });
     }
@@ -2013,6 +2029,15 @@ export class BoardRenderer {
       crystalAccent(color).bloom,
       megaHero ? 205 : burstHero ? 180 : 150 + Math.min(50, combo * 8),
       (0.95 + Math.min(0.42, combo * 0.06)) * (megaHero ? 1.18 : burstHero ? 1.08 : 1),
+    );
+    this.addShockwave(
+      view,
+      x,
+      y,
+      cell * (0.3 + Math.min(0.1, combo * 0.016)) * (megaHero ? 1.25 : 1),
+      crystal.edge,
+      megaHero ? 260 : 210,
+      megaHero ? 1.35 : 0.95,
     );
     this.capParticles(view);
   }
@@ -2389,6 +2414,74 @@ export class BoardRenderer {
       ctx.restore();
     }
     view.powerEffects.length = write;
+  }
+
+  private drawMegaStrikeWave(
+    view: BoardView,
+    cells: Coord[],
+    ix: number,
+    iy: number,
+    cell: number,
+    now: number,
+  ): void {
+    if (this.fx.quality === "low" || this.fx.reducedMotion) return;
+    const effect = [...view.powerEffects]
+      .reverse()
+      .find((candidate) => candidate.kind === "mega" && now - candidate.born >= 0 && now - candidate.born < 560);
+    if (!effect) return;
+
+    const age = now - effect.born;
+    const matchedTile = [...view.tiles.values()].find(
+      (tile) => tile.dying && cells.some((at) => at.r === tile.r && at.c === tile.c),
+    );
+    const colorIndex = matchedTile?.color ?? 6;
+    const crystal = crystalAccent(colorIndex);
+    const color = COLORS[colorIndex - 1] ?? "#00BFFF";
+    const waveT = Math.max(0, Math.min(1, (age - 76) / 250));
+    if (waveT <= 0) return;
+    const waveFade = Math.max(0, 1 - Math.max(0, age - 390) / 170);
+    const ctx = this.ctx;
+
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.lineCap = "round";
+    for (let i = 0; i < cells.length; i++) {
+      const at = cells[i]!;
+      const x = ix + GAP + at.c * (cell + GAP) + cell / 2;
+      const y = iy + GAP + at.r * (cell + GAP) + cell / 2;
+      const distance = Math.hypot(x - effect.x, y - effect.y) / Math.max(cell, 1);
+      const delay = Math.min(88, distance * 9 + (i % 3) * 7);
+      const local = Math.max(0, Math.min(1, (age - 76 - delay) / 190));
+      if (local <= 0) continue;
+      const alpha = (1 - local * 0.62) * waveFade;
+
+      ctx.globalAlpha = alpha * 0.14;
+      ctx.strokeStyle = crystal.edge;
+      ctx.lineWidth = Math.max(0.7, cell * 0.012);
+      ctx.beginPath();
+      ctx.moveTo(effect.x, effect.y);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+
+      const head = Math.min(1, local * 1.22);
+      const hx = effect.x + (x - effect.x) * head;
+      const hy = effect.y + (y - effect.y) * head;
+      ctx.globalAlpha = alpha * 0.78;
+      ctx.fillStyle = crystal.core;
+      ctx.shadowColor = color;
+      ctx.shadowBlur = cell * 0.12;
+      ctx.beginPath();
+      ctx.arc(hx, hy, Math.max(1.2, cell * 0.035), 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.globalAlpha = alpha * 0.56;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = Math.max(0.8, cell * 0.014);
+      ctx.beginPath();
+      ctx.arc(x, y, cell * (0.14 + local * 0.22), 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.restore();
   }
 
   private drawPowerContrast(view: BoardView, now: number): void {
@@ -3129,8 +3222,9 @@ export class BoardRenderer {
     now: number,
     selected: boolean,
   ): void {
-    if (!selected && !this.playerView.powerTargeting) return;
     const ctx = this.ctx;
+    const active = selected || Boolean(this.playerView.powerTargeting);
+    const intensity = active ? 1 : 0.42;
     const phase = this.fx.reducedMotion ? 0.32 : (now / 4200 + (cx + cy) * 0.0008) % 1;
     const sweepX = cx - s * 0.82 + phase * s * 1.64;
     const crystal = crystalAccent(colorIndex);
@@ -3141,9 +3235,9 @@ export class BoardRenderer {
 
     const sweep = ctx.createLinearGradient(sweepX - s * 0.22, cy - s, sweepX + s * 0.22, cy + s);
     sweep.addColorStop(0, "rgba(255,255,255,0)");
-    sweep.addColorStop(0.44, `rgba(255,255,255,${selected ? 0.2 : 0.105})`);
-    sweep.addColorStop(0.52, `rgba(255,255,255,${selected ? 0.32 : 0.16})`);
-    sweep.addColorStop(0.62, colorWithAlpha(crystal.edge, selected ? 0.15 : 0.08));
+    sweep.addColorStop(0.44, `rgba(255,255,255,${0.2 * intensity})`);
+    sweep.addColorStop(0.52, `rgba(255,255,255,${0.32 * intensity})`);
+    sweep.addColorStop(0.62, colorWithAlpha(crystal.edge, 0.15 * intensity));
     sweep.addColorStop(1, "rgba(255,255,255,0)");
     ctx.globalCompositeOperation = "lighter";
     ctx.fillStyle = sweep;
@@ -3157,6 +3251,7 @@ export class BoardRenderer {
     ctx.globalAlpha = 0.62;
     ctx.fillStyle = shadow;
     ctx.fillRect(cx - s, cy - s, s * 2, s * 2);
+    ctx.globalAlpha = 1;
     ctx.restore();
 
     ctx.save();
@@ -3530,6 +3625,19 @@ export class BoardRenderer {
     volume.addColorStop(0.72, "rgba(0,0,0,0)");
     volume.addColorStop(1, "rgba(0,8,18,0.28)");
     ctx.fillStyle = volume;
+    ctx.fillRect(dx, dy, dest, dest);
+    const refraction = ctx.createLinearGradient(
+      cx - s * 0.5,
+      cy + s * 0.42,
+      cx + s * 0.42,
+      cy - s * 0.5,
+    );
+    refraction.addColorStop(0, colorWithAlpha(crystal.core, 0.04));
+    refraction.addColorStop(0.42, colorWithAlpha(crystal.edge, 0.12));
+    refraction.addColorStop(0.5, "rgba(255,255,255,0.22)");
+    refraction.addColorStop(0.58, colorWithAlpha(color, 0.08));
+    refraction.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = refraction;
     ctx.fillRect(dx, dy, dest, dest);
     paintCrystalOptics(ctx, cx, cy, s, colorIndex, color);
 

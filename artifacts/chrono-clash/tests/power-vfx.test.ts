@@ -17,6 +17,10 @@ describe("power ability VFX presentation", () => {
     expect(renderer).toContain("view.powerEffects.length > 4");
     expect(renderer).toContain("view.powerWake =");
     expect(renderer).toContain("powerFractureDirection");
+    expect(renderer).toContain("private drawMegaStrikeWave");
+    expect(renderer).toContain("const matchedTile = [...view.tiles.values()]");
+    expect(renderer).toContain("const crystal = crystalAccent(colorIndex)");
+    expect(renderer).toContain("fxEvent.cells?.length");
     expect(renderer).toContain("const peakCenter = effect.kind === \"mega\" ? 146 : 92");
     expect(renderer).toContain("hero = false");
     expect(renderer).toContain("streak: mega ? 0.95 : 0.68");
