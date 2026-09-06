@@ -1,0 +1,159 @@
+I want a MAJOR upgrade to the GEM VFX only.
+
+The current VFX should feel much more premium, cinematic, expensive, and AAA-inspired. Do not settle for simple particle bursts, basic glow, or generic explosions.
+
+CORE GEM DESTRUCTION
+
+When a gem is cleared, make it feel like a powerful crystalline object is being destroyed by contained energy:
+
+1. Anticipation
+    * Gem briefly intensifies in brightness.
+    * Internal energy rapidly builds inside the crystal.
+    * Add a subtle scale pulse.
+    * Add a sharp specular highlight sweeping across the crystal.
+2. Crystal fracture
+    * At the exact destruction moment, create a very brief crystalline crack/fracture impression.
+    * The crystal should appear to break from the inside rather than simply vanish.
+3. Energy detonation
+    * Bright central flash.
+    * Multiple layers of energy expanding outward.
+    * Thin luminous shockwave ring.
+    * Small secondary energy rings.
+    * Strong but extremely short bloom.
+4. Crystal shards
+    * Generate visually convincing small crystal fragments.
+    * Fragments should inherit the gem’s actual color.
+    * Shards should shoot outward with varied velocity and rotation.
+    * Add subtle motion trails to the fastest shards.
+    * Shards should catch light as they rotate.
+    * Fade naturally rather than simply disappearing.
+5. Energy particles
+    * Use multiple particle scales:
+        * large glowing fragments
+        * medium crystal particles
+        * tiny sparks
+        * fine energy dust
+    * Give particles varied trajectories and lifetimes.
+    * Avoid a uniform circular particle explosion.
+6. Afterglow
+    * Leave a tiny residual energy glow for a fraction of a second.
+    * Then smoothly dissipate.
+
+MAKE THE GEM ITSELF LOOK PREMIUM
+
+Improve the gem rendering where possible:
+
+* Stronger 3D crystal depth.
+* Multi-layer internal glow.
+* Bright internal core.
+* Edge highlights.
+* Glass/crystal-like reflections.
+* Subtle animated energy moving inside the crystal.
+* More sophisticated specular response.
+* Avoid flat neon-colored surfaces.
+
+The gem should look like a valuable futuristic energy crystal.
+
+COLOR-SPECIFIC VFX
+
+Every gem’s VFX must dynamically inherit its actual color.
+
+BLUE:
+cyan/azure energy + cool crystal shards
+
+RED:
+crimson/scarlet energy + hot glowing fragments
+
+GREEN:
+emerald/neon-green energy + crystalline green shards
+
+YELLOW:
+gold/electric-yellow energy + bright golden fragments
+
+PURPLE:
+violet/magenta cosmic energy + purple crystal shards
+
+Do NOT hardcode one VFX color for all gems.
+
+PREMIUM IMPACT
+
+Add subtle cinematic polish:
+
+* very short hit-stop on major gem destruction
+* tiny localized camera impulse for powerful clears
+* sharp flash
+* expanding shockwave
+* controlled bloom
+* energy streaks
+* crystal reflections
+* layered particle depth
+
+IMPORTANT:
+Do not make the whole screen flash constantly.
+Do not cover the board.
+Do not reduce gem readability.
+Effects must be short, deliberate, and synchronized.
+
+MULTIPLE GEM CLEAR
+
+When multiple gems clear together:
+
+* Each gem gets its own destruction effect.
+* Stagger the effects by a few milliseconds for a cascading cinematic feel.
+* Create a subtle energy connection between nearby matching gems.
+* Increase intensity based on the number of gems cleared.
+* Large clears should feel spectacular but remain readable.
+
+MEGA STRIKE
+
+For Mega Strike:
+
+The selected gem’s color should become the visual identity of the attack.
+
+Sequence:
+
+SELECT GEM
+→ selected gem charges
+→ energy travels through the board
+→ matching-color gems illuminate
+→ each matching gem fractures
+→ synchronized crystal detonations
+→ colorful energy wave passes through them
+→ final larger crystal-energy impact
+
+IMPORTANT:
+Only gems matching the selected color receive the destruction VFX.
+
+Other colors must remain visually untouched.
+
+PERFORMANCE
+
+This must remain smooth on mobile.
+
+Use:
+
+* particle pooling
+* reusable VFX objects
+* GPU-friendly particles
+* automatic cleanup
+* limited particle counts
+* no unnecessary DOM/object creation
+
+Do not sacrifice frame rate for visual effects.
+
+ART DIRECTION
+
+Target:
+
+Premium AAA-inspired sci-fi crystal VFX
+cinematic
+luxurious
+high-energy
+dimensional
+colorful
+sharp
+polished
+
+It should look like the gems contain real energy and crystalline material—not like colored circles with particles around them.
+
+First inspect the existing gem rendering/VFX implementation and enhance it intelligently. Do not replace working gameplay or gem logic.
