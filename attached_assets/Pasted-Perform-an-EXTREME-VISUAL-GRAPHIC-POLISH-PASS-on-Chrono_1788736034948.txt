@@ -1,0 +1,443 @@
+Perform an EXTREME VISUAL + GRAPHIC POLISH PASS on Chrono Clash.
+
+The goal is to make the game visually feel like a premium, modern, AAA-inspired sci-fi mobile game.
+
+IMPORTANT:
+
+* This is a visual/art-direction pass.
+* DO NOT change gameplay mechanics.
+* DO NOT change matching logic.
+* DO NOT change scoring.
+* DO NOT change turns.
+* DO NOT change abilities.
+* DO NOT change Mega Strike behavior.
+* Do not remove working functionality.
+* Preserve the current responsive mobile gameplay.
+* Optimize everything for real-device performance.
+
+1. OVERALL ART DIRECTION
+
+Create a cohesive visual identity:
+
+Premium futuristic cosmic battle arena
+2.5D / dimensional presentation
+dark metallic + glass materials
+luminous crystalline gems
+controlled cyan / blue / red / violet energy
+cinematic lighting
+deep contrast
+high-end mobile-game finish
+
+Avoid:
+
+* flat UI
+* cheap gradients
+* generic neon everywhere
+* excessive glow
+* cartoonish visuals
+* clutter
+* unfinished placeholder-looking elements
+
+Everything should feel like it belongs to the same game.
+
+2. GAMEPLAY ENVIRONMENT
+
+Upgrade the entire gameplay background.
+
+Add visual depth:
+
+* layered cosmic atmosphere
+* subtle distant particles/stars
+* dimensional environmental shapes
+* dark metallic structures
+* glass/energy surfaces
+* subtle depth haze
+* controlled light sources
+* atmospheric glow around important gameplay areas
+
+The environment should feel like a real futuristic battle arena rather than a flat background.
+
+Keep the board as the visual focus.
+
+3. BOARD
+
+Make the board feel physically constructed.
+
+Improve:
+
+* dimensional frame
+* metallic/glass materials
+* depth
+* bevels
+* edge highlights
+* internal reflections
+* subtle emissive lighting
+* shadows
+* contact lighting
+* layered frame geometry
+
+The board should feel like a premium physical device floating inside the arena.
+
+Avoid making the frame excessively bright.
+
+4. GEM GRAPHICS
+
+The gems are the HERO visual element.
+
+Make them look like high-value futuristic energy crystals.
+
+Improve:
+
+* 3D depth
+* faceted crystal geometry
+* internal energy
+* translucent edges
+* realistic highlights
+* reflections
+* controlled bloom
+* internal glow
+* subtle animated energy
+* depth shadows
+* contact shadows
+
+Every gem should look dimensional even on a small phone screen.
+
+Colors must remain immediately distinguishable.
+
+5. GEM MATERIAL QUALITY
+
+Avoid the appearance of:
+
+* flat colored icons
+* simple circles
+* generic glowing buttons
+
+Aim for:
+crystal + glass + energy core
+
+The player should visually feel that every gem is a physical object containing energy.
+
+6. LIGHTING
+
+Introduce cinematic lighting hierarchy.
+
+Primary:
+
+* board
+* gems
+* player/opponent state
+* important abilities
+
+Secondary:
+
+* environment
+* background atmosphere
+
+Use colored light selectively.
+
+For example:
+
+* blue/cyan energy around blue gameplay elements
+* red energy around opposing/danger elements
+* violet for cosmic/special abilities
+
+Do not wash the entire screen in neon.
+
+7. HUD GRAPHICS
+
+Upgrade the HUD to premium sci-fi quality.
+
+Improve:
+
+* health bars
+* energy bars
+* player indicators
+* opponent indicators
+* gem/currency counters
+* ability buttons
+* icons
+* typography
+* spacing
+* panels
+* separators
+* backgrounds
+
+Use:
+
+* glass panels
+* subtle metallic borders
+* restrained glow
+* depth
+* clean typography
+* consistent icon treatment
+
+The HUD should look designed rather than assembled from standard UI components.
+
+8. BUTTONS
+
+Make interactive controls visually premium.
+
+States:
+
+* normal
+* pressed
+* selected
+* unavailable
+* cooldown
+* ready
+
+Use subtle:
+
+* depth
+* highlight
+* inner glow
+* press animation
+* edge lighting
+
+Do not make buttons oversized or overly bright.
+
+9. ABILITY GRAPHICS
+
+Make abilities visually distinctive.
+
+Each ability should have:
+
+* unique icon treatment
+* unique color identity
+* premium button design
+* subtle ready-state energy
+* polished activation feedback
+
+Mega Strike should feel especially powerful.
+
+10. MENUS
+
+Polish:
+
+* main menu
+* game-start screen
+* pause screen if present
+* settings if present
+* victory screen
+* defeat screen
+* restart screen
+
+Every screen should feel like part of the same visual system.
+
+Use consistent:
+
+* typography
+* spacing
+* panels
+* lighting
+* iconography
+* transitions
+* background treatment
+
+11. VICTORY / DEFEAT GRAPHICS
+
+Victory:
+
+* cinematic energy
+* premium typography
+* controlled particles
+* dimensional result panel
+* strong visual hierarchy
+
+Defeat:
+
+* darker atmospheric treatment
+* controlled red/crimson energy
+* clean result presentation
+
+Avoid cheap full-screen overlays.
+
+12. TYPOGRAPHY
+
+Audit the entire game for inconsistent typography.
+
+Create a clear hierarchy:
+
+TITLE
+HEADLINE
+IMPORTANT VALUE
+SECONDARY VALUE
+BUTTON
+SMALL LABEL
+
+Use consistent:
+
+* font family
+* weight
+* letter spacing
+* capitalization
+* glow
+* alignment
+
+Numbers such as score, health, and energy should be especially readable.
+
+13. GRAPHIC CONSISTENCY
+
+Audit every visible element.
+
+No element should look like it came from a different game.
+
+Check:
+
+* icons
+* panels
+* borders
+* shadows
+* glow
+* buttons
+* text
+* gems
+* board
+* background
+* VFX
+* HUD
+
+Create one coherent visual language.
+
+14. DEPTH / 2.5D
+
+Push the existing 2.5D presentation much further.
+
+Use layered depth between:
+
+* background
+* environment
+* board
+* board frame
+* gems
+* VFX
+* HUD
+
+Add subtle parallax where appropriate.
+
+The game should NOT look like a flat 2D web interface.
+
+15. CINEMATIC PRESENTATION
+
+Add subtle cinematic polish to major moments:
+
+* match
+* combo
+* ability activation
+* Mega Strike
+* major damage
+* victory
+* defeat
+
+Use:
+
+* lighting pulses
+* controlled bloom
+* depth effects
+* short transitions
+* subtle camera movement
+* layered VFX
+
+Keep gameplay readable.
+
+16. MICRO GRAPHIC POLISH
+
+Look for small visual imperfections:
+
+* inconsistent spacing
+* misaligned elements
+* uneven padding
+* awkward scaling
+* jagged edges
+* inconsistent glow
+* poor contrast
+* weak hierarchy
+* elements touching screen edges
+* UI overlapping gameplay
+* icons that don’t visually match
+* elements that look like placeholders
+
+Fix all of these.
+
+17. MOBILE RESPONSIVENESS
+
+Test the visual layout at multiple phone sizes/orientations supported by the game.
+
+Make sure:
+
+* HUD doesn’t overlap
+* board remains centered
+* gems remain readable
+* buttons remain accessible
+* text doesn’t clip
+* panels don’t overflow
+* effects don’t obscure important information
+* safe areas are respected
+
+18. PERFORMANCE
+
+Do not sacrifice performance for graphics.
+
+Inspect:
+
+* excessive shadows
+* excessive blur
+* excessive particles
+* expensive filters
+* unnecessary DOM layers
+* repeated rendering
+* memory-heavy effects
+
+Use efficient techniques and reuse existing systems where possible.
+
+Target smooth gameplay on real mobile hardware.
+
+19. EXISTING CSS / STYLE ARCHITECTURE
+
+Before changing styles, inspect the existing stylesheet architecture carefully.
+
+There may be later override rules that supersede earlier visual changes.
+
+Do not blindly append conflicting styles.
+
+Find the actual active selectors and fix the correct rules.
+
+Avoid creating another huge layer of unnecessary overrides.
+
+20. FINAL VISUAL QA
+
+After implementation, inspect the actual running game screen-by-screen.
+
+Check:
+
+MAIN MENU
+→ GAMEPLAY
+→ GEM INTERACTION
+→ COMBO
+→ ABILITIES
+→ MEGA STRIKE
+→ VICTORY
+→ DEFEAT
+→ RESTART
+
+For each screen ask:
+
+“Does this look like a premium commercial mobile game?”
+
+If something looks generic, flat, unfinished, inconsistent, or cheap, polish it.
+
+Do not stop when the code works.
+
+The target is:
+
+AAA-inspired
+premium
+cinematic
+dimensional
+crystalline
+futuristic
+cohesive
+mobile-first
+high visual quality
+
+Most importantly: preserve the existing gameplay and functionality while dramatically improving the visual presentation.
