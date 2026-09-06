@@ -28,6 +28,11 @@ describe("power ability VFX presentation", () => {
     expect(renderer).toContain("targetX: cx");
     expect(renderer).toContain("this.stepParticles(view, dt)");
     expect(renderer).toContain("this.stepCrystalShards(view, dt)");
+    expect(renderer).toContain("private drawGemDestruction");
+    expect(renderer).toContain("private drawEnergyLinks");
+    expect(renderer).toContain("view.hitStopUntil");
+    expect(renderer).toContain('shape: i % 5 === 0 ? "spark" : i % 3 === 0 ? "dust" : "crystal"');
+    expect(renderer).toContain("facet: i % 3 === 0 ? crystal.edge : crystal.core");
   });
 
   it("keeps armed targeting in the existing Canvas renderer", () => {
@@ -56,6 +61,8 @@ describe("power ability VFX presentation", () => {
     expect(styles).toContain("@keyframes cc-power-press-mega");
     expect(styles).toContain("@keyframes cc-power-button-pulse");
     expect(styles).toContain('scale(0.94)');
+    expect(renderer).toContain("const internal = ctx.createRadialGradient");
+    expect(renderer).toContain("const corePulse = 0.72 + Math.sin(now / 680");
   });
 
   it("keeps real power resolution in the session path", () => {

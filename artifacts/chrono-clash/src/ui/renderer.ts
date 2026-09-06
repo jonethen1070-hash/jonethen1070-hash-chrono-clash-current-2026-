@@ -84,6 +84,7 @@ interface Particle {
   pull?: number;
   drag?: number;
   streak?: number;
+  shape?: "crystal" | "spark" | "dust";
 }
 
 interface Shockwave {
@@ -109,6 +110,8 @@ interface CrystalShard {
   size: number;
   color: string;
   trail?: number;
+  facet?: string;
+  depth?: number;
 }
 
 interface SocketPulse {
@@ -201,6 +204,8 @@ export interface RenderVfxInspection {
   settleCount: number;
   shardCount: number;
   shockwaveCount: number;
+  energyLinkCount: number;
+  hitStopActive: boolean;
   socketPulseCount: number;
 }
 export interface BoardRenderInspection {
@@ -221,6 +226,7 @@ class BoardView {
   particles: Particle[] = [];
   shards: CrystalShard[] = [];
   shockwaves: Shockwave[] = [];
+  energyLinks: { x1: number; y1: number; x2: number; y2: number; born: number; life: number; color: string }[] = [];
   socketPulses: SocketPulse[] = [];
   powerEffects: PowerEffect[] = [];
   powerTargeting: PowerTargeting | null = null;
@@ -236,6 +242,7 @@ class BoardView {
   particleCapHits = 0;
   shake = 0;
   flash = 0;
+  hitStopUntil = 0;
 
   reset(): void {
     this.tiles.clear();
@@ -246,6 +253,7 @@ class BoardView {
     this.particles = [];
     this.shards = [];
     this.shockwaves = [];
+    this.energyLinks = [];
     this.socketPulses = [];
     this.powerEffects = [];
     this.powerTargeting = null;
@@ -261,6 +269,7 @@ class BoardView {
     this.particleCapHits = 0;
     this.shake = 0;
     this.flash = 0;
+    this.hitStopUntil = 0;
   }
 }
 
@@ -276,6 +285,7 @@ export class BoardRenderer {
   private wellCache = new Map<string, HTMLCanvasElement>();
   private gemSprites = new Map<string, HTMLCanvasElement>();
   private particlePool: Particle[] = [];
+  private shardPool: CrystalShard[] = [];
   private tileScratch: VisualTile[] = [];
   private hintBits = new Uint8Array(ROWS * COLS);
   private lastDpr = 0;
@@ -561,6 +571,8 @@ export class BoardRenderer {
         settleCount: this.playerView.settleCount,
         shardCount: this.playerView.shards.length,
         shockwaveCount: this.playerView.shockwaves.length,
+        energyLinkCount: this.playerView.energyLinks.length,
+        hitStopActive: this.playerView.hitStopUntil > performance.now(),
         socketPulseCount: this.playerView.socketPulses.length,
       },
     };
@@ -1238,6 +1250,11 @@ export class BoardRenderer {
           direction.x,
           direction.y,
         );
+         if (tile.breakStrength >= 4 || recentClearSize >= 6) {
+           view.hitStopUntil = Math.max(view.hitStopUntil, now + 28);
+           view.shake = Math.max(view.shake, Math.min(5.5, 1.6 + tile.breakStrength * 0.52));
+           view.flash = Math.max(view.flash, 0.18 + Math.min(0.22, tile.breakStrength * 0.03));
+         }
       }
       if (isPlayer) view.shake = Math.max(view.shake, 0.9);
     }
@@ -1262,6 +1279,9 @@ export class BoardRenderer {
         continue;
       }
       view.seenFx.add(fxEvent.id);
+      if (fxEvent.kind === "clear" && fxEvent.cells && fxEvent.cells.length > 1) {
+        this.queueEnergyLinks(view, fxEvent.cells, ix, iy, cell, now, fxEvent.born);
+      }
       if (fxEvent.kind === "power" || fxEvent.kind === "rewind") {
         const castTarget =
           isPlayer && view.powerCastTarget && now - view.powerCastTarget.born < 900
@@ -1348,7 +1368,7 @@ export class BoardRenderer {
           tile.vy = 0;
         }
       }
-      tile.dieAge += dt;
+       tile.dieAge += dt;
       if (!tile.burstEmitted && tile.dieAge >= 0) {
         tile.burstEmitted = true;
         view.fractureCount += 1;
@@ -1363,6 +1383,11 @@ export class BoardRenderer {
           direction.x,
           direction.y,
         );
+         if (tile.breakStrength >= 4 || recentClearSize >= 6) {
+           view.hitStopUntil = Math.max(view.hitStopUntil, now + 28);
+           view.shake = Math.max(view.shake, Math.min(5.5, 1.6 + tile.breakStrength * 0.52));
+           view.flash = Math.max(view.flash, 0.18 + Math.min(0.22, tile.breakStrength * 0.03));
+         }
       }
       const pose = easeCrystalDie(Math.max(0, tile.dieAge) / dieDur);
       if (reduced) {
@@ -1460,6 +1485,7 @@ export class BoardRenderer {
     this.stepCrystalShards(view, dt);
     this.drawParticles(view);
     this.drawCrystalShards(view);
+    this.drawEnergyLinks(view, now);
     this.drawShockwaves(view, now);
     this.drawFloats(view, now);
 
@@ -1901,6 +1927,7 @@ export class BoardRenderer {
       p.pull = init.pull;
       p.drag = init.drag;
       p.streak = init.streak;
+      p.shape = init.shape;
     }
     view.particles.push(p);
   }
@@ -1910,8 +1937,21 @@ export class BoardRenderer {
   }
 
   private spawnCrystalShard(view: BoardView, shard: CrystalShard): void {
-    view.shards.push(shard);
-    if (view.shards.length > 40) view.shards.splice(0, view.shards.length - 40);
+    const pooled = this.shardPool.pop();
+    if (pooled) {
+      Object.assign(pooled, shard);
+      view.shards.push(pooled);
+    } else {
+      view.shards.push(shard);
+    }
+    if (view.shards.length > 40) {
+      const removed = view.shards.splice(0, view.shards.length - 40);
+      for (const item of removed) this.recycleCrystalShard(item);
+    }
+  }
+
+  private recycleCrystalShard(shard: CrystalShard): void {
+    if (this.shardPool.length < 96) this.shardPool.push(shard);
   }
 
   private gemSprite(atlas: HTMLCanvasElement, colorIndex: number, color: string, inner: number, selected: boolean): HTMLCanvasElement {
@@ -1999,6 +2039,8 @@ export class BoardRenderer {
         size: cell * ((shardTier === 0 ? 0.052 : shardTier === 1 ? 0.078 : 0.112) + Math.random() * (megaHero ? 0.022 : 0.014)),
         color: i % 4 === 0 ? crystal.edge : i % 2 ? accent : hex,
         trail: megaHero ? 1.35 : burstHero ? 1.05 : 0.72,
+         facet: i % 3 === 0 ? crystal.edge : crystal.core,
+         depth: 0.38 + (i % 4) * 0.16,
       });
     }
 
@@ -2019,6 +2061,7 @@ export class BoardRenderer {
         size: cell * ((megaHero ? 0.038 : burstHero ? 0.035 : 0.032) + Math.random() * (megaHero ? 0.032 : 0.026)),
         color: i % 4 === 0 ? crystal.edge : i % 2 === 0 ? hex : accent,
         streak: megaHero ? 1.15 : burstHero ? 0.92 : 0.6,
+         shape: i % 5 === 0 ? "spark" : i % 3 === 0 ? "dust" : "crystal",
       });
     }
     this.addShockwave(
@@ -2059,6 +2102,7 @@ export class BoardRenderer {
         size: cell * (0.028 + Math.random() * 0.022),
         color: i % 2 === 0 ? "#EAFBFF" : hex,
         g: 0.04,
+         shape: "spark",
       });
     }
     this.capParticles(view);
@@ -2576,6 +2620,7 @@ export class BoardRenderer {
       shard.rotation += shard.spin * frameScale;
       shard.life -= dt;
       if (shard.life > 0) view.shards[write++] = shard;
+      else this.recycleCrystalShard(shard);
     }
     view.shards.length = write;
   }
@@ -2602,18 +2647,34 @@ export class BoardRenderer {
         ctx.stroke();
       }
       ctx.globalAlpha = a;
-      ctx.beginPath();
-      ctx.moveTo(p.x, p.y - r);
-      ctx.lineTo(p.x + r * 0.52, p.y);
-      ctx.lineTo(p.x, p.y + r);
-      ctx.lineTo(p.x - r * 0.52, p.y);
-      ctx.closePath();
-      ctx.fill();
-      ctx.globalAlpha = a * 0.5;
-      ctx.fillStyle = "#fff";
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, r * 0.28, 0, Math.PI * 2);
-      ctx.fill();
+      if (p.shape === "spark") {
+        ctx.strokeStyle = p.color;
+        ctx.lineWidth = Math.max(0.65, r * 0.22);
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(p.x - r * 1.3, p.y);
+        ctx.lineTo(p.x + r * 1.3, p.y);
+        ctx.moveTo(p.x, p.y - r * 1.3);
+        ctx.lineTo(p.x, p.y + r * 1.3);
+        ctx.stroke();
+      } else if (p.shape === "dust") {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, Math.max(0.7, r * 0.44), 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y - r);
+        ctx.lineTo(p.x + r * 0.52, p.y);
+        ctx.lineTo(p.x, p.y + r);
+        ctx.lineTo(p.x - r * 0.52, p.y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = a * 0.5;
+        ctx.fillStyle = "#fff";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, r * 0.28, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
     ctx.restore();
     ctx.globalAlpha = 1;
@@ -2651,6 +2712,14 @@ export class BoardRenderer {
       ctx.lineTo(size * 0.16, size * 0.52);
       ctx.closePath();
       ctx.fill();
+      ctx.globalAlpha = alpha * (0.3 + (shard.depth ?? 0.5) * 0.36);
+      ctx.fillStyle = shard.facet ?? "#FFFFFF";
+      ctx.beginPath();
+      ctx.moveTo(-size * 0.12, -size * 0.58);
+      ctx.lineTo(size * 0.58, -size * 0.12);
+      ctx.lineTo(size * 0.16, size * 0.08);
+      ctx.closePath();
+      ctx.fill();
       ctx.globalAlpha = alpha * 0.72;
       ctx.fillStyle = "#FFFFFF";
       ctx.beginPath();
@@ -2662,6 +2731,82 @@ export class BoardRenderer {
       ctx.restore();
     }
     ctx.restore();
+  }
+
+  private queueEnergyLinks(
+    view: BoardView,
+    cells: Coord[],
+    ix: number,
+    iy: number,
+    cell: number,
+    now: number,
+    born: number,
+  ): void {
+    const candidates = cells.slice(0, this.fx.quality === "medium" ? 8 : 12);
+    const colorAt = (at: Coord): string => {
+      const tile = [...view.tiles.values()].find((candidate) => candidate.r === at.r && candidate.c === at.c);
+      return crystalAccent(tile?.color ?? 6).core;
+    };
+    for (let i = 0; i < candidates.length; i++) {
+      const a = candidates[i]!;
+      let nearest: Coord | null = null;
+      let nearestDistance = Number.POSITIVE_INFINITY;
+      for (let j = i + 1; j < candidates.length; j++) {
+        const b = candidates[j]!;
+        const distance = Math.hypot(a.r - b.r, a.c - b.c);
+        if (distance <= 2.5 && distance < nearestDistance) {
+          nearest = b;
+          nearestDistance = distance;
+        }
+      }
+      if (!nearest) continue;
+      view.energyLinks.push({
+        x1: ix + GAP + a.c * (cell + GAP) + cell / 2,
+        y1: iy + GAP + a.r * (cell + GAP) + cell / 2,
+        x2: ix + GAP + nearest.c * (cell + GAP) + cell / 2,
+        y2: iy + GAP + nearest.r * (cell + GAP) + cell / 2,
+        born: Math.max(now, born),
+        life: this.fx.quality === "high" ? 250 : 190,
+        color: colorAt(a),
+      });
+    }
+    if (view.energyLinks.length > 18) {
+      view.energyLinks.splice(0, view.energyLinks.length - 18);
+    }
+  }
+
+  private drawEnergyLinks(view: BoardView, now: number): void {
+    if (!view.energyLinks.length || this.fx.quality === "low" || this.fx.reducedMotion) return;
+    const ctx = this.ctx;
+    let write = 0;
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    for (const link of view.energyLinks) {
+      const age = now - link.born;
+      if (age < 0 || age >= link.life) continue;
+      view.energyLinks[write++] = link;
+      const t = age / link.life;
+      const alpha = Math.sin(Math.PI * t) * (this.fx.quality === "high" ? 0.34 : 0.24);
+      const pulse = (now / 110 + link.x1 + link.y1) % 1;
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = link.color;
+      ctx.lineWidth = Math.max(0.7, this.lastPlayerCell * 0.012);
+      ctx.shadowColor = link.color;
+      ctx.shadowBlur = this.lastPlayerCell * 0.06;
+      ctx.beginPath();
+      ctx.moveTo(link.x1, link.y1);
+      ctx.lineTo(link.x2, link.y2);
+      ctx.stroke();
+      ctx.globalAlpha = alpha * 1.8;
+      ctx.fillStyle = "#FFFFFF";
+      const hx = link.x1 + (link.x2 - link.x1) * pulse;
+      const hy = link.y1 + (link.y2 - link.y1) * pulse;
+      ctx.beginPath();
+      ctx.arc(hx, hy, Math.max(0.8, this.lastPlayerCell * 0.018), 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+    view.energyLinks.length = write;
   }
 
   private drawFloats(view: BoardView, now: number): void {
@@ -3152,6 +3297,20 @@ export class BoardRenderer {
     ) {
       this.drawTargetCrystalResponse(cx, cy, s, tile.color, targeting, now);
     }
+    if (tile.dying && this.fx.quality !== "low" && !this.fx.reducedMotion) {
+      const dieDur = gemDieDuration(this.fx.animation, false);
+      this.drawGemDestruction(
+        cx,
+        cy,
+        s,
+        tile.color,
+        tile.dieAge,
+        dieDur,
+        tile.breakStrength,
+        tile.fractureSeed,
+        now,
+      );
+    }
 
     if (tile.flash > 0.04) {
       if (useAtlas) {
@@ -3252,6 +3411,37 @@ export class BoardRenderer {
     ctx.fillStyle = shadow;
     ctx.fillRect(cx - s, cy - s, s * 2, s * 2);
     ctx.globalAlpha = 1;
+    ctx.restore();
+
+    ctx.save();
+    jewelPath(ctx, cx, cy, s * 0.82, colorIndex);
+    ctx.clip();
+    ctx.globalCompositeOperation = "lighter";
+    const corePulse = 0.72 + Math.sin(now / 680 + cx * 0.01) * 0.12;
+    const internal = ctx.createRadialGradient(
+      cx - s * 0.12,
+      cy - s * 0.18,
+      s * 0.01,
+      cx,
+      cy + s * 0.04,
+      s * 0.42,
+    );
+    internal.addColorStop(0, colorWithAlpha("#FFFFFF", 0.34 * intensity * corePulse));
+    internal.addColorStop(0.14, colorWithAlpha(crystal.core, 0.38 * intensity * corePulse));
+    internal.addColorStop(0.48, colorWithAlpha(color, 0.1 * intensity));
+    internal.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = internal;
+    ctx.fillRect(cx - s * 0.9, cy - s * 0.9, s * 1.8, s * 1.8);
+
+    ctx.globalAlpha = 0.22 * intensity;
+    ctx.strokeStyle = crystal.edge;
+    ctx.lineWidth = Math.max(0.7, s * 0.012);
+    ctx.beginPath();
+    ctx.moveTo(cx - s * 0.42, cy + s * 0.34);
+    ctx.lineTo(cx - s * 0.08, cy - s * 0.34);
+    ctx.lineTo(cx + s * 0.22, cy + s * 0.02);
+    ctx.lineTo(cx + s * 0.44, cy - s * 0.28);
+    ctx.stroke();
     ctx.restore();
 
     ctx.save();
@@ -3550,6 +3740,100 @@ export class BoardRenderer {
     ctx.beginPath();
     ctx.arc(cx, cy, s * (0.12 + progress * 0.14), 0, Math.PI * 2);
     ctx.fill();
+    ctx.restore();
+  }
+
+  private drawGemDestruction(
+    cx: number,
+    cy: number,
+    s: number,
+    colorIndex: number,
+    dieAge: number,
+    dieDur: number,
+    strength: number,
+    seed: number,
+    now: number,
+  ): void {
+    const ctx = this.ctx;
+    const crystal = crystalAccent(colorIndex);
+    const color = COLORS[colorIndex - 1] ?? "#FFFFFF";
+    const anticipation = dieAge < 0 ? Math.max(0, Math.min(1, 1 + dieAge / 0.072)) : 1;
+    const impact = dieAge < 0 ? 0 : Math.max(0, Math.min(1, dieAge / Math.max(0.001, dieDur)));
+    const detonation = Math.sin(Math.PI * Math.min(1, impact * 1.18));
+    const pulse = anticipation > 0 ? Math.sin(anticipation * Math.PI) : 0;
+    const direction = seed * 1.7 + now / 980;
+
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    if (anticipation > 0 && dieAge < 0) {
+      const build = 0.2 + anticipation * 0.56 + pulse * 0.22;
+      const core = ctx.createRadialGradient(cx - s * 0.08, cy - s * 0.12, 0, cx, cy, s * 0.48);
+      core.addColorStop(0, colorWithAlpha("#FFFFFF", 0.68 * build));
+      core.addColorStop(0.18, colorWithAlpha(crystal.core, 0.58 * build));
+      core.addColorStop(0.52, colorWithAlpha(color, 0.22 * build));
+      core.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = core;
+      ctx.beginPath();
+      ctx.arc(cx, cy, s * (0.24 + anticipation * 0.08), 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.globalAlpha = 0.32 + anticipation * 0.42;
+      ctx.strokeStyle = crystal.edge;
+      ctx.shadowColor = crystal.bloom;
+      ctx.shadowBlur = s * 0.11;
+      ctx.lineWidth = Math.max(0.8, s * 0.014);
+      ctx.beginPath();
+      ctx.moveTo(cx - s * 0.62 + anticipation * s * 0.12, cy - s * 0.44);
+      ctx.lineTo(cx + s * 0.48 + anticipation * s * 0.12, cy + s * 0.48);
+      ctx.stroke();
+    }
+
+    if (dieAge >= 0) {
+      const radius = s * (0.22 + detonation * (0.42 + Math.min(0.12, strength * 0.012)));
+      const flash = Math.max(0, 1 - impact * 1.45);
+      if (flash > 0) {
+        const core = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius * 1.3);
+        core.addColorStop(0, colorWithAlpha("#FFFFFF", 0.88 * flash));
+        core.addColorStop(0.16, colorWithAlpha(crystal.core, 0.66 * flash));
+        core.addColorStop(0.52, colorWithAlpha(color, 0.18 * flash));
+        core.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = core;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius * 1.25, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      const ringFade = Math.max(0, 1 - impact * 1.8);
+      for (let ring = 0; ring < 3; ring++) {
+        const ringT = Math.max(0, Math.min(1, impact * 1.45 - ring * 0.13));
+        if (ringT <= 0) continue;
+        ctx.globalAlpha = ringFade * (ring === 0 ? 0.74 : 0.34);
+        ctx.strokeStyle = ring === 0 ? crystal.edge : color;
+        ctx.shadowColor = crystal.bloom;
+        ctx.shadowBlur = s * (ring === 0 ? 0.12 : 0.07);
+        ctx.lineWidth = Math.max(0.7, s * (ring === 0 ? 0.018 : 0.01));
+        ctx.beginPath();
+        ctx.arc(
+          cx,
+          cy,
+          s * (0.18 + ringT * (0.46 + ring * 0.14)),
+          direction + ring * 0.8,
+          direction + Math.PI * (1.35 + ring * 0.18),
+        );
+        ctx.stroke();
+      }
+
+      ctx.globalAlpha = Math.max(0, 0.22 - impact * 0.18);
+      ctx.strokeStyle = crystal.core;
+      ctx.lineWidth = Math.max(0.8, s * 0.012);
+      ctx.beginPath();
+      ctx.arc(cx, cy, s * (0.58 + detonation * 0.22), 0, Math.PI * 2);
+      ctx.stroke();
+    }
     ctx.restore();
   }
 
