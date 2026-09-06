@@ -338,6 +338,86 @@ test("guest mobile matches survive rapid swipes, cancellation, and layout checks
   expect(state.scrollTop).toBe(0);
 });
 
+test("mobile targeted power release outside the board stays unspent and leaves swipes responsive", async ({ page, context }) => {
+  await page.goto("/");
+  await expect(page.locator("#menu.active")).toBeVisible();
+
+  await page.locator("#menuGuest").click();
+  await expect(page.locator("#match.active")).toBeVisible();
+  await expect.poll(async () => page.locator("#overlay").evaluate((el) => el.classList.contains("hidden"))).toBe(true);
+
+  const board = page.locator("#playerBoard");
+  const boardBox = await board.boundingBox();
+  expect(boardBox).not.toBeNull();
+  const box = boardBox!;
+  const viewport = page.viewportSize();
+  expect(viewport).not.toBeNull();
+
+  await page.evaluate(() => {
+    const session = (window as Window & { __chrono?: { session?: { player: { energy: number } } } }).__chrono?.session;
+    if (!session) throw new Error("Missing Chrono session");
+    session.player.energy = 100;
+  });
+  await page.locator("#energyBurstAttack").click();
+  await expect(page.locator("#energyBurstAttack")).toHaveAttribute("aria-pressed", "true");
+
+  const target = await page.evaluate(() => {
+    const session = (window as Window & {
+      __chrono?: { session?: { hintCells: (now: number) => Array<{ r: number; c: number }> } };
+    }).__chrono?.session;
+    const hint = session?.hintCells(performance.now()) ?? [];
+    return hint[0] ?? { r: 0, c: 0 };
+  });
+  const targetPoint = cellCenter(box, target.r, target.c);
+  const outsidePoint = box.y > 20
+    ? { x: box.x + box.width / 2, y: box.y - 12 }
+    : { x: 1, y: Math.min(viewport!.height - 1, box.y + box.height / 2) };
+  expect(outsidePoint.x < box.x || outsidePoint.x > box.x + box.width || outsidePoint.y < box.y || outsidePoint.y > box.y + box.height).toBe(true);
+
+  const cdp = await context.newCDPSession(page);
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchStart",
+    touchPoints: [{ x: targetPoint.x, y: targetPoint.y, id: 61 }],
+  });
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchMove",
+    touchPoints: [{ x: outsidePoint.x, y: outsidePoint.y, id: 61 }],
+  });
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchEnd",
+    touchPoints: [],
+  });
+
+  const canceledPower = await page.evaluate(() => {
+    const chrono = (window as Window & { __chrono?: { session?: { player: { energy: number }; drag: unknown } } }).__chrono;
+    return {
+      energy: chrono?.session?.player.energy,
+      dragging: chrono?.session?.drag,
+    };
+  });
+  expect(canceledPower.energy).toBe(100);
+  expect(canceledPower.dragging).toBeNull();
+  await expect(page.locator("#energyBurstAttack")).toHaveAttribute("aria-pressed", "false");
+
+  const move = await page.evaluate(() => {
+    const session = (window as Window & {
+      __chrono?: { session?: { hintCells: (now: number) => Array<{ r: number; c: number }> } };
+    }).__chrono?.session;
+    const hint = session?.hintCells(performance.now()) ?? [];
+    if (hint.length < 2) throw new Error("Missing valid follow-up swipe");
+    return { from: hint[0]!, to: hint[1]! };
+  });
+  const scoreBefore = await page.evaluate(() => {
+    const session = (window as Window & { __chrono?: { session?: { player: { score: number } } } }).__chrono?.session;
+    return session?.player.score ?? 0;
+  });
+  await touchSwipe(cdp, cellCenter(box, move.from.r, move.from.c), cellCenter(box, move.to.r, move.to.c), 62);
+  await expect.poll(async () => page.evaluate(() => {
+    const session = (window as Window & { __chrono?: { session?: { player: { score: number } } } }).__chrono?.session;
+    return session?.player.score ?? 0;
+  })).toBeGreaterThan(scoreBefore);
+});
+
 test("real touch gestures play only the committed swap WAV progression", async ({ page, context }) => {
   await page.addInitScript(() => {
     localStorage.setItem(
