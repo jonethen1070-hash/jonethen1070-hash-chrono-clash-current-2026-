@@ -60,17 +60,17 @@ describe("crystal gem motion curves", () => {
     const fallOne = gemTravelDuration(40, 40, "fall", "high", false);
     const fallThree = gemTravelDuration(40 * 3, 40, "fall", "high", false);
     const fallFar = gemTravelDuration(40 * 5, 40, "fall", "high", false);
-    expect(SWAP_PUSH_MS).toBe(120);
-    expect(SWAP_MAGNET_MS).toBe(80);
-    expect(SWAP_TOTAL_MS).toBe(200);
-    expect(swap).toBe(0.2);
-    expect(fallOne).toBeCloseTo(0.22, 5);
+    expect(SWAP_PUSH_MS).toBe(105);
+    expect(SWAP_MAGNET_MS).toBe(70);
+    expect(SWAP_TOTAL_MS).toBe(175);
+    expect(swap).toBe(0.175);
+    expect(fallOne).toBeCloseTo(0.16, 5);
     expect(fallThree).toBeGreaterThan(fallOne);
     expect(fallFar).toBeGreaterThan(fallThree);
-    expect(fallThree).toBeCloseTo(0.38, 5);
-    expect(fallFar).toBeCloseTo(0.54, 5);
-    expect(gemTravelDuration(40 * 4, 40, "fall", "high", false)).toBeCloseTo(0.46, 5);
-    expect(gemTravelDuration(40 * 8, 40, "fall", "high", false)).toBe(0.6);
+    expect(fallThree).toBeCloseTo(0.29, 5);
+    expect(fallFar).toBeCloseTo(0.42, 5);
+    expect(gemTravelDuration(40 * 4, 40, "fall", "high", false)).toBeCloseTo(0.355, 5);
+    expect(gemTravelDuration(40 * 8, 40, "fall", "high", false)).toBe(0.52);
     expect(fallFar).toBeGreaterThan(swap);
     expect(gemFallDelay(0, 3, "high", false)).toBeLessThan(gemFallDelay(7, 3, "high", false));
     expect(gemFallDelay(3, 2, "high", true)).toBe(0);
@@ -78,9 +78,9 @@ describe("crystal gem motion curves", () => {
   });
 
   it("blooms then dissolves matched crystals instead of popping them", () => {
-    expect(gemDieDuration("high", false)).toBe(0.15);
-    expect(gemDieDuration("medium", false)).toBe(0.135);
-    expect(gemDieDuration("low", false)).toBe(0.12);
+    expect(gemDieDuration("high", false)).toBe(0.12);
+    expect(gemDieDuration("medium", false)).toBe(0.11);
+    expect(gemDieDuration("low", false)).toBe(0.1);
     const start = easeCrystalDie(0);
     const bloom = easeCrystalDie(0.15);
     const end = easeCrystalDie(1);
@@ -195,9 +195,9 @@ describe("landing feedback", () => {
     expect(renderer).toContain("tile.scale = 1.015");
     expect(renderer).toContain("primeSwapPose");
     expect(renderer).toContain("life: 64");
-    expect(renderer).toContain("const MATCH_IMPACT_MS = 72");
-    expect(renderer).toContain("const MATCH_STAGGER_MIN_MS = 12");
-    expect(renderer).toContain("const MATCH_STAGGER_STEP_MS = 7");
+    expect(renderer).toContain("const MATCH_IMPACT_MS = 54");
+    expect(renderer).toContain("const MATCH_STAGGER_MIN_MS = 8");
+    expect(renderer).toContain("const MATCH_STAGGER_STEP_MS = 4");
     expect(renderer).toContain("const cascadeHold");
     expect(renderer).toContain("life: megaHero ? 0.28 : burstHero ? 0.23 : 0.18");
     expect(renderer).toContain("const charge =");

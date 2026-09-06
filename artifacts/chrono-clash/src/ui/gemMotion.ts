@@ -5,8 +5,8 @@ export const LIVE_GEM_MAX_IN_CELL_DROP = 0.16;
 
 export type GemMoveKind = "swap" | "fall";
 
-export const SWAP_PUSH_MS = 120;
-export const SWAP_MAGNET_MS = 80;
+export const SWAP_PUSH_MS = 105;
+export const SWAP_MAGNET_MS = 70;
 export const SWAP_TOTAL_MS = SWAP_PUSH_MS + SWAP_MAGNET_MS;
 
 export function clamp01(t: number): number {
@@ -70,15 +70,15 @@ export function gemTravelDuration(
   if (reduced) return kind === "swap" ? 0.06 : 0.058;
   const cells = Math.max(0.4, dist / Math.max(cell, 1));
   if (kind === "swap") {
-    if (animation === "low") return 0.18;
-    if (animation === "medium") return 0.2;
+    if (animation === "low") return 0.14;
+    if (animation === "medium") return 0.15;
     return SWAP_TOTAL_MS / 1000;
   }
   // Keep a one-cell drop quick enough to read as responsive while preserving
   // progressively longer travel for deeper cascades.
-  const base = animation === "low" ? 0.2 : animation === "medium" ? 0.21 : 0.22;
-  const perCell = animation === "low" ? 0.07 : animation === "medium" ? 0.075 : 0.08;
-  return Math.min(0.6, base + Math.max(0, cells - 1) * perCell);
+  const base = animation === "low" ? 0.14 : animation === "medium" ? 0.15 : 0.16;
+  const perCell = animation === "low" ? 0.055 : animation === "medium" ? 0.06 : 0.065;
+  return Math.min(0.52, base + Math.max(0, cells - 1) * perCell);
 }
 
 export function gemFallDelay(
@@ -88,16 +88,16 @@ export function gemFallDelay(
   reduced: boolean,
 ): number {
   if (reduced || animation === "low") return 0;
-  const spread = animation === "medium" ? 0.007 : 0.01;
-  const readablePause = animation === "medium" ? 0.058 : 0.064;
-  return Math.min(0.11, readablePause + col * spread + Math.max(0, cellsFallen) * 0.003);
+  const spread = animation === "medium" ? 0.002 : 0.003;
+  const lead = animation === "medium" ? 0.006 : 0.008;
+  return Math.min(0.045, lead + col * spread + Math.max(0, cellsFallen) * 0.001);
 }
 
 export function gemDieDuration(animation: Intensity, reduced: boolean): number {
   if (reduced) return 0.055;
-  if (animation === "low") return 0.12;
-  if (animation === "medium") return 0.135;
-  return 0.15;
+  if (animation === "low") return 0.1;
+  if (animation === "medium") return 0.11;
+  return 0.12;
 }
 
 /** Energy bloom, then a short crystal dissolve. Fast enough for competitive play. */

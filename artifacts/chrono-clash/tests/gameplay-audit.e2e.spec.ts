@@ -93,7 +93,9 @@ test("guest player can navigate, swap, use Mega Strike, recover from cancellatio
   const megaResult = await page.evaluate(() => {
     const chrono = (window as Window & { __chrono?: { session?: any } }).__chrono;
     const events = chrono?.session?.fx ?? [];
-    const clear = [...events].reverse().find((event: { kind: string }) => event.kind === "clear");
+    const clear = [...events]
+      .reverse()
+      .find((event: { kind: string; side?: string }) => event.kind === "clear" && event.side === "player");
     return { clearCells: clear?.cells ?? [], energy: chrono?.session?.player.energy ?? 100 };
   });
   expect(megaResult.energy).toBeLessThan(100);

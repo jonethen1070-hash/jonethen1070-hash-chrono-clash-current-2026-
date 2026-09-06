@@ -17,10 +17,10 @@ export const BOARD_FRAME = 6;
 export { LIVE_GEM_MAX_IN_CELL_DROP, liveGemDrawOrigin } from "./gemMotion";
 const GAP = BOARD_GAP;
 const FRAME = BOARD_FRAME;
-const MATCH_IMPACT_MS = 72;
+const MATCH_IMPACT_MS = 54;
 const GEM_VISUAL_SCALE = 1.06;
-const MATCH_STAGGER_MIN_MS = 12;
-const MATCH_STAGGER_STEP_MS = 7;
+const MATCH_STAGGER_MIN_MS = 8;
+const MATCH_STAGGER_STEP_MS = 4;
 const MATCH_STAGGER_MAX_MS = MATCH_STAGGER_MIN_MS + MATCH_STAGGER_STEP_MS * 2;
 const DRAG_FOLLOW = 0.985;
 const DRAG_NEIGHBOR_PUSH = 0.18;
@@ -983,11 +983,12 @@ export class BoardRenderer {
     const hadPendingSwap = view.pendingSwapIds.size > 0;
     const hasMatchPresentation = Number.isFinite(recentClearBorn) || hadPendingSwap;
     const swapWindowMs = Math.max(swapRemainingMs, pendingSwapMs);
-    const recognitionMs = reduced ? 20 : MATCH_IMPACT_MS;
-    const breakMs = gemDieDuration(anim, reduced) * 1000;
     const clearAgeMs = Number.isFinite(recentClearBorn) ? Math.max(0, now - recentClearBorn) : 0;
+    const impactDelay = reduced
+      ? 20
+      : Math.max(MATCH_IMPACT_MS, swapWindowMs + MATCH_IMPACT_MS);
     const cascadeHold = hasMatchPresentation
-      ? Math.max(0, swapWindowMs + recognitionMs + breakMs + MATCH_STAGGER_MAX_MS - clearAgeMs) / 1000
+      ? Math.max(0, impactDelay - clearAgeMs) / 1000
       : 0;
     const populated = view.tiles.size > 0;
     for (let r = 0; r < ROWS; r++) {
@@ -1205,9 +1206,6 @@ export class BoardRenderer {
     }
     this.capParticles(view);
 
-    const impactDelay = this.fx.reducedMotion
-      ? 20
-      : Math.max(MATCH_IMPACT_MS, swapWindowMs + MATCH_IMPACT_MS);
     for (const [id, tile] of view.tiles) {
       if (live.has(id) || tile.dying) continue;
       tile.dying = true;
