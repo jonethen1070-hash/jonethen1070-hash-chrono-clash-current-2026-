@@ -1,0 +1,423 @@
+Perform an EXTREME GAMEPLAY POLISH PASS on Chrono Clash.
+
+This is about making the existing gameplay feel incredibly responsive, satisfying, cinematic, and premium — NOT changing the core game rules.
+
+IMPORTANT:
+
+* Preserve all existing gameplay mechanics and rules.
+* Do not redesign the game.
+* Do not remove working systems.
+* Do not change gem colors, matching rules, scoring rules, turn rules, or win/lose conditions unless fixing an actual bug.
+* Prioritize mobile touch responsiveness and gameplay clarity.
+* Test after every major change.
+
+1. TOUCH / INPUT — EXTREMELY RESPONSIVE
+
+Make gem interaction feel immediate.
+
+* Minimize input latency.
+* Make the entire intended gem hit area easy to tap.
+* Ensure touch coordinates map precisely to the correct board cell.
+* Prevent accidental selection of neighboring gems.
+* Prevent double-triggering from rapid taps.
+* Handle touchstart/touchend/pointer events correctly.
+* Prevent scrolling/gesture interference while playing.
+* Give immediate visual feedback when a gem is touched.
+* Never make the player wonder whether their tap registered.
+
+Add subtle press feedback:
+
+* tiny scale response
+* brightness pulse
+* short glow
+* extremely quick response
+
+Do NOT make the interaction feel slow.
+
+2. GEM SWAP / MOVEMENT FEEL
+
+Make every gem movement feel physical and deliberate.
+
+* Smooth acceleration/deceleration.
+* No robotic linear movement.
+* Use subtle anticipation before movement.
+* Use satisfying easing.
+* Prevent visual snapping.
+* Prevent gems from overlapping during movement.
+* Keep movement synchronized with the actual board state.
+
+The player’s action should feel instantly connected to the result.
+
+3. MATCH FEEDBACK
+
+When a valid match occurs:
+
+* Immediately identify the matched gems.
+* Give them a brief visual confirmation.
+* Add a tiny anticipation pulse.
+* Then execute the clear.
+* Make the timing feel intentional and satisfying.
+
+Avoid excessive delay.
+
+The player should instantly understand:
+“I made a match.”
+
+4. GEM CLEAR FEEL
+
+Make gem destruction feel powerful but controlled.
+
+Sequence:
+
+MATCH
+→ anticipation
+→ brief brightness increase
+→ crystal fracture
+→ energy burst
+→ shards/particles
+→ disappearance
+→ board settles
+
+Keep this extremely responsive.
+
+Do not allow VFX to delay the actual gameplay unnecessarily.
+
+5. CASCADE / COMBO FEEL
+
+When a clear causes another match:
+
+* Detect the next cascade cleanly.
+* Give each cascade a slightly stronger sense of impact.
+* Add subtle combo escalation.
+* Synchronize gem movement and VFX.
+* Prevent overlapping animations from making the board confusing.
+
+Example:
+
+1st cascade = normal
+2nd cascade = stronger
+3rd cascade = noticeably more powerful
+4+ = spectacular but still readable
+
+Use timing and feedback, not just larger particle counts.
+
+6. COMBO FEEDBACK
+
+Make combos feel rewarding.
+
+Add:
+
+* dynamic combo indicator
+* short scale/bounce animation
+* energy pulse
+* subtle screen response
+* satisfying audio feedback if audio exists
+* increasing intensity for higher combos
+
+The feedback should communicate:
+
+“That was a GOOD move.”
+
+7. PLAYER ACTION FEEDBACK
+
+Every meaningful player action should receive appropriate feedback.
+
+Examples:
+
+* gem selected
+* valid move
+* invalid move
+* match created
+* cascade
+* combo
+* damage dealt
+* damage received
+* ability activated
+* ability unavailable
+* energy gained
+* energy spent
+* victory
+* defeat
+
+Do not leave important actions visually silent.
+
+8. DAMAGE / COMBAT FEEL
+
+Make attacks feel impactful.
+
+When the opponent takes damage:
+
+* brief target highlight
+* impact flash
+* directional energy effect
+* small hit reaction
+* damage number/indicator if already supported
+* subtle camera impulse for major attacks
+
+When the player takes damage:
+
+* clear but controlled hit feedback
+* health bar response
+* brief red/danger feedback
+* subtle impact response
+
+Do NOT overuse screen shake.
+
+9. HEALTH / ENERGY UI FEEDBACK
+
+Whenever health or energy changes:
+
+* animate the value change.
+* briefly highlight the changed value.
+* animate bars smoothly.
+* make gains and losses visually distinct.
+* Never let the UI suddenly jump without feedback.
+
+Make the HUD feel alive.
+
+10. ABILITIES
+
+Polish every existing ability.
+
+When an ability is available:
+
+* subtle ready-state feedback.
+
+When activated:
+
+* immediate confirmation.
+* clear targeting state.
+* cinematic but short activation sequence.
+
+When unavailable:
+
+* clear feedback explaining why.
+
+Never allow an ability button to appear usable when it isn’t.
+
+11. MEGA STRIKE
+
+Preserve the corrected Mega Strike behavior:
+
+ACTIVATE MEGA STRIKE
+→ select ONE gem
+→ read that gem’s actual color/type
+→ identify ALL gems with that same color
+→ clear ONLY those matching gems
+→ leave every other color untouched.
+
+Polish the interaction:
+
+* Selected gem gets a strong target highlight.
+* Other matching-color gems can briefly reveal/illuminate themselves.
+* Energy travels between matching gems.
+* Matching gems then clear in a cinematic sequence.
+* Nonmatching gems remain completely unaffected.
+
+Do not alter the underlying rule.
+
+12. BOARD RESPONSE
+
+Make the board feel physical.
+
+Use subtle:
+
+* depth response
+* lighting response
+* energy pulses
+* micro movement
+* impact response
+
+The board should feel like a physical futuristic battle device rather than a static UI grid.
+
+Keep the board readable.
+
+13. GAME PACING
+
+Improve the rhythm of gameplay.
+
+Avoid:
+
+* unnecessary pauses
+* long transitions
+* input lockouts
+* waiting for VFX to finish
+* sluggish cascades
+* delayed buttons
+
+The player should always feel that the game is responding.
+
+Use short cinematic moments only for important events.
+
+14. VICTORY
+
+Make winning feel extremely rewarding.
+
+Sequence:
+
+FINAL MOVE
+→ final clear
+→ impact
+→ brief time slowdown
+→ strong victory energy burst
+→ HUD/result transition
+→ victory presentation
+
+Make it feel earned.
+
+15. DEFEAT
+
+Make defeat clear and polished.
+
+* gameplay stops correctly.
+* final impact resolves.
+* defeat presentation appears cleanly.
+* no buttons remain accidentally interactive.
+* restart works immediately.
+
+16. RESTART / STATE RESET
+
+This is extremely important.
+
+Test:
+
+Game
+→ Victory
+→ Restart
+→ New Game
+
+and:
+
+Game
+→ Defeat
+→ Restart
+→ New Game
+
+Verify:
+
+* no duplicate gems
+* no duplicate event listeners
+* no old timers
+* no old animations
+* no stale scores
+* no stale health
+* no stale energy
+* no stale ability states
+* no previous game state leaking into the new match.
+
+17. MOBILE PERFORMANCE
+
+Target smooth real-device gameplay.
+
+Inspect for:
+
+* unnecessary rendering
+* excessive particles
+* unnecessary DOM updates
+* repeated object creation
+* memory leaks
+* timers that aren’t cleared
+* event listeners that accumulate
+* expensive animation loops
+
+Use pooling/reuse where appropriate.
+
+Gameplay responsiveness is more important than adding more effects.
+
+18. AUDIO / HAPTIC FEEL
+
+If audio/haptics already exist, synchronize them precisely with gameplay.
+
+Examples:
+
+tap
+→ subtle click
+
+match
+→ satisfying confirmation
+
+clear
+→ crystal impact
+
+cascade
+→ escalating sound
+
+ability
+→ distinctive activation sound
+
+major attack
+→ stronger impact
+
+victory
+→ rewarding completion
+
+Keep audio short and responsive.
+
+19. MICRO-POLISH
+
+Look for hundreds of tiny opportunities to improve perceived quality:
+
+* 50–150ms timing improvements
+* better easing
+* tiny scale changes
+* smoother UI transitions
+* cleaner state changes
+* better anticipation
+* better impact timing
+* better visual hierarchy
+* fewer unnecessary delays
+
+These small details are extremely important.
+
+20. BUG PREVENTION
+
+While doing the polish pass, actively watch for:
+
+* race conditions
+* duplicate input events
+* animation/state desynchronization
+* clicks during transitions
+* abilities triggering twice
+* gems becoming permanently locked
+* board becoming unresponsive
+* incorrect turn progression
+* stale UI values
+* incorrect game reset
+
+Fix actual bugs you discover.
+
+FINAL QA
+
+After the polish pass, perform a complete real gameplay test:
+
+MAIN MENU
+→ START
+→ GEM INTERACTION
+→ MATCH
+→ CASCADE
+→ COMBO
+→ DAMAGE
+→ ABILITIES
+→ MEGA STRIKE
+→ MULTIPLE MATCHES
+→ VICTORY
+→ RESTART
+
+Then test:
+
+START
+→ GAMEPLAY
+→ DEFEAT
+→ RESTART
+
+Also test rapid tapping and touch interaction on mobile.
+
+Run the existing automated tests again.
+
+Do not stop at “tests pass.”
+
+The final standard is:
+
+The game should feel extremely responsive, satisfying, polished, premium, and intentional at every interaction.
+
+If something feels even slightly sluggish, confusing, mechanical, or unfinished, identify it and improve it without changing the underlying gameplay rules.
