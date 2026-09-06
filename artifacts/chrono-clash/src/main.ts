@@ -400,6 +400,7 @@ app.innerHTML = `
         <canvas id="oppGems" aria-hidden="true"></canvas>
       </div>
       </div>
+      <p id="matchStatus" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
       <canvas id="stage"></canvas>
       <div id="overlay" class="overlay hidden"><div class="big" id="overlayText"></div></div>
       <div id="comboBurst" class="combo-burst hidden"></div>
@@ -525,6 +526,7 @@ const ui = {
   comboDamage: $("#comboDamage"),
   comboBurst: $("#comboBurst"),
   energyBurst: $("#energyBurst"),
+  matchStatus: $("#matchStatus"),
   overlay: $("#overlay"),
   overlayText: $("#overlayText"),
   callout: $("#callout"),
@@ -1606,6 +1608,14 @@ function useEnergyAttack(id: "burst" | "megaStrike", button: HTMLButtonElement):
   if (next) pressPowerButton(button);
   else audio.play("ui");
 }
+
+function reportCanceledEnergyPower(id: "burst" | "megaStrike"): void {
+  const name = id === "burst" ? "Energy Burst" : "Mega Strike";
+  ui.matchStatus.textContent = `Target canceled. Select a gem on the board to use ${name}.`;
+  showCallout("TARGET CANCELED", "urgent");
+  restartAnim(ui.match, "impact");
+}
+
 ui.energyBurstAttack.addEventListener("click", () => useEnergyAttack("burst", ui.energyBurstAttack));
 ui.megaStrikeAttack.addEventListener("click", () => useEnergyAttack("megaStrike", ui.megaStrikeAttack));
 document.querySelector(".powers")?.addEventListener("pointerdown", (e) => {
@@ -2030,6 +2040,7 @@ ui.playerBoard.addEventListener(
     const cell = hitPlayer(e);
     if (!cell) return;
     e.preventDefault();
+    ui.matchStatus.textContent = "";
     swipe = { id: e.pointerId, r: cell.r, c: cell.c, x: e.clientX, y: e.clientY, dx: 0, dy: 0 };
     session.setDrag(cell, 0, 0);
     if (armedEnergyPower) renderer.setPowerTarget(cell, now);
@@ -2088,6 +2099,7 @@ ui.playerBoard.addEventListener(
         renderer.flashInvalid(from, from, now);
         restartAnim(button, "unavailable");
         feelHaptic("invalid");
+        reportCanceledEnergyPower(id);
         return;
       }
       renderer.setPowerTarget(target, now);
@@ -2184,6 +2196,7 @@ function onScreenEnter(id: string, now: number): void {
     lastGameplayCalloutAt = 0;
     lastPlayerEnergy = 0;
     battleLog.length = 0;
+    ui.matchStatus.textContent = "";
     setArmedEnergyPower(null);
     layout.dirty = true;
     paintMatchIdentities();

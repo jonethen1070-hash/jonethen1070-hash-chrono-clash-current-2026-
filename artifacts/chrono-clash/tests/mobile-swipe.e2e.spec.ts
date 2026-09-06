@@ -45,6 +45,10 @@ type RenderState = {
   moving: RenderTile[];
   dying: RenderTile[];
   visibleEmptySockets: Array<{ r: number; c: number }>;
+  powerTargeting: {
+    kind: "burst" | "mega";
+    target: { r: number; c: number } | null;
+  } | null;
   vfx: {
     particleCount: number;
     particleCap: number;
@@ -379,6 +383,10 @@ test("mobile targeted power release outside the board stays unspent and leaves s
     type: "touchStart",
     touchPoints: [{ x: targetPoint.x, y: targetPoint.y, id: 61 }],
   });
+  await expect.poll(async () => page.evaluate(() => {
+    const state = (window as Window & { __chrono?: { renderState?: () => RenderState } }).__chrono?.renderState?.();
+    return state?.powerTargeting ?? null;
+  })).toEqual({ kind: "burst", target });
   await cdp.send("Input.dispatchTouchEvent", {
     type: "touchMove",
     touchPoints: [{ x: outsidePoint.x, y: outsidePoint.y, id: 61 }],
@@ -398,6 +406,12 @@ test("mobile targeted power release outside the board stays unspent and leaves s
   expect(canceledPower.energy).toBe(100);
   expect(canceledPower.dragging).toBeNull();
   await expect(page.locator("#energyBurstAttack")).toHaveAttribute("aria-pressed", "false");
+  await expect(page.locator("#matchStatus")).toHaveText("Target canceled. Select a gem on the board to use Energy Burst.");
+  await expect(page.locator("#callout")).toHaveText("TARGET CANCELED");
+  await expect.poll(async () => page.evaluate(() => {
+    const state = (window as Window & { __chrono?: { renderState?: () => RenderState } }).__chrono?.renderState?.();
+    return state?.powerTargeting ?? null;
+  })).toBeNull();
 
   const move = await page.evaluate(() => {
     const session = (window as Window & {
@@ -412,6 +426,7 @@ test("mobile targeted power release outside the board stays unspent and leaves s
     return session?.player.score ?? 0;
   });
   await touchSwipe(cdp, cellCenter(box, move.from.r, move.from.c), cellCenter(box, move.to.r, move.to.c), 62);
+  await expect(page.locator("#matchStatus")).toHaveText("");
   await expect.poll(async () => page.evaluate(() => {
     const session = (window as Window & { __chrono?: { session?: { player: { score: number } } } }).__chrono?.session;
     return session?.player.score ?? 0;

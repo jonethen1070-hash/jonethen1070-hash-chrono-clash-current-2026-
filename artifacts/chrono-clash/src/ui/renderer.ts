@@ -214,6 +214,10 @@ export interface BoardRenderInspection {
   moving: RenderTileInspection[];
   dying: RenderTileInspection[];
   visibleEmptySockets: Coord[];
+  powerTargeting: {
+    kind: PowerTargetKind;
+    target: Coord | null;
+  } | null;
   vfx: RenderVfxInspection;
 }
 
@@ -561,6 +565,14 @@ export class BoardRenderer {
       moving: inspected.filter((tile) => !tile.dying && tile.moveKind !== "idle"),
       dying: inspected.filter((tile) => tile.dying),
       visibleEmptySockets: empty,
+      powerTargeting: this.playerView.powerTargeting
+        ? {
+            kind: this.playerView.powerTargeting.kind,
+            target: this.playerView.powerTargeting.target
+              ? { ...this.playerView.powerTargeting.target }
+              : null,
+          }
+        : null,
       vfx: {
         particleCount: this.playerView.particles.length,
         particleCap: this.particleCap(),
