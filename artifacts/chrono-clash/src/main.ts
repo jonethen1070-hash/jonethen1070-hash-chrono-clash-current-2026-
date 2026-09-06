@@ -1990,7 +1990,12 @@ function pressPowerButton(btn: HTMLButtonElement): void {
 
 let cachedCellSize = 0;
 
+function ensureInputLayout(): void {
+  if (layout.dirty) refreshLayout();
+}
+
 function cellSize(): number {
+  ensureInputLayout();
   if (cachedCellSize > 0) return cachedCellSize;
   const rect = layout.player;
   const size = Math.min(rect.width, rect.height);
@@ -2020,6 +2025,7 @@ ui.playerBoard.addEventListener(
   (e) => {
     if (e.pointerType === "mouse" && e.button !== 0) return;
     const now = performance.now();
+    ensureInputLayout();
     if (!session.isInteractive(now)) return;
     const cell = hitPlayer(e);
     if (!cell) return;
@@ -2073,12 +2079,19 @@ ui.playerBoard.addEventListener(
     const from = { r: swipe.r, c: swipe.c };
     if (armedEnergyPower) {
       const id = armedEnergyPower;
-      const target = hitPlayer(e) ?? from;
+      const target = hitPlayer(e);
       const button = id === "burst" ? ui.energyBurstAttack : ui.megaStrikeAttack;
-      renderer.setPowerTarget(target, now);
-      renderer.setPowerCastTarget(target, now);
       swipe = null;
       setArmedEnergyPower(null);
+      if (!target) {
+        session.rejectSwipe(now);
+        renderer.flashInvalid(from, from, now);
+        restartAnim(button, "unavailable");
+        feelHaptic("invalid");
+        return;
+      }
+      renderer.setPowerTarget(target, now);
+      renderer.setPowerCastTarget(target, now);
       if (session.usePower(id, now, target)) {
         pressPowerButton(button);
         flashCast(id === "burst" ? "cast-burst" : "cast-mega", button);
@@ -2106,7 +2119,9 @@ ui.playerBoard.addEventListener(
     }
   },
 );
-function finishSwipe(): void {
+function finishSwipe(e?: Event): void {
+  const pointerId = e && "pointerId" in e ? Number((e as Event & { pointerId?: number }).pointerId) : null;
+  if (swipe && pointerId != null && pointerId !== swipe.id) return;
   swipe = null;
   if (armedEnergyPower) setArmedEnergyPower(null);
   session.setDrag(null);
@@ -2116,6 +2131,7 @@ ui.playerBoard.addEventListener("pointercancel", finishSwipe);
 ui.playerBoard.addEventListener("lostpointercapture", finishSwipe);
 
 function hitPlayer(e: PointerEvent) {
+  ensureInputLayout();
   return renderer.cellAt(layout.player, layout.canvas, e.clientX, e.clientY);
 }
 
@@ -2284,7 +2300,10 @@ function frame(now: number): void {
     ui.match.classList.toggle("final-critical", snap.last5);
     ui.match.classList.toggle("leading", snap.player.score > snap.opponent.score);
     ui.match.classList.toggle("trailing", snap.player.score < snap.opponent.score);
-    ui.playerCard.classList.toggle("locked", snap.playerLockedRemainingMs > 0);
+     const playing = snap.phase === "playing";
+     ui.playerCard.classList.toggle("locked", snap.playerLockedRemainingMs > 0);
+     ui.playerCard.classList.toggle("resolving", snap.busy && playing);
+     ui.playerCard.setAttribute("aria-busy", snap.busy && playing ? "true" : "false");
     ui.oppCard.classList.toggle("pressured", snap.rivalLockedRemainingMs > 0);
     const pCombo = snap.player.combo > 1 ? `COMBO x${snap.player.combo}` : "";
     const oCombo = snap.opponent.combo > 1 ? `COMBO x${snap.opponent.combo}` : "";
@@ -2323,7 +2342,6 @@ function frame(now: number): void {
     lastPlayerEnergy = snap.player.energy;
     energyWrap?.classList.toggle("low", snap.player.energy < ENERGY_FREEZE);
     energyWrap?.classList.toggle("hot", snap.player.energy >= 70);
-    const playing = snap.phase === "playing";
     ui.rewind.disabled = !session.canUsePower("rewind", now);
     const burstReady = session.canUsePower("burst", now);
     const megaStrikeReady = session.canUsePower("megaStrike", now);

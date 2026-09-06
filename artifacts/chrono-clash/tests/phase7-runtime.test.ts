@@ -67,4 +67,18 @@ describe("phase 7 runtime gameplay remains intact", () => {
     loss.playAgain(70_000);
     expect(loss.screen).toBe("ready");
   });
+
+  it("drops overlapping swaps while the first resolve is still settling", () => {
+    const game = new GameSession();
+    game.progress = { ...game.progress, tutorialDone: true, matchesSeen: 8 };
+    game.mode = "time";
+    const start = 1_000;
+    game.startMatch(start);
+    game.tick(start + 3_200);
+    const move = findAnyValidSwap(game.player.board);
+    expect(move).not.toBeNull();
+    expect(game.tryPlayerSwap(move!.a, move!.b, start + 3_200)).toBe(true);
+    expect(game.isInteractive(start + 3_210)).toBe(false);
+    expect(game.isInteractive(start + 4_000)).toBe(true);
+  });
 });

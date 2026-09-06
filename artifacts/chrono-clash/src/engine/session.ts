@@ -636,12 +636,14 @@ export class GameSession {
     if (this.onlineRemote && this.onlinePhase !== "playing") return false;
     if (this.screen !== "match" || this.phase !== "playing" || this.ended) return false;
     if (this.resolving) return false;
+    if (now < this.busyUntil) return false;
     if (now < this.playerLockedUntil) return false;
     return true;
   }
 
   canUsePower(id: PowerId, now = performance.now()): boolean {
     if (this.screen !== "match" || this.phase !== "playing" || this.ended) return false;
+    if (this.resolving) return false;
     if (now < this.powerLockUntil) return false;
     if (powerConsumesCharge(id) && getCharge(economyFromProgress(this.progress), id) <= 0) return false;
     if (id === "freeze") return this.player.energy >= powerEnergyCost(id);

@@ -54,6 +54,9 @@ describe("power ability VFX presentation", () => {
     expect(renderer).toContain("const impactStart = mega ? 98 : 44");
     expect(main).toContain("renderer.setPowerTargeting");
     expect(main).toContain("renderer.setPowerTarget(hitPlayer(e)");
+    expect(main).not.toContain("hitPlayer(e) ?? from");
+    expect(main).toContain("ensureInputLayout()");
+    expect(main).toContain('feelHaptic("invalid")');
     expect(main).toContain("renderer.setPowerCastTarget(target, now)");
     expect(main).toContain('renderer.setPowerTarget(null, performance.now())');
     expect(main).toContain('pressPowerButton(button)');

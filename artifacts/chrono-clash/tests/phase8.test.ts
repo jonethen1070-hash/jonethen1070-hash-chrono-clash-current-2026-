@@ -52,11 +52,21 @@ describe("phase 8 event haptics", () => {
     expect(hapticCuesFromFx({ kind: "power", text: "RIVAL FREEZE" })).toEqual([{ kind: "block" }]);
     expect(hapticCuesFromFx({ kind: "power", text: "ENERGY BURST" })).toEqual([{ kind: "power" }]);
     expect(hapticCuesFromFx({ kind: "power", text: "MEGA STRIKE" })).toEqual([{ kind: "power" }]);
-    expect(hapticCuesFromFx({ kind: "attack", text: "ATTACK!", side: "player", combo: 3 })).toEqual([]);
-    expect(hapticCuesFromFx({ kind: "attack", text: "RIVAL PULSE", side: "opponent", combo: 2 })).toEqual([]);
-    expect(hapticCuesFromFx({ kind: "attack", text: "TIME STRIKE", side: "player", combo: 5 })).toEqual([]);
-    expect(hapticCuesFromFx({ kind: "attack", text: "FINAL STRIKE", side: "player", combo: 5 })).toEqual([]);
-    expect(hapticCuesFromFx({ kind: "attack", text: "RIVAL FINALE", side: "opponent", combo: 5 })).toEqual([]);
+    expect(hapticCuesFromFx({ kind: "attack", text: "ATTACK!", side: "player", combo: 3 })).toEqual([
+      { kind: "attackHit", combo: 3, delayMs: 420 },
+    ]);
+    expect(hapticCuesFromFx({ kind: "attack", text: "RIVAL PULSE", side: "opponent", combo: 2 })).toEqual([
+      { kind: "incoming", combo: 2 },
+    ]);
+    expect(hapticCuesFromFx({ kind: "attack", text: "TIME STRIKE", side: "player", combo: 5 })).toEqual([
+      { kind: "attackHit", combo: 5, delayMs: 420 },
+    ]);
+    expect(hapticCuesFromFx({ kind: "attack", text: "FINAL STRIKE", side: "player", combo: 5 })).toEqual([
+      { kind: "attackHit", combo: 5, delayMs: 720 },
+    ]);
+    expect(hapticCuesFromFx({ kind: "attack", text: "RIVAL FINALE", side: "opponent", combo: 5 })).toEqual([
+      { kind: "incoming", combo: 5 },
+    ]);
     expect(hapticCuesFromFx({ kind: "finale", text: "VICTORY" })).toEqual([{ kind: "victory" }]);
     expect(hapticCuesFromFx({ kind: "finale", text: "DEFEAT" })).toEqual([{ kind: "defeat" }]);
     expect(hapticCuesFromFx({ kind: "finale", text: "DRAW" })).toEqual([{ kind: "draw" }]);

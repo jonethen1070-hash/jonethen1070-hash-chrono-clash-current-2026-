@@ -9494,3 +9494,26 @@ html body #app #match .energy-attack.strike {
     linear-gradient(180deg, #1a3a4d 0%, #091823 48%, #03070c 100%);
 }
 
+/* Resolve lock feedback: the rules remain authoritative while the current
+   move settles, but the HUD makes that short hand-off feel intentional. */
+html body #app #match #playerCard.resolving {
+  border-color: rgba(114, 238, 255, 0.92);
+  box-shadow:
+    0 0 0 1px rgba(0, 12, 22, 0.94),
+    0 0 18px rgba(0, 218, 255, 0.26),
+    inset 0 0 0 1px rgba(194, 255, 255, 0.16);
+  animation: cc-resolve-breathe 220ms ease-out both;
+}
+
+@keyframes cc-resolve-breathe {
+  from { filter: brightness(1) saturate(1); }
+  45% { filter: brightness(1.18) saturate(1.14); }
+  to { filter: brightness(1) saturate(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body #app #match #playerCard.resolving {
+    animation: none;
+  }
+}
+

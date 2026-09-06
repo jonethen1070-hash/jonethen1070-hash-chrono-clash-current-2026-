@@ -127,7 +127,8 @@ export function hapticCuesFromFx(fx: BattleFx): HapticCue[] {
   }
   if (fx.kind === "rewind") return [{ kind: "rewind" }];
   if (fx.kind === "attack") {
-    return [];
+    if (fx.side === "opponent") return [{ kind: "incoming", combo: fx.combo ?? 1 }];
+    return [{ kind: "attackHit", combo: fx.combo ?? 1, delayMs: attackBoltDelayMs(fx.text) }];
   }
   if (fx.kind === "urgent") {
     return [{ kind: "urgent", combo: /FINAL|TIME/i.test(fx.text) ? 2 : 1 }];
