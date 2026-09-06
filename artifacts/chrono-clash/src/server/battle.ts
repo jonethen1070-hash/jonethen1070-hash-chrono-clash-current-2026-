@@ -96,7 +96,13 @@ type FighterSlot = {
   combo: number;
   energy: number;
   attack: number;
-  lastSnap: Board | null;
+  lastSnap: {
+    board: Board;
+    score: number;
+    combo: number;
+    energy: number;
+    attack: number;
+  } | null;
   lastSeen: number;
   lastClientSeq: number;
   joined: boolean;
@@ -122,6 +128,16 @@ type Room = {
 
 function cloneBoard(board: Board): Board {
   return board.map((row) => row.map((cell) => (cell ? { ...cell } : null)));
+}
+
+function captureSnapshot(slot: FighterSlot): NonNullable<FighterSlot["lastSnap"]> {
+  return {
+    board: cloneBoard(slot.board),
+    score: slot.score,
+    combo: slot.combo,
+    energy: slot.energy,
+    attack: slot.attack,
+  };
 }
 
 function makeFighter(playerId: string, seed: number, now: number): FighterSlot {
@@ -200,7 +216,7 @@ function finishByScore(room: Room, now: number, reason: BattleResult["reason"]):
 function applySwap(actor: FighterSlot, other: FighterSlot, action: BattleActionInput, now: number): boolean {
   if (!action.a || !action.b) return false;
   if (now < actor.freezeUntil || now < actor.lockUntil) return false;
-  actor.lastSnap = cloneBoard(actor.board);
+  actor.lastSnap = captureSnapshot(actor);
   const result = trySwap(actor.board, action.a, action.b, actor.rng);
   if (!result || result.cleared <= 0) {
     actor.lastSnap = null;
@@ -241,7 +257,7 @@ function applyPower(
       return false;
     }
     actor.energy -= cost;
-    actor.lastSnap = cloneBoard(actor.board);
+    actor.lastSnap = captureSnapshot(actor);
     const result = resolveTargetedPower(actor.board, actor.rng, id, target);
     if (!result) return false;
     actor.score += result.scoreDelta;
@@ -274,7 +290,13 @@ function applyPower(
   if (id === "rewind") {
     if (actor.energy < ENERGY_REWIND || !actor.lastSnap) return false;
     actor.energy -= ENERGY_REWIND;
-    actor.board = cloneBoard(actor.lastSnap);
+    const previous = actor.lastSnap;
+    actor.board = cloneBoard(previous.board);
+    actor.score = previous.score;
+    actor.combo = previous.combo;
+    actor.energy = Math.max(0, previous.energy - ENERGY_REWIND);
+    actor.attack = previous.attack;
+    actor.lastSnap = null;
     return true;
   }
   return false;

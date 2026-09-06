@@ -247,10 +247,10 @@ function decorateSpecial(group: MatchGroup): MatchGroup {
     special = "bomb";
     shape = "five";
   } else if (hasRow4) {
-    special = "lineV";
+    special = "lineH";
     shape = "four";
   } else if (hasCol4) {
-    special = "lineH";
+    special = "lineV";
     shape = "four";
   }
 
@@ -267,6 +267,9 @@ export function matchingNeighbors(board: Board, a: Coord): Coord[] {
     { r: a.r, c: a.c - 1 },
     { r: a.r, c: a.c + 1 },
   ];
+  if (board[a.r]?.[a.c]?.kind !== "normal") {
+    return dirs.filter((p) => inBounds(p.r, p.c));
+  }
   const hits: Coord[] = [];
   for (const b of dirs) {
     if (!inBounds(b.r, b.c)) continue;

@@ -1063,12 +1063,16 @@ function stopMatchPoll(): void {
 
 let battlePoll: ReturnType<typeof setInterval> | null = null;
 let battleClientSeq = 0;
+let battleSyncInFlight = false;
+let battleSyncFailures = 0;
 
 function stopBattleSync(): void {
   if (battlePoll) {
     clearInterval(battlePoll);
     battlePoll = null;
   }
+  battleSyncInFlight = false;
+  battleSyncFailures = 0;
 }
 
 function nextBattleSeq(): number {
@@ -1089,29 +1093,48 @@ function sendOnlineAction(action: Omit<BattleActionInput, "clientSeq">): void {
   void net
     .sendBattleAction(matchId, { ...action, clientSeq: nextBattleSeq() })
     .then((snap) => session.applyBattleSnapshot(snap))
-    .catch(() => undefined);
+    .catch(() => {
+      battleSyncFailures += 1;
+      if (battleSyncFailures >= 4) ui.onlineStatus.textContent = "CONNECTION UNSTABLE";
+    });
 }
 
 function startBattleSync(matchId: string): void {
   stopBattleSync();
   battleClientSeq = 0;
   session.pendingClientSeq = 0;
+  battleSyncInFlight = true;
   void net
     .joinBattle(matchId)
     .then((snap) => {
+      battleSyncInFlight = false;
+      battleSyncFailures = 0;
       session.applyBattleSnapshot(snap);
       battlePoll = setInterval(() => {
         if (!session.onlineMatchId) {
           stopBattleSync();
           return;
         }
+        if (battleSyncInFlight) return;
+        battleSyncInFlight = true;
         void net
           .syncBattle(session.onlineMatchId, session.onlineLastSeq)
-          .then((next) => session.applyBattleSnapshot(next))
-          .catch(() => undefined);
+          .then((next) => {
+            battleSyncFailures = 0;
+            session.applyBattleSnapshot(next);
+          })
+          .catch(() => {
+            battleSyncFailures += 1;
+            if (battleSyncFailures >= 4) ui.onlineStatus.textContent = "CONNECTION UNSTABLE";
+          })
+          .finally(() => {
+            battleSyncInFlight = false;
+          });
       }, 250);
     })
     .catch((err: unknown) => {
+      battleSyncFailures += 1;
+      battleSyncInFlight = false;
       ui.onlineStatus.textContent = err instanceof Error ? err.message : "battle join failed";
     });
 }
@@ -2085,6 +2108,7 @@ ui.playerBoard.addEventListener(
 );
 function finishSwipe(): void {
   swipe = null;
+  if (armedEnergyPower) setArmedEnergyPower(null);
   session.setDrag(null);
   renderer.setPowerTarget(null, performance.now());
 }
@@ -2557,9 +2581,17 @@ document.addEventListener("visibilitychange", () => {
   layout.dirty = true;
   armFrame();
 });
-window.addEventListener("pagehide", () => {
+window.addEventListener("pageshow", (event) => {
+  if (!event.persisted) return;
+  audio.resume();
+  audio.warm();
+  layout.dirty = true;
+  armFrame();
+});
+window.addEventListener("pagehide", (event) => {
   if (raf) cancelAnimationFrame(raf);
   raf = 0;
-  audio.dispose();
+  if (event.persisted) audio.suspend();
+  else audio.dispose();
   haptics.cancel();
 });

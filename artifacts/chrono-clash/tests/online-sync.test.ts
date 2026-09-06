@@ -218,6 +218,46 @@ describe("online battle synchronization", () => {
     game.close();
   });
 
+  it("rewinds the online fighter state, not only its board", async () => {
+    const game = guestGame();
+    const { a, b, ticketA } = await pair(game);
+    const t0 = 9_000;
+    game.joinBattle(a.token, ticketA.matchId!, t0);
+    game.joinBattle(b.token, ticketA.matchId!, t0);
+    let now = playTime(t0);
+    let seq = 1;
+    let beforeLast: BattleSync["you"] | null = null;
+    let latest = game.battleSync(a.token, ticketA.matchId!, 0, now);
+
+    for (let i = 0; i < 12 && latest.you.energy < 26; i++) {
+      const move = firstSwap(latest.you.board);
+      beforeLast = latest.you;
+      latest = game.battleAction(
+        a.token,
+        ticketA.matchId!,
+        { clientSeq: seq++, type: "swap", a: move.a, b: move.b },
+        now + 10,
+      );
+      now += 1_000;
+      latest = game.battleSync(a.token, ticketA.matchId!, 0, now);
+    }
+
+    expect(beforeLast).not.toBeNull();
+    expect(latest.you.energy).toBeGreaterThanOrEqual(26);
+    const rewound = game.battleAction(
+      a.token,
+      ticketA.matchId!,
+      { clientSeq: seq, type: "power", id: "rewind" },
+      now + 10,
+    );
+    expect(rewound.you.board).toEqual(beforeLast!.board);
+    expect(rewound.you.score).toBe(beforeLast!.score);
+    expect(rewound.you.combo).toBe(beforeLast!.combo);
+    expect(rewound.you.attack).toBe(beforeLast!.attack);
+    expect(rewound.you.energy).toBe(Math.max(0, beforeLast!.energy - 26));
+    game.close();
+  });
+
   it("ends the match from the server clock and does not accept a client-declared winner", async () => {
     const game = guestGame();
     const { a, b, ticketA } = await pair(game);
@@ -306,5 +346,48 @@ describe("online battle synchronization", () => {
     expect(local.opponent.energy).toBe(12);
     expect(local.phase).toBe("playing");
     expect(local.remainingMs(800)).toBe(54_000);
+  });
+
+  it("rejects older snapshots and advances the remote clock between polls", () => {
+    const local = new GameSession();
+    local.beginOnlineTimeBattle(
+      { matchId: "m_ordered", opponentId: "cc_b", seed: 100, playerId: "cc_a", players: ["cc_a", "cc_b"] },
+      100,
+    );
+    local.startMatch(200);
+    const snapshot = (seq: number, score: number, remainingMs: number) => ({
+      matchId: "m_ordered",
+      seed: 100,
+      seq,
+      phase: "playing" as const,
+      remainingMs,
+      you: {
+        playerId: "cc_a",
+        board: local.player.board,
+        score: 0,
+        combo: 0,
+        energy: 0,
+        attack: 0,
+        lock: 0,
+        lastClientSeq: 0,
+      },
+      opponent: {
+        playerId: "cc_b",
+        board: local.opponent.board,
+        score,
+        combo: 0,
+        energy: 0,
+        attack: 0,
+        lock: 0,
+      },
+      result: null,
+      yourLastClientSeq: 0,
+    });
+
+    local.applyBattleSnapshot(snapshot(8, 500, 50_000), 1_000);
+    expect(local.remainingMs(2_000)).toBe(49_000);
+    local.applyBattleSnapshot(snapshot(7, 9999, 1_000), 1_100);
+    expect(local.opponent.score).toBe(500);
+    expect(local.remainingMs(2_000)).toBe(49_000);
   });
 });

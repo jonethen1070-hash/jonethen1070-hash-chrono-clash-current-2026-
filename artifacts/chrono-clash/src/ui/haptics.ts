@@ -222,6 +222,7 @@ export class HapticBus {
 
   cancel(): void {
     this.clearPending();
+    if (!this.enabled) return;
     try {
       this.vibrate?.(0);
     } catch {

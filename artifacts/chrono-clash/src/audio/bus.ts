@@ -92,6 +92,7 @@ export class AudioBus {
   private raw = new Map<string, { url: string; data: ArrayBuffer }>();
   private loading = false;
   private prefetching = false;
+  private lifecycle = 0;
   private unlocked = false;
   private catalogReady = false;
   private ready: Promise<void> = Promise.resolve();
@@ -197,7 +198,7 @@ export class AudioBus {
     if (!ctx) return;
     if (this.catalogReady || this.loading) return;
     this.loading = true;
-    this.ready = this.loadAssets(ctx);
+    this.ready = this.loadAssets(ctx, this.lifecycle);
   }
 
   /** Fetch and decode lobby audio without starting playback so it can begin the instant the splash ends. */
@@ -387,6 +388,7 @@ export class AudioBus {
   }
 
   dispose(): void {
+    this.lifecycle += 1;
     this.clearTimers();
     this.stopBed(false);
     this.stopVoice();
@@ -932,12 +934,17 @@ export class AudioBus {
     }
   }
 
-  private async decodeItem(ctx: AudioContext, item: ReturnType<typeof uniqueAudioAssets>[number]): Promise<void> {
+  private async decodeItem(
+    ctx: AudioContext,
+    item: ReturnType<typeof uniqueAudioAssets>[number],
+    lifecycle = this.lifecycle,
+  ): Promise<void> {
     if (this.buffers.has(item.id)) return;
     const cached = this.raw.get(item.id);
     if (cached) {
       try {
         const buffer = await decodeAudioBuffer(ctx, cached.data);
+        if (lifecycle !== this.lifecycle || ctx !== this.ctx) return;
         this.buffers.set(item.id, buffer);
         this.loadedFrom.set(item.id, cached.url);
         this.raw.delete(item.id);
@@ -952,6 +959,7 @@ export class AudioBus {
       if (!found) continue;
       try {
         const buffer = await decodeAudioBuffer(ctx, found.data);
+        if (lifecycle !== this.lifecycle || ctx !== this.ctx) return;
         this.buffers.set(item.id, buffer);
         this.loadedFrom.set(item.id, found.url);
         if (item.id === "music-battle") this.promoteBedToFile("battle");
@@ -962,7 +970,7 @@ export class AudioBus {
     }
   }
 
-  private async loadAssets(ctx: AudioContext): Promise<void> {
+  private async loadAssets(ctx: AudioContext, lifecycle: number): Promise<void> {
     try {
       try {
         await ctx.resume();
@@ -971,10 +979,15 @@ export class AudioBus {
       }
       const assets = uniqueAudioAssets();
       const lobby = assets.find((item) => item.id === "music-lobby");
-      if (lobby) await this.decodeItem(ctx, lobby);
+      if (lobby) await this.decodeItem(ctx, lobby, lifecycle);
       this.promoteBedToFile();
-      await Promise.all(assets.filter((item) => item.id !== "music-lobby").map((item) => this.decodeItem(ctx, item)));
+      await Promise.all(
+        assets
+          .filter((item) => item.id !== "music-lobby")
+          .map((item) => this.decodeItem(ctx, item, lifecycle)),
+      );
     } finally {
+      if (lifecycle !== this.lifecycle || ctx !== this.ctx) return;
       this.loading = false;
       this.catalogReady = true;
       this.promoteBedToFile();

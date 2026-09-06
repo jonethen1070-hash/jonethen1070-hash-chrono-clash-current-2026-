@@ -227,6 +227,7 @@ export class GameSession {
   private onlineSeed: number | null = null;
   private onlinePhase: "waiting" | "countdown" | "playing" | "ended" | "cancelled" | null = null;
   private onlineRemainingMs: number | null = null;
+  private onlineRemainingAt = 0;
 
   get onlineRemote(): boolean {
     return this.onlineMatchId != null;
@@ -459,6 +460,7 @@ export class GameSession {
     this.onlineSeed = input.seed >>> 0;
     this.onlinePhase = "waiting";
     this.onlineRemainingMs = MATCH_SECONDS * 1000;
+    this.onlineRemainingAt = now;
     this.onlineLastSeq = 0;
     this.pendingClientSeq = 0;
     this.mode = "time";
@@ -474,6 +476,7 @@ export class GameSession {
     this.onlineSeed = null;
     this.onlinePhase = null;
     this.onlineRemainingMs = null;
+    this.onlineRemainingAt = 0;
     this.onlineLastSeq = 0;
     this.pendingClientSeq = 0;
   }
@@ -510,8 +513,10 @@ export class GameSession {
     now = performance.now(),
   ): void {
     if (!this.onlineMatchId || snap.matchId !== this.onlineMatchId) return;
+    if (snap.seq < this.onlineLastSeq) return;
     this.onlinePhase = snap.phase;
     this.onlineRemainingMs = snap.remainingMs;
+    this.onlineRemainingAt = now;
     this.onlineLastSeq = snap.seq;
     this.onlineSeed = snap.seed >>> 0;
     this.opponent.board = cloneBoard(snap.opponent.board);
@@ -887,7 +892,7 @@ export class GameSession {
       }
     } else {
       const remaining = this.remainingMs(now);
-      if (!this.onlineRemote && remaining <= 0) {
+      if (remaining <= 0) {
         this.clockExpired = true;
         this.endMatch(now);
         return;
@@ -972,6 +977,10 @@ export class GameSession {
   }
 
   usePower(id: PowerId, now = performance.now(), target?: Coord): boolean {
+    if (this.mode === "time" && this.remainingMs(now) <= 0) {
+      this.endMatch(now);
+      return false;
+    }
     if (!this.canUsePower(id, now)) return false;
 
     if (id === "burst" || id === "megaStrike") {
@@ -1014,6 +1023,7 @@ export class GameSession {
         side: "opponent",
         combo: id === "burst" ? 3 : 6,
       });
+      if (this.mode === "score" && this.player.score >= this.scoreTarget) this.endMatch(now);
       return true;
     }
 
@@ -1080,7 +1090,7 @@ export class GameSession {
   remainingMs(now: number): number {
     if (this.mode === "score") return 0;
     if (this.onlineRemote && this.onlineRemainingMs != null && this.phase === "playing") {
-      return this.onlineRemainingMs;
+      return Math.max(0, this.onlineRemainingMs - Math.max(0, now - this.onlineRemainingAt));
     }
     const cap = MATCH_SECONDS * 1000;
     if (this.phase === "countdown") return cap;

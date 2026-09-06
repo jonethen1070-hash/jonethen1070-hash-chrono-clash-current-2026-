@@ -8,6 +8,7 @@ import {
   hasAnyMatch,
   makePiece,
   matchingNeighbors,
+  resolveBoard,
   resetIds,
   trySwap,
 } from "../src/engine/board";
@@ -44,6 +45,26 @@ describe("board generation", () => {
 });
 
 describe("swapping", () => {
+  it("orients line specials with the direction of the four-match", () => {
+    resetIds();
+    const horizontal = generateBoard(createSeededRng(21));
+    for (let c = 0; c < 4; c++) horizontal[0]![c] = makePiece(1);
+    expect(findMatches(horizontal).find((group) => group.special)?.special).toBe("lineH");
+
+    const vertical = Array.from({ length: ROWS }, (_, r) =>
+      Array.from({ length: COLS }, (_, c) => makePiece(((r * 2 + c) % 6) + 1)),
+    );
+    for (let r = 0; r < 4; r++) vertical[r]![0] = makePiece(2);
+    expect(findMatches(vertical).find((group) => group.special)?.special).toBe("lineV");
+  });
+
+  it("offers every adjacent destination when a special is selected", () => {
+    resetIds();
+    const board = generateBoard(createSeededRng(23));
+    board[3]![3] = makePiece(1, "lineH");
+    expect(matchingNeighbors(board, { r: 3, c: 3 })).toHaveLength(4);
+  });
+
   it("clears a horizontal match of three and scores", () => {
     resetIds();
     const rng = createSeededRng(7);

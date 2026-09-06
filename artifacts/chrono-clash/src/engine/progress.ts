@@ -155,7 +155,11 @@ export function loadProgress(): LocalProgress {
 }
 
 export function saveProgress(progress: LocalProgress): void {
-  storage()?.setItem(KEY, JSON.stringify(progress));
+  try {
+    storage()?.setItem(KEY, JSON.stringify(progress));
+  } catch {
+    /* Progress is best-effort when storage is unavailable or full. */
+  }
 }
 
 export function resetProgress(): LocalProgress {
@@ -169,6 +173,11 @@ export function resetProgress(): LocalProgress {
     { winningCoins: 0, powerCharges: {}, claimedAdReceipts: [] },
   );
   saveProgress(next);
+  try {
+    storage()?.removeItem("chrono-clash-progress-v1");
+  } catch {
+    /* ignore unavailable storage */
+  }
   return next;
 }
 
