@@ -1,0 +1,264 @@
+POLISH THE GEM MOVEMENT SYSTEM EXTREMELY CAREFULLY.
+
+The game currently sometimes feels sluggish because:
+
+* gems can fall too slowly after matches
+* swaps don’t always feel fast and responsive
+* movement timing can feel inconsistent
+* the game occasionally waits too long between actions
+
+I want the gem movement to feel FAST, CRISP, RESPONSIVE, SATISFYING, AND PREMIUM.
+
+Do NOT change the actual gameplay rules or board logic.
+
+1. GEM SWAP — INSTANT AND SATISFYING
+
+When the player swaps two gems:
+
+* Input should register immediately.
+* Start the visual movement almost instantly.
+* Use a fast, polished easing curve.
+* No unnecessary delay before the swap begins.
+* No sluggish acceleration.
+* No long animation.
+* No visual snapping.
+
+Target feeling:
+
+tap → immediate movement → satisfying impact → result
+
+The swap should feel energetic and deliberate.
+
+Use a short animation duration appropriate for a fast mobile match game, approximately 100–180ms, and tune it based on the existing game architecture.
+
+2. GEM FALLING — FAST BUT CONTROLLED
+
+After a match clears:
+
+* Gems above should begin falling immediately.
+* Do not add unnecessary waiting between clearing and gravity.
+* Falling distance should affect the duration naturally.
+* Short falls should be very quick.
+* Longer falls can take slightly longer, but should still feel energetic.
+* Use smooth acceleration/deceleration rather than slow linear movement.
+
+The player should feel:
+
+CLEAR → INSTANT GRAVITY → FAST FALL → BOARD READY
+
+NOT:
+
+CLEAR → WAIT → SLOW FALL → WAIT → NEXT ACTION
+
+3. DISTANCE-BASED FALL SPEED
+
+Implement movement timing intelligently.
+
+Do not use one slow fixed duration for every fall.
+
+For example:
+
+* 1 cell fall = very quick
+* 2–3 cells = slightly longer
+* large falls = longer but capped
+
+Set a reasonable minimum and maximum duration so:
+
+* short movements don’t feel slow
+* huge falls don’t become instant teleportation
+
+The exact values should be tuned by testing the actual game.
+
+4. CASCADES MUST FLOW
+
+When a falling gem creates another match:
+
+Do NOT create unnecessary pauses.
+
+Desired rhythm:
+
+CLEAR
+↓
+GEMS FALL
+↓
+NEW MATCH DETECTED
+↓
+CLEAR
+↓
+GEMS FALL
+↓
+NEXT CASCADE
+
+The entire sequence should feel like a fluid chain reaction.
+
+Avoid artificial delays between these stages.
+
+5. BOARD STATE VS VISUAL ANIMATION
+
+IMPORTANT:
+
+Keep the underlying board state synchronized correctly.
+
+Do not speed up the visual animation by breaking:
+
+* collision/state detection
+* match detection
+* turn handling
+* input locking
+* cascade resolution
+
+The visual movement can be fast, but the game state must remain deterministic.
+
+6. INPUT RESPONSIVENESS
+
+Make sure the player isn’t unnecessarily locked out.
+
+During appropriate movement phases:
+
+* prevent invalid interaction
+* but don’t block input longer than necessary.
+
+As soon as the board is genuinely ready for the next player action, immediately allow interaction.
+
+No invisible waiting period.
+
+7. MOVEMENT EASING
+
+Use polished easing rather than basic linear interpolation.
+
+SWAP:
+
+* quick acceleration
+* smooth arrival
+* subtle settle
+
+FALL:
+
+* stronger initial acceleration
+* controlled deceleration
+* tiny settle/bounce if appropriate
+
+Keep the bounce extremely subtle.
+
+Do NOT make gems feel cartoonish.
+
+8. IMPACT / SETTLE
+
+When gems finish moving:
+
+* very subtle scale settle
+* tiny glow response
+* optional tiny positional settle
+
+This should make the gems feel physical without slowing gameplay.
+
+The settle effect must NOT delay the next interaction.
+
+9. VISUAL CONTINUITY
+
+Avoid:
+
+* teleporting gems
+* snapping
+* overlapping gems
+* disappearing/reappearing during movement
+* inconsistent speeds
+* gaps between falling gems
+* gems arriving at different times when they should move together
+
+Movement should look clean and intentional.
+
+10. PERFORMANCE
+
+Make sure animation remains smooth on mobile.
+
+Inspect:
+
+* requestAnimationFrame usage
+* unnecessary re-renders
+* DOM updates
+* animation loops
+* timers
+* expensive VFX during movement
+
+Do not use expensive effects to compensate for poor movement.
+
+The movement itself should feel good.
+
+11. TIMING AUDIT
+
+Inspect the entire match-resolution pipeline and identify ALL unnecessary delays.
+
+Look specifically for:
+
+* setTimeout delays
+* animation completion waits
+* promise waits
+* cascade delays
+* clear delays
+* gravity delays
+* input lock durations
+* turn transition delays
+
+Remove or reduce unnecessary waiting while preserving correct sequencing.
+
+Do NOT blindly remove every timeout. Some timing may be necessary for gameplay/VFX synchronization.
+
+12. CONSISTENCY
+
+This is important:
+
+The movement should feel the same every time.
+
+Test:
+
+* normal swap
+* invalid swap
+* successful match
+* 1-cell fall
+* 2-cell fall
+* large fall
+* cascade
+* multiple simultaneous clears
+* Mega Strike clear
+* rapid player interaction
+
+Look for any situation where movement suddenly becomes slow.
+
+13. PREMIUM FEEL TARGET
+
+The final feeling should be:
+
+FAST
+CRISP
+RESPONSIVE
+SMOOTH
+PHYSICAL
+ENERGETIC
+SATISFYING
+
+Think premium modern mobile match gameplay.
+
+The player should never think:
+
+“Why is the gem taking so long to move?”
+
+They should think:
+
+“That felt GOOD.”
+
+FINAL TEST
+
+After implementing the changes, actually play several complete matches.
+
+Pay particular attention to:
+
+SWAP → MATCH → CLEAR → FALL → CASCADE → NEXT MOVE
+
+Test this repeatedly.
+
+Also test large clears and Mega Strike.
+
+If any transition still feels sluggish, inspect the timing pipeline again and fix the actual cause rather than simply increasing animation speed.
+
+Run the existing tests afterward and make sure gameplay functionality remains intact.
