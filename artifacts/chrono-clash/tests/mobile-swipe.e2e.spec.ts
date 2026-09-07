@@ -593,6 +593,100 @@ test("mobile Mega Strike release outside the board stays unspent and leaves swip
   })).toBeGreaterThan(scoreBefore);
 });
 
+test("mobile Mega Strike valid touch charges once and clears only the selected color", async ({ page, context }) => {
+  await page.goto("/");
+  await expect(page.locator("#menu.active")).toBeVisible();
+
+  await page.locator("#menuGuest").click();
+  await expect(page.locator("#match.active")).toBeVisible();
+  await expect.poll(async () => page.locator("#overlay").evaluate((el) => el.classList.contains("hidden"))).toBe(true);
+
+  const board = page.locator("#playerBoard");
+  const boardBox = await board.boundingBox();
+  expect(boardBox).not.toBeNull();
+  const box = boardBox!;
+  const target = { r: 3, c: 3 };
+  const intendedCells = [
+    target,
+    { r: 0, c: 0 },
+    { r: 2, c: 5 },
+    { r: 6, c: 1 },
+  ];
+
+  await page.evaluate((cells) => {
+    const session = (window as Window & {
+      __chrono?: {
+        session?: {
+          player: {
+            board: Array<Array<{ color: number; kind: string } | null>>;
+            energy: number;
+          };
+        };
+      };
+    }).__chrono?.session;
+    if (!session) throw new Error("Missing Chrono session");
+    const selected = new Set(cells.map(({ r, c }) => `${r},${c}`));
+    session.player.board.forEach((row, r) => row.forEach((piece, c) => {
+      if (!piece) throw new Error(`Missing fixture cell ${r},${c}`);
+      piece.color = selected.has(`${r},${c}`) ? 5 : 2;
+      piece.kind = "normal";
+    }));
+    session.player.energy = 100;
+  }, intendedCells);
+
+  const megaButton = page.locator("#megaStrikeAttack");
+  await expect(megaButton).toBeEnabled();
+  await megaButton.click();
+  await expect(megaButton).toHaveAttribute("aria-pressed", "true");
+
+  const targetPoint = cellCenter(box, target.r, target.c);
+  const cdp = await context.newCDPSession(page);
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchStart",
+    touchPoints: [{ x: targetPoint.x, y: targetPoint.y, id: 65 }],
+  });
+  await expect.poll(async () => page.evaluate(() => {
+    const state = (window as Window & { __chrono?: { renderState?: () => RenderState } }).__chrono?.renderState?.();
+    return state?.powerTargeting ?? null;
+  })).toEqual({ kind: "mega", target });
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchMove",
+    touchPoints: [{ x: targetPoint.x + 2, y: targetPoint.y + 1, id: 65 }],
+  });
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchEnd",
+    touchPoints: [],
+  });
+
+  const megaResult = await page.evaluate(() => {
+    const chrono = (window as Window & {
+      __chrono?: {
+        session?: {
+          player: { energy: number };
+          fx: Array<{ kind: string; side?: string; cells?: Array<{ r: number; c: number }> }>;
+        };
+      };
+    }).__chrono;
+    const events = chrono?.session?.fx ?? [];
+    const clearEvents = events.filter((event) => event.kind === "clear" && event.side === "player");
+    return {
+      energy: chrono?.session?.player.energy,
+      clearEvents: clearEvents.map((event) => event.cells ?? []),
+    };
+  });
+
+  expect(megaResult.energy).toBe(64);
+  expect(megaResult.clearEvents).toHaveLength(1);
+  expect(megaResult.clearEvents[0]).toEqual(expect.arrayContaining(intendedCells));
+  expect(megaResult.clearEvents[0]).toHaveLength(intendedCells.length);
+  await expect(megaButton).toHaveAttribute("aria-pressed", "false");
+  await expect(page.locator("#cancelPowerTarget")).toBeHidden();
+  await expect.poll(async () => page.evaluate(() => {
+    const state = (window as Window & { __chrono?: { renderState?: () => RenderState } }).__chrono?.renderState?.();
+    return state?.powerTargeting ?? null;
+  })).toBeNull();
+});
+
 test("real touch gestures play only the committed swap WAV progression", async ({ page, context }) => {
   await page.addInitScript(() => {
     localStorage.setItem(
