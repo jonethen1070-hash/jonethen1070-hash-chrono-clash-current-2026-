@@ -32,12 +32,12 @@ export const XP_PER_LEVEL = 120;
 export const APP_VERSION = "1.0.0";
 
 export const COLORS = [
-  "#FF167F",
-  "#FF9D00",
-  "#00B86B",
-  "#126BFF",
-  "#8A20FF",
-  "#00BFFF",
+  "#D1166D",
+  "#D38800",
+  "#008F5B",
+  "#1754C7",
+  "#6D25C9",
+  "#008EAA",
 ] as const;
 
 export type PieceKind = "normal" | "lineH" | "lineV" | "bomb";

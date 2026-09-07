@@ -11,7 +11,7 @@ function read(rel: string): string {
 
 describe("arena HUD polish outside the gem board", () => {
   it("keeps gem identities, board mechanics, and Chrono Power IDs locked", () => {
-    expect([...COLORS]).toEqual(["#FF167F", "#FF9D00", "#00B86B", "#126BFF", "#8A20FF", "#00BFFF"]);
+    expect([...COLORS]).toEqual(["#D1166D", "#D38800", "#008F5B", "#1754C7", "#6D25C9", "#008EAA"]);
     const main = read("src/main.ts");
     expect(main).toContain('id="playerGems"');
     expect(main).toContain('id="oppGems"');

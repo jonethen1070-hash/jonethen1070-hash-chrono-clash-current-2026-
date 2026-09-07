@@ -15,7 +15,7 @@ const root = process.cwd();
 
 describe("visual depth polish", () => {
   it("keeps gem identities, board size, and motion contracts", () => {
-    expect([...COLORS]).toEqual(["#FF167F", "#FF9D00", "#00B86B", "#126BFF", "#8A20FF", "#00BFFF"]);
+    expect([...COLORS]).toEqual(["#D1166D", "#D38800", "#008F5B", "#1754C7", "#6D25C9", "#008EAA"]);
     expect(BOARD_GAP).toBe(1.5);
     expect(BOARD_FRAME).toBe(6);
     const motion = readFileSync(join(root, "src/ui/gemMotion.ts"), "utf8");
@@ -36,6 +36,8 @@ describe("visual depth polish", () => {
     expect(paint).toContain("crystal.edge");
     expect(paint).toContain("source-atop");
     expect(paint).toContain("lighter");
+    expect(paint).toContain("colorWithAlpha(color, 0.48)");
+    expect(paint).toContain("rgba(255,255,255,0.28)");
     const drawGem = renderer.slice(renderer.indexOf("private drawGem("), renderer.indexOf("private drawAtlasGem("));
     expect(drawGem).toContain("ellipse(cx, cy + s * 0.44");
     expect(drawGem).toContain("travelLift");
