@@ -1,0 +1,108 @@
+FIX END-OF-MATCH MICRO-SLOWDOWN — CHRONO CLASH
+
+There is a small but noticeable slowdown/freeze immediately BEFORE the Victory or Defeat screen appears.
+
+IMPORTANT:
+Normal gameplay speed is good.
+Do NOT slow down swaps, gem falls, matching, or normal VFX.
+
+The issue specifically happens during the final moment before:
+VICTORY
+or
+DEFEATED
+
+Investigate the Victory/Defeat transition pipeline.
+
+Check for expensive operations happening simultaneously at game end:
+
+- final match resolution
+- final cascade
+- final gem destruction VFX
+- Mega Burst / Energy Blast cleanup
+- screen flash
+- screen shake
+- glow/filter effects
+- score calculation
+- timer shutdown
+- stopping animation loops
+- removing VFX
+- creating the results overlay
+- DOM/layout recalculation
+- CSS filter/backdrop-filter
+- large-scale opacity/transform animations
+- multiple requestAnimationFrame callbacks
+- timers and event listeners
+
+IMPORTANT PERFORMANCE RULE:
+
+The game must NOT wait for cosmetic VFX to finish before declaring Victory/Defeat.
+
+Correct sequence:
+
+FINAL GAMEPLAY RESOLUTION
+↓
+LOCK GAME INPUT
+↓
+IMMEDIATELY DETERMINE WIN/LOSS
+↓
+STOP GAMEPLAY LOOP
+↓
+SHOW VICTORY/DEFEAT STATE
+↓
+RUN RESULT VFX independently
+
+Do NOT do:
+
+FINAL MATCH
+↓
+WAIT FOR ALL VFX
+↓
+WAIT FOR ANIMATION
+↓
+CALCULATE RESULT
+↓
+SHOW SCREEN
+
+The result transition should feel instantaneous.
+
+If there is a final-match VFX effect still running, gracefully cancel/reduce it when the game ends rather than allowing it to compete with the results-screen rendering.
+
+Especially check Mega Burst and Energy Blast:
+- cancel their expensive particle/update loops at game end
+- remove temporary DOM elements
+- remove unnecessary filters
+- prevent duplicate animation frames
+- do not create another full-screen effect during the transition
+
+Also check the Victory/Defeat overlay itself.
+
+The results screen should NOT trigger a large expensive visual effect immediately when it opens.
+
+Use lightweight:
+- opacity
+- transform
+- limited glow
+
+Avoid expensive:
+- large backdrop-filter
+- huge blur
+- multiple layered box-shadows
+- continuously animated full-screen gradients
+- multiple simultaneous particle systems
+
+CRITICAL:
+Do not make the transition slower to hide the problem.
+
+The desired feel is:
+
+FINAL MOVE
+→ tiny satisfying impact
+→ INSTANT VICTORY/DEFEAT
+→ smooth results screen
+
+There should be NO noticeable hitch immediately before the result appears.
+
+Also fix the existing DEFEATED screen layout:
+the giant DEFEATED text currently overlaps the HUD/results content. Keep the title but scale and position it correctly so the result screen is fully readable.
+
+Do not change gameplay rules, scoring, combo logic, timer logic, or board behavior.
