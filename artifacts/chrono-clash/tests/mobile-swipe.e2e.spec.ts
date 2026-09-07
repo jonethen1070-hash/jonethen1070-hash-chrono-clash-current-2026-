@@ -156,6 +156,140 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
+const MOBILE_BOARD_VIEWPORTS = [
+  { name: "short Android", width: 360, height: 640 },
+  { name: "short visual viewport", width: 390, height: 727 },
+  { name: "standard phone", width: 390, height: 844 },
+  { name: "wide tall phone", width: 430, height: 932 },
+  { name: "iPhone-style tall", width: 393, height: 852 },
+] as const;
+
+test.describe("mobile board clipping regression", () => {
+  test.describe.configure({ timeout: 60_000 });
+
+  for (const target of MOBILE_BOARD_VIEWPORTS) {
+    test(`${target.name} ${target.width}x${target.height} keeps the board and abilities visible`, async ({ page }) => {
+      await page.setViewportSize({ width: target.width, height: target.height });
+      await page.goto("/");
+      await expect(page.locator("#menu.active")).toBeVisible();
+
+      await page.locator("#menuGuest").click();
+      await expect(page.locator("#match.active")).toBeVisible();
+      await expect.poll(async () => page.locator("#overlay").evaluate((el) => el.classList.contains("hidden"))).toBe(true);
+
+      const geometry = await page.evaluate(() => {
+        const board = document.querySelector<HTMLElement>("#playerBoard");
+        const canvas = document.querySelector<HTMLCanvasElement>("#playerGems");
+        const visual = window.visualViewport;
+        const boardRect = board?.getBoundingClientRect();
+        const canvasRect = canvas?.getBoundingClientRect();
+        const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>(".powers > button"));
+        const dynamicViewport = {
+          width: visual?.width ?? window.innerWidth,
+          height: visual?.height ?? window.innerHeight,
+          offsetLeft: visual?.offsetLeft ?? 0,
+          offsetTop: visual?.offsetTop ?? 0,
+          innerWidth: window.innerWidth,
+          innerHeight: window.innerHeight,
+        };
+        const matchStyle = document.querySelector<HTMLElement>("#match") && getComputedStyle(document.querySelector<HTMLElement>("#match")!);
+        const renderState = (window as Window & {
+          __chrono?: { renderState?: () => RenderState };
+        }).__chrono?.renderState?.();
+
+        return {
+          board: boardRect
+            ? {
+                left: boardRect.left,
+                right: boardRect.right,
+                top: boardRect.top,
+                bottom: boardRect.bottom,
+                width: boardRect.width,
+                height: boardRect.height,
+              }
+            : null,
+          canvas: canvasRect
+            ? {
+                left: canvasRect.left,
+                right: canvasRect.right,
+                top: canvasRect.top,
+                bottom: canvasRect.bottom,
+                width: canvasRect.width,
+                height: canvasRect.height,
+                display: getComputedStyle(canvas!).display,
+                visibility: getComputedStyle(canvas!).visibility,
+                opacity: getComputedStyle(canvas!).opacity,
+              }
+            : null,
+          buttons: buttons.map((button) => {
+            const rect = button.getBoundingClientRect();
+            return {
+              id: button.id,
+              left: rect.left,
+              right: rect.right,
+              top: rect.top,
+              bottom: rect.bottom,
+              width: rect.width,
+              height: rect.height,
+              display: getComputedStyle(button).display,
+              visibility: getComputedStyle(button).visibility,
+            };
+          }),
+          dynamicViewport,
+          cssBoardSize: matchStyle?.getPropertyValue("--mobile-board-size").trim() ?? "",
+          cssBoardBlock: matchStyle?.getPropertyValue("--mobile-board-block").trim() ?? "",
+          canvasCount: board?.querySelectorAll("canvas").length ?? 0,
+          renderCell: renderState?.cell ?? 0,
+          renderTileCount: renderState?.tiles.length ?? 0,
+        };
+      });
+      const detail = JSON.stringify({ target, ...geometry });
+      const viewportLeft = geometry.dynamicViewport.offsetLeft;
+      const viewportRight = viewportLeft + geometry.dynamicViewport.width;
+      const viewportTop = geometry.dynamicViewport.offsetTop;
+      const viewportBottom = viewportTop + geometry.dynamicViewport.height;
+      const board = geometry.board;
+      const canvas = geometry.canvas;
+
+      console.log(`[mobile-board] ${detail}`);
+      expect(board, `Missing transformed board geometry: ${detail}`).not.toBeNull();
+      expect(canvas, `Missing player canvas geometry: ${detail}`).not.toBeNull();
+      expect(geometry.buttons, `Ability buttons were not rendered: ${detail}`).toHaveLength(3);
+      expect(geometry.canvasCount, `Expected an in-board canvas: ${detail}`).toBeGreaterThan(0);
+      expect(geometry.renderTileCount, `Expected all 64 board tiles: ${detail}`).toBe(64);
+      expect(geometry.renderCell, `Expected a measurable 8x8 cell size: ${detail}`).toBeGreaterThan(0);
+
+      expect(Math.abs(board!.width - board!.height), `Board must stay square: ${detail}`).toBeLessThanOrEqual(1);
+      expect(board!.left, `Board clipped at the left viewport edge: ${detail}`).toBeGreaterThanOrEqual(viewportLeft - 1);
+      expect(board!.right, `Board clipped at the right viewport edge: ${detail}`).toBeLessThanOrEqual(viewportRight + 1);
+      expect(board!.top, `Board clipped at the top viewport edge: ${detail}`).toBeGreaterThanOrEqual(viewportTop - 1);
+      expect(board!.bottom, `Board clipped at the bottom viewport edge: ${detail}`).toBeLessThanOrEqual(viewportBottom + 1);
+
+      expect(canvas!.width, `Canvas has no visible width: ${detail}`).toBeGreaterThan(0);
+      expect(canvas!.height, `Canvas has no visible height: ${detail}`).toBeGreaterThan(0);
+      expect(canvas!.width, `Canvas is narrower than the board: ${detail}`).toBeLessThanOrEqual(board!.width + 1);
+      expect(canvas!.height, `Canvas is shorter than the board: ${detail}`).toBeLessThanOrEqual(board!.height + 1);
+      expect(canvas!.left, `Canvas clipped at the left edge of the board: ${detail}`).toBeGreaterThanOrEqual(board!.left - 1);
+      expect(canvas!.right, `Canvas clipped at the right edge of the board: ${detail}`).toBeLessThanOrEqual(board!.right + 1);
+      expect(canvas!.top, `Canvas clipped at the top edge of the board: ${detail}`).toBeGreaterThanOrEqual(board!.top - 1);
+      expect(canvas!.bottom, `Canvas clipped at the bottom edge of the board: ${detail}`).toBeLessThanOrEqual(board!.bottom + 1);
+      expect(canvas!.display, `Canvas was display-hidden: ${detail}`).not.toBe("none");
+      expect(canvas!.visibility, `Canvas was visibility-hidden: ${detail}`).not.toBe("hidden");
+
+      for (const button of geometry.buttons) {
+        expect(button.width, `Ability ${button.id} has no width: ${detail}`).toBeGreaterThan(0);
+        expect(button.height, `Ability ${button.id} has no height: ${detail}`).toBeGreaterThan(0);
+        expect(button.left, `Ability ${button.id} clipped at the left edge: ${detail}`).toBeGreaterThanOrEqual(viewportLeft - 1);
+        expect(button.right, `Ability ${button.id} clipped at the right edge: ${detail}`).toBeLessThanOrEqual(viewportRight + 1);
+        expect(button.top, `Ability ${button.id} overlaps the board: ${detail}`).toBeGreaterThanOrEqual(board!.bottom - 1);
+        expect(button.bottom, `Ability ${button.id} clipped at the bottom edge: ${detail}`).toBeLessThanOrEqual(viewportBottom + 1);
+        expect(button.display, `Ability ${button.id} was display-hidden: ${detail}`).not.toBe("none");
+        expect(button.visibility, `Ability ${button.id} was visibility-hidden: ${detail}`).not.toBe("hidden");
+      }
+    });
+  }
+});
+
 test("guest mobile matches survive rapid swipes, cancellation, and layout checks", async ({ page, context }) => {
   await page.goto("/");
   await expect(page.locator("#menu.active")).toBeVisible();

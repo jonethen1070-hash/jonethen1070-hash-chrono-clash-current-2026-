@@ -1,6 +1,6 @@
 swaps=149
-player=18572 rival=945
+player=16966 rival=2146
 outcome=win
-bestCombo=4
+bestCombo=5
 plays=1 record=1-0-0
 PASS: complete 60s match produced a correct winner
