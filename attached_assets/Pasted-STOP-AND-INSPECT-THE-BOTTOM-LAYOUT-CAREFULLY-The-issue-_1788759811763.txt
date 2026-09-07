@@ -1,0 +1,82 @@
+STOP AND INSPECT THE BOTTOM LAYOUT CAREFULLY.
+
+The issue is NOT primarily the size of the three ability buttons.
+
+The actual regression is a VERTICAL POSITIONING / SPACING problem.
+
+CURRENT SCREEN:
+- The 8x8 board ends normally.
+- Immediately below the board there is now a very large empty dark vertical region.
+- Then there is an additional large beveled separator region.
+- The ability buttons are pushed all the way toward the bottom of the viewport.
+- REWIND is dangerously close to the browser bottom area and its lower content is being squeezed/clipped.
+
+THIS IS THE ROOT PROBLEM:
+The bottom action/ability section is being anchored, stretched, or distributed toward the bottom of the game viewport instead of following the board naturally.
+
+DO NOT:
+- change the board
+- change gem size
+- change the top HUD
+- change player/rival panels
+- change FIGHT/VS
+- change the timer
+- change colors
+- change button artwork
+- change gameplay
+- change match logic
+- add random CSS overrides
+
+FIX ONLY THE VERTICAL LAYOUT OF THE BOTTOM ACTION SECTION.
+
+Inspect the parent layout/container first.
+
+Look specifically for:
+- flex: 1
+- justify-content: space-between
+- height: 100%
+- min-height
+- viewport-height calculations
+- flex-grow
+- margin-top
+- padding-top
+- absolute bottom positioning
+- bottom: 0
+- spacer elements
+- grid rows that are consuming excess vertical space
+- safe-area / viewport calculations
+
+The desired composition is:
+
+BOARD
+↓
+small, intentional gap
+↓
+BOTTOM ABILITY BAR
+↓
+small safe bottom padding
+
+NOT:
+
+BOARD
+↓
+HUGE EMPTY SPACE
+↓
+LARGE EMPTY PANEL
+↓
+ABILITY BAR AT VERY BOTTOM
+
+The ability bar should sit directly and naturally below the board, using only the amount of vertical space it actually needs.
+
+IMPORTANT:
+Do NOT solve this by adding another late CSS override to aaa-polish.css.
+
+Find the existing layout rule causing the excess vertical space and fix the ROOT CAUSE.
+
+After changing it, compare the result against the previous stable layout and verify:
+- no huge blank region below the board
+- all 3 abilities fully visible
+- REWIND's bottom text/cost fully visible
+- ability buttons aligned horizontally
+- no browser bottom overlap
+- board position and size unchanged
