@@ -14,3 +14,9 @@ When the cancel control is fixed or hidden, the compact action strip should rese
 **Why:** The short-viewport layout combines a reduced button row with a full-height control variable and a reserved cancellation row, so the bar can look detached from the board even when the buttons themselves fit.
 
 **How to apply:** Fix the source short-viewport rule by collapsing the inactive track and reducing the control-row variable to the button row plus its intentional padding. Keep the board row content-sized; do not stretch it to push controls toward the viewport bottom.
+
+When compact ability cards move their cost into a dedicated grid rail, override any inherited `min-width: max-content` on the cost node before assigning a bounded track. Otherwise the cost can span into the label while remaining technically inside the button.
+
+**Why:** The legacy power styles intentionally sized cost text to its content, which conflicts with a three-column mobile card and is not caught by simple button-boundary checks.
+
+**How to apply:** Give the cost a finite width/max-width and let the label track ellipsize; verify both element bounds and label/cost separation at short and tall phone viewports.

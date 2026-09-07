@@ -10169,4 +10169,265 @@ html body #app #results.active .result-actions {
   }
 }
 
+/* Final visual balance pass.
+   Keep the arena luminous, but let the board surface and gem colors carry the
+   focus instead of stacking several equally bright cyan halos. */
+html body #app #match.active .match-brand,
+html body #app #match.active .match-brand-actions .hud-icon,
+html body #app #match.active .match-brand-actions .hud-mute {
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.92), 0 0 8px rgba(99, 239, 255, 0.1) !important;
+}
+
+html body #app #match.active .player-side .board-slot {
+  border-color: rgba(105, 229, 240, 0.54);
+  box-shadow:
+    0 0 0 1px rgba(0, 2, 6, 0.96),
+    0 0 0 3px rgba(38, 174, 194, 0.12),
+    0 20px 34px rgba(0, 0, 0, 0.8),
+    0 0 14px rgba(28, 194, 218, 0.12),
+    inset 0 2px 0 rgba(224, 255, 255, 0.18),
+    inset 0 -16px 22px rgba(0, 0, 0, 0.74) !important;
+}
+
+html body #app #match.active .player-side .board-outer-rail {
+  border-color: rgba(49, 182, 201, 0.4) !important;
+  box-shadow:
+    0 3px 0 rgba(1, 12, 18, 0.96),
+    0 9px 15px rgba(0, 0, 0, 0.68),
+    0 0 10px rgba(32, 218, 238, 0.14) !important;
+}
+
+html body #app #match.active .player-side .board-energy-glass {
+  box-shadow:
+    inset 0 1px 0 rgba(232, 255, 255, 0.16),
+    inset 0 -2px 0 rgba(30, 163, 184, 0.32),
+    inset 0 0 14px rgba(0, 184, 211, 0.06) !important;
+}
+
+html body #app #match.active .player-side .board-slot::before {
+  box-shadow:
+    0 2px 0 rgba(241, 255, 255, 0.3),
+    0 5px 0 rgba(1, 18, 24, 1),
+    0 14px 20px rgba(0, 0, 0, 0.82),
+    0 0 13px rgba(32, 218, 238, 0.16) !important;
+}
+
+html body #app #match.active .player-side .board-slot::after {
+  background:
+    linear-gradient(112deg, rgba(235, 255, 255, 0.1), transparent 22% 78%, rgba(47, 220, 239, 0.04)),
+    linear-gradient(90deg, transparent 8%, rgba(240, 255, 255, 0.64) 50%, transparent 92%) top / 38% 2px no-repeat,
+    linear-gradient(90deg, transparent 8%, rgba(31, 213, 233, 0.42) 50%, transparent 92%) bottom / 38% 2px no-repeat,
+    linear-gradient(180deg, transparent 10%, rgba(47, 221, 240, 0.36) 50%, transparent 90%) left / 2px 32% no-repeat,
+    linear-gradient(180deg, transparent 10%, rgba(47, 221, 240, 0.36) 50%, transparent 90%) right / 2px 32% no-repeat !important;
+}
+
+html body #app #match.active .board-canvas {
+  filter:
+    saturate(1.14)
+    contrast(1.1)
+    brightness(1.04)
+    drop-shadow(0 6px 8px rgba(0, 0, 0, 0.96))
+    drop-shadow(0 0 4px rgba(79, 224, 242, 0.04)) !important;
+}
+
+/* One control language for Burst, Mega Strike, and Rewind. The cost has its
+   own right-aligned rail so it cannot collide with the descriptive copy. */
+html body #app #match.active .powers > .energy-attack,
+html body #app #match.active .powers > #rewind {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 48px;
+  height: 48px;
+  border-radius: 6px !important;
+  padding: 5px 7px !important;
+  border: 1px solid rgba(124, 219, 232, 0.48) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.11) 0 1px, transparent 9px),
+    linear-gradient(155deg, rgba(9, 24, 34, 0.98), rgba(2, 7, 13, 0.99) 72%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(238, 255, 255, 0.16),
+    inset 0 -10px 14px rgba(0, 0, 0, 0.52),
+    0 6px 12px rgba(0, 0, 0, 0.5) !important;
+}
+
+html body #app #match.active .powers > .energy-attack.burst {
+  --attack-color: #54f15c;
+  --attack-soft: rgba(84, 241, 92, 0.18);
+  border-top-color: rgba(124, 245, 255, 0.78) !important;
+}
+
+html body #app #match.active .powers > .energy-attack.strike {
+  --attack-color: #ff285d;
+  --attack-soft: rgba(255, 40, 93, 0.18);
+  border-top-color: rgba(255, 136, 160, 0.78) !important;
+}
+
+html body #app #match.active .powers > #rewind {
+  --mod-core: rgba(61, 156, 255, 0.24);
+  border-top-color: rgba(118, 191, 255, 0.78) !important;
+}
+
+html body #app #match.active .powers > .energy-attack .energy-attack-glyph,
+html body #app #match.active .powers > #rewind .glyph {
+  flex: 0 0 auto;
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.72)) drop-shadow(0 0 5px currentColor) !important;
+}
+
+html body #app #match.active .powers > .energy-attack .energy-attack-copy {
+  min-width: 0;
+  align-self: center;
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+
+html body #app #match.active .powers > .energy-attack {
+  grid-template-columns: 24px minmax(0, 1fr) max-content;
+  grid-template-rows: 1fr auto;
+}
+
+html body #app #match.active .powers > .energy-attack .energy-attack-cost {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+}
+
+html body #app #match.active .powers > .energy-attack .energy-attack-copy b,
+html body #app #match.active .powers > #rewind b {
+  font-size: 8px;
+  line-height: 1.05;
+  letter-spacing: 0.065em;
+  white-space: nowrap;
+}
+
+html body #app #match.active .powers > .energy-attack .energy-attack-copy small,
+html body #app #match.active .powers > #rewind .need {
+  margin-top: 2px;
+  color: #9db8c2;
+  font-size: 7px;
+  line-height: 1.05;
+  white-space: nowrap;
+}
+
+html body #app #match.active .powers > .energy-attack .energy-attack-cost,
+html body #app #match.active .powers > #rewind .cost {
+  min-width: max-content;
+  align-self: end;
+  justify-self: end;
+  margin-left: 3px;
+  padding-left: 3px;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  white-space: nowrap;
+  text-shadow: 0 0 5px currentColor;
+}
+
+html body #app #match.active .powers > #rewind {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 48px;
+  grid-template-rows: 1fr auto;
+  column-gap: 6px;
+  align-items: center;
+  text-align: left;
+}
+
+html body #app #match.active .powers > #rewind .glyph {
+  grid-row: 1 / span 2;
+  width: 24px;
+  height: 24px;
+  justify-self: center;
+  transform: none !important;
+}
+
+html body #app #match.active .powers > #rewind b,
+html body #app #match.active .powers > #rewind .cost,
+html body #app #match.active .powers > #rewind .need {
+  grid-column: 2;
+}
+
+html body #app #match.active .powers > #rewind b {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html body #app #match.active .powers > #rewind .cost {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  box-sizing: border-box;
+  min-width: 0 !important;
+  width: 48px !important;
+  max-width: 48px !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transform: none !important;
+}
+
+html body #app #match.active .powers > #rewind .need {
+  grid-column: 2;
+  grid-row: 2;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Rewind's legacy ready animation rotates the circular glyph. A rotated
+   square is larger than its grid track and can protrude from narrow cards;
+   keep the breathing brightness cue without changing its touch geometry. */
+html body #app #match.active .powers > #rewind .glyph {
+  animation: arenaGlyphIdle 2.8s ease-in-out infinite !important;
+}
+
+@media (max-width: 360px) {
+  html body #app #match.active .powers > .energy-attack,
+  html body #app #match.active .powers > #rewind {
+    padding-inline: 4px !important;
+  }
+
+  html body #app #match.active .powers > .energy-attack .energy-attack-copy b,
+  html body #app #match.active .powers > #rewind b {
+    font-size: 7px;
+    letter-spacing: 0.045em;
+  }
+
+  html body #app #match.active .powers > .energy-attack .energy-attack-copy small,
+  html body #app #match.active .powers > #rewind .need {
+    font-size: 6px;
+  }
+
+  html body #app #match.active .powers > .energy-attack .energy-attack-cost,
+  html body #app #match.active .powers > #rewind .cost {
+    font-size: 7px;
+    letter-spacing: 0.04em;
+  }
+}
+
+@media (max-height: 760px) {
+  html body #app #match.active .powers > .energy-attack,
+  html body #app #match.active .powers > #rewind {
+    min-height: 42px;
+    height: 42px;
+    padding: 3px 3px 2px !important;
+  }
+
+  html body #app #match.active .powers > .energy-attack {
+    grid-template-columns: 20px minmax(0, 1fr) max-content;
+  }
+
+  html body #app #match.active .powers > #rewind {
+    grid-template-columns: 20px minmax(0, 1fr) 36px;
+    column-gap: 4px;
+  }
+
+  html body #app #match.active .powers > #rewind .glyph {
+    width: 18px;
+    height: 18px;
+  }
+
+  html body #app #match.active .powers > #rewind .cost {
+    width: 36px !important;
+    max-width: 36px !important;
+  }
+}
+
 

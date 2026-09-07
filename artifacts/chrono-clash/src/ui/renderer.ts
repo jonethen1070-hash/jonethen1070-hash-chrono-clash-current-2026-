@@ -3408,7 +3408,7 @@ export class BoardRenderer {
     ctx.arc(cx, cy + s * 0.04, s * 0.4, 0, Math.PI * 2);
     const halo = ctx.createRadialGradient(cx, cy - s * 0.04, s * 0.04, cx, cy + s * 0.06, s * 0.4);
     halo.addColorStop(0, crystal.bloom);
-    halo.addColorStop(0.32, `${color}18`);
+    halo.addColorStop(0.32, `${color}15`);
     halo.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = halo;
     ctx.fill();
@@ -4052,7 +4052,7 @@ export class BoardRenderer {
     ctx.arc(cx, cy + s * 0.08, s * 0.36, 0, Math.PI * 2);
     const under = ctx.createRadialGradient(cx, cy - s * 0.02, s * 0.02, cx, cy + s * 0.1, s * 0.36);
     under.addColorStop(0, crystal.bloom);
-    under.addColorStop(0.38, `${color}52`);
+    under.addColorStop(0.38, `${color}45`);
     under.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = under;
     ctx.fill();
