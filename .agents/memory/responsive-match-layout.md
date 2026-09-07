@@ -32,3 +32,9 @@ Charged attack buttons reuse the ready-screen `.ready-pulse` class, whose viewpo
 **Why:** Energy changes can add the class after the match has settled, so an initial geometry check can pass while a charged power becomes untappable.
 
 **How to apply:** Validate controls both uncharged and charged at the shortest supported mobile viewport; treat the ability row as normal flow, not a fixed overlay.
+
+Mobile ability content can overflow its button even when the button rectangle is inside the viewport: the match-stage perspective magnifies child `translateZ` layers, and a flex column can shrink the rewind icon before its cost row.
+
+**Why:** Outer action geometry alone missed clipped labels/costs and reduced Rewind artwork on short phones.
+
+**How to apply:** Keep the three controls equal-height, use explicit compact grid rows for their internal content, and validate rendered child bounds—not only button bounds—at short and tall phone sizes.
