@@ -1,0 +1,132 @@
+CHRONO CLASH — YOU STILL HAVE NOT USED THE LOWER PHONE SPACE
+
+Look carefully at the CURRENT mobile screenshot.
+
+There is STILL a large unused vertical area underneath the ability bar.
+
+This is the specific problem I want fixed.
+
+DO NOT tell me the screen fits technically. I want the composition to USE the available phone viewport professionally.
+
+CURRENT:
+HEADER
+PLAYER/RIVAL
+ENERGY
+8x8 BOARD
+ABILITY BAR
+↓↓↓↓
+LARGE UNUSED SPACE
+↓↓↓↓
+PHONE BOTTOM CONTROLS
+
+DESIRED:
+HEADER
+PLAYER/RIVAL
+ENERGY
+LARGE/TALL 8x8 BOARD
+SMALL GAP
+ABILITY BAR
+SMALL SAFE BOTTOM MARGIN
+PHONE BOTTOM CONTROLS
+
+IMPORTANT:
+
+The board is already almost full width.
+
+Therefore DO NOT make the board wider.
+
+Instead, use the remaining VERTICAL viewport space intelligently.
+
+1. Increase the usable HEIGHT of the gameplay board/composition.
+2. Make the 8×8 board feel taller and more substantial.
+3. Keep all 8 rows and 8 columns.
+4. Keep every gem fully visible.
+5. Keep gem proportions correct — DO NOT vertically stretch the gem artwork.
+6. Increase gem size modestly if the available cell width allows it.
+7. Reduce unnecessary gaps/padding around the board if that allows slightly larger gems.
+8. Move the ability bar DOWN so it sits naturally closer to the bottom safe area.
+9. Leave only a SMALL intentional safe-space margin beneath the ability bar.
+10. Eliminate the large unused region currently visible below the ability bar.
+
+VERY IMPORTANT:
+
+Do NOT simply add:
+bottom: 0;
+position: fixed;
+negative margins;
+or another random CSS override.
+
+Inspect the actual gameplay screen layout and determine why the content stops early.
+
+The game background/environment should continue naturally behind the lower area, but the UI itself should use the available viewport intelligently.
+
+BOARD:
+
+The board should be the dominant gameplay element.
+
+Aim for the largest practical board that fits between:
+- Energy bar above
+- Ability bar below
+
+The board must be constrained by:
+- phone width
+- available phone height
+
+Do NOT distort the gems.
+
+If the current board width is already at its practical maximum, use vertical spacing/layout space to make the board composition taller rather than forcing the gems into a wider shape.
+
+ABILITY BAR:
+
+Keep:
+ENERGY BURST | MEGA STRIKE | REWIND
+
+Keep the current button designs.
+
+Move the complete ability bar lower into the currently unused space.
+
+It should NOT touch the phone/browser bottom controls.
+
+Use proper safe-area handling such as env(safe-area-inset-bottom) where appropriate.
+
+TARGET:
+
+There should be approximately only a small, intentional bottom margin after the ability bar — NOT the large empty region visible in the current screenshot.
+
+DO NOT CHANGE:
+- gem artwork
+- colors
+- HUD design
+- player/rival panels
+- timer
+- energy bar
+- gameplay
+- swap logic
+- match logic
+- scoring
+- abilities
+- VFX
+- audio
+
+This is ONLY a responsive vertical-composition correction.
+
+BEFORE FINISHING:
+
+Take a fresh screenshot at the same phone viewport.
+
+Inspect specifically the bottom half.
+
+I want:
+✓ larger/taller gameplay composition
+✓ large readable gems
+✓ ability bar lower
+✓ almost no wasted bottom space
+✓ complete ability buttons
+✓ complete REWIND cost/text
+✓ no overlap
+✓ no clipping
+✓ safe bottom margin
+✓ board remains playable
+✓ professional studio-quality mobile composition
+
+DO NOT stop until the large empty region below the ability bar has been properly addressed.
