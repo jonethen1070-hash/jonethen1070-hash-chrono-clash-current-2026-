@@ -1,0 +1,111 @@
+Improve Chrono Clash gameplay feel by making the game slightly faster, more responsive, and much more satisfying WITHOUT changing the existing gameplay rules, board logic, scoring, or mechanics.
+
+Focus specifically on SWAP → MATCH → FALL → CASCADE.
+
+1. SWAP FEEL
+
+* Make gem swapping noticeably faster and more responsive.
+* The selected gems should begin moving immediately when the player swipes.
+* Reduce unnecessary input-to-animation delay.
+* Use a short, punchy swap animation rather than a slow linear movement.
+* Target roughly 100–140ms for the main swap movement.
+* Add a very subtle ease-out/overshoot so the destination feels impactful, but keep it controlled and premium.
+* The two gems should move as a coordinated pair and arrive cleanly at their destination.
+* Do NOT make the swap feel floaty or sluggish.
+* Touch/swipe input must remain extremely responsive.
+
+2. MATCH DETECTION
+
+* Match detection should happen immediately after the swap finishes.
+* Remove unnecessary waits between swap completion and match recognition.
+* Once a valid match is detected, trigger the match feedback almost immediately.
+* Target approximately 50–80ms of transition/settling before the match response.
+* Do not add artificial pauses.
+
+3. GEM MATCH / CLEAR ANIMATION
+
+* Make matched gems clear faster and feel more energetic.
+* The match should have a quick impact moment rather than slowly fading away.
+* Use a short scale/pulse + glow/pop effect.
+* Target roughly 120–180ms for the main match-clear animation.
+* Keep VFX readable and premium rather than excessive.
+
+4. GEM FALLING / GRAVITY — IMPORTANT
+    Make falling gems feel MUCH more physical and satisfying, similar to the feeling of Candy Crush.
+
+Do NOT simply move gems downward with a slow linear translation.
+
+Instead:
+
+* After matched gems disappear, calculate the empty cells.
+* Gems above should visibly fall into the empty spaces.
+* Falling should start quickly after the match clears.
+* Use acceleration during the fall rather than constant linear speed.
+* Gems should start slightly slower, accelerate downward, then decelerate naturally as they approach their destination.
+* Add a very subtle squash/compression on landing followed by a tiny settle.
+* Each gem should feel like an actual object falling into the board.
+* Gems falling multiple cells should visibly travel farther and take slightly longer than gems falling one cell.
+* Avoid making every gem land at exactly the same visual moment.
+* Use tiny stagger/variation between columns so cascades feel organic.
+* Keep the total cascade fast.
+
+Suggested feel:
+
+* 1 cell fall: ~90–120ms
+* 2–3 cell fall: ~130–190ms
+* 4+ cell fall: ~180–260ms
+    Adjust these based on the existing animation system so the game remains fast.
+
+5. CASCADES
+
+* As soon as falling gems land and a new match exists, detect it quickly.
+* Do not insert long delays between cascade stages.
+* Cascades should feel like one continuous chain reaction.
+* The player should feel:
+    SWIPE → SNAP → MATCH → POP → GEMS DROP → NEW MATCH → CASCADE
+    rather than:
+    SWIPE → WAIT → MATCH → WAIT → DROP → WAIT.
+
+6. PHYSICS / VISUAL QUALITY
+
+* Preserve the existing gem artwork/materials and premium 2.5D presentation.
+* Do not redesign the board.
+* Do not change the existing game mechanics.
+* Do not change scoring, match rules, power-ups, turns, timers, or game balance.
+* Do not introduce excessive bounce.
+* Do not make gems overlap or visually clip through each other.
+* Maintain perfect grid alignment when gems finish moving.
+* All gems must end at their exact logical cell positions.
+
+7. OVERALL SPEED
+    Make the entire interaction approximately 10–20% faster than the current game, but prioritize responsiveness and perceived speed over simply shortening every animation.
+
+The final feeling should be:
+FAST, SNAPPY, PHYSICAL, SATISFYING.
+
+Think premium mobile match-3:
+
+* swap feels immediate
+* match feels punchy
+* gems fall with acceleration
+* landing has weight
+* cascades flow continuously
+* no dead time
+
+IMPORTANT:
+First inspect the existing swap, match, gravity/fall, cascade, and animation/tween code. Modify the existing systems instead of creating a second competing animation system.
+
+Also check for existing animation delays, setTimeout/setInterval waits, transition durations, promise waits, or CSS transitions that are unnecessarily slowing the gameplay loop.
+
+Do not touch unrelated UI or visual polish.
+After implementing, test several scenarios:
+
+* normal 3-gem match
+* 4+ gem match
+* one-cell fall
+* multi-cell fall
+* multiple columns falling simultaneously
+* chain cascade
+* rapid repeated swipes
+
+The result should feel significantly more responsive and satisfying while preserving the exact existing gameplay.
