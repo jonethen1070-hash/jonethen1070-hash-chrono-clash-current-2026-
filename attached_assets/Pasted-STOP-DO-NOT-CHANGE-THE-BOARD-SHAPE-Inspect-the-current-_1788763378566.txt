@@ -1,0 +1,91 @@
+STOP — DO NOT CHANGE THE BOARD SHAPE.
+
+Inspect the current screenshot carefully.
+
+The current 8×8 board is now approximately square and nearly full phone width. THAT PART IS GOOD.
+
+The remaining problem is the vertical composition at the bottom.
+
+CURRENT:
+8×8 BOARD
+↓
+ABILITY BAR
+↓
+TOO MUCH EMPTY GAME BACKGROUND
+↓
+PHONE BOTTOM CONTROLS
+
+I need:
+8×8 BOARD
+↓
+SMALL GAP
+↓
+ABILITY BAR
+↓
+SMALL SAFE BOTTOM MARGIN
+↓
+PHONE BOTTOM CONTROLS
+
+IMPORTANT:
+DO NOT make the board rectangular.
+DO NOT vertically stretch the gems.
+DO NOT distort the cells.
+
+The board must remain a square 8×8 grid.
+
+Use the currently unused bottom space to move the COMPLETE ability bar lower, closer to the bottom safe area.
+
+Then recalculate the board's available height.
+
+If the new layout creates additional room between ENERGY and ABILITY BAR, allow the square 8×8 board to grow slightly, constrained by BOTH:
+- available width
+- available height
+
+The board should use the largest square size that safely fits.
+
+DO NOT force a larger board if the width is already the limiting factor.
+
+The priority is:
+
+1. Preserve the current board proportions.
+2. Remove the excessive empty space below the ability bar.
+3. Move the ability bar downward into that available space.
+4. Keep a small safe-area margin above the phone/browser controls.
+5. Only then allow the board to become larger if actual available space permits it.
+
+DO NOT:
+- change the top HUD
+- change player/rival panels
+- change energy bar
+- change gem artwork
+- change gem proportions
+- change gameplay
+- change match logic
+- change animations
+- change ability designs
+- add arbitrary negative margins
+- add random !important overrides
+- use fixed positioning just to force the layout
+
+Inspect the parent gameplay container and its height/flex/grid calculations.
+
+Use the actual mobile viewport and safe-area inset.
+
+The ability bar should be part of the normal gameplay layout, not independently floating at a hardcoded bottom position.
+
+FINAL TARGET:
+
+The current board should remain visually like a large square 8×8 board.
+
+The ability bar should sit immediately beneath it.
+
+There should be only a small intentional space underneath the ability bar.
+
+Everything must remain completely visible and tappable.
+
+NO overlap.
+NO clipping.
+NO huge empty region.
+NO distorted gems.
+
+Make the smallest structural change necessary to achieve this.
