@@ -1,0 +1,116 @@
+IMPORTANT — I NOW WANT THE BOARD TO USE THE EMPTY VERTICAL SPACE.
+
+The current 8×8 board is constrained to approximately a SQUARE because its height is being determined from its width / aspect-ratio.
+
+That is why there is unused vertical space underneath it.
+
+I DO NOT want the board to remain locked to a 1:1 square if that prevents it from using the available phone height.
+
+CHANGE THE BOARD LAYOUT SO THE 8 ROWS CAN USE MORE VERTICAL HEIGHT.
+
+IMPORTANT:
+DO NOT STRETCH OR DISTORT THE GEM ARTWORK.
+
+The GRID/BOARD CONTAINER can become taller.
+
+Each of the 8 ROWS should have more vertical space.
+
+The gems themselves must remain proportional and undistorted.
+
+Desired structure:
+
+ENERGY BAR
+↓
+LARGE TALL 8×8 GAME BOARD
+↓
+SMALL GAP
+↓
+ABILITY BAR
+↓
+SMALL SAFE BOTTOM SPACE
+
+The board should expand DOWNWARD into the currently unused vertical space.
+
+DO NOT move the board upward.
+DO NOT create empty space above the board.
+DO NOT leave a large empty area below the board.
+
+Instead, the board itself should occupy that space.
+
+INSPECT AND REMOVE/CHANGE the rule that is forcing the board to be square, such as:
+- aspect-ratio: 1 / 1
+- height based directly on width
+- fixed board height
+- square grid container
+- grid-auto-rows based on width
+
+Use the available viewport height to determine the board's maximum usable height.
+
+The 8 columns should continue to fit the phone width.
+
+The 8 rows should be allowed to become taller.
+
+GEMS:
+- Keep gem aspect ratio correct.
+- Never visually stretch a gem.
+- Scale gems proportionally.
+- Center each gem inside its cell.
+- Increase gem size only where there is actual room.
+- Do not make gems wider than their columns.
+
+BOARD:
+- Keep exactly 8 columns.
+- Keep exactly 8 rows.
+- Keep current board frame styling.
+- Extend the board frame vertically with the grid.
+- Maintain consistent row spacing.
+- Maintain consistent column spacing.
+
+USE AVAILABLE SPACE:
+
+Calculate the available vertical space between:
+ENERGY BAR
+and
+ABILITY BAR.
+
+Make the board consume as much of that available space as is practical.
+
+The ability bar should remain below the board.
+
+There should be only a small controlled gap between board and abilities.
+
+There should be only a small safe-area margin below the abilities.
+
+IMPORTANT:
+Do NOT solve this with random margin/padding hacks.
+Do NOT use negative margins.
+Do NOT add another giant aaa-polish.css override.
+Do NOT change the HUD.
+Do NOT change the Energy bar.
+Do NOT change the ability buttons.
+Do NOT change gameplay or match logic.
+
+The key change is:
+
+CURRENT:
+square board constrained by WIDTH
+
+WANTED:
+TALLER 8×8 GRID constrained by the AVAILABLE VIEWPORT HEIGHT, while keeping each GEM itself proportional.
+
+Test on the actual phone viewport.
+
+The final screen should have:
+✓ no huge empty space below the board
+✓ no huge empty space above the board
+✓ larger/taller 8×8 gameplay area
+✓ larger readable gems where physically possible
+✓ undistorted gems
+✓ complete board visible
+✓ complete ability bar visible
+✓ small safe bottom margin
+✓ zero overlap
+✓ zero clipping
+
+This is the intended design:
+THE BOARD SHOULD USE THE EMPTY VERTICAL SPACE.
