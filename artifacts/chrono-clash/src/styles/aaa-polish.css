@@ -10116,6 +10116,10 @@ html body #app #results.active.loss::before {
     height: 18px !important;
     font-size: 12px !important;
   }
+
+  html body #app #match .powers > #rewind .cost {
+    transform: translateY(-1px) !important;
+  }
 }
 
 

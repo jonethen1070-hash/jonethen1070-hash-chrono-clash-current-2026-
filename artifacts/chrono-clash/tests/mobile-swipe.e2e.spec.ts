@@ -8,6 +8,15 @@ type BoardBox = {
   height: number;
 };
 
+type Rect = {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+  width: number;
+  height: number;
+};
+
 type TouchPoint = {
   x: number;
   y: number;
@@ -189,6 +198,44 @@ test.describe("mobile board clipping regression", () => {
         const boardRect = board?.getBoundingClientRect();
         const canvasRect = canvas?.getBoundingClientRect();
         const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>(".powers > button"));
+        const abilityParts = [
+          {
+            id: "energyBurstAttack",
+            parts: [
+              { name: "icon", selector: ".energy-attack-glyph" },
+              { name: "label", selector: ".energy-attack-copy b" },
+              { name: "cost", selector: ".energy-attack-cost" },
+            ],
+          },
+          {
+            id: "megaStrikeAttack",
+            parts: [
+              { name: "icon", selector: ".energy-attack-glyph" },
+              { name: "label", selector: ".energy-attack-copy b" },
+              { name: "cost", selector: ".energy-attack-cost" },
+            ],
+          },
+          {
+            id: "rewind",
+            parts: [
+              { name: "icon", selector: ".glyph" },
+              { name: "label", selector: "b" },
+              { name: "cost", selector: ".cost" },
+            ],
+          },
+        ] as const;
+        const rectData = (element: Element | null): Rect | null => {
+          if (!element) return null;
+          const rect = element.getBoundingClientRect();
+          return {
+            left: rect.left,
+            right: rect.right,
+            top: rect.top,
+            bottom: rect.bottom,
+            width: rect.width,
+            height: rect.height,
+          };
+        };
         const dynamicViewport = {
           width: visual?.width ?? window.innerWidth,
           height: visual?.height ?? window.innerHeight,
@@ -238,6 +285,17 @@ test.describe("mobile board clipping regression", () => {
               height: rect.height,
               display: getComputedStyle(button).display,
               visibility: getComputedStyle(button).visibility,
+            };
+          }),
+          abilityContent: abilityParts.map(({ id, parts }) => {
+            const button = document.getElementById(id);
+            return {
+              id,
+              button: rectData(button),
+              parts: parts.map(({ name, selector }) => ({
+                name,
+                rect: rectData(button?.querySelector(selector) ?? null),
+              })),
             };
           }),
           dynamicViewport,
@@ -292,6 +350,35 @@ test.describe("mobile board clipping regression", () => {
         expect(button.bottom, `Ability ${button.id} clipped at the bottom edge: ${detail}`).toBeLessThanOrEqual(viewportBottom + 1);
         expect(button.display, `Ability ${button.id} was display-hidden: ${detail}`).not.toBe("none");
         expect(button.visibility, `Ability ${button.id} was visibility-hidden: ${detail}`).not.toBe("hidden");
+      }
+
+      expect(geometry.abilityContent, `Ability content was not rendered: ${detail}`).toHaveLength(3);
+      for (const ability of geometry.abilityContent) {
+        expect(ability.button, `Missing ${ability.id} button geometry: ${detail}`).not.toBeNull();
+        const button = ability.button!;
+        for (const part of ability.parts) {
+          const partDetail = `${detail} ${ability.id} ${part.name}`;
+          expect(part.rect, `Missing ability ${part.name} geometry: ${partDetail}`).not.toBeNull();
+          const rect = part.rect!;
+          expect(rect.width, `Ability ${part.name} has no width: ${partDetail}`).toBeGreaterThan(0);
+          expect(rect.height, `Ability ${part.name} has no height: ${partDetail}`).toBeGreaterThan(0);
+          expect(
+            rect.left,
+            `Ability ${part.name} clipped on the left: ${partDetail}`,
+          ).toBeGreaterThanOrEqual(button.left);
+          expect(
+            rect.right,
+            `Ability ${part.name} clipped on the right: ${partDetail}`,
+          ).toBeLessThanOrEqual(button.right);
+          expect(
+            rect.top,
+            `Ability ${part.name} clipped at the top: ${partDetail}`,
+          ).toBeGreaterThanOrEqual(button.top);
+          expect(
+            rect.bottom,
+            `Ability ${part.name} clipped at the bottom: ${partDetail}`,
+          ).toBeLessThanOrEqual(button.bottom);
+        }
       }
     });
   }
