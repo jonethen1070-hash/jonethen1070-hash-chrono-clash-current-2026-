@@ -1,0 +1,266 @@
+Optimize Chrono Clash VFX performance specifically for rapid gameplay, cascades, and multiple simultaneous matches.
+
+IMPORTANT:
+Do NOT reduce the game’s responsiveness or slow down the swap/fall/match animations to solve performance problems.
+
+The goal is:
+FAST GAMEPLAY + SATISFYING VFX + STABLE PERFORMANCE.
+
+FIRST:
+Inspect the existing VFX, particle, glow, animation/tween, DOM/canvas elements, CSS filters, shadows, and effect cleanup systems before changing anything.
+
+Do NOT create a second competing VFX system.
+Improve the existing implementation.
+
+1. IDENTIFY VFX PERFORMANCE HOTSPOTS
+    Look for:
+
+* Particle spawning during matches
+* Repeated particle creation/destruction
+* Excessive DOM elements
+* CSS blur/filter effects
+* Large box-shadow/glow effects
+* Multiple simultaneous tweens
+* Screen shake
+* Flash effects
+* Match trails
+* Gem glow effects
+* Cascade effects
+* Power-up VFX
+* Effects that remain alive after they visually finish
+* requestAnimationFrame loops that continue unnecessarily
+* setTimeout/setInterval chains that accumulate during fast play
+
+Fix actual bottlenecks instead of guessing.
+
+2. EFFECT POOLING
+    Where practical, reuse VFX objects/elements instead of constantly creating new ones.
+
+For frequently triggered effects such as:
+
+* gem match pop
+* particles
+* sparkle bursts
+* small impact effects
+* landing effects
+
+Use lightweight pooling/reuse.
+
+When an effect finishes:
+
+* reset it
+* hide it
+* return it to the pool
+* do not leave inactive animation loops running
+
+3. LIMIT SIMULTANEOUS VFX
+    Add a sensible maximum number of simultaneous cosmetic effects.
+
+During normal gameplay:
+
+* allow the full premium VFX treatment.
+
+During large cascades:
+
+* automatically reduce duplicate/similar cosmetic effects.
+
+For example:
+If 10+ gems match at once, do NOT spawn 10 expensive particle systems with dozens of particles each.
+
+Instead:
+
+* preserve the strongest match effects
+* combine or simplify secondary effects
+* maintain visual richness without excessive GPU/CPU work
+
+The player should still SEE and FEEL the cascade.
+
+4. ADAPTIVE VFX QUALITY
+    Create a lightweight adaptive VFX quality mechanism based on current effect load.
+
+Normal state:
+FULL VFX.
+
+Heavy cascade:
+REDUCED VFX.
+
+Very heavy effect load:
+MINIMAL SECONDARY VFX.
+
+Never disable the important gameplay feedback.
+
+Priority order:
+
+1. Gem movement
+2. Match recognition
+3. Match impact/pop
+4. Cascade/falling feedback
+5. Power-up feedback
+6. Secondary particles
+7. Decorative ambient effects
+
+If performance becomes stressed, remove/reduce items from the bottom of this list first.
+
+5. EXPENSIVE CSS EFFECTS
+    Inspect existing CSS for expensive effects such as:
+
+* filter: blur()
+* backdrop-filter
+* large box-shadow
+* repeated text-shadow
+* excessive opacity layers
+* large translucent overlays
+
+Do NOT remove the premium visual style.
+
+Instead:
+
+* reduce expensive effects during heavy gameplay
+* use simpler opacity/scale effects where visually equivalent
+* avoid stacking many blurred layers at the same time
+* restore the full visual treatment once the cascade finishes
+
+6. PARTICLE MANAGEMENT
+    Particles should be:
+
+* short-lived
+* lightweight
+* capped
+* efficiently removed
+
+Avoid spawning unnecessary particles for every tiny movement.
+
+Use fewer but better particles.
+
+Match VFX should feel:
+CRISP
+BRIGHT
+IMPACTFUL
+SHORT
+
+Not:
+HEAVY
+SMOKY
+SLOW
+OVERLOADED
+
+7. GEM FALL / LANDING VFX
+    Keep the satisfying physical falling effect from the previous speed pass.
+
+For falling gems:
+
+* prioritize movement and landing
+* use a tiny landing squash/settle
+* use a very subtle impact sparkle only when useful
+* do not create expensive particle effects for every falling gem
+
+For large cascades, consolidate landing effects where possible.
+
+8. SWAP VFX
+    Keep the swap fast and satisfying.
+
+Use subtle feedback:
+
+* tiny highlight/energy response
+* quick scale/impact
+* optional very short trail
+
+Do NOT add heavy particles to every normal swap.
+
+9. MATCH VFX
+    The match should remain the visual star.
+
+Use:
+
+* quick gem pop
+* short glow burst
+* controlled particles
+* optional energy streak
+* concise impact
+
+Make the effect finish quickly so the next cascade can begin immediately.
+
+10. CASCADE VFX
+    Make cascades visually exciting without multiplying the performance cost.
+
+As cascade depth increases:
+
+* preserve the important impact
+* reduce repetitive secondary particles
+* avoid spawning the same expensive effect hundreds of times
+
+A large cascade should look MORE exciting, not slower.
+
+11. CLEANUP
+    Audit every temporary VFX element.
+
+Make sure finished effects:
+
+* stop their animation loop
+* stop timers
+* release references where appropriate
+* return pooled elements
+* do not continue consuming CPU/GPU
+
+Pay particular attention to effects triggered repeatedly during rapid swiping.
+
+12. FAST-PLAY TEST
+    After implementation, test:
+
+* rapid consecutive swaps
+* fast 3-match
+* simultaneous matches
+* 4/5-gem matches
+* large cascades
+* multiple cascade chains
+* power-up + cascade
+* rapid gameplay for at least 30–60 seconds
+
+Watch specifically for:
+
+* FPS drops
+* input delay
+* delayed gem movement
+* animation queues building up
+* particles accumulating
+* VFX remaining after they should disappear
+* increasing memory/CPU usage during long play
+
+13. IMPORTANT GAME-FEEL RULE
+    Do NOT solve performance by making:
+
+* swaps slower
+* matches slower
+* gem falling slower
+* cascade delays longer
+* input less responsive
+
+Instead, optimize the VFX workload.
+
+FINAL TARGET:
+
+FAST SWIPE
+↓
+INSTANT SATISFYING SWAP
+↓
+QUICK MATCH POP
+↓
+PHYSICAL GEM FALL
+↓
+SMOOTH CASCADE
+↓
+EXCITING BUT CONTROLLED VFX
+
+The game should feel energetic even when the player plays extremely fast.
+
+Preserve the existing:
+
+* gameplay rules
+* scoring
+* board
+* gem designs
+* HUD
+* premium 2.5D visual direction
+* existing VFX style
+
+This is a performance + game-feel optimization pass, not a visual redesign.
