@@ -9366,7 +9366,7 @@ html body #app #match .player-side .board-socket-bed {
 
   html body #app #match .powers {
     margin-top: 6px !important;
-    transform: translateZ(2px) !important;
+    transform: translateZ(2px) translateY(-3px) !important;
   }
 }
 

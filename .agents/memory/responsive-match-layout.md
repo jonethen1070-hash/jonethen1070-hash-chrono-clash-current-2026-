@@ -26,3 +26,9 @@ When a shared custom property supplies both board width and height, avoid embedd
 **Why:** A percentage inside a reusable `min()` variable resolves against the property’s axis. Reusing it for height produced a two-pixel outer rectangle mismatch even though the CSS declared a square aspect ratio.
 
 **How to apply:** Derive the mobile size from safe dynamic viewport width and remaining dynamic viewport height, then set `box-sizing: border-box` plus identical width, height, max-width, and max-height on the board frame.
+
+When the square board is already width-limited but the mobile viewport is much taller, keep the match stage full-height and bottom-align the board within its flexible row so the in-flow ability strip uses the lower safe area.
+
+**Why:** A width-limited square cannot grow vertically without distorting its cells. Bottom-aligning it preserves the board and gem geometry while eliminating the large empty region below the controls.
+
+**How to apply:** Use a `minmax(0, 1fr)` board row, keep the ability row in normal grid flow, and apply only a small transform correction when perspective makes the rendered controls exceed the viewport by a pixel.

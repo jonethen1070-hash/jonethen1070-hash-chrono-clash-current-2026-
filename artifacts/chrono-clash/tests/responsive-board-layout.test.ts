@@ -32,25 +32,32 @@ describe("production responsive board layout", () => {
     expect(main).toContain('setProperty("--app-vh"');
   });
 
-  it("sizes the player board to the recovered safe viewport space", () => {
+  it("sizes the player board from safe viewport width and height", () => {
     const css = readFileSync("src/styles/aaa-polish.css", "utf8");
     expect(css).toContain("--game-pad-x: 4px");
     expect(css).toContain("grid-template-rows:");
     expect(css).toContain("var(--energy-height)\n    0px\n    minmax(0, 1fr)");
-    expect(css).toContain("width: min(100%, calc(100vw - var(--safe-left) - var(--safe-right) - 2px), 388px)");
-    expect(css).toContain("max-width: min(100%, calc(100vw - var(--safe-left) - var(--safe-right) - 2px), 388px)");
-    expect(css).toContain("height: auto !important");
+    expect(css).toContain("--mobile-board-inline:");
+    expect(css).toContain("--mobile-board-block:");
+    expect(css).toContain("--mobile-board-size:");
+    expect(css).toContain("box-sizing: border-box !important");
+    expect(css).toContain("width: var(--mobile-board-size) !important");
+    expect(css).toContain("height: var(--mobile-board-size) !important");
+    expect(css).toContain("max-width: var(--mobile-board-size) !important");
+    expect(css).toContain("max-height: var(--mobile-board-size) !important");
     expect(css).toContain("aspect-ratio: 1 / 1 !important");
     expect(css).toContain("margin-top: 0 !important");
   });
 
-  it("packs mobile controls beneath the content-sized square board", () => {
+  it("uses the lower mobile viewport for the board and ability strip", () => {
     const css = readFileSync("src/styles/aaa-polish.css", "utf8");
     expect(css).toContain(
-      "var(--energy-height)\n      0px\n      max-content\n      calc(var(--control-height) + 6px)",
+      "var(--energy-height)\n      0px\n      minmax(0, 1fr)\n      calc(var(--control-height) + 6px)",
     );
+    expect(css).toContain("height: 100% !important");
+    expect(css).toContain("align-self: end !important");
     expect(css).toContain("margin-top: 6px !important");
-    expect(css).toContain("transform: translateZ(2px) !important");
+    expect(css).toContain("transform: translateZ(2px) translateY(-3px) !important");
   });
 
   it("scales gem cells proportionally with board size", () => {
@@ -115,8 +122,8 @@ describe("production responsive board layout", () => {
     expect(css).toContain("grid-row: 4 !important");
     expect(css).toContain("grid-row: 5 !important");
     expect(css).toContain("grid-row: 6 !important");
-    expect(css).toContain("width: min(100%, calc(100vw - var(--safe-left) - var(--safe-right) - 2px), 388px)");
-    expect(css).toContain("388px");
+    expect(css).toContain("--mobile-board-size:");
+    expect(css).toContain("align-self: end !important");
     expect(css).toContain("margin-top: 0 !important");
   });
 
