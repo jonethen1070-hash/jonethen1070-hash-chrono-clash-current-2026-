@@ -1,0 +1,527 @@
+STRICT INSTRUCTION: UPGRADE THE GAMEPLAY EXPERIENCE OF CHRONO CLASH WITHOUT BREAKING THE EXISTING GAME.
+
+The current game looks good, but the gameplay can feel repetitive/boring because the player mainly performs:
+
+MATCH → CLEAR → FALL → REPEAT.
+
+I want you to make the gameplay much more engaging, tense, rewarding, and replayable.
+
+ABSOLUTE RULES
+
+DO NOT:
+
+* rewrite the game from scratch
+* change the core match-3 rules
+* remove existing mechanics
+* break current gem behavior
+* change the corrected Mega Strike logic
+* remove existing abilities
+* remove the current HUD
+* add unnecessary complexity
+* sacrifice performance
+* add random mechanics that don’t fit the existing game
+
+Before changing anything, inspect the current gameplay architecture.
+
+Preserve everything that already works.
+
+⸻
+
+1. MAKE EVERY MOVE MATTER
+
+The player should feel like they are making a decision, not just clearing random gems.
+
+Improve the existing systems so the player has meaningful choices between:
+
+* creating a larger match
+* building a combo
+* generating energy
+* preparing an ability
+* attacking the rival
+* preparing Mega Strike
+
+Do NOT completely redesign the board.
+
+Use the existing mechanics intelligently.
+
+⸻
+
+2. MAKE COMBOS THE HEART OF THE GAME
+
+Create a strong combo progression.
+
+Example:
+
+MATCH
+→ COMBO ×2
+→ COMBO ×3
+→ COMBO ×4
+→ CHRONO CHAIN
+
+Higher combos should provide progressively stronger rewards using the existing scoring/energy/attack systems where possible.
+
+Rewards can include:
+
+* increased energy gain
+* increased damage
+* score multiplier
+* stronger feedback
+* better VFX/audio response
+
+Do NOT make combos uncontrollably powerful.
+
+Balance them carefully.
+
+The player should actively WANT to continue a chain.
+
+⸻
+
+3. MAKE ENERGY MEANINGFUL
+
+Energy should feel like a strategic resource.
+
+The player should constantly think:
+
+“Should I spend energy now or save it?”
+
+Existing abilities should interact naturally with energy.
+
+Make energy gain visually satisfying.
+
+When energy increases:
+
+* animate the bar
+* show a subtle energy pulse
+* give clear feedback
+
+When an ability spends energy:
+
+* make the cost visually obvious
+* smoothly animate the energy reduction
+
+Do not change existing energy costs unless necessary for balance.
+
+⸻
+
+4. MAKE MEGA STRIKE A MAJOR MOMENT
+
+Mega Strike must feel like a goal the player is building toward.
+
+Keep the existing requirement.
+
+When Mega Strike reaches the required energy:
+
+MEGA STRIKE READY
+
+Give the player strong but controlled feedback.
+
+When activated:
+
+SELECT GEM
+→ identify its actual color
+→ reveal/highlight matching-color gems
+→ energy travels toward them
+→ all matching-color gems clear
+→ massive synchronized crystal reaction
+
+IMPORTANT:
+
+ONLY the selected gem’s color is affected.
+
+Other colors must remain untouched.
+
+Do not break the existing Mega Strike logic.
+
+⸻
+
+5. MAKE THE RIVAL FEEL ALIVE
+
+The Rival should feel like an opponent, not just a second score number.
+
+Use the existing rival/game logic where possible.
+
+Improve feedback when:
+
+* rival gains points
+* rival attacks
+* rival takes damage
+* rival is close to winning
+* player gets ahead
+* rival is defeated
+
+Add subtle states such as:
+
+RIVAL ATTACKING
+
+RIVAL LOW
+
+RIVAL COMBO
+
+RIVAL CRITICAL
+
+Do not add annoying constant popups.
+
+The player should feel that they are actually fighting someone.
+
+⸻
+
+6. CREATE TENSION
+
+Use the existing timer to create a stronger climax.
+
+When approximately 10 seconds remain:
+
+* subtly increase music intensity if audio exists
+* increase energy/combo tension
+* strengthen HUD urgency
+* subtly change lighting
+* make the rival more visually active
+
+At the final seconds:
+
+5
+4
+3
+2
+1
+
+Make the ending feel exciting.
+
+Do NOT slow the game down.
+
+Do NOT interfere with input.
+
+⸻
+
+7. CREATE “ALMOST” MOMENTS
+
+Give useful feedback when the player is close to something meaningful.
+
+Examples:
+
+“2 MORE ENERGY”
+
+“MEGA STRIKE READY”
+
+“COMBO ×4”
+
+“CRITICAL”
+
+“ONE MORE MATCH”
+
+These should be subtle and premium.
+
+Do not spam messages.
+
+Only show them when genuinely meaningful.
+
+⸻
+
+8. IMPROVE REWARD FEEDBACK
+
+Every successful action should feel rewarding.
+
+For:
+
+MATCH
+→ clear feedback
+
+COMBO
+→ stronger feedback
+
+BIG COMBO
+→ major feedback
+
+DAMAGE
+→ impact
+
+ABILITY
+→ strong activation
+
+MEGA STRIKE
+→ spectacular payoff
+
+VICTORY
+→ major celebration
+
+The intensity should scale with the importance of the action.
+
+⸻
+
+9. ADD LIGHTWEIGHT CHALLENGE VARIETY
+
+If the existing architecture supports it, introduce small rotating objectives without redesigning the game.
+
+Examples:
+
+* Achieve a ×4 combo
+* Clear 15 gems
+* Use an ability
+* Charge Mega Strike
+* Deal a certain amount of damage
+* Win before the timer expires
+
+Keep objectives simple.
+
+Do NOT turn the game into a complicated quest system.
+
+The purpose is to make each match feel slightly different.
+
+⸻
+
+10. PROGRESSION HOOK
+
+After victory, improve the feeling of progression using lightweight existing structures if available.
+
+Possible feedback:
+
+XP gained
+Score record
+Combo record
+Damage record
+Match reward
+Next level progress
+
+Do NOT implement a giant progression system unless the current architecture already supports it.
+
+For now, create a clear reason for:
+
+“PLAY AGAIN.”
+
+⸻
+
+11. VICTORY MUST FEEL EARNED
+
+When the player wins:
+
+FINAL MATCH
+→ FINAL COMBO
+→ FINAL DAMAGE
+→ VICTORY
+
+Give the player a strong payoff.
+
+Show useful results such as:
+
+* final score
+* best combo
+* damage dealt
+* reward/progress
+
+Keep it clean and premium.
+
+⸻
+
+12. DEFEAT MUST CREATE A REASON TO TRY AGAIN
+
+Do not make defeat feel like simply stopping the game.
+
+Show:
+
+DEFEAT
+
+Then useful information:
+
+* score
+* best combo
+* closest moment
+* progress
+
+Then make:
+
+PLAY AGAIN
+
+very obvious.
+
+Do NOT punish the player with long animations or delays.
+
+⸻
+
+13. DO NOT MAKE IT SLOWER
+
+THIS IS CRITICAL.
+
+The previous problem was gameplay feeling slow and not smooth.
+
+Do NOT solve engagement by adding long cinematic pauses.
+
+All new feedback must be:
+
+FAST
+RESPONSIVE
+NON-BLOCKING
+
+The player should be able to continue playing immediately whenever the board is ready.
+
+⸻
+
+14. PERFORMANCE FIRST
+
+All new systems must be lightweight.
+
+Do not create:
+
+* unnecessary animation loops
+* duplicate event listeners
+* excessive DOM elements
+* excessive particles
+* memory leaks
+* expensive calculations every frame
+
+Reuse existing systems wherever possible.
+
+⸻
+
+15. MOBILE FIRST
+
+Everything must work beautifully with touch.
+
+No hover-dependent mechanics.
+
+No tiny controls.
+
+No accidental taps.
+
+No input delay.
+
+No gameplay interruption.
+
+⸻
+
+16. DO NOT OVERDESIGN
+
+The game should NOT become noisy.
+
+Avoid:
+
+* constant flashing
+* endless popups
+* excessive text
+* giant UI
+* too many mechanics
+* too many currencies
+* unnecessary menus
+
+The player should understand the game instantly.
+
+The complexity should come from strategy and competition, not confusing UI.
+
+⸻
+
+17. CORE FEEL
+
+The final gameplay loop should feel like:
+
+MATCH
+↓
+BUILD
+↓
+CHOOSE
+↓
+COMBO
+↓
+ATTACK
+↓
+RIVAL RESPONDS
+↓
+BUILD ENERGY
+↓
+MEGA STRIKE
+↓
+CLIMAX
+↓
+VICTORY / DEFEAT
+↓
+REWARD
+↓
+PLAY AGAIN
+
+NOT:
+
+MATCH
+→ WAIT
+→ MATCH
+→ WAIT
+→ MATCH
+→ END
+
+⸻
+
+18. TEST THE ACTUAL GAME
+
+Do NOT judge this only from code.
+
+Play multiple complete matches.
+
+Test:
+
+* normal matches
+* large matches
+* cascades
+* combos
+* abilities
+* Mega Strike
+* rival interaction
+* final 10 seconds
+* victory
+* defeat
+* restart
+* Play Again
+
+Also test rapid touch input.
+
+⸻
+
+19. REGRESSION PROTECTION
+
+After implementation verify:
+
+* all existing tests still pass
+* production build still passes
+* Mega Strike still clears ONLY the selected color
+* other gem colors remain untouched
+* gem movement remains smooth
+* game does not slow down
+* restart works correctly
+* no duplicate loops/listeners
+* no console errors
+
+⸻
+
+20. FINAL QUALITY STANDARD
+
+Do not stop at “features added.”
+
+Ask:
+
+Is the player excited about the NEXT MOVE?
+
+If the answer is no, continue refining.
+
+Chrono Clash should feel:
+
+FAST
+SMOOTH
+STRATEGIC
+TENSE
+REWARDING
+COMPETITIVE
+CINEMATIC
+PREMIUM
+REPLAYABLE
+
+The goal is NOT to make the game busier.
+
+The goal is to make the player think:
+
+“One more move.”
+
+“One more combo.”
+
+“I can beat the rival.”
+
+“I almost had Mega Strike.”
+
+“Let me play again.”
+
+Make the smallest number of changes necessary to achieve that feeling while preserving the existing game.
