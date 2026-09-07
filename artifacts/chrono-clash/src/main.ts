@@ -2107,8 +2107,7 @@ ui.playerBoard.addEventListener(
     if (e.pointerType === "mouse" && e.button !== 0) return;
     const now = performance.now();
     ensureInputLayout();
-    const targetingPower = armedEnergyPower !== null;
-    if (!session.isInteractive(now) && !targetingPower) return;
+    if (!session.isInteractive(now)) return;
     const cell = hitPlayer(e);
     if (!cell) return;
     e.preventDefault();
@@ -2623,7 +2622,6 @@ function frame(now: number): void {
     const fade = snap.screen === "results" ? Math.max(0, 1 - (now - resultAt) / 700) : 1;
     refreshLayout();
     renderer.draw(snap, layout.player, layout.opp, now, fade);
-    session.setPresentationReady(renderer.isPlayerInputReady());
     if (renderer.takeLandingImpacts() > 0) {
       haptics.defer("swap", 1, now);
     }

@@ -5,7 +5,7 @@
 8. rival scored via simulated moves: 0 -> 39
 9. FREEZE activated, energy=0
 10. rival halted for 5s: score stayed 39
-11-12. TIME SHIFT held clock at 49480ms while rival halted
+11-12. TIME SHIFT held clock at 53980ms while rival halted
 13. another move scored 54 -> 127
 14-15. REWIND restored board, score, and combo
 16-17. TIME BATTLE ended: loss you=54 rival=78

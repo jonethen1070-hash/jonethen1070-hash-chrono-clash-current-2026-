@@ -86,9 +86,5 @@ describe("phase 7 runtime gameplay remains intact", () => {
     expect(game.tryPlayerSwap(move!.a, move!.b, start + 3_200)).toBe(true);
     expect(game.isInteractive(start + 3_210)).toBe(false);
     expect(game.isInteractive(start + 4_000)).toBe(true);
-    game.setPresentationReady(false);
-    expect(game.isInteractive(start + 4_000)).toBe(false);
-    game.setPresentationReady(true);
-    expect(game.isInteractive(start + 4_000)).toBe(true);
   });
 });

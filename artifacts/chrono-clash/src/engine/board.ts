@@ -384,47 +384,6 @@ export function applyGravity(board: Board, rng: () => number): { moved: boolean;
   return { moved, filled };
 }
 
-/**
- * Estimate the renderer's real presentation window for a resolved board.
- *
- * The resolver mutates the board synchronously, while the renderer presents
- * the committed swap, crystal impact, fall, and landing over elapsed time.
- * Input must remain closed until the longest surviving/new gem has landed;
- * otherwise a fast second swap starts a second pose/VFX sequence on top of
- * the first one.
- */
-export function resolvePresentationLockMs(before: Board, after: Board, events: ResolveEvent[]): number {
-  const previous = new Map<number, { r: number; c: number }>();
-  for (let r = 0; r < ROWS; r++) {
-    for (let c = 0; c < COLS; c++) {
-      const piece = before[r]![c];
-      if (piece) previous.set(piece.id, { r, c });
-    }
-  }
-
-  let maxTravelCells = 1;
-  for (let r = 0; r < ROWS; r++) {
-    for (let c = 0; c < COLS; c++) {
-      const piece = after[r]![c];
-      if (!piece) continue;
-      const from = previous.get(piece.id);
-      const travel = from ? Math.abs(r - from.r) : r + 1.15;
-      maxTravelCells = Math.max(maxTravelCells, travel);
-    }
-  }
-
-  const hasClear = events.some((event) => event.type === "clear");
-  const fallMs = Math.min(520, 160 + Math.max(0, maxTravelCells - 1) * 65);
-  const swapMs = 175;
-  // The renderer keeps the clear presentation behind the committed swap
-  // window before gravity starts: swap travel + the crystal impact pulse.
-  const impactMs = hasClear ? swapMs + 54 : 0;
-  const landingMs = maxTravelCells > 1 ? 60 : 0;
-  const dieMs = hasClear ? 120 + 16 : 0;
-
-  return Math.max(swapMs, impactMs + Math.max(fallMs + landingMs, dieMs));
-}
-
 export function resolveBoard(
   board: Board,
   rng: () => number,

@@ -16,15 +16,7 @@ import {
   SWAP_TOTAL_MS,
 } from "../src/ui/gemMotion";
 import { COLS, INVALID_RETURN_MS, ROWS } from "../src/engine/types";
-import {
-  cloneBoard,
-  createSeededRng,
-  findMatches,
-  makePiece,
-  resetIds,
-  resolvePresentationLockMs,
-  trySwap,
-} from "../src/engine/board";
+import { cloneBoard, createSeededRng, findMatches, makePiece, resetIds, trySwap } from "../src/engine/board";
 import { LARGE_MATCH_VFX_FIXTURES } from "./vfxFixtures";
 
 const THREE_ROW_CASCADE_FIXTURE = [
@@ -118,8 +110,6 @@ describe("input and animation timing contracts", () => {
     expect(renderer).toContain("tile.dieAge += dt");
     expect(renderer).toContain("this.stepParticles(view, dt)");
     expect(renderer).toContain("this.stepCrystalShards(view, dt)");
-    expect(renderer).toContain("isPlayerInputReady()");
-    expect(renderer).toContain("tile.settleAge < tile.settleDur");
   });
 });
 
@@ -209,16 +199,6 @@ describe("large-match VFX fixtures", () => {
       0);
       expect(maxFall).toBeGreaterThanOrEqual(fixture.expectedMaxFall);
     }
-  });
-
-  it("keeps input locked through the longest resolved fall and landing", () => {
-    const before = cascadeFixture();
-    const after = cloneBoard(before);
-    const result = trySwap(after, { r: 3, c: 3 }, { r: 3, c: 4 }, createSeededRng(101));
-
-    expect(result).not.toBeNull();
-    expect(resolvePresentationLockMs(before, result!.board, result!.events)).toBeGreaterThan(360);
-    expect(resolvePresentationLockMs(before, result!.board, result!.events)).toBeLessThanOrEqual(800);
   });
 });
 
