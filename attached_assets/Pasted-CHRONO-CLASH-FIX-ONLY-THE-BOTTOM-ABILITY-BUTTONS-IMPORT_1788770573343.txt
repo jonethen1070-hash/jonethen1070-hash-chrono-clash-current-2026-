@@ -1,0 +1,151 @@
+CHRONO CLASH — FIX ONLY THE BOTTOM ABILITY BUTTONS
+
+IMPORTANT:
+The 8×8 board is now in the correct position and size.
+
+DO NOT TOUCH THE BOARD OR ANYTHING ABOVE IT.
+
+The ONLY thing to fix now is the bottom ability/action bar.
+
+CURRENT PROBLEM:
+
+The three ability buttons are being clipped/squeezed vertically.
+
+ENERGY BURST:
+- lower content is too close to the bottom edge
+- button content needs more breathing room
+- text/cost should be completely visible and crisp
+
+MEGA STRIKE:
+- same problem
+- content is too close to the bottom boundary
+
+REWIND:
+- this is the most obvious problem
+- the circular rewind icon is not properly contained/positioned
+- the icon is being cut into the upper edge of the button
+- the lower red cost/detail is partially clipped
+- the complete REWIND button must be visible
+
+DO NOT MOVE THE BOARD.
+
+DO NOT CHANGE:
+- board size
+- board position
+- gems
+- gem size
+- HUD
+- player panel
+- rival panel
+- VS/FIGHT
+- timer
+- energy bar
+- gameplay
+- match logic
+- swap logic
+- VFX
+- audio
+
+ONLY FIX THE ABILITY BAR.
+
+DESIRED RESULT:
+
+All three buttons should look like professional mobile-game controls:
+
+┌────────────────┬────────────────┬────────────────┐
+│ ⚡              │ ◆              │      ↻         │
+│ ENERGY BURST   │ MEGA STRIKE    │    REWIND      │
+│  ⚡40           │  ◆50           │    COST        │
+└────────────────┴────────────────┴────────────────┘
+
+Everything must be fully inside the button boundaries.
+
+BUTTON REQUIREMENTS:
+
+1. All three buttons must have the same height.
+2. All three buttons must have the same vertical alignment.
+3. Nothing may be clipped at the top or bottom.
+4. Text must remain completely visible.
+5. Ability costs must remain completely visible.
+6. Icons must remain completely visible.
+7. Rewind icon must be fully contained inside its intended icon area.
+8. Do not let the rewind icon overlap the button border.
+9. Do not let the cost text fall below the button.
+10. Keep the existing artwork and premium sci-fi styling.
+11. Make the text/icons visually SHARP and readable.
+12. Preserve the existing glow/effects without allowing them to obscure the content.
+
+IMPORTANT FOR REWIND:
+
+Inspect the actual HTML/CSS for the rewind icon and its internal elements.
+
+Find whether it is being clipped because of:
+- overflow: hidden
+- incorrect top/bottom positioning
+- transform
+- fixed height
+- line-height
+- padding
+- absolute positioning
+- incorrect flex alignment
+- pseudo-elements
+- a parent container clipping its contents
+
+Fix the ROOT CAUSE.
+
+Do NOT simply hide the overflowing part.
+
+Do NOT crop the icon.
+
+Do NOT replace the artwork.
+
+The complete rewind icon must be visible.
+
+ABILITY BAR POSITION:
+
+Keep the ability bar below the board.
+
+Give the entire ability bar enough vertical room for its content.
+
+Leave a small safe bottom margin so the bar does not collide with the phone/browser bottom area.
+
+Do not push the buttons off-screen.
+
+Do not use negative margins.
+
+Do not use arbitrary transform hacks.
+
+Do not add another large block of !important overrides to aaa-polish.css.
+
+Inspect the existing ability-bar structure and fix the relevant layout rule.
+
+SHARPNESS:
+
+Make sure the button labels, numbers, icons and borders render cleanly at the actual mobile device scale.
+
+Do not scale the entire ability bar down excessively just to make it fit.
+
+The controls should remain comfortably tappable.
+
+FINAL CHECK ON THE ACTUAL PHONE VIEWPORT:
+
+✓ Energy Burst completely visible
+✓ Energy Burst icon completely visible
+✓ Energy Burst label sharp
+✓ Energy Burst cost sharp
+✓ Mega Strike completely visible
+✓ Mega Strike icon completely visible
+✓ Mega Strike label sharp
+✓ Mega Strike cost sharp
+✓ Rewind completely visible
+✓ Rewind icon completely visible
+✓ Rewind label sharp
+✓ Rewind cost completely visible
+✓ no clipping
+✓ no overlap
+✓ no distorted artwork
+✓ no browser-bottom collision
+✓ all three buttons aligned
+✓ board remains EXACTLY as it is now
+
+Make ONLY this bottom-control correction.
