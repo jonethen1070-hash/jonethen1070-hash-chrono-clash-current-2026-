@@ -9344,9 +9344,9 @@ html body #app #match .player-side .board-socket-bed {
   }
 }
 
-/* Keep the square board width-limited while using the full mobile stage:
-   the board row absorbs spare vertical space, the board settles against the
-   ability strip, and the strip remains in normal flow above the safe margin. */
+/* Keep the square board width-limited, but let the mobile composition pack
+   the controls directly beneath it instead of stretching the board row to
+   consume the remaining viewport height. */
 @media (max-width: 600px) {
   html body #app #match .match-stage {
     grid-template-rows:
@@ -9354,19 +9354,15 @@ html body #app #match .player-side .board-socket-bed {
       var(--battle-height)
       var(--energy-height)
       0px
-      minmax(0, 1fr)
+      max-content
       calc(var(--control-height) + 6px) !important;
-    height: 100% !important;
+    height: max-content !important;
     align-content: start !important;
-  }
-
-  html body #app #match .player-side .board-slot {
-    align-self: end !important;
   }
 
   html body #app #match .powers {
     margin-top: 6px !important;
-    transform: translateZ(2px) translateY(-3px) !important;
+    transform: translateZ(2px) !important;
   }
 }
 
