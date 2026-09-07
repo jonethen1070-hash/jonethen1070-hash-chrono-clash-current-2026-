@@ -531,6 +531,13 @@ export class BoardRenderer {
     return count;
   }
 
+  isPlayerInputReady(): boolean {
+    for (const tile of this.playerView.tiles.values()) {
+      if (tile.dying || tile.moveKind !== "idle" || tile.settleAge < tile.settleDur) return false;
+    }
+    return true;
+  }
+
   inspectPlayer(): BoardRenderInspection {
     const { tiles } = this.playerView;
     const inspected = [...tiles.values()].map<RenderTileInspection>((tile) => ({

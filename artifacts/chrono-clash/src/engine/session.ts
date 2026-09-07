@@ -5,6 +5,7 @@ import {
   findAnyValidSwap,
   generateBoard,
   matchingNeighbors,
+  resolvePresentationLockMs,
   snapshotBoard,
   trySwap,
 } from "./board";
@@ -254,6 +255,7 @@ export class GameSession {
   private clockExpired = false;
   private powerLockUntil = 0;
   private resolving = false;
+  private presentationReady = true;
   private ended = false;
   private rivalPowerCool = 0;
   private playerBoardGen = 0;
@@ -636,9 +638,14 @@ export class GameSession {
     if (this.onlineRemote && this.onlinePhase !== "playing") return false;
     if (this.screen !== "match" || this.phase !== "playing" || this.ended) return false;
     if (this.resolving) return false;
+    if (!this.presentationReady) return false;
     if (now < this.busyUntil) return false;
     if (now < this.playerLockedUntil) return false;
     return true;
+  }
+
+  setPresentationReady(ready: boolean): void {
+    this.presentationReady = ready;
   }
 
   canUsePower(id: PowerId, now = performance.now()): boolean {
@@ -789,6 +796,7 @@ export class GameSession {
     this.clockExpired = false;
     this.powerLockUntil = 0;
     this.resolving = false;
+    this.presentationReady = true;
     this.ended = false;
     this.rivalPowerCool = 0;
     this.pushFx("countdown", "3", now);
@@ -937,7 +945,7 @@ export class GameSession {
     this.lastPlayerSnap.push(pre);
     if (this.lastPlayerSnap.length > REWIND_HISTORY) this.lastPlayerSnap.shift();
     this.applyResolve(this.player, result, boost, now, "player");
-    this.busyUntil = now + Math.min(360, 160 + result.events.length * 22);
+    this.busyUntil = now + resolvePresentationLockMs(pre.board, result.board, result.events);
     this.resolving = false;
     if (this.mode === "score" && this.player.score >= this.scoreTarget) this.endMatch(now);
     return true;
