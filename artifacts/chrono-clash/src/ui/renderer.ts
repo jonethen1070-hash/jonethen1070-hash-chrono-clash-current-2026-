@@ -136,6 +136,7 @@ interface PowerEffect {
   y: number;
   cell: number;
   born: number;
+  impactCount: number;
 }
 
 type PowerTargetKind = "burst" | "mega";
@@ -2100,20 +2101,26 @@ export class BoardRenderer {
 
     const effectNow = performance.now();
     let hero: PowerEffect["kind"] | undefined;
+    let heroEffect: PowerEffect | undefined;
     for (let i = view.powerEffects.length - 1; i >= 0; i--) {
       const candidate = view.powerEffects[i]!;
       if (candidate.kind !== "rewind" && effectNow - candidate.born >= 0 && effectNow - candidate.born < 620) {
         hero = candidate.kind;
+        heroEffect = candidate;
         break;
       }
     }
     const megaHero = hero === "mega";
     const burstHero = hero === "burst";
-    const heroMul = megaHero ? 1.8 : burstHero ? 1.42 : 1;
+    const heroImpactIndex = heroEffect ? heroEffect.impactCount++ : -1;
+    const heroPrimary = Boolean(hero && heroImpactIndex === 0);
+    const heroSecondary = Boolean(hero && heroImpactIndex > 0);
+    const heroMul = heroSecondary ? 0.82 : megaHero ? 1.8 : burstHero ? 1.42 : 1;
     const loadLevel = this.secondaryVfxLevel(view, combo);
-    const shardBase = this.fx.quality === "medium"
+    const fullShardBase = this.fx.quality === "medium"
       ? megaHero ? 4 : burstHero ? 3 : 2
       : Math.min(8, Math.max(3, Math.round((combo >= 5 ? 5 : combo >= 4 ? 4 : 3) * heroMul)));
+    const shardBase = heroSecondary ? Math.min(2, fullShardBase) : fullShardBase;
     const shardCount = loadLevel === 2
       ? Math.max(1, Math.ceil(shardBase * 0.4))
       : loadLevel === 1
@@ -2140,10 +2147,11 @@ export class BoardRenderer {
       });
     }
 
-    const particleBase = Math.min(
+    const fullParticleBase = Math.min(
       megaHero ? 24 : burstHero ? 18 : 12,
       Math.max(1, Math.round((n + (combo >= 5 ? 3 : combo >= 4 ? 2 : combo >= 3 ? 1 : 0)) * heroMul)),
     );
+    const particleBase = heroSecondary ? Math.min(3, fullParticleBase) : fullParticleBase;
     const particleCount = loadLevel === 2
       ? Math.max(1, Math.ceil(particleBase * 0.42))
       : loadLevel === 1
@@ -2174,7 +2182,7 @@ export class BoardRenderer {
       megaHero ? 205 : burstHero ? 180 : 150 + Math.min(50, combo * 8),
       (0.95 + Math.min(0.42, combo * 0.06)) * (megaHero ? 1.18 : burstHero ? 1.08 : 1),
     );
-    if (loadLevel === 0 || hero) {
+    if (loadLevel === 0 || heroPrimary) {
       this.addShockwave(
         view,
         x,
@@ -2310,7 +2318,18 @@ export class BoardRenderer {
     const effect = burst ? "burst" : mega ? "mega" : rewind ? "rewind" : null;
     const powerColor = freeze ? "#00D9FF" : rewind ? "#2E9BFF" : mega ? "#00D9FF" : burst ? "#7CF5FF" : "#A855F7";
     if (effect) {
-      view.powerEffects.push({ kind: effect, x, y, cell, born: now });
+        const existing = [...view.powerEffects]
+          .reverse()
+          .find((candidate) => candidate.kind === effect && now - candidate.born < 360);
+        if (existing) {
+          existing.x = x;
+          existing.y = y;
+          existing.cell = cell;
+          existing.born = now;
+          existing.impactCount = 0;
+        } else {
+          view.powerEffects.push({ kind: effect, x, y, cell, born: now, impactCount: 0 });
+        }
       view.powerWake = {
         born: now,
         life: effect === "mega" ? 178 : effect === "rewind" ? 180 : 142,
@@ -2605,12 +2624,17 @@ export class BoardRenderer {
     if (waveT <= 0) return;
     const waveFade = Math.max(0, 1 - Math.max(0, age - 390) / 170);
     const ctx = this.ctx;
+    const loadLevel = this.secondaryVfxLevel(view);
+    const targetLimit = loadLevel === 2 ? 5 : loadLevel === 1 ? 8 : 10;
+    const waveCells = cells.length <= targetLimit
+      ? cells
+      : cells.filter((_, index) => index === 0 || index === cells.length - 1 || index % Math.ceil(cells.length / (targetLimit - 2)) === 0).slice(0, targetLimit);
 
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
     ctx.lineCap = "round";
-    for (let i = 0; i < cells.length; i++) {
-      const at = cells[i]!;
+    for (let i = 0; i < waveCells.length; i++) {
+      const at = waveCells[i]!;
       const x = ix + GAP + at.c * (cell + GAP) + cell / 2;
       const y = iy + GAP + at.r * (rowCell + GAP) + (rowCell - cell) / 2 + cell / 2;
       const distance = Math.hypot(x - effect.x, y - effect.y) / Math.max(cell, 1);
@@ -2633,7 +2657,7 @@ export class BoardRenderer {
       ctx.globalAlpha = alpha * 0.78;
       ctx.fillStyle = crystal.core;
       ctx.shadowColor = color;
-      ctx.shadowBlur = cell * 0.12;
+      ctx.shadowBlur = loadLevel === 0 ? cell * 0.12 : 0;
       ctx.beginPath();
       ctx.arc(hx, hy, Math.max(1.2, cell * 0.035), 0, Math.PI * 2);
       ctx.fill();
