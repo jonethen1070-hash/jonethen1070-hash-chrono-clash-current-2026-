@@ -321,6 +321,18 @@ export class BoardRenderer {
 
   constructor(private ctx: CanvasRenderingContext2D) {}
 
+  private recycleViewEffects(view: BoardView): void {
+    for (const particle of view.particles) this.recycleParticle(particle);
+    for (const shard of view.shards) this.recycleCrystalShard(shard);
+    view.particles.length = 0;
+    view.shards.length = 0;
+    view.shockwaves.length = 0;
+    view.energyLinks.length = 0;
+    view.socketPulses.length = 0;
+    view.powerEffects.length = 0;
+    view.floats.length = 0;
+  }
+
   setFx(fx: RenderFx): void {
     if (this.fx.quality !== fx.quality) {
       this.gemSprites.clear();
@@ -636,6 +648,8 @@ export class BoardRenderer {
 
     if (snap.screen !== this.lastScreen) {
       if (snap.screen === "match") {
+        this.recycleViewEffects(this.playerView);
+        this.recycleViewEffects(this.oppView);
         this.playerView.reset();
         this.oppView.reset();
         this.bolts = [];
@@ -2096,9 +2110,15 @@ export class BoardRenderer {
     const megaHero = hero === "mega";
     const burstHero = hero === "burst";
     const heroMul = megaHero ? 1.8 : burstHero ? 1.42 : 1;
-    const shardCount = this.fx.quality === "medium"
+    const loadLevel = this.secondaryVfxLevel(view, combo);
+    const shardBase = this.fx.quality === "medium"
       ? megaHero ? 4 : burstHero ? 3 : 2
       : Math.min(8, Math.max(3, Math.round((combo >= 5 ? 5 : combo >= 4 ? 4 : 3) * heroMul)));
+    const shardCount = loadLevel === 2
+      ? Math.max(1, Math.ceil(shardBase * 0.4))
+      : loadLevel === 1
+        ? Math.max(2, Math.ceil(shardBase * 0.68))
+        : shardBase;
     for (let i = 0; i < shardCount; i++) {
       const a = (Math.PI * 2 * i) / shardCount + 0.18 + (megaHero ? directionX * 0.18 : 0);
       const sp = (1.7 + Math.min(0.7, combo * 0.1) + Math.random() * 0.42) * heroMul;
@@ -2120,10 +2140,15 @@ export class BoardRenderer {
       });
     }
 
-    const particleCount = Math.min(
+    const particleBase = Math.min(
       megaHero ? 24 : burstHero ? 18 : 12,
       Math.max(1, Math.round((n + (combo >= 5 ? 3 : combo >= 4 ? 2 : combo >= 3 ? 1 : 0)) * heroMul)),
     );
+    const particleCount = loadLevel === 2
+      ? Math.max(1, Math.ceil(particleBase * 0.42))
+      : loadLevel === 1
+        ? Math.max(2, Math.ceil(particleBase * 0.7))
+        : particleBase;
     for (let i = 0; i < particleCount; i++) {
       const a = (Math.PI * 2 * i) / particleCount + Math.random() * 0.35;
       const sp = (1.35 + Math.min(0.8, combo * 0.12) + Math.random() * 1.1) * (megaHero ? 1.32 : burstHero ? 1.14 : 1);
@@ -2149,22 +2174,26 @@ export class BoardRenderer {
       megaHero ? 205 : burstHero ? 180 : 150 + Math.min(50, combo * 8),
       (0.95 + Math.min(0.42, combo * 0.06)) * (megaHero ? 1.18 : burstHero ? 1.08 : 1),
     );
-    this.addShockwave(
-      view,
-      x,
-      y,
-      cell * (0.3 + Math.min(0.1, combo * 0.016)) * (megaHero ? 1.25 : 1),
-      crystal.edge,
-      megaHero ? 260 : 210,
-      megaHero ? 1.35 : 0.95,
-    );
+    if (loadLevel === 0 || hero) {
+      this.addShockwave(
+        view,
+        x,
+        y,
+        cell * (0.3 + Math.min(0.1, combo * 0.016)) * (megaHero ? 1.25 : 1),
+        crystal.edge,
+        megaHero ? 260 : 210,
+        megaHero ? 1.35 : 0.95,
+      );
+    }
     this.capParticles(view);
   }
 
   private impactSpark(view: BoardView, x: number, y: number, color: number, cell: number): void {
     if (this.fx.quality === "low" || this.fx.reducedMotion) return;
     const hex = COLORS[color - 1] ?? "#EAFBFF";
-    const n = this.fx.quality === "medium" ? 4 : 6;
+    const loadLevel = this.secondaryVfxLevel(view);
+    if (loadLevel === 2) return;
+    const n = loadLevel === 1 ? 2 : this.fx.quality === "medium" ? 4 : 6;
     for (let i = 0; i < n; i++) {
       const a = (Math.PI * 2 * i) / n + Math.random() * 0.2;
       const sp = 1.1 + Math.random() * 1.4;
@@ -2197,6 +2226,17 @@ export class BoardRenderer {
     return this.fx.quality === "medium" ? 28 : this.fx.quality === "low" ? 8 : 48;
   }
 
+  private secondaryVfxLevel(view: BoardView, combo = 1): 0 | 1 | 2 {
+    const load =
+      view.particles.length +
+      view.shards.length * 1.5 +
+      view.shockwaves.length * 2.5 +
+      view.energyLinks.length;
+    if (combo >= 8 || load >= 72) return 2;
+    if (combo >= 6 || load >= 42) return 1;
+    return 0;
+  }
+
   private addShockwave(
     view: BoardView,
     x: number,
@@ -2216,9 +2256,12 @@ export class BoardRenderer {
   private drawShockwaves(view: BoardView, now: number): void {
     if (!view.shockwaves.length) return;
     const ctx = this.ctx;
+    const loadLevel = this.secondaryVfxLevel(view);
     retainInPlace(view.shockwaves, (wave) => now - wave.born < wave.life);
     ctx.save();
-    for (const wave of view.shockwaves) {
+    for (let i = 0; i < view.shockwaves.length; i++) {
+      const wave = view.shockwaves[i]!;
+      if (loadLevel === 2 && !wave.hero && i % 2 === 1) continue;
       const t = Math.max(0, Math.min(1, (now - wave.born) / wave.life));
       const eased = 1 - Math.pow(1 - t, 2);
       const alpha = (1 - t) * (1 - t) * (wave.hero ? 1.08 : 0.8);
@@ -2226,20 +2269,20 @@ export class BoardRenderer {
       ctx.strokeStyle = wave.color;
       ctx.lineWidth = Math.max(0.8, wave.width * (wave.hero ? 1.18 : 1) * (1 - t * 0.55));
       ctx.shadowColor = wave.color;
-      ctx.shadowBlur = (wave.hero ? 12 : 8) + wave.width * (wave.hero ? 2.6 : 2);
+      ctx.shadowBlur = loadLevel === 0 ? (wave.hero ? 12 : 8) + wave.width * (wave.hero ? 2.6 : 2) : 0;
       ctx.beginPath();
       ctx.arc(wave.x, wave.y, 4 + wave.radius * eased * (wave.hero ? 1.1 : 1), 0, Math.PI * 2);
       ctx.stroke();
       ctx.globalAlpha = alpha * (wave.hero ? 0.42 : 0.34);
       ctx.lineWidth = Math.max(0.6, wave.width * (wave.hero ? 0.52 : 0.42) * (1 - t));
-      ctx.shadowBlur = (wave.hero ? 5 : 3) + wave.width;
+      ctx.shadowBlur = loadLevel === 0 ? (wave.hero ? 5 : 3) + wave.width : 0;
       ctx.beginPath();
       ctx.arc(wave.x, wave.y, 4 + wave.radius * eased * (wave.hero ? 0.78 : 0.72), 0, Math.PI * 2);
       ctx.stroke();
         if (wave.hero) {
           ctx.globalAlpha = alpha * 0.22;
           ctx.lineWidth = Math.max(0.5, wave.width * 0.24 * (1 - t));
-          ctx.shadowBlur = 2 + wave.width * 0.7;
+          ctx.shadowBlur = loadLevel === 0 ? 2 + wave.width * 0.7 : 0;
           ctx.beginPath();
           ctx.arc(wave.x, wave.y, 4 + wave.radius * eased * 1.28, 0, Math.PI * 2);
           ctx.stroke();
@@ -2641,7 +2684,9 @@ export class BoardRenderer {
 
   private ringBurst(view: BoardView, x: number, y: number, cell: number, combo: number): void {
     if (this.fx.quality === "low" || this.fx.reducedMotion) return;
-    const n = this.fx.quality === "medium" ? 5 : combo >= 8 ? 8 : combo >= 5 ? 7 : 6;
+    const loadLevel = this.secondaryVfxLevel(view, combo);
+    const fullCount = this.fx.quality === "medium" ? 5 : combo >= 8 ? 8 : combo >= 5 ? 7 : 6;
+    const n = loadLevel === 2 ? 2 : loadLevel === 1 ? Math.max(3, Math.ceil(fullCount * 0.6)) : fullCount;
     const energy = combo >= 8 ? "#EAFBFF" : combo >= 5 ? "#7CF5FF" : "#00D9FF";
     for (let i = 0; i < n; i++) {
       const a = (Math.PI * 2 * i) / n;
@@ -2704,6 +2749,7 @@ export class BoardRenderer {
 
   private drawParticles(view: BoardView): void {
     const ctx = this.ctx;
+    const loadLevel = this.secondaryVfxLevel(view);
     ctx.save();
     for (const p of view.particles) {
       const a = Math.max(0, p.life);
@@ -2711,7 +2757,7 @@ export class BoardRenderer {
       ctx.globalAlpha = a;
       ctx.fillStyle = p.color;
       ctx.shadowColor = p.color;
-      ctx.shadowBlur = Math.max(1.5, r * 2.6);
+      ctx.shadowBlur = loadLevel === 0 ? Math.max(1.5, r * 2.6) : 0;
       if (p.streak !== undefined && (Math.abs(p.vx) > 0.12 || Math.abs(p.vy) > 0.12)) {
         const trail = p.streak * (0.45 + a * 0.55);
         ctx.globalAlpha = a * 0.72;
@@ -2760,6 +2806,7 @@ export class BoardRenderer {
   private drawCrystalShards(view: BoardView): void {
     if (!view.shards.length) return;
     const ctx = this.ctx;
+    const loadLevel = this.secondaryVfxLevel(view);
     ctx.save();
     for (const shard of view.shards) {
       const alpha = Math.max(0, shard.life / shard.max);
@@ -2770,7 +2817,7 @@ export class BoardRenderer {
       ctx.globalAlpha = alpha * 0.92;
       ctx.fillStyle = shard.color;
       ctx.shadowColor = shard.color;
-      ctx.shadowBlur = Math.max(2, size * 2.2);
+      ctx.shadowBlur = loadLevel === 0 ? Math.max(2, size * 2.2) : 0;
       if (shard.trail && (Math.abs(shard.vx) > 0.12 || Math.abs(shard.vy) > 0.12)) {
         ctx.globalAlpha = alpha * 0.48;
         ctx.strokeStyle = shard.color;
@@ -2820,7 +2867,9 @@ export class BoardRenderer {
     now: number,
     born: number,
   ): void {
-    const candidates = cells.slice(0, this.fx.quality === "medium" ? 8 : 12);
+    const loadLevel = this.secondaryVfxLevel(view);
+    const candidateLimit = loadLevel === 2 ? 4 : loadLevel === 1 ? 6 : this.fx.quality === "medium" ? 8 : 12;
+    const candidates = cells.slice(0, candidateLimit);
     const colorAt = (at: Coord): string => {
       const tile = [...view.tiles.values()].find((candidate) => candidate.r === at.r && candidate.c === at.c);
       return crystalAccent(tile?.color ?? 6).core;
@@ -2848,14 +2897,16 @@ export class BoardRenderer {
         color: colorAt(a),
       });
     }
-    if (view.energyLinks.length > 18) {
-      view.energyLinks.splice(0, view.energyLinks.length - 18);
+    const linkCap = loadLevel === 2 ? 8 : loadLevel === 1 ? 12 : 18;
+    if (view.energyLinks.length > linkCap) {
+      view.energyLinks.splice(0, view.energyLinks.length - linkCap);
     }
   }
 
   private drawEnergyLinks(view: BoardView, now: number): void {
     if (!view.energyLinks.length || this.fx.quality === "low" || this.fx.reducedMotion) return;
     const ctx = this.ctx;
+    const loadLevel = this.secondaryVfxLevel(view);
     let write = 0;
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
@@ -2870,7 +2921,7 @@ export class BoardRenderer {
       ctx.strokeStyle = link.color;
       ctx.lineWidth = Math.max(0.7, this.lastPlayerCell * 0.012);
       ctx.shadowColor = link.color;
-      ctx.shadowBlur = this.lastPlayerCell * 0.06;
+      ctx.shadowBlur = loadLevel === 0 ? this.lastPlayerCell * 0.06 : 0;
       ctx.beginPath();
       ctx.moveTo(link.x1, link.y1);
       ctx.lineTo(link.x2, link.y2);
