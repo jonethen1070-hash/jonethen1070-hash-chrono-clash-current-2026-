@@ -32,7 +32,7 @@ describe("production responsive board layout", () => {
     expect(main).toContain('setProperty("--app-vh"');
   });
 
-  it("sizes the player board from safe viewport width and height", () => {
+  it("sizes the player board from safe viewport width with a flexible tall row", () => {
     const css = readFileSync("src/styles/aaa-polish.css", "utf8");
     expect(css).toContain("--game-pad-x: 4px");
     expect(css).toContain("grid-template-rows:");
@@ -41,22 +41,25 @@ describe("production responsive board layout", () => {
     expect(css).toContain("--mobile-board-block:");
     expect(css).toContain("--mobile-board-size:");
     expect(css).toContain("box-sizing: border-box !important");
-    expect(css).toContain("width: var(--mobile-board-size) !important");
-    expect(css).toContain("height: var(--mobile-board-size) !important");
-    expect(css).toContain("max-width: var(--mobile-board-size) !important");
-    expect(css).toContain("max-height: var(--mobile-board-size) !important");
-    expect(css).toContain("aspect-ratio: 1 / 1 !important");
+    expect(css).toContain("width: var(--mobile-board-inline) !important");
+    expect(css).toContain("height: 100% !important");
+    expect(css).toContain("max-width: var(--mobile-board-inline) !important");
+    expect(css).toContain("max-height: none !important");
+    expect(css).toContain("aspect-ratio: auto !important");
     expect(css).toContain("margin-top: 0 !important");
+    const renderer = readFileSync("src/ui/renderer.ts", "utf8");
+    expect(renderer).toContain("const rowCell =");
+    expect(renderer).toContain("(rowCell - cell) / 2");
   });
 
-  it("keeps the square board fixed while docking controls in the remaining stage space", () => {
+  it("keeps abilities directly below the flexible tall board", () => {
     const css = readFileSync("src/styles/aaa-polish.css", "utf8");
     expect(css).toContain(
-      "var(--energy-height)\n      0px\n      max-content\n      minmax(0, 1fr)",
+      "var(--energy-height)\n      0px\n      minmax(0, 1fr)\n      calc(var(--control-height) + 6px)",
     );
     expect(css).toContain("height: 100% !important");
-    expect(css).toContain("align-self: end !important");
-    expect(css).toContain("margin: 0 auto 6px !important");
+    expect(css).toContain("align-self: start !important");
+    expect(css).toContain("margin: 0 auto !important");
     expect(css).toContain("transform: translateZ(2px) !important");
   });
 

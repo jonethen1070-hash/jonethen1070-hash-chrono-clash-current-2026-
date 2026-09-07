@@ -26,3 +26,9 @@ When a shared custom property supplies both board width and height, avoid embedd
 **Why:** A percentage inside a reusable `min()` variable resolves against the property’s axis. Reusing it for height produced a two-pixel outer rectangle mismatch even though the CSS declared a square aspect ratio.
 
 **How to apply:** Derive the mobile size from safe dynamic viewport width and remaining dynamic viewport height, then set `box-sizing: border-box` plus identical width, height, max-width, and max-height on the board frame.
+
+Charged attack buttons reuse the ready-screen `.ready-pulse` class, whose viewport margin can move an in-flow ability out of the match viewport. Mobile match rules must zero the button margin while preserving the pulse animation.
+
+**Why:** Energy changes can add the class after the match has settled, so an initial geometry check can pass while a charged power becomes untappable.
+
+**How to apply:** Validate controls both uncharged and charged at the shortest supported mobile viewport; treat the ability row as normal flow, not a fixed overlay.

@@ -9302,10 +9302,9 @@ html body #app #match .player-side .board-socket-bed {
     inset 0 -1px 0 rgba(117, 223, 232, .1) !important;
 }
 
-/* Size the square board from whichever mobile dimension is actually limiting:
-   the safe inline viewport or the space left after the fixed HUD, energy row,
-   and ability strip. The dynamic viewport keeps browser-chrome changes from
-   pushing the controls below the visible match area. */
+/* Let the mobile board consume the normal grid row between energy and abilities.
+   The columns remain width-led, while the renderer keeps each gem square and
+   centers it inside the taller row slots. */
 @media (max-width: 600px) {
   html body #app #match.match-screen {
     --mobile-board-inline: min(
@@ -9337,16 +9336,17 @@ html body #app #match .player-side .board-socket-bed {
 
   html body #app #match .player-side .board-slot {
     box-sizing: border-box !important;
-    width: var(--mobile-board-size) !important;
-    height: var(--mobile-board-size) !important;
-    max-width: var(--mobile-board-size) !important;
-    max-height: var(--mobile-board-size) !important;
+    width: var(--mobile-board-inline) !important;
+    height: 100% !important;
+    max-width: var(--mobile-board-inline) !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    aspect-ratio: auto !important;
+    align-self: stretch !important;
   }
 }
 
-/* Keep the square board width-limited, but let the mobile composition pack
-   the controls directly beneath it instead of stretching the board row to
-   consume the remaining viewport height. */
+/* Keep the ability bar in normal flow directly after the flexible tall board. */
 @media (max-width: 600px) {
   html body #app #match .match-stage {
     grid-template-rows:
@@ -9354,16 +9354,24 @@ html body #app #match .player-side .board-socket-bed {
       var(--battle-height)
       var(--energy-height)
       0px
-      max-content
-      minmax(0, 1fr) !important;
+      minmax(0, 1fr)
+      calc(var(--control-height) + 6px) !important;
     height: 100% !important;
     align-content: stretch !important;
   }
 
   html body #app #match .powers {
-    align-self: end !important;
-    margin: 0 auto 6px !important;
+    align-self: start !important;
+    margin: 0 auto !important;
     transform: translateZ(2px) !important;
+  }
+
+  /* The shared ready-pulse class also serves the round ready screen and
+     carries a large viewport margin. Keep that animation from changing the
+     in-match ability geometry when a power becomes charged. */
+  html body #app #match .powers > .energy-attack,
+  html body #app #match .powers > #rewind {
+    margin: 0 !important;
   }
 }
 

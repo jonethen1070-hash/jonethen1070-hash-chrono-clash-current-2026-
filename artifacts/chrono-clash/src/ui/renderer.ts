@@ -816,7 +816,7 @@ export class BoardRenderer {
     const lx = x - canvasRect.left - layout.ix;
     const ly = y - canvasRect.top - layout.iy;
     const c = Math.floor((lx - GAP) / (layout.cell + GAP));
-    const r = Math.floor((ly - GAP) / (layout.cell + GAP));
+    const r = Math.floor((ly - GAP) / (layout.rowCell + GAP));
     if (r < 0 || c < 0 || r >= ROWS || c >= COLS) return null;
     return { r, c };
   }
@@ -841,9 +841,11 @@ export class BoardRenderer {
     lockLeftMs = 0,
   ): void {
     const layout = boardLayout(x, y, w, h);
-    const { size, ox, oy, cell, ix, iy } = layout;
+    const { size, ox, oy, cell, rowCell, ix, iy } = layout;
     if (!(size > 8 && cell > 2 && Number.isFinite(cell))) return;
     if (isPlayer) this.lastPlayerCell = cell;
+    const rowOrigin = (r: number) => iy + GAP + r * (rowCell + GAP) + (rowCell - cell) / 2;
+    const rowCenter = (r: number) => rowOrigin(r) + cell / 2;
     const ctx = this.ctx;
 
     view.shake *= 0.78;
@@ -871,6 +873,14 @@ export class BoardRenderer {
     ctx.save();
     ctx.translate(sx + impulseX, sy + impulseY);
 
+    // The board housing can use a taller mobile row, but the gem layer below
+    // remains unscaled so each crystal keeps its approved proportions.
+    const boardScaleY = h / size;
+    ctx.save();
+    ctx.translate(0, oy);
+    ctx.scale(1, boardScaleY);
+    ctx.translate(0, -oy);
+
     const slabEdge = isPlayer ? "#007A9E" : "#8E1740";
     const slabFace = isPlayer ? "#062B39" : "#32101C";
     ctx.save();
@@ -895,8 +905,6 @@ export class BoardRenderer {
 
     this.blitWells(ctx, ox, oy, size, cell, isPlayer);
     this.drawBoardDepth(ctx, ox, oy, size, isPlayer, boosted, frozen);
-    this.drawSocketPulses(view, now);
-
     ctx.save();
     if (isPlayer) chamferedRect(ctx, ox + FRAME, oy + FRAME, size - FRAME * 2, 8);
     else roundRect(ctx, ox + FRAME, oy + FRAME, size - FRAME * 2, size - FRAME * 2, 14);
@@ -952,6 +960,8 @@ export class BoardRenderer {
       roundRect(ctx, ox + 3, oy + 3, size - 6, size - 6, 18);
       ctx.stroke();
     }
+    ctx.restore();
+    this.drawSocketPulses(view, now);
 
     const live = view.live;
     live.clear();
@@ -1023,10 +1033,10 @@ export class BoardRenderer {
         if (!piece) continue;
         live.add(piece.id);
         const tx = ix + GAP + c * (cell + GAP);
-        const ty = iy + GAP + r * (cell + GAP);
+        const ty = rowOrigin(r);
         let tile = view.tiles.get(piece.id);
         if (!tile) {
-            const startY = populated ? ty - cell * (r + 1.15) : ty;
+            const startY = populated ? ty - rowCell * (r + 1.15) : ty;
           tile = {
             id: piece.id,
             color: piece.color,
@@ -1046,7 +1056,15 @@ export class BoardRenderer {
             toX: tx,
             toY: ty,
             moveAge: 0,
-            moveDur: populated ? gemTravelDuration(Math.abs(ty - startY), cell, "fall", anim, reduced) : 0,
+            moveDur: populated
+              ? gemTravelDuration(
+                  rowCell > cell ? Math.abs(ty - startY) * (cell / rowCell) : Math.abs(ty - startY),
+                  cell,
+                  "fall",
+                  anim,
+                  reduced,
+                )
+              : 0,
             moveHold: populated ? gemFallDelay(c, Math.max(1, r), anim, reduced) + cascadeHold : 0,
             moveKind: populated ? "fall" : "idle",
             dieAge: 0,
@@ -1097,7 +1115,13 @@ export class BoardRenderer {
           tile.toY = ty;
           tile.moveAge = 0;
           tile.moveKind = kind;
-          tile.moveDur = gemTravelDuration(dist, cell, kind, anim, reduced);
+           tile.moveDur = gemTravelDuration(
+             kind === "fall" && rowCell > cell ? dist * (cell / rowCell) : dist,
+             cell,
+             kind,
+             anim,
+             reduced,
+           );
           tile.moveHold =
             kind === "fall"
               ? gemFallDelay(c, Math.abs(r - prevR), anim, reduced) + cascadeHold
@@ -1304,7 +1328,7 @@ export class BoardRenderer {
       }
       view.seenFx.add(fxEvent.id);
       if (fxEvent.kind === "clear" && fxEvent.cells && fxEvent.cells.length > 1) {
-        this.queueEnergyLinks(view, fxEvent.cells, ix, iy, cell, now, fxEvent.born);
+        this.queueEnergyLinks(view, fxEvent.cells, ix, iy, cell, rowCell, now, fxEvent.born);
       }
       if (fxEvent.kind === "power" || fxEvent.kind === "rewind") {
         const castTarget =
@@ -1312,7 +1336,7 @@ export class BoardRenderer {
             ? view.powerCastTarget.at
             : fxEvent.at;
         const castX = castTarget ? ix + GAP + castTarget.c * (cell + GAP) + cell / 2 : ox + size / 2;
-        const castY = castTarget ? iy + GAP + castTarget.r * (cell + GAP) + cell / 2 : oy + size / 2;
+        const castY = castTarget ? rowCenter(castTarget.r) : oy + size / 2;
         this.castPower(view, fxEvent.text, castX, castY, cell, isPlayer, now);
         if (isPlayer) view.powerCastTarget = null;
         if (fxEvent.kind === "rewind" && isPlayer && !this.fx.reducedMotion) {
@@ -1328,7 +1352,7 @@ export class BoardRenderer {
       if (fxEvent.kind === "clear") {
         const pts = Math.abs(Number(String(fxEvent.text).replace(/[^\d]/g, "")) || 0);
         const px = fxEvent.at ? ix + GAP + fxEvent.at.c * (cell + GAP) + cell / 2 : ox + size / 2;
-        const py = fxEvent.at ? iy + GAP + fxEvent.at.r * (cell + GAP) + cell / 2 : oy + size * 0.46;
+        const py = fxEvent.at ? rowCenter(fxEvent.at.r) : oy + size * 0.46;
         view.floats.push({
           x: px,
           y: py,
@@ -1389,7 +1413,7 @@ export class BoardRenderer {
       }
     }
     if (megaClear?.cells?.length) {
-      this.drawMegaStrikeWave(view, megaClear.cells, ix, iy, cell, now);
+      this.drawMegaStrikeWave(view, megaClear.cells, ix, iy, cell, rowCell, now);
     }
 
     const dieDur = gemDieDuration(anim, reduced);
@@ -1480,7 +1504,7 @@ export class BoardRenderer {
       const wobble = bad ? Math.sin(now / 18) * 3.2 : 0;
       const lift = sel ? 1.026 : 1;
       const restX = ix + GAP + tile.c * (cell + GAP);
-      const restY = iy + GAP + tile.r * (cell + GAP);
+      const restY = rowOrigin(tile.r);
       const settleT = tile.settleDur > 0 ? Math.min(1, tile.settleAge / tile.settleDur) : 1;
       const settleEase = 1 - Math.pow(1 - settleT, 3);
       const settleDx = tile.settleX * (1 - settleEase);
@@ -2518,6 +2542,7 @@ export class BoardRenderer {
     ix: number,
     iy: number,
     cell: number,
+    rowCell: number,
     now: number,
   ): void {
     if (this.fx.quality === "low" || this.fx.reducedMotion) return;
@@ -2544,7 +2569,7 @@ export class BoardRenderer {
     for (let i = 0; i < cells.length; i++) {
       const at = cells[i]!;
       const x = ix + GAP + at.c * (cell + GAP) + cell / 2;
-      const y = iy + GAP + at.r * (cell + GAP) + cell / 2;
+      const y = iy + GAP + at.r * (rowCell + GAP) + (rowCell - cell) / 2 + cell / 2;
       const distance = Math.hypot(x - effect.x, y - effect.y) / Math.max(cell, 1);
       const delay = Math.min(88, distance * 9 + (i % 3) * 7);
       const local = Math.max(0, Math.min(1, (age - 76 - delay) / 190));
@@ -2791,6 +2816,7 @@ export class BoardRenderer {
     ix: number,
     iy: number,
     cell: number,
+    rowCell: number,
     now: number,
     born: number,
   ): void {
@@ -2814,9 +2840,9 @@ export class BoardRenderer {
       if (!nearest) continue;
       view.energyLinks.push({
         x1: ix + GAP + a.c * (cell + GAP) + cell / 2,
-        y1: iy + GAP + a.r * (cell + GAP) + cell / 2,
+        y1: iy + GAP + a.r * (rowCell + GAP) + (rowCell - cell) / 2 + cell / 2,
         x2: ix + GAP + nearest.c * (cell + GAP) + cell / 2,
-        y2: iy + GAP + nearest.r * (cell + GAP) + cell / 2,
+        y2: iy + GAP + nearest.r * (rowCell + GAP) + (rowCell - cell) / 2 + cell / 2,
         born: Math.max(now, born),
         life: this.fx.quality === "high" ? 250 : 190,
         color: colorAt(a),
@@ -4102,15 +4128,18 @@ function boardLayout(x: number, y: number, w: number, h: number): {
   ox: number;
   oy: number;
   cell: number;
+  rowCell: number;
   ix: number;
   iy: number;
 } {
   const size = Math.min(w, h);
   const ox = x + (w - size) / 2;
-  const oy = y + (h - size) / 2;
+  const oy = y;
   const inner = size - FRAME * 2;
   const cell = (inner - GAP * (COLS + 1)) / COLS;
-  return { size, ox, oy, cell, ix: ox + FRAME, iy: oy + FRAME };
+  const rowInner = Math.max(inner, h - FRAME * 2);
+  const rowCell = (rowInner - GAP * (ROWS + 1)) / ROWS;
+  return { size, ox, oy, cell, rowCell, ix: ox + FRAME, iy: oy + FRAME };
 }
 
 function drawIrregularEnergyArc(

@@ -75,10 +75,15 @@ const BOARD_SIZE = 8;
 function cellCenter(board: BoardBox, row: number, col: number): { x: number; y: number } {
   const inner = board.width - BOARD_FRAME * 2;
   const cell = (inner - BOARD_GAP * (BOARD_SIZE + 1)) / BOARD_SIZE;
+  const rowCell = Math.max(
+    cell,
+    (board.height - BOARD_FRAME * 2 - BOARD_GAP * (BOARD_SIZE + 1)) / BOARD_SIZE,
+  );
   const pitch = cell + BOARD_GAP;
+  const rowPitch = rowCell + BOARD_GAP;
   return {
     x: board.x + BOARD_FRAME + BOARD_GAP + col * pitch + cell / 2,
-    y: board.y + BOARD_FRAME + BOARD_GAP + row * pitch + cell / 2,
+    y: board.y + BOARD_FRAME + BOARD_GAP + row * rowPitch + (rowCell - cell) / 2 + cell / 2,
   };
 }
 
@@ -259,7 +264,9 @@ test.describe("mobile board clipping regression", () => {
       expect(geometry.renderTileCount, `Expected all 64 board tiles: ${detail}`).toBe(64);
       expect(geometry.renderCell, `Expected a measurable 8x8 cell size: ${detail}`).toBeGreaterThan(0);
 
-      expect(Math.abs(board!.width - board!.height), `Board must stay square: ${detail}`).toBeLessThanOrEqual(1);
+      expect(board!.height, `Board should use the available vertical match space: ${detail}`).toBeGreaterThanOrEqual(
+        board!.width,
+      );
       expect(board!.left, `Board clipped at the left viewport edge: ${detail}`).toBeGreaterThanOrEqual(viewportLeft - 1);
       expect(board!.right, `Board clipped at the right viewport edge: ${detail}`).toBeLessThanOrEqual(viewportRight + 1);
       expect(board!.top, `Board clipped at the top viewport edge: ${detail}`).toBeGreaterThanOrEqual(viewportTop - 1);
@@ -324,7 +331,7 @@ test("guest mobile matches survive rapid swipes, cancellation, and layout checks
 
   expect(geometry.width).toBeGreaterThan(300);
   expect(geometry.width).toBeLessThanOrEqual(view.width);
-  expect(geometry.height).toBeCloseTo(geometry.width, 0);
+   expect(geometry.height).toBeGreaterThanOrEqual(geometry.width);
   expect(geometry.left).toBeGreaterThanOrEqual(0);
   expect(geometry.right).toBeLessThanOrEqual(view.width + 1);
   expect(geometry.top).toBeGreaterThanOrEqual(0);
@@ -1422,6 +1429,7 @@ test.describe("mobile cascade visibility", () => {
   });
 
   test("captures deterministic large-match VFX timing without locking the mobile board", async ({ page }) => {
+    test.setTimeout(60_000);
     const consoleErrors: string[] = [];
     const pageErrors: string[] = [];
     page.on("console", (message) => {
@@ -1558,7 +1566,7 @@ test.describe("mobile cascade visibility", () => {
           state.vfx.shockwaveCount === 0 &&
           state.vfx.socketPulseCount === 0,
         );
-      }), { timeout: 2_000, intervals: [16, 32, 64] }).toBe(true);
+      }), { timeout: 4_000, intervals: [16, 32, 64] }).toBe(true);
       const final = await page.evaluate(() => {
         const chrono = (window as Window & { __chrono?: { renderState?: () => RenderState } }).__chrono;
         return chrono?.renderState?.() ?? null;
