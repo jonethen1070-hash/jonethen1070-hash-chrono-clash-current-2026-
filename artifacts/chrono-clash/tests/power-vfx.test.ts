@@ -20,6 +20,11 @@ describe("power ability VFX presentation", () => {
     expect(renderer).toContain("private drawMegaStrikeWave");
     expect(renderer).toContain("const matchedTile = [...view.tiles.values()]");
     expect(renderer).toContain("const crystal = crystalAccent(colorIndex)");
+    expect(renderer).toContain("const heroImpactIndex = heroEffect ? heroEffect.impactCount++ : -1");
+    expect(renderer).toContain("const heroPrimary = Boolean(hero && heroImpactIndex === 0)");
+    expect(renderer).toContain("const heroSecondary = Boolean(hero && heroImpactIndex > 0)");
+    expect(renderer).toContain("const targetLimit = loadLevel === 2 ? 5 : loadLevel === 1 ? 8 : 10");
+    expect(renderer).toContain("existing.impactCount = 0");
     expect(renderer).toContain("fxEvent.cells?.length");
     expect(renderer).toContain("const peakCenter = effect.kind === \"mega\" ? 146 : 92");
     expect(renderer).toContain("hero = false");
