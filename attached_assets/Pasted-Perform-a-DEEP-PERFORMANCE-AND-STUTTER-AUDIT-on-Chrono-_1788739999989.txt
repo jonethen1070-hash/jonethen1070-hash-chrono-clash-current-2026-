@@ -1,0 +1,303 @@
+Perform a DEEP PERFORMANCE AND STUTTER AUDIT on Chrono Clash.
+
+The game sometimes slows down during gameplay. This is NOT acceptable for a premium mobile game.
+
+The goal is to find the ROOT CAUSE of intermittent slowdowns/stutters and fix it.
+
+IMPORTANT:
+
+* Do not change gameplay rules.
+* Do not remove gameplay features.
+* Do not simply reduce animation speed.
+* Do not hide the problem by disabling VFX.
+* Preserve the premium visual quality.
+* Prioritize stable, smooth real-device performance.
+
+1. FIND WHEN THE SLOWDOWN HAPPENS
+
+Play the game repeatedly and specifically test:
+
+* normal gem swaps
+* rapid swaps
+* matches
+* large matches
+* cascades
+* long gem falls
+* multiple simultaneous clears
+* Mega Strike
+* multiple VFX at once
+* opponent actions
+* damage effects
+* HUD updates
+* victory/defeat
+* restarting several games
+* rapid tapping
+
+Determine whether the slowdown happens:
+
+* randomly
+* after several matches
+* during cascades
+* after abilities
+* after VFX
+* after restarting
+* after playing for several minutes
+
+2. CHECK FRAME RATE / MAIN THREAD
+
+Inspect the actual runtime performance.
+
+Look for:
+
+* frame-rate drops
+* long main-thread tasks
+* excessive JavaScript execution
+* excessive rendering
+* layout/reflow spikes
+* garbage collection
+* memory growth
+* animation loops
+* expensive event handlers
+
+Do not guess. Identify the actual expensive operations.
+
+3. PARTICLE / VFX PERFORMANCE
+
+Audit all gem VFX.
+
+Look for:
+
+* too many particles
+* particles being recreated unnecessarily
+* effects not being destroyed
+* effects accumulating after every match
+* excessive DOM elements
+* excessive canvas objects
+* expensive blur/filter effects
+* excessive glow layers
+* duplicate VFX instances
+
+Use pooling/reuse where appropriate.
+
+IMPORTANT:
+Keep the premium VFX appearance while making the implementation efficient.
+
+4. MEMORY LEAK CHECK
+
+This is extremely important.
+
+Check whether objects accumulate during gameplay.
+
+Specifically inspect:
+
+* event listeners
+* timers
+* intervals
+* animation frames
+* particle objects
+* VFX instances
+* DOM nodes
+* subscriptions
+* callbacks
+* promises
+* audio objects
+
+Play multiple complete games and verify memory does not continuously grow.
+
+Restart the game repeatedly and check for duplicated systems.
+
+5. ANIMATION LOOPS
+
+Audit every requestAnimationFrame / animation loop.
+
+Make sure:
+
+* loops aren’t accidentally duplicated
+* old loops are properly stopped
+* only necessary loops remain active
+* inactive screens don’t continue animating
+* destroyed effects don’t continue updating
+
+A duplicated animation loop can cause progressive slowdowns.
+
+6. EVENT LISTENERS
+
+Check for duplicate listeners after:
+
+* restarting
+* entering gameplay
+* returning to menu
+* activating abilities
+* changing game state
+
+Make sure listeners are registered once and cleaned up correctly.
+
+7. DOM / UI PERFORMANCE
+
+Inspect HUD updates.
+
+Avoid unnecessarily rebuilding large portions of the UI when only one value changes.
+
+Pay particular attention to:
+
+* score
+* health
+* energy
+* combo
+* gem counters
+* ability cooldowns
+* timers
+
+Update only what actually changed.
+
+8. GEM RENDERING
+
+Optimize gem rendering without making the gems look worse.
+
+Check for:
+
+* unnecessary DOM nodes
+* repeated style calculations
+* excessive shadows
+* expensive filters
+* repeated layout calculations
+* unnecessary redraws
+
+The gems must remain visually premium.
+
+9. BOARD / GRAVITY PERFORMANCE
+
+Optimize:
+
+* match detection
+* board scanning
+* gravity calculations
+* cascade resolution
+* gem creation
+* gem removal
+
+Avoid repeatedly scanning the entire board when a smaller calculation is sufficient.
+
+But DO NOT change the game’s actual matching behavior.
+
+10. TIMING / GAME LOOP
+
+Inspect the entire gameplay pipeline.
+
+Make sure slowdowns aren’t caused by excessive:
+
+* setTimeout
+* setInterval
+* Promise chains
+* animation waits
+* artificial cascade delays
+
+Do not remove timing that is required for gameplay or VFX synchronization.
+
+Instead make the timing efficient and deterministic.
+
+11. AUDIO PERFORMANCE
+
+Check whether repeated sound creation is causing performance problems.
+
+Avoid creating unnecessary audio objects repeatedly.
+
+Reuse audio resources where appropriate.
+
+12. MOBILE PERFORMANCE
+
+This is critical.
+
+Optimize for real mobile devices, not just desktop browsers.
+
+Check:
+
+* CPU usage
+* GPU workload
+* memory
+* rendering
+* animation performance
+* touch responsiveness
+
+The game should maintain a stable, smooth frame rate during normal gameplay and large effects.
+
+13. VFX QUALITY MUST REMAIN
+
+Do NOT solve performance by simply:
+
+* removing particles
+* removing glow
+* removing animations
+* removing crystal shards
+* disabling cinematic effects
+
+Instead optimize the implementation.
+
+The visual target remains:
+
+PREMIUM
+CINEMATIC
+COLORFUL
+CRYSTALLINE
+AAA-INSPIRED
+
+while maintaining smooth gameplay.
+
+14. STRESS TEST
+
+Perform a stress test:
+
+* rapid gem interaction
+* several consecutive cascades
+* large gem clears
+* Mega Strike
+* repeated abilities
+* multiple VFX simultaneously
+* several complete games without refreshing the page
+* repeated restart/play-again cycles
+
+Watch for performance degradation over time.
+
+15. IMPORTANT ROOT-CAUSE RULE
+
+Do NOT tell me “performance is improved” unless you actually identify what was causing the slowdown.
+
+Report:
+
+1. ROOT CAUSE
+2. FILE / FUNCTION RESPONSIBLE
+3. WHY IT CAUSED THE SLOWDOWN
+4. FIX IMPLEMENTED
+5. PERFORMANCE IMPACT
+6. ANY REMAINING BOTTLENECKS
+
+16. REGRESSION TEST
+
+After fixing the performance problems:
+
+Run the complete game again and verify:
+
+START
+→ SWAP
+→ MATCH
+→ CLEAR
+→ FALL
+→ CASCADE
+→ COMBO
+→ ABILITY
+→ MEGA STRIKE
+→ OPPONENT
+→ VICTORY/DEFEAT
+→ RESTART
+
+Make sure gameplay remains correct.
+
+Run the existing automated tests and production build.
+
+FINAL STANDARD:
+
+The game must feel consistently fast, smooth, responsive, and stable, even during heavy gameplay and VFX.
+
+Do not optimize away the game’s visual quality.
+
+Find and fix the actual performance problem.
