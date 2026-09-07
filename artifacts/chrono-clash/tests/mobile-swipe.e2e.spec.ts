@@ -593,6 +593,196 @@ test("mobile Mega Strike release outside the board stays unspent and leaves swip
   })).toBeGreaterThan(scoreBefore);
 });
 
+test("online Mega Strike cancellation stays local and the next valid swap reaches transport", async ({ page, context }) => {
+  const sentActions: Array<{ type?: string; id?: string; target?: { r: number; c: number } }> = [];
+  await page.route("**/v1/match/m_online/action", async (route) => {
+    const payload = JSON.parse(route.request().postData() ?? "{}") as {
+      type?: string;
+      id?: string;
+      target?: { r: number; c: number };
+    };
+    sentActions.push(payload);
+
+    const snapshot = await page.evaluate(() => {
+      const chrono = (window as Window & {
+        __chrono?: {
+          session?: {
+            pendingClientSeq: number;
+            player: {
+              board: unknown[][];
+              score: number;
+              combo: number;
+              energy: number;
+              attack: number;
+            };
+            opponent: {
+              board: unknown[][];
+              score: number;
+              combo: number;
+              energy: number;
+              attack: number;
+            };
+          };
+        };
+      }).__chrono;
+      const session = chrono?.session;
+      if (!session) throw new Error("Missing Chrono session");
+      return {
+        matchId: "m_online",
+        seed: 7,
+        players: ["cc_a", "cc_b"],
+        seq: 1,
+        phase: "playing",
+        remainingMs: 59_000,
+        you: {
+          playerId: "cc_a",
+          board: session.player.board,
+          score: session.player.score,
+          combo: session.player.combo,
+          energy: session.player.energy,
+          attack: session.player.attack,
+          lock: 0,
+          lastClientSeq: session.pendingClientSeq,
+        },
+        opponent: {
+          playerId: "cc_b",
+          board: session.opponent.board,
+          score: session.opponent.score,
+          combo: session.opponent.combo,
+          energy: session.opponent.energy,
+          attack: session.opponent.attack,
+          lock: 0,
+        },
+        events: [],
+        result: null,
+        opponentConnected: true,
+        yourLastClientSeq: session.pendingClientSeq,
+      };
+    });
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(snapshot),
+    });
+  });
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      "chrono-clash-online-session",
+      JSON.stringify({ token: "transport-test-token", playerId: "cc_a" }),
+    );
+  });
+
+  await page.goto("/");
+  await expect(page.locator("#menu.active")).toBeVisible();
+  await page.evaluate(() => {
+    const session = (window as Window & {
+      __chrono?: {
+        session?: {
+          beginOnlineTimeBattle: (input: {
+            matchId: string;
+            opponentId: string;
+            seed: number;
+            playerId: string;
+            players: string[];
+          }) => void;
+          screen: string;
+          phase: string;
+          onlinePhase: string;
+          player: { energy: number };
+        };
+      };
+    }).__chrono?.session;
+    if (!session) throw new Error("Missing Chrono session");
+    session.beginOnlineTimeBattle({
+      matchId: "m_online",
+      opponentId: "cc_b",
+      seed: 7,
+      playerId: "cc_a",
+      players: ["cc_a", "cc_b"],
+    });
+    session.screen = "match";
+    session.phase = "playing";
+    session.onlinePhase = "playing";
+    session.player.energy = 100;
+  });
+  await expect(page.locator("#match.active")).toBeVisible();
+  await expect.poll(async () => page.locator("#megaStrikeAttack").isEnabled()).toBe(true);
+
+  const board = page.locator("#playerBoard");
+  const boardBox = await board.boundingBox();
+  expect(boardBox).not.toBeNull();
+  const box = boardBox!;
+  const viewport = page.viewportSize();
+  expect(viewport).not.toBeNull();
+  const target = await page.evaluate(() => {
+    const session = (window as Window & {
+      __chrono?: { session?: { hintCells: (now: number) => Array<{ r: number; c: number }> } };
+    }).__chrono?.session;
+    return session?.hintCells(performance.now())[0] ?? { r: 0, c: 0 };
+  });
+  const targetPoint = cellCenter(box, target.r, target.c);
+  const outsidePoint = box.y > 20
+    ? { x: box.x + box.width / 2, y: box.y - 12 }
+    : { x: 1, y: Math.min(viewport!.height - 1, box.y + box.height / 2) };
+  const cdp = await context.newCDPSession(page);
+
+  await page.locator("#megaStrikeAttack").click();
+  await expect(page.locator("#megaStrikeAttack")).toHaveAttribute("aria-pressed", "true");
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchStart",
+    touchPoints: [{ x: targetPoint.x, y: targetPoint.y, id: 67 }],
+  });
+  await expect.poll(async () => page.evaluate(() => {
+    const state = (window as Window & { __chrono?: { renderState?: () => RenderState } }).__chrono?.renderState?.();
+    return state?.powerTargeting ?? null;
+  })).toEqual({ kind: "mega", target });
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchMove",
+    touchPoints: [{ x: outsidePoint.x, y: outsidePoint.y, id: 67 }],
+  });
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchEnd",
+    touchPoints: [],
+  });
+
+  const canceled = await page.evaluate(() => {
+    const chrono = (window as Window & {
+      __chrono?: {
+        session?: {
+          player: { energy: number };
+          pendingClientSeq: number;
+        };
+      };
+    }).__chrono;
+    return {
+      energy: chrono?.session?.player.energy,
+      pendingClientSeq: chrono?.session?.pendingClientSeq,
+    };
+  });
+  expect(canceled).toEqual({ energy: 100, pendingClientSeq: 0 });
+  expect(sentActions).toEqual([]);
+  await expect(page.locator("#megaStrikeAttack")).toHaveAttribute("aria-pressed", "false");
+  await expect(page.locator("#matchStatus")).toHaveText("Target canceled. Select a gem on the board to use Mega Strike.");
+  await expect.poll(async () => page.evaluate(() => {
+    const state = (window as Window & { __chrono?: { renderState?: () => RenderState } }).__chrono?.renderState?.();
+    return state?.powerTargeting ?? null;
+  })).toBeNull();
+
+  const move = await page.evaluate(() => {
+    const session = (window as Window & {
+      __chrono?: { session?: { hintCells: (now: number) => Array<{ r: number; c: number }> } };
+    }).__chrono?.session;
+    const hint = session?.hintCells(performance.now()) ?? [];
+    if (hint.length < 2) throw new Error("Missing valid follow-up swipe");
+    return { from: hint[0]!, to: hint[1]! };
+  });
+  await touchSwipe(cdp, cellCenter(box, move.from.r, move.from.c), cellCenter(box, move.to.r, move.to.c), 68);
+  await expect.poll(() => sentActions).toHaveLength(1);
+  expect(sentActions[0]).toMatchObject({ type: "swap" });
+  expect(sentActions[0]?.id).toBeUndefined();
+  expect(sentActions[0]?.target).toBeUndefined();
+});
+
 test("mobile Mega Strike valid touch charges once and clears only the selected color", async ({ page, context }) => {
   await page.goto("/");
   await expect(page.locator("#menu.active")).toBeVisible();
