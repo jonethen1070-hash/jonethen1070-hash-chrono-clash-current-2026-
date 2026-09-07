@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { findAnyValidSwap } from "../src/engine/board";
 import { GameSession } from "../src/engine/session";
-import { ENERGY_FREEZE, ENERGY_TIMESHIFT } from "../src/engine/types";
+import { ENERGY_FREEZE, ENERGY_TIMESHIFT, FINALE_MS } from "../src/engine/types";
 import { withPowerStock } from "../src/engine/economy";
 
 describe("phase 7 runtime gameplay remains intact", () => {
@@ -72,6 +72,23 @@ describe("phase 7 runtime gameplay remains intact", () => {
     expect(loss.fx.some((f) => f.kind === "finale" && f.text === "DEFEAT")).toBe(true);
     loss.playAgain(70_000);
     expect(loss.screen).toBe("ready");
+  });
+
+  it("hands off to results after a brief impact window instead of waiting on VFX", () => {
+    expect(FINALE_MS).toBeLessThanOrEqual(220);
+    const game = new GameSession();
+    game.progress = { ...game.progress, tutorialDone: true, matchesSeen: 8 };
+    game.mode = "time";
+    game.startMatch(1000);
+    game.tick(4200);
+    game.player.score = 40;
+    game.opponent.score = 9000;
+    const endedAt = 64_200;
+    game.tick(endedAt);
+    expect(game.phase).toBe("ended");
+    expect(game.screen).toBe("match");
+    game.tick(endedAt + FINALE_MS + 1);
+    expect(game.screen).toBe("results");
   });
 
   it("drops overlapping swaps while the first resolve is still settling", () => {

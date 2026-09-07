@@ -2249,10 +2249,12 @@ let lastScreen = "";
 let lastProfile = -1;
 let boardsDrawn = false;
 let lastResultKey = "";
+let matchEffectsStopped = false;
 let lastRivalActionAt = -Infinity;
 let lastFinalSecond = 0;
 let lastMegaReady = false;
 let objectiveCompleted = false;
+const RESULTS_BOARD_FADE_MS = 220;
 
 type MatchObjective = {
   label: string;
@@ -2322,6 +2324,7 @@ function onScreenEnter(id: string, now: number): void {
     announcer.submit("ready", now);
   }
   if (id === "match") {
+    matchEffectsStopped = false;
     lastOverlay = "";
     seenFx = 0;
     lastGameplayCalloutAt = 0;
@@ -2400,8 +2403,12 @@ function frame(now: number): void {
     renderProfile();
   }
 
-  const showBoards = screen === "match" || (screen === "results" && now - resultAt < 700);
+  const showBoards = screen === "match" || (screen === "results" && now - resultAt < RESULTS_BOARD_FADE_MS);
   if (showBoards && snap && !document.hidden) {
+    if (snap.phase === "ended" && !matchEffectsStopped) {
+      renderer.stopMatchEffects(snap.fx);
+      matchEffectsStopped = true;
+    }
     const rate = scoreTickerRate(settings.animation, reducedMotion());
     shownPlayer += (snap.player.score - shownPlayer) * rate;
     shownOpp += (snap.opponent.score - shownOpp) * rate;
@@ -2619,7 +2626,7 @@ function frame(now: number): void {
       lastOverlay = overlayText;
     }
 
-    const fade = snap.screen === "results" ? Math.max(0, 1 - (now - resultAt) / 700) : 1;
+    const fade = snap.screen === "results" ? Math.max(0, 1 - (now - resultAt) / RESULTS_BOARD_FADE_MS) : 1;
     refreshLayout();
     renderer.draw(snap, layout.player, layout.opp, now, fade);
     if (renderer.takeLandingImpacts() > 0) {

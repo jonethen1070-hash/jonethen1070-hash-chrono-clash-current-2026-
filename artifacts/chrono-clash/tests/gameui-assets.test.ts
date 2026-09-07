@@ -90,6 +90,16 @@ describe("GameUI reskin assets", () => {
     expect(targetResponse).toContain("drawIrregularEnergyArc");
   });
 
+  it("stops transient match effects before the results handoff", () => {
+    const renderer = readFileSync(join(process.cwd(), "src/ui/renderer.ts"), "utf8");
+    const main = readFileSync(join(process.cwd(), "src/main.ts"), "utf8");
+    expect(renderer).toContain("stopMatchEffects");
+    expect(renderer).toContain("this.bolts.length = 0");
+    expect(renderer).toContain("this.combatFloats.length = 0");
+    expect(main).toContain("renderer.stopMatchEffects(snap.fx)");
+    expect(main).toContain("const RESULTS_BOARD_FADE_MS = 220");
+  });
+
   it("isolates one atlas gem per 256 cell instead of drawing the sheet split", () => {
     const atlas = readFileSync(join(process.cwd(), "src/ui/gemAtlas.ts"), "utf8");
     expect(atlas).toContain("isolateAtlasGems");

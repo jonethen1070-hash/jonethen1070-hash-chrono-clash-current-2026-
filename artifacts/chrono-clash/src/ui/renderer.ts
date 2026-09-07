@@ -744,6 +744,31 @@ export class BoardRenderer {
     this.wipeLayer(this.oppLayer);
   }
 
+  stopMatchEffects(fx: FxEvent[] = []): void {
+    this.recycleViewEffects(this.playerView);
+    this.recycleViewEffects(this.oppView);
+    for (const view of [this.playerView, this.oppView]) {
+      view.tiles.clear();
+      view.live.clear();
+      view.pendingSwapIds.clear();
+      view.pendingSwapTargets.clear();
+      view.pendingSwap = null;
+      view.powerTargeting = null;
+      view.powerImpactImpulse = null;
+      view.powerCastTarget = null;
+      view.powerWake = null;
+      view.shake = 0;
+      view.flash = 0;
+      view.hitStopUntil = 0;
+      for (const event of fx) view.seenFx.add(event.id);
+    }
+    this.bolts.length = 0;
+    this.combatFloats.length = 0;
+    this.invalidUntil = 0;
+    this.invalidA = null;
+    this.invalidB = null;
+  }
+
   private canvasOrigin(): { left: number; top: number } {
     const parent = this.ctx.canvas.getBoundingClientRect();
     this.parentLeft = parent.left;

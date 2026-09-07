@@ -7,7 +7,8 @@ export const SCORE_TARGET = 5_000;
 export const SCORE_TARGETS = [3_000, 5_000, 8_000, 10_000] as const;
 export const COUNTDOWN_SECONDS = 3;
 export const READY_MS = 1600;
-export const FINALE_MS = 1400;
+// Keep only a brief handoff for the final impact; cosmetic VFX must not gate results.
+export const FINALE_MS = 180;
 
 export const ENERGY_MAX = 100;
 export const ENERGY_FREEZE = 12;
