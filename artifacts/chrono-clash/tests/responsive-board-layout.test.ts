@@ -49,12 +49,14 @@ describe("production responsive board layout", () => {
     expect(css).toContain("margin-top: 0 !important");
   });
 
-  it("packs mobile controls beneath the content-sized square board", () => {
+  it("keeps the square board fixed while docking controls in the remaining stage space", () => {
     const css = readFileSync("src/styles/aaa-polish.css", "utf8");
     expect(css).toContain(
-      "var(--energy-height)\n      0px\n      max-content\n      calc(var(--control-height) + 6px)",
+      "var(--energy-height)\n      0px\n      max-content\n      minmax(0, 1fr)",
     );
-    expect(css).toContain("margin-top: 6px !important");
+    expect(css).toContain("height: 100% !important");
+    expect(css).toContain("align-self: end !important");
+    expect(css).toContain("margin: 0 auto 6px !important");
     expect(css).toContain("transform: translateZ(2px) !important");
   });
 

@@ -9355,13 +9355,14 @@ html body #app #match .player-side .board-socket-bed {
       var(--energy-height)
       0px
       max-content
-      calc(var(--control-height) + 6px) !important;
-    height: max-content !important;
-    align-content: start !important;
+      minmax(0, 1fr) !important;
+    height: 100% !important;
+    align-content: stretch !important;
   }
 
   html body #app #match .powers {
-    margin-top: 6px !important;
+    align-self: end !important;
+    margin: 0 auto 6px !important;
     transform: translateZ(2px) !important;
   }
 }
