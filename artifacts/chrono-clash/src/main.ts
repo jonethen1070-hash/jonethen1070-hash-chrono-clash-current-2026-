@@ -393,6 +393,9 @@ app.innerHTML = `
           <span class="energy-attack-cost"><i aria-hidden="true"></i>${ENERGY_MEGA_STRIKE}</span>
         </button>
         <button class="power" id="rewind"><span class="glyph" aria-hidden="true">↺</span><i class="ability-fx" aria-hidden="true"></i><b>REWIND</b><span class="cost">${ENERGY_REWIND} ENERGY</span><span class="need">Restores your last valid move.</span></button>
+        <div class="power-cancel" hidden>
+          <button type="button" class="power-cancel-button" id="cancelPowerTarget" aria-controls="playerBoard">CANCEL TARGET</button>
+        </div>
       </div>
       <div id="oppBoard" class="opponent-render-reserve" aria-hidden="true">
         <span id="freezeClock"></span>
@@ -535,6 +538,7 @@ const ui = {
   rewind: $("#rewind") as HTMLButtonElement,
   energyBurstAttack: $("#energyBurstAttack") as HTMLButtonElement,
   megaStrikeAttack: $("#megaStrikeAttack") as HTMLButtonElement,
+  cancelPowerTarget: $("#cancelPowerTarget") as HTMLButtonElement,
   powerArmory: $("#powerArmory"),
   dailyRun: $("#dailyRun"),
   modeTime: $("#modeTime") as HTMLButtonElement,
@@ -1617,6 +1621,8 @@ function setArmedEnergyPower(id: "burst" | "megaStrike" | null): void {
   renderer.setPowerTargeting(id === "megaStrike" ? "mega" : id === "burst" ? "burst" : null, performance.now());
   ui.energyBurstAttack.setAttribute("aria-pressed", id === "burst" ? "true" : "false");
   ui.megaStrikeAttack.setAttribute("aria-pressed", id === "megaStrike" ? "true" : "false");
+  ui.cancelPowerTarget.closest(".power-cancel")?.toggleAttribute("hidden", id === null);
+  ui.cancelPowerTarget.textContent = id === "burst" ? "CANCEL ENERGY BURST" : id === "megaStrike" ? "CANCEL MEGA STRIKE" : "CANCEL TARGET";
 }
 
 function useEnergyAttack(id: "burst" | "megaStrike", button: HTMLButtonElement): void {
@@ -1626,9 +1632,12 @@ function useEnergyAttack(id: "burst" | "megaStrike", button: HTMLButtonElement):
     return;
   }
   const next = armedEnergyPower === id ? null : id;
-  setArmedEnergyPower(next);
-  if (next) pressPowerButton(button);
-  else audio.play("ui");
+  if (next) {
+    setArmedEnergyPower(next);
+    pressPowerButton(button);
+  } else {
+    cancelArmedEnergyPower();
+  }
 }
 
 function reportCanceledEnergyPower(id: "burst" | "megaStrike"): void {
@@ -1638,8 +1647,17 @@ function reportCanceledEnergyPower(id: "burst" | "megaStrike"): void {
   restartAnim(ui.match, "impact");
 }
 
+function cancelArmedEnergyPower(): void {
+  const id = armedEnergyPower;
+  if (!id) return;
+  setArmedEnergyPower(null);
+  reportCanceledEnergyPower(id);
+  audio.play("ui");
+}
+
 ui.energyBurstAttack.addEventListener("click", () => useEnergyAttack("burst", ui.energyBurstAttack));
 ui.megaStrikeAttack.addEventListener("click", () => useEnergyAttack("megaStrike", ui.megaStrikeAttack));
+ui.cancelPowerTarget.addEventListener("click", cancelArmedEnergyPower);
 document.querySelector(".powers")?.addEventListener("pointerdown", (e) => {
   const point = e as PointerEvent;
   const target = e.target;

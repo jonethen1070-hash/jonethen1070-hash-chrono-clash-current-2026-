@@ -364,6 +364,14 @@ test("mobile targeted power release outside the board stays unspent and leaves s
   });
   await page.locator("#energyBurstAttack").click();
   await expect(page.locator("#energyBurstAttack")).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator("#cancelPowerTarget")).toBeVisible();
+  await page.locator("#cancelPowerTarget").click();
+  await expect(page.locator("#energyBurstAttack")).toHaveAttribute("aria-pressed", "false");
+  await expect(page.locator("#cancelPowerTarget")).toBeHidden();
+  await expect(page.locator("#matchStatus")).toHaveText("Target canceled. Select a gem on the board to use Energy Burst.");
+  expect(await page.evaluate(() => (window as Window & { __chrono?: { session?: { player: { energy: number } } } }).__chrono?.session?.player.energy)).toBe(100);
+  await page.locator("#energyBurstAttack").click();
+  await expect(page.locator("#energyBurstAttack")).toHaveAttribute("aria-pressed", "true");
 
   const target = await page.evaluate(() => {
     const session = (window as Window & {
@@ -506,6 +514,14 @@ test("mobile Mega Strike release outside the board stays unspent and leaves swip
     if (!session) throw new Error("Missing Chrono session");
     session.player.energy = 100;
   });
+  await page.locator("#megaStrikeAttack").click();
+  await expect(page.locator("#megaStrikeAttack")).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator("#cancelPowerTarget")).toBeVisible();
+  await page.locator("#cancelPowerTarget").click();
+  await expect(page.locator("#megaStrikeAttack")).toHaveAttribute("aria-pressed", "false");
+  await expect(page.locator("#cancelPowerTarget")).toBeHidden();
+  await expect(page.locator("#matchStatus")).toHaveText("Target canceled. Select a gem on the board to use Mega Strike.");
+  expect(await page.evaluate(() => (window as Window & { __chrono?: { session?: { player: { energy: number } } } }).__chrono?.session?.player.energy)).toBe(100);
   await page.locator("#megaStrikeAttack").click();
   await expect(page.locator("#megaStrikeAttack")).toHaveAttribute("aria-pressed", "true");
 
