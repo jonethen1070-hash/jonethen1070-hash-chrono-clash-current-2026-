@@ -937,7 +937,10 @@ export class GameSession {
     this.lastPlayerSnap.push(pre);
     if (this.lastPlayerSnap.length > REWIND_HISTORY) this.lastPlayerSnap.shift();
     this.applyResolve(this.player, result, boost, now, "player");
-    this.busyUntil = now + Math.min(360, 160 + result.events.length * 22);
+    // Keep the input gate long enough to prevent overlapping resolves, but do
+    // not turn the visual settle window into an artificial pause between
+    // otherwise valid swipes.
+    this.busyUntil = now + Math.min(300, 132 + result.events.length * 16);
     this.resolving = false;
     if (this.mode === "score" && this.player.score >= this.scoreTarget) this.endMatch(now);
     return true;

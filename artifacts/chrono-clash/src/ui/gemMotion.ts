@@ -5,8 +5,8 @@ export const LIVE_GEM_MAX_IN_CELL_DROP = 0.16;
 
 export type GemMoveKind = "swap" | "fall";
 
-export const SWAP_PUSH_MS = 105;
-export const SWAP_MAGNET_MS = 70;
+export const SWAP_PUSH_MS = 72;
+export const SWAP_MAGNET_MS = 48;
 export const SWAP_TOTAL_MS = SWAP_PUSH_MS + SWAP_MAGNET_MS;
 
 export function clamp01(t: number): number {
@@ -74,11 +74,11 @@ export function gemTravelDuration(
     if (animation === "medium") return 0.15;
     return SWAP_TOTAL_MS / 1000;
   }
-  // Keep a one-cell drop quick enough to read as responsive while preserving
-  // progressively longer travel for deeper cascades.
-  const base = animation === "low" ? 0.14 : animation === "medium" ? 0.15 : 0.16;
-  const perCell = animation === "low" ? 0.055 : animation === "medium" ? 0.06 : 0.065;
-  return Math.min(0.52, base + Math.max(0, cells - 1) * perCell);
+  // Keep the first cell punchy, then give deeper drops just enough extra
+  // travel to read as physical without putting dead time between cascades.
+  const base = animation === "low" ? 0.09 : animation === "medium" ? 0.095 : 0.1;
+  const perCell = animation === "low" ? 0.035 : animation === "medium" ? 0.038 : 0.04;
+  return Math.min(0.28, base + Math.max(0, cells - 1) * perCell);
 }
 
 export function gemFallDelay(
