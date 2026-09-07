@@ -1,0 +1,560 @@
+Perform a FINAL EXTREME REFINEMENT PASS on Chrono Clash.
+
+The goal is NOT simply to make the game “better.”
+
+The goal is to make the existing game feel EXTREMELY REFINED, PREMIUM, RESPONSIVE, COHESIVE, AND PROFESSIONAL from the first tap to the end of a match.
+
+Think of this as the final polish pass before showing the game to a professional publisher or studio.
+
+ABSOLUTE RULE
+
+DO NOT change the core gameplay design.
+
+Preserve:
+
+* matching rules
+* gem behavior
+* scoring
+* turns
+* opponent logic
+* abilities
+* Mega Strike behavior
+* win/lose conditions
+
+Fix bugs, performance problems, timing problems, and visual inconsistencies when necessary.
+
+⸻
+
+1. GAME FEEL
+
+Every interaction must feel intentional.
+
+Audit:
+
+* tapping
+* selecting
+* swapping
+* matching
+* clearing
+* falling
+* cascading
+* combo
+* damage
+* abilities
+* Mega Strike
+* victory
+* defeat
+* restart
+
+Remove anything that feels:
+
+* slow
+* delayed
+* stiff
+* random
+* unfinished
+* inconsistent
+* cheap
+* overly mechanical
+
+The player should always feel that the game is responding immediately.
+
+⸻
+
+2. GEM MOVEMENT
+
+This is a HIGH PRIORITY area.
+
+Make swaps:
+
+* extremely responsive
+* fast
+* smooth
+* precise
+* satisfying
+
+Make falling:
+
+* immediate after clearing
+* distance-aware
+* smooth
+* energetic
+* consistent
+
+There must NEVER be random moments where gems suddenly fall slowly.
+
+Audit the entire pipeline:
+
+MATCH
+→ CLEAR
+→ GRAVITY
+→ FALL
+→ NEW GEMS
+→ MATCH CHECK
+→ CASCADE
+
+Remove unnecessary waiting while preserving correct sequencing.
+
+⸻
+
+3. ANIMATION TIMING
+
+Audit EVERY animation duration in the game.
+
+Look for:
+
+* transitions that are too slow
+* effects that delay gameplay
+* unnecessary pauses
+* awkward easing
+* animations that overlap incorrectly
+* animations that finish after the game has already moved on
+
+Use timing intentionally.
+
+Small actions should be quick.
+
+Important actions can have slightly more cinematic timing.
+
+Nothing should feel sluggish.
+
+⸻
+
+4. INPUT
+
+Make touch interaction exceptional.
+
+* immediate response
+* accurate hit detection
+* no accidental neighboring selection
+* no double activation
+* no missed taps
+* no invisible input lock
+* no interaction dead zones
+
+Test rapid tapping.
+
+Test tapping during animations.
+
+Test ability activation.
+
+Test Mega Strike selection.
+
+⸻
+
+5. GEM GRAPHICS
+
+Make gems look like premium energy crystals.
+
+Refine:
+
+* geometry
+* depth
+* lighting
+* highlights
+* internal energy
+* reflections
+* transparency
+* shadows
+* glow
+* material response
+
+The gems should be the visual heroes.
+
+Avoid flat-looking or generic shapes.
+
+⸻
+
+6. GEM VFX
+
+Every clear should feel satisfying.
+
+Refine:
+
+* anticipation
+* crystal fracture
+* flash
+* energy burst
+* crystal shards
+* sparks
+* shockwave
+* afterglow
+
+VFX must match the gem’s actual color.
+
+Keep the effects controlled and premium.
+
+More particles does NOT automatically mean better.
+
+⸻
+
+7. CASCADE PRESENTATION
+
+Cascades should feel increasingly exciting.
+
+1st clear → satisfying
+2nd cascade → stronger
+3rd → powerful
+4+ → spectacular
+
+Use:
+
+* timing
+* sound
+* lighting
+* energy
+* subtle camera response
+* combo presentation
+
+Do NOT simply spam particles.
+
+⸻
+
+8. BOARD
+
+Refine the board into a premium physical object.
+
+Improve:
+
+* depth
+* frame
+* bevels
+* materials
+* reflections
+* shadows
+* edge lighting
+* glass/metal surfaces
+* internal lighting
+
+The board should feel like a futuristic battle device.
+
+⸻
+
+9. HUD
+
+Perform a complete visual audit.
+
+Refine:
+
+* health
+* energy
+* score
+* combo
+* player indicator
+* opponent indicator
+* ability buttons
+* counters
+* labels
+
+Check:
+
+* alignment
+* spacing
+* typography
+* contrast
+* hierarchy
+* readability
+* safe areas
+
+Nothing should look accidentally positioned.
+
+⸻
+
+10. UI MICRO-POLISH
+
+Inspect every button and panel.
+
+Every interactive element needs:
+
+NORMAL
+→ PRESSED
+→ ACTIVE
+→ DISABLED
+→ COOLDOWN
+→ READY
+
+states where appropriate.
+
+Make transitions subtle and consistent.
+
+⸻
+
+11. AUDIO / HAPTICS
+
+If already implemented, synchronize them precisely.
+
+Every important action should have appropriate feedback.
+
+Avoid repetitive or annoying sounds.
+
+Major events should feel powerful.
+
+⸻
+
+12. CAMERA / SCREEN RESPONSE
+
+Use subtle cinematic camera response for important moments.
+
+Examples:
+
+* major match
+* large cascade
+* powerful ability
+* Mega Strike
+* major damage
+* victory
+
+Keep it restrained.
+
+The board must never become difficult to read.
+
+⸻
+
+13. PERFORMANCE
+
+This is CRITICAL.
+
+The game must remain smooth during:
+
+* normal gameplay
+* large clears
+* cascades
+* Mega Strike
+* heavy VFX
+* long sessions
+* repeated restarts
+
+Find and fix:
+
+* memory leaks
+* duplicated animation loops
+* duplicate listeners
+* excessive DOM updates
+* excessive particles
+* unnecessary rendering
+* expensive filters
+* timers that aren’t cleaned up
+* stale game objects
+* accumulating VFX
+
+Do NOT simply remove visual quality to improve performance.
+
+Optimize the implementation.
+
+⸻
+
+14. GAME STATE
+
+Perform a deep state audit.
+
+Check for:
+
+* stale state
+* race conditions
+* actions triggering twice
+* animations and game state becoming unsynchronized
+* input remaining locked
+* board becoming stuck
+* opponent turn getting stuck
+* ability state becoming incorrect
+* restart not fully resetting
+
+The game must remain deterministic.
+
+⸻
+
+15. MEGA STRIKE
+
+Verify the final behavior:
+
+ACTIVATE MEGA STRIKE
+→ SELECT ONE GEM
+→ READ ITS ACTUAL COLOR
+→ FIND ALL GEMS OF THAT COLOR
+→ CLEAR ALL MATCHING GEMS
+→ APPLY VFX ONLY TO THOSE GEMS
+→ LEAVE ALL OTHER COLORS UNTOUCHED
+
+Test every available gem color.
+
+⸻
+
+16. MENUS / RESULTS
+
+Refine:
+
+MAIN MENU
+START
+SETTINGS if present
+PAUSE if present
+VICTORY
+DEFEAT
+RESTART
+PLAY AGAIN
+
+Transitions should feel seamless.
+
+No abrupt screen changes.
+
+No leftover gameplay elements.
+
+⸻
+
+17. VISUAL CONSISTENCY
+
+Perform a full-screen audit.
+
+Every visible element should belong to one cohesive design language.
+
+Check:
+
+* colors
+* glow
+* borders
+* shadows
+* typography
+* icons
+* panels
+* buttons
+* gems
+* board
+* background
+* VFX
+
+Nothing should look like a placeholder.
+
+⸻
+
+18. 2.5D PRESENTATION
+
+Push the existing dimensional presentation.
+
+Create clear depth between:
+
+BACKGROUND
+↓
+ENVIRONMENT
+↓
+BOARD
+↓
+BOARD FRAME
+↓
+GEMS
+↓
+VFX
+↓
+HUD
+
+Use subtle depth/parallax where appropriate.
+
+Do NOT turn it into a flat UI.
+
+⸻
+
+19. CSS / STYLE ARCHITECTURE
+
+Before making visual changes:
+
+Inspect the existing CSS and determine which rules are actually active.
+
+There may be later override-heavy rules.
+
+Do NOT blindly append another giant stylesheet.
+
+Fix the correct selectors.
+
+Remove or consolidate obsolete/conflicting overrides where safe.
+
+Avoid creating technical debt just to achieve visual polish.
+
+⸻
+
+20. FINAL “PROFESSIONAL REVIEW”
+
+After everything is refined, look at the game as if you are a senior game designer, UI/UX designer, technical artist, and QA engineer reviewing it for release.
+
+Ask:
+
+Does anything feel slow?
+
+Does anything feel cheap?
+
+Does anything feel visually inconsistent?
+
+Does anything feel unfinished?
+
+Does any interaction feel delayed?
+
+Does any animation feel unnecessary?
+
+Does anything distract from gameplay?
+
+Does anything look like a placeholder?
+
+Does anything break after repeated play?
+
+Fix every issue you can identify.
+
+⸻
+
+FINAL TEST
+
+Play multiple complete matches.
+
+Test:
+
+START
+→ SWAP
+→ MATCH
+→ CLEAR
+→ FALL
+→ CASCADE
+→ COMBO
+→ DAMAGE
+→ ABILITY
+→ MEGA STRIKE
+→ OPPONENT
+→ VICTORY
+→ RESTART
+
+Then:
+
+START
+→ GAMEPLAY
+→ DEFEAT
+→ RESTART
+
+Also perform:
+
+* rapid tapping
+* long sessions
+* repeated restarts
+* large cascades
+* large clears
+* every Mega Strike color
+
+Run all existing automated tests and production build.
+
+FINAL STANDARD
+
+Do not stop at:
+
+“Everything works.”
+
+The standard is:
+
+Everything works AND feels exceptionally polished.
+
+Chrono Clash should feel:
+
+FAST
+SMOOTH
+RESPONSIVE
+CINEMATIC
+PREMIUM
+DIMENSIONAL
+CRYSTALLINE
+COHESIVE
+PROFESSIONAL
+
+Do a final pass specifically looking for the tiny 1% details that separate a functional game from a highly refined commercial game.
