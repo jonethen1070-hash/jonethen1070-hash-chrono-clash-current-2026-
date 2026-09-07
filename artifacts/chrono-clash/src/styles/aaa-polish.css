@@ -4795,9 +4795,14 @@ html body #app #match .energy-attack-glyph {
 html body #app #match .power-cancel {
   grid-column: 1 / -1;
   min-width: 0;
+  position: relative;
+  z-index: 12;
+  pointer-events: auto;
 }
 
 html body #app #match .power-cancel-button {
+  position: relative;
+  z-index: 13;
   width: 100%;
   min-height: 34px;
   padding: 7px 10px;
@@ -9968,6 +9973,54 @@ html body #app #results.active.loss::before {
   html body #app:has(#match.active) .space-drift,
   html body #app:has(#match.active) .space-debris {
     animation: none !important;
+  }
+}
+
+/* Keep the armed-power cancel row inside short mobile viewports. */
+@media (max-height: 760px) {
+  html body #app #match .powers {
+    grid-template-rows: 42px 34px !important;
+    gap: 6px !important;
+    padding-top: 4px !important;
+    padding-bottom: 2px !important;
+  }
+
+  html body #app #match .powers > .ability-deck {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 / 3 !important;
+  }
+
+  html body #app #match .powers > .energy-attack.burst {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+  }
+
+  html body #app #match .powers > .energy-attack.strike {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+  }
+
+  html body #app #match .powers > #rewind {
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+  }
+
+  html body #app #match .powers > .power-cancel {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 !important;
+    position: fixed !important;
+    left: 4px !important;
+    right: 4px !important;
+    bottom: 4px !important;
+    width: auto !important;
+    z-index: 50 !important;
+  }
+
+  html body #app #match .powers > .energy-attack,
+  html body #app #match .powers > #rewind {
+    min-height: 42px !important;
+    height: 42px !important;
+    padding: 3px 3px 2px !important;
   }
 }
 

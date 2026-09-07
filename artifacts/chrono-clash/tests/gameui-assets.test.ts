@@ -109,6 +109,19 @@ describe("GameUI reskin assets", () => {
     expect(css).not.toMatch(/\.you-meta \{\s*flex-wrap: wrap/);
   });
 
+  it("adds lightweight match goals and rival state feedback without changing board controls", () => {
+    const main = readFileSync(join(process.cwd(), "src/main.ts"), "utf8");
+    const css = readFileSync(join(process.cwd(), "src/styles/game.css"), "utf8");
+    expect(main).toContain('id="matchObjective"');
+    expect(main).toContain('id="rivalState"');
+    expect(main).toContain("MEGA STRIKE READY");
+    expect(main).toContain("lastFinalSecond");
+    expect(main).toContain("OBJECTIVE COMPLETE");
+    expect(css).toContain(".match-objective.complete");
+    expect(css).toContain(".rival-state.rival-attacking");
+    expect(css).toContain("@keyframes finalTick");
+  });
+
   it("keeps the rival board a compact square below the HUD and above energy", () => {
     const studio = readFileSync(join(process.cwd(), "src/styles/studio.css"), "utf8");
     const polish = readFileSync(join(process.cwd(), "src/styles/aaa-polish.css"), "utf8");

@@ -20,3 +20,4 @@
 - [Cascade release timing](gem-motion-timing.md) — begin gravity at the swap-tied impact handoff, not after the full break animation, while preserving a visible committed swap.
 - [Browser performance probes](browser-performance-probes.md) — compare against a blank baseline and CPU profile before interpreting headless Canvas frame or Long Task numbers.
 - [Motion and input commit contract](motion-input-contract.md) — keep capped renderer timing and prime swap poses only after accepted session swaps.
+- [Short viewport power controls](short-viewport-power-controls.md) — mobile visual viewport can be 727px; keep armed-power cancellation inside the compact control band.

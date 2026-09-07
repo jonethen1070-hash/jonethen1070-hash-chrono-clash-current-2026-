@@ -2684,6 +2684,8 @@ button,
   #match .boards { gap: 3px; }
   #match .fighter { min-height: 40px; padding: 2px 4px; }
   #match .fighter em { display: none; }
+  #match .rival-state,
+  #match .match-objective { display: none; }
   #match .avatar-ring,
   #match .avatar-ring.rival { width: 30px; height: 30px; }
   #match .vs-column { min-width: 64px; }

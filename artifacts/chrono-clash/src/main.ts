@@ -337,6 +337,7 @@ app.innerHTML = `
           <div class="fighter-copy">
             <small>RIVAL</small>
             <em id="rivalLevel">CPU</em>
+             <span class="rival-state" id="rivalState">RIVAL ONLINE</span>
             <div class="score-rail">
               <b id="oppScore">0</b>
               <span class="score-track"><i id="oppScoreFill"></i></span>
@@ -358,6 +359,7 @@ app.innerHTML = `
             <span class="shift-clock" id="shiftClock"></span>
             <span class="combo" id="playerCombo"></span>
             <span class="combo-damage" id="comboDamage"></span>
+             <span class="match-objective" id="matchObjective"></span>
           </div>
           <div id="playerBoard" class="board-slot">
             <div class="board-hardware" aria-hidden="true">
@@ -515,6 +517,7 @@ const ui = {
   oppScore: $("#oppScore"),
   playerCard: $("#playerCard"),
   oppCard: $("#oppCard"),
+  rivalState: $("#rivalState"),
   timer: $("#timer"),
   timerBtn: $("#timerBtn"),
   timerLabel: $("#timerLabel"),
@@ -527,6 +530,7 @@ const ui = {
   playerScoreFill: $("#playerScoreFill"),
   oppScoreFill: $("#oppScoreFill"),
   comboDamage: $("#comboDamage"),
+  matchObjective: $("#matchObjective"),
   comboBurst: $("#comboBurst"),
   energyBurst: $("#energyBurst"),
   matchStatus: $("#matchStatus"),
@@ -2245,6 +2249,56 @@ let lastScreen = "";
 let lastProfile = -1;
 let boardsDrawn = false;
 let lastResultKey = "";
+let lastRivalActionAt = -Infinity;
+let lastFinalSecond = 0;
+let lastMegaReady = false;
+let objectiveCompleted = false;
+
+type MatchObjective = {
+  label: string;
+  target: number;
+  value: (snap: ReturnType<GameSession["snapshot"]>) => number;
+};
+
+const MATCH_OBJECTIVES: MatchObjective[] = [
+  { label: "REACH COMBO x4", target: 4, value: (snap) => snap.player.bestCombo },
+  { label: "CHARGE 50 ENERGY", target: 50, value: (snap) => snap.player.energy },
+  { label: "BREAK 1,000 SCORE", target: 1_000, value: (snap) => snap.player.score },
+  { label: "TAKE THE LEAD", target: 1, value: (snap) => (snap.player.score > snap.opponent.score ? 1 : 0) },
+];
+let matchObjective: MatchObjective = MATCH_OBJECTIVES[0]!;
+
+function updateMatchObjective(snap: ReturnType<GameSession["snapshot"]>): void {
+  const value = Math.max(0, Math.min(matchObjective.target, matchObjective.value(snap)));
+  const complete = value >= matchObjective.target;
+  ui.matchObjective.textContent = complete
+    ? "OBJECTIVE COMPLETE"
+    : `${matchObjective.label} · ${matchObjective.target === 1 ? "NOT YET" : `${Math.floor(value)}/${matchObjective.target}`}`;
+  ui.matchObjective.classList.toggle("complete", complete);
+  if (complete && !objectiveCompleted) {
+    objectiveCompleted = true;
+    showCallout("OBJECTIVE COMPLETE", "powerful", 780);
+    restartAnim(ui.matchObjective, "complete");
+  }
+}
+
+function updateRivalState(snap: ReturnType<GameSession["snapshot"]>, now: number): void {
+  const playerLead = snap.player.score - snap.opponent.score;
+  const critical = snap.mode === "score"
+    ? snap.opponent.score >= snap.target * 0.72
+    : snap.last10 && snap.opponent.score >= snap.player.score;
+  const state = now - lastRivalActionAt < 900
+    ? "RIVAL ATTACKING"
+    : snap.opponent.combo >= 3
+      ? "RIVAL COMBO"
+      : critical
+        ? "RIVAL CRITICAL"
+        : playerLead >= 500
+          ? "RIVAL LOW"
+          : "RIVAL ONLINE";
+  if (ui.rivalState.textContent !== state) ui.rivalState.textContent = state;
+  ui.rivalState.className = `rival-state ${state.toLowerCase().replaceAll(" ", "-")}`;
+}
 
 function onScreenEnter(id: string, now: number): void {
   pulseUxEnter(id);
@@ -2272,6 +2326,15 @@ function onScreenEnter(id: string, now: number): void {
     seenFx = 0;
     lastGameplayCalloutAt = 0;
     lastPlayerEnergy = 0;
+    lastFinalSecond = 0;
+    lastMegaReady = false;
+    lastRivalActionAt = -Infinity;
+    objectiveCompleted = false;
+    matchObjective = MATCH_OBJECTIVES[session.progress.matchesSeen % MATCH_OBJECTIVES.length]!;
+    ui.matchObjective.textContent = matchObjective.label;
+    ui.matchObjective.classList.remove("complete");
+    ui.rivalState.textContent = "RIVAL ONLINE";
+    ui.rivalState.className = "rival-state";
     battleLog.length = 0;
     ui.matchStatus.textContent = "";
     setArmedEnergyPower(null);
@@ -2390,6 +2453,7 @@ function frame(now: number): void {
     ui.match.classList.toggle("final-critical", snap.last5);
     ui.match.classList.toggle("leading", snap.player.score > snap.opponent.score);
     ui.match.classList.toggle("trailing", snap.player.score < snap.opponent.score);
+     updateRivalState(snap, now);
      const playing = snap.phase === "playing";
      ui.playerCard.classList.toggle("locked", snap.playerLockedRemainingMs > 0);
      ui.playerCard.classList.toggle("resolving", snap.busy && playing);
@@ -2423,6 +2487,12 @@ function frame(now: number): void {
     ui.shiftClock.classList.toggle("on", shiftText.length > 0);
     setWidth(ui.energyFill, `${snap.player.energy}%`);
     setText(ui.energyLabel, `${Math.round(snap.player.energy)} / ${ENERGY_MAX}`);
+     const megaReady = snap.player.energy >= ENERGY_MEGA_STRIKE;
+     if (megaReady && !lastMegaReady) {
+       showCallout("MEGA STRIKE READY", "powerful", 960);
+       restartAnim(ui.megaStrikeAttack, "ready-pulse");
+     }
+     lastMegaReady = megaReady;
     if (snap.player.energy > lastPlayerEnergy + 0.5) {
       if (energyWrap instanceof HTMLElement) restartAnim(energyWrap, "gain");
       restartAnim(ui.energyFill, "surge");
@@ -2441,7 +2511,9 @@ function frame(now: number): void {
     ui.megaStrikeAttack.classList.toggle("ready", megaStrikeReady);
     ui.energyBurstAttack.classList.toggle("unavailable", !burstReady);
     ui.megaStrikeAttack.classList.toggle("unavailable", !megaStrikeReady);
+     ui.megaStrikeAttack.classList.toggle("charged", megaReady);
     ui.rewind.classList.toggle("ready", playing && snap.player.energy >= ENERGY_REWIND);
+     updateMatchObjective(snap);
 
     const comboAt = session.screen === "match" ? lastGameplayCalloutAt : announcer.lastComboAt;
     freshFx.length = 0;
@@ -2466,6 +2538,7 @@ function frame(now: number): void {
         (fx.kind === "clear" || fx.kind === "combo" || fx.kind === "power" || fx.kind === "attack")
       ) {
         restartAnim(ui.oppCard, "cpu-action");
+         lastRivalActionAt = now;
       }
       if (fx.kind === "power") {
         const t = fx.text.toUpperCase();
@@ -2489,6 +2562,16 @@ function frame(now: number): void {
         displayCallout(cue.id);
         if (cue.id === "combo") lastGameplayCalloutAt = now;
       }
+     if (snap.last5) {
+       const finalSecond = Math.max(1, Math.min(5, Math.ceil(snap.remainingMs / 1000)));
+       if (finalSecond !== lastFinalSecond) {
+         lastFinalSecond = finalSecond;
+         showCallout(String(finalSecond), "urgent", 260);
+         restartAnim(ui.timerBtn, "final-tick");
+       }
+     } else {
+       lastFinalSecond = 0;
+     }
     } else {
       for (const cue of gameplayCallouts) announcer.schedule(cue.id, cue.delayMs, now);
     }
