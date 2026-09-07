@@ -352,6 +352,7 @@ export class BoardRenderer {
     const cell = this.lastPlayerCell;
     tile.flash = Math.max(tile.flash, 0.72);
     tile.glow = Math.max(tile.glow, 0.82);
+    if (this.fx.reducedMotion) return;
     this.playerView.shake = Math.max(this.playerView.shake, 0.8);
     this.addShockwave(
       this.playerView,
@@ -849,8 +850,9 @@ export class BoardRenderer {
     view.flash *= 0.86;
     const mul = feelMul(this.fx.quality, this.fx.reducedMotion);
     const shakeAmt = view.shake * mul;
-    const sx = shakeAmt > 0.05 ? (Math.random() - 0.5) * Math.min(shakeAmt, 5) : 0;
-    const sy = shakeAmt > 0.05 ? (Math.random() - 0.5) * Math.min(shakeAmt, 5) * 0.6 : 0;
+    const shakePhase = now / 34 + (view === this.playerView ? 0.0 : 2.4);
+    const sx = shakeAmt > 0.05 ? Math.sin(shakePhase) * Math.min(shakeAmt, 5) : 0;
+    const sy = shakeAmt > 0.05 ? Math.cos(shakePhase * 1.17) * Math.min(shakeAmt, 5) * 0.6 : 0;
     let impulseX = 0;
     let impulseY = 0;
     if (view.powerImpactImpulse) {
@@ -2056,14 +2058,7 @@ export class BoardRenderer {
     if (!n) return;
     const hex = COLORS[color - 1] ?? "#fff";
     const crystal = crystalAccent(color);
-    const accent =
-      this.fx.vfxTheme === "nova-fx"
-        ? "#FFD447"
-        : this.fx.vfxTheme === "aurora-fx"
-          ? "#7CF5FF"
-          : this.fx.vfxTheme === "ember-fx"
-            ? "#FF9D00"
-            : hex;
+    const accent = hex;
 
     const effectNow = performance.now();
     let hero: PowerEffect["kind"] | undefined;
@@ -2157,9 +2152,9 @@ export class BoardRenderer {
         life: 0.72,
         max: 0.72,
         size: cell * (0.028 + Math.random() * 0.022),
-        color: i % 2 === 0 ? "#EAFBFF" : hex,
+        color: i % 2 === 0 ? crystalAccent(color).edge : hex,
         g: 0.04,
-         shape: "spark",
+        shape: "spark",
       });
     }
     this.capParticles(view);
@@ -2262,7 +2257,7 @@ export class BoardRenderer {
     );
     view.shake = Math.max(
       view.shake,
-      (freeze ? 4.6 : rewind ? 1.6 : mega ? 0 : burst ? 2.4 : 3.4) * mul,
+      (freeze ? 4.6 : rewind ? 1.6 : mega ? 3.8 : burst ? 2.4 : 3.4) * mul,
     );
     if (mega && !this.fx.reducedMotion) {
       view.powerImpactImpulse = {

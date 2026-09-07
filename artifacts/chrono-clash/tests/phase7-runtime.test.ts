@@ -33,11 +33,17 @@ describe("phase 7 runtime gameplay remains intact", () => {
     const move = findAnyValidSwap(game.player.board);
     expect(move).toBeTruthy();
     expect(game.tryPlayerSwap(move!.a, move!.b, now)).toBe(true);
+    game.selected = move!.a;
+    game.drag = { from: move!.a, to: move!.b, dx: 1, dy: 0, born: now };
+    game.bounce = { from: move!.a, dx: 1, dy: 0, born: now };
     now += 80;
     game.tick(now);
     game.player.energy = 100;
     expect(game.canUsePower("rewind", now)).toBe(true);
     expect(game.usePower("rewind", now)).toBe(true);
+    expect(game.selected).toBeNull();
+    expect(game.drag).toBeNull();
+    expect(game.bounce).toBeNull();
     expect(game.fx.some((f) => f.kind === "rewind")).toBe(true);
   });
 

@@ -1011,6 +1011,10 @@ export class GameSession {
       this.applyResolve(this.player, result, boost, now, "player");
       this.powerLockUntil = now + 620;
       this.busyUntil = Math.max(this.busyUntil, now + 620);
+      this.rivalPressureUntil = Math.max(
+        this.rivalPressureUntil,
+        now + (id === "megaStrike" ? PRESSURE_MS * 2 : PRESSURE_MS),
+      );
       this.resolving = false;
       this.notePower(id);
       this.pushFx("power", id === "burst" ? "ENERGY BURST" : "MEGA STRIKE", now, {
@@ -1073,7 +1077,11 @@ export class GameSession {
       this.player.attack = prev.attack;
       this.player.energy = Math.max(0, prev.energy - ENERGY_REWIND);
       this.player.lastClearAt = now;
+      this.selected = null;
+      this.drag = null;
+      this.bounce = null;
       this.powerLockUntil = now + POWER_LOCK_MS;
+      this.busyUntil = Math.max(this.busyUntil, now + POWER_LOCK_MS);
       this.notePower(id);
       this.pushFx("rewind", "BOARD RESTORED", now, { side: "player" });
       return true;

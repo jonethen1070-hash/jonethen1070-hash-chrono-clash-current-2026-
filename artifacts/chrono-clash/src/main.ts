@@ -797,7 +797,11 @@ function displayCallout(id: VoiceLineId): void {
 announcer.onSpeak = displayCallout;
 
 let calloutTimer = 0;
-function showCallout(text: string, intensity: string): void {
+let protectedCalloutUntil = 0;
+function showCallout(text: string, intensity: string, protectMs = 0): void {
+  const now = performance.now();
+  if (protectMs <= 0 && now < protectedCalloutUntil) return;
+  if (protectMs > 0) protectedCalloutUntil = now + protectMs;
   ui.callout.textContent = text;
   const ingame = session.screen === "match" ? " ingame" : "";
   ui.callout.className = `callout pop ${intensity}${ingame}`;
@@ -1074,6 +1078,7 @@ let battleSyncGeneration = 0;
 let battleClientSeq = 0;
 let battleSyncInFlight = false;
 let battleSyncFailures = 0;
+let battleActionQueue: Promise<void> = Promise.resolve();
 
 function stopBattleSync(): void {
   battleSyncGeneration += 1;
@@ -1100,12 +1105,22 @@ function leaveOnlineBattle(): void {
 function sendOnlineAction(action: Omit<BattleActionInput, "clientSeq">): void {
   const matchId = session.onlineMatchId;
   if (!session.onlineRemote || !matchId || !net.token) return;
-  void net
-    .sendBattleAction(matchId, { ...action, clientSeq: nextBattleSeq() })
-    .then((snap) => session.applyBattleSnapshot(snap))
-    .catch(() => {
-      battleSyncFailures += 1;
-      if (battleSyncFailures >= 4) ui.onlineStatus.textContent = "CONNECTION UNSTABLE";
+  const generation = battleSyncGeneration;
+  const clientSeq = nextBattleSeq();
+  battleActionQueue = battleActionQueue
+    .catch(() => undefined)
+    .then(async () => {
+      if (generation !== battleSyncGeneration || session.onlineMatchId !== matchId) return;
+      try {
+        const snap = await net.sendBattleAction(matchId, { ...action, clientSeq });
+        if (generation !== battleSyncGeneration || session.onlineMatchId !== matchId) return;
+        battleSyncFailures = 0;
+        session.applyBattleSnapshot(snap);
+      } catch {
+        if (generation !== battleSyncGeneration || session.onlineMatchId !== matchId) return;
+        battleSyncFailures += 1;
+        if (battleSyncFailures >= 4) ui.onlineStatus.textContent = "CONNECTION UNSTABLE";
+      }
     });
 }
 
@@ -1370,9 +1385,15 @@ ui.emailDialog.addEventListener("click", (event) => {
   }
 });
 window.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && !ui.emailDialog.classList.contains("hidden")) {
+  if (event.key !== "Escape") return;
+  if (!ui.emailDialog.classList.contains("hidden")) {
     closeEmailDialog();
     ui.menuStatus.textContent = "EMAIL SIGN-IN CANCELLED.";
+    return;
+  }
+  if (armedEnergyPower && session.screen === "match") {
+    event.preventDefault();
+    cancelArmedEnergyPower();
   }
 });
 ui.emailForm.addEventListener("submit", (event) => {
@@ -1541,6 +1562,7 @@ $("#retryMatch").addEventListener("click", () => {
   pressUi("confirm");
   audio.startMusic();
   audio.resetSwapWave();
+  leaveOnlineBattle();
   session.playAgain();
   syncScreenNow();
 });
@@ -1548,6 +1570,7 @@ $("#again").addEventListener("click", () => {
   pressUi("confirm");
   audio.startMusic();
   audio.resetSwapWave();
+  leaveOnlineBattle();
   session.playAgain();
   syncScreenNow();
 });
@@ -1609,6 +1632,10 @@ function flashCombo(combo: number): void {
 }
 
 ui.rewind.addEventListener("click", () => {
+  if (armedEnergyPower) {
+    setArmedEnergyPower(null);
+    renderer.setPowerCastTarget(null, performance.now());
+  }
   if (session.usePower("rewind")) {
     ping(ui.rewind);
     flashCast("cast-rewind", ui.rewind);
@@ -1643,7 +1670,7 @@ function useEnergyAttack(id: "burst" | "megaStrike", button: HTMLButtonElement):
 function reportCanceledEnergyPower(id: "burst" | "megaStrike"): void {
   const name = id === "burst" ? "Energy Burst" : "Mega Strike";
   ui.matchStatus.textContent = `Target canceled. Select a gem on the board to use ${name}.`;
-  showCallout("TARGET CANCELED", "urgent");
+  showCallout("TARGET CANCELED", "urgent", 520);
   restartAnim(ui.match, "impact");
 }
 
@@ -2149,6 +2176,7 @@ ui.playerBoard.addEventListener(
         flashCast(id === "burst" ? "cast-burst" : "cast-mega", button);
         sendOnlineAction({ type: "power", id, target });
       } else {
+        renderer.setPowerCastTarget(null, now);
         restartAnim(button, "unavailable");
       }
       return;

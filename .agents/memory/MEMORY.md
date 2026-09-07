@@ -8,6 +8,7 @@
 - [Cascade regression checks](cascade-regression-checks.md) — transient Canvas motion needs deterministic fixtures, fast polling, and renderer pose assertions.
 - [Matched swap impact](matched-swap-impact.md) — synchronous resolves can remove swapped IDs before paint; preserve their socket targets in dying overlays.
 - [Gameplay callout separation](gameplay-callout-separation.md) — preserve in-match callout text and impact VFX independently when spoken announcer cues are disabled.
+- [Transient gameplay callouts](transient-gameplay-callouts.md) — cancellation feedback needs a short priority hold so stale low-priority events cannot overwrite it.
 - [Audio bed cleanup](audio-bed-cleanup.md) — pending music fades must retain source references until disposal or canceled timers can strand connected loops across scene re-entry.
 - [Arena entry timing](arena-entry-timing.md) — set the battle bed in the user gesture that enters match; do not wait for the render loop to begin file playback.
 - [Browser audio regression testing](browser-audio-regression-testing.md) — distinguish procedural bed voices from legitimate oscillator-based UI cues by tracking source buffers and frequency signatures.

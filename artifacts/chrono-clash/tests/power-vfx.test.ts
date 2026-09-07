@@ -50,6 +50,7 @@ describe("power ability VFX presentation", () => {
     expect(renderer).toContain("powerImpactImpulse");
     expect(renderer).toContain("born: now + 120");
     expect(renderer).toContain("life: 78");
+    expect(renderer).toContain("mega ? 3.8 : burst ? 2.4");
     expect(renderer).toContain('effect.kind === "mega" ? 150');
     expect(renderer).toContain("const impactStart = mega ? 98 : 44");
     expect(main).toContain("renderer.setPowerTargeting");

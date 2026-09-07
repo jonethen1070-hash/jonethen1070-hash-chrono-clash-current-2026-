@@ -8794,19 +8794,6 @@ html:has(#match.active) body::after {
   background: none !important;
 }
 
-html body #app #match .arena-architecture,
-html body #app #match .match-brand,
-html body #app #match .hud-conduit,
-html body #app #match .vs-arcs,
-html body #app #match .vs-reactor,
-html body #app #match .ability-deck,
-html body #app #match .board-fastener,
-html body #app #match .board-energy-glass {
-  display: none !important;
-  animation: none !important;
-  filter: none !important;
-}
-
 html body #app #match:not(.clash-in) .vs-clash {
   display: none !important;
   animation: none !important;
@@ -8814,12 +8801,6 @@ html body #app #match:not(.clash-in) .vs-clash {
 
 html body #app #match.clash-in .vs-clash {
   display: block !important;
-}
-
-html body #app #match #timerLabel,
-html body #app #match #youLevel,
-html body #app #match #rivalLevel {
-  visibility: hidden !important;
 }
 
 html body #app #match .match-stage::before {
@@ -9424,6 +9405,35 @@ html body #app #match .energy-attack.strike.power-press::after {
   html body #app #match .energy-attack.strike[aria-pressed="true"] {
     animation: none;
     box-shadow: 0 0 10px rgba(124, 245, 255, 0.22);
+  }
+}
+
+/* FINAL REFINEMENT PASS
+   Keep the arena hardware visible during play and let the Canvas own gem
+   material instead of stacking multiple whole-board color filters. */
+html body #app #match.active .arena-architecture,
+html body #app #match.active .match-brand,
+html body #app #match.active .hud-conduit,
+html body #app #match.active .vs-arcs,
+html body #app #match.active .vs-reactor,
+html body #app #match.active .ability-deck,
+html body #app #match.active .board-fastener,
+html body #app #match.active .board-energy-glass {
+  display: block;
+  visibility: visible;
+  opacity: 1;
+}
+
+html body #app #match.active #playerGems {
+  filter: drop-shadow(0 6px 7px rgba(1, 5, 10, .86)) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body #app #match.active .arena-architecture,
+  html body #app #match.active .hud-conduit,
+  html body #app #match.active .vs-reactor,
+  html body #app #match.active .ability-deck {
+    animation: none !important;
   }
 }
 
