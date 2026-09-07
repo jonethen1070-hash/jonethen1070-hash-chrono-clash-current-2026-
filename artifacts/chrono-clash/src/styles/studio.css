@@ -184,7 +184,7 @@ body,
   overflow: hidden;
   contain: layout;
 }
-#match .match-brand-row { grid-row: 1; }
+#match .match-controls-row { grid-row: 1; }
 #match .match-top { grid-row: 2; }
 #match .attack-row { grid-row: 3; position: relative; z-index: 2; }
 #match .boards { grid-row: 4; min-height: 0; overflow: hidden; }
@@ -229,19 +229,11 @@ body,
   -webkit-text-fill-color: #5ef6ff;
   filter: none;
 }
-#match .match-brand-row {
+#match .match-controls-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 6px;
+  justify-content: flex-end;
   min-width: 0;
-}
-#match .match-brand {
-  flex: 1 1 auto;
-  min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-align: left;
 }
 #match .match-brand-actions {
   display: flex;
@@ -988,7 +980,7 @@ body,
   #match .vs-column .timer { padding: 3px 8px 3px; }
   #match .hud-mute { min-height: 24px; padding: 2px 7px; }
   #match .hud-icon { width: 24px; height: 24px; min-width: 24px; min-height: 24px; }
-  #match .match-brand-row { min-height: 0; }
+  #match .match-controls-row { min-height: 0; }
   #match .match-stage { gap: 4px 0; }
   #match .rival-side .board-slot {
     width: min(22vw, 11dvh, 96px);
@@ -1307,7 +1299,7 @@ button,
   to { background-position: 18px 0, 0 0; }
 }
 
-#match .match-brand-row {
+#match .match-controls-row {
   padding: 0;
   border-radius: 0;
   background: none;
@@ -2722,7 +2714,7 @@ button,
   #match .vs-badge { font-size: 15px; }
   #match .power { min-height: 40px; }
   #match .powers { padding: 10px 2px 3px; }
-  #match .match-brand-row { min-height: 0; }
+  #match .match-controls-row { min-height: 0; }
   #match .rival-side .board-slot {
     width: min(20vw, 10dvh, 84px);
     height: min(20vw, 10dvh, 84px);

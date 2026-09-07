@@ -6108,7 +6108,7 @@ html body #app #match.match-screen {
   --game-pad-top: 0px;
   --game-pad-bottom: 0px;
   --section-gap: 0px;
-  --brand-height: 40px;
+   --controls-height: 26px;
   --battle-height: 68px;
   --energy-height: 32px;
   --ability-height: 0px;
@@ -6131,7 +6131,7 @@ html body #app #match.match-screen {
 html body #app #match .match-stage {
   display: grid !important;
   grid-template-rows:
-    var(--brand-height)
+    var(--controls-height)
     var(--battle-height)
     var(--energy-height)
     0px
@@ -6147,7 +6147,7 @@ html body #app #match .match-stage {
   align-content: start;
 }
 
-html body #app #match .match-brand-row {
+html body #app #match .match-controls-row {
   grid-row: 1 !important;
 }
 
@@ -6187,14 +6187,9 @@ html body #app #match .powers {
   grid-row: 6 !important;
 }
 
-html body #app #match .match-brand-row {
-  flex: 0 0 var(--brand-height) !important;
+html body #app #match .match-controls-row {
+  height: var(--controls-height) !important;
   min-height: 0 !important;
-  height: var(--brand-height) !important;
-}
-
-html body #app #match .match-brand {
-  font-size: clamp(8px, 2.5vw, 12px) !important;
 }
 
 html body #app #match .match-brand-actions {
@@ -6507,7 +6502,7 @@ html body #app #match.match-screen::after {
 }
 
 html body #app #match .match-stage::before {
-  inset: calc(var(--brand-height) - 2px) -6px calc(var(--control-height) + 2px) !important;
+  inset: calc(var(--controls-height) - 2px) -6px calc(var(--control-height) + 2px) !important;
   background:
     linear-gradient(90deg, rgba(27, 185, 204, .09), transparent 4% 96%, rgba(205, 37, 72, .075)),
     linear-gradient(180deg, rgba(25, 57, 67, .24), rgba(2, 8, 12, .15) 42%, rgba(0, 2, 5, .5)) !important;
@@ -6639,7 +6634,7 @@ html body #app #match .ability-deck * {
 
 html body #app #match .arena-architecture {
   position: absolute;
-  inset: var(--brand-height) -10px calc(var(--control-height) + 2px);
+  inset: var(--controls-height) -10px calc(var(--control-height) + 2px);
   z-index: -1;
   overflow: hidden;
   transform-style: preserve-3d;
@@ -6869,8 +6864,8 @@ html body #app #match .ability-deck-core {
   html body #app #match .vs-reactor { top: -2px; }
 }
 
-/* Surgical mobile header repair: preserve every control in one clean row. */
-html body #app #match .match-brand-row {
+/* Surgical mobile controls repair: preserve every control in one clean row. */
+html body #app #match .match-controls-row {
   position: relative;
   z-index: 8;
   width: 100%;
@@ -9356,7 +9351,7 @@ html body #app #match .player-side .board-socket-bed {
       - var(--safe-bottom)
       - var(--game-pad-top)
       - var(--game-pad-bottom)
-      - var(--brand-height)
+      - var(--controls-height)
       - var(--battle-height)
       - var(--energy-height)
       - var(--control-height)
@@ -9384,7 +9379,7 @@ html body #app #match .player-side .board-socket-bed {
 @media (max-width: 600px) {
   html body #app #match .match-stage {
     grid-template-rows:
-      var(--brand-height)
+      var(--controls-height)
       var(--battle-height)
       var(--energy-height)
       0px

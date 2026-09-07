@@ -291,8 +291,7 @@ app.innerHTML = `
         <div class="arena-pylon arena-pylon-right"><i></i><i></i><i></i></div>
         <div class="arena-deck"></div>
       </div>
-      <div class="match-brand-row">
-        <div class="match-brand" aria-hidden="true">CHRONO CLASH</div>
+      <div class="match-controls-row">
         <div class="match-brand-actions">
           <button type="button" class="hud-icon" id="dockChat" aria-label="Chat" title="Chat">
             <span class="dock-ico chat" aria-hidden="true"></span>

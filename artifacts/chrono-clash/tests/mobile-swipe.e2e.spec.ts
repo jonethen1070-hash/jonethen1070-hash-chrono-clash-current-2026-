@@ -190,6 +190,8 @@ test.describe("mobile board clipping regression", () => {
       await page.locator("#menuGuest").click();
       await expect(page.locator("#match.active")).toBeVisible();
       await expect.poll(async () => page.locator("#overlay").evaluate((el) => el.classList.contains("hidden"))).toBe(true);
+      await expect(page.locator("#match .match-brand-row")).toHaveCount(0);
+      await expect(page.locator("#match .match-brand")).toHaveCount(0);
 
       const geometry = await page.evaluate(() => {
         const board = document.querySelector<HTMLElement>("#playerBoard");

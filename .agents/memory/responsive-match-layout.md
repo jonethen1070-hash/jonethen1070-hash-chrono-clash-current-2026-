@@ -38,3 +38,9 @@ Mobile ability content can overflow its button even when the button rectangle is
 **Why:** Outer action geometry alone missed clipped labels/costs and reduced Rewind artwork on short phones.
 
 **How to apply:** Keep the three controls equal-height, use explicit compact grid rows for their internal content, and validate rendered child bounds—not only button bounds—at short and tall phone sizes.
+
+When the gameplay title strip is removed, keep Audio/Chat/Settings in a short fixed utility row rather than absolutely overlaying the fighter HUD.
+
+**Why:** An absolute control cluster can cover the Rival label, score, or avatar even when its own bounds remain inside the viewport.
+
+**How to apply:** Make the utility row an explicit first grid track, shift the battle/energy/board rows up behind it, and subtract only the utility-row height from mobile board sizing.
