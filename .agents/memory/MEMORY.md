@@ -1,4 +1,5 @@
 - [Responsive match layout](responsive-match-layout.md) — legacy grid-row and absolute-label rules can override the explicit mobile match layout.
+- [Results overlay layering](results-overlay-layering.md) — broad screen selectors can beat outcome-panel backgrounds, while short flex stacks can shrink the headline.
 - [Palette rendering and cascade](palette-rendering.md) — exact colors can be masked by disabled-state specificity and atlas artwork.
 - [Idle visual cleanup](idle-visual-cleanup.md) — ambient match texture can come from fixed pseudo-elements outside the decorative space-layer tree.
 - [Mobile performance validation](mobile-performance-validation.md) — validate touch completion/cancellation and scroll locking alongside event-driven layout and cached static canvas work.

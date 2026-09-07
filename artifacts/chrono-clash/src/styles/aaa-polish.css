@@ -10019,6 +10019,53 @@ html body #app #results.active.loss::before {
   border-color: rgba(255, 102, 143, 0.2);
 }
 
+/* Results own the viewport while the match finishes its short canvas fade. */
+html body #app .screen#results.active:not(#match):not(#splash) {
+  z-index: 20;
+  isolation: isolate;
+  justify-content: center;
+  min-height: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 72% 42% at 50% 22%, rgba(74, 198, 222, 0.14), transparent 72%),
+    linear-gradient(180deg, #01060c 0%, #000206 100%) !important;
+}
+
+html body #app .screen#results.active.loss:not(#match):not(#splash) {
+  background:
+    radial-gradient(ellipse 68% 44% at 50% 22%, rgba(190, 24, 66, 0.16), transparent 72%),
+    linear-gradient(180deg, #0c030a 0%, #020105 100%) !important;
+}
+
+html body #app #results.active #resultTitle {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding-inline: 4px;
+  overflow: hidden;
+  font-size: clamp(34px, 12vw, 56px);
+  line-height: 1;
+  white-space: nowrap;
+  text-overflow: clip;
+}
+
+html body #app #results.active .result-actions {
+  width: 100%;
+  max-width: 100%;
+  margin-top: 0;
+}
+
+@media (max-width: 600px) and (max-height: 600px) {
+  html body #app .screen#results.active:not(#match):not(#splash) {
+    gap: 8px;
+  }
+
+  html body #app #results.active #resultTitle {
+    flex: 0 0 auto;
+    overflow: visible;
+  }
+}
+
 /* Keep mobile hierarchy compact and safe-area aware. */
 @media (max-width: 600px) {
   html body #app #menu.screen {
