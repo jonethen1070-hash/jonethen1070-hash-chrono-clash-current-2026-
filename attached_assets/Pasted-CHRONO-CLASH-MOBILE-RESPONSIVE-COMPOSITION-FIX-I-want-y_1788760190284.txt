@@ -1,0 +1,234 @@
+CHRONO CLASH — MOBILE RESPONSIVE COMPOSITION FIX
+
+I want you to fix the ENTIRE GAME SCREEN so that Chrono Clash fits cleanly inside a real phone viewport.
+
+This is a PROFESSIONAL GAME UI/layout pass.
+
+The screenshot shows the current problem:
+- The complete game does not use the available phone viewport efficiently.
+- There is excessive empty vertical space below the board.
+- The bottom ability bar is pushed too low.
+- REWIND can become clipped near the bottom.
+- Some elements are being vertically displaced instead of maintaining a coherent composition.
+- The whole game needs to feel like a professionally designed mobile game rather than a desktop layout squeezed into a phone.
+
+PRIMARY GOAL:
+
+Everything visible during gameplay must fit inside the actual phone viewport with NO overlap and NO clipping.
+
+Required hierarchy:
+
+TOP HEADER
+↓
+PLAYER / RIVAL HUD
+↓
+ENERGY BAR
+↓
+8×8 GAME BOARD
+↓
+SMALL CONTROLLED GAP
+↓
+ABILITY BAR
+↓
+SMALL SAFE BOTTOM PADDING
+
+Everything must remain inside the game viewport.
+
+IMPORTANT:
+DO NOT simply scale random elements.
+DO NOT use arbitrary negative margins.
+DO NOT hide elements.
+DO NOT crop the board.
+DO NOT make the buttons tiny.
+DO NOT add endless CSS overrides.
+DO NOT destroy the existing premium visual style.
+
+FIRST inspect the actual HTML/React structure and CSS controlling the complete gameplay screen.
+
+Find the ROOT CAUSE of the vertical overflow/wasted space.
+
+Pay particular attention to:
+- game screen wrapper
+- gameplay container
+- viewport height
+- 100vh
+- 100dvh
+- min-height
+- flex layouts
+- flex-grow
+- grid rows
+- fixed heights
+- absolute positioning
+- bottom positioning
+- margins/padding
+- safe-area insets
+- browser/mobile viewport behavior
+- iOS Safari viewport behavior
+
+RESPONSIVE REQUIREMENT:
+
+The gameplay screen must adapt to different phone sizes.
+
+Use modern mobile viewport sizing appropriately, especially dynamic viewport units where appropriate.
+
+The layout must work on:
+- small phones
+- standard phones
+- large phones
+- iPhone-style tall screens
+- Android-style screens
+
+Do NOT assume one fixed screen resolution.
+
+THE 8×8 BOARD:
+
+The board is the most important gameplay element.
+
+Preserve:
+- exactly 8×8 cells
+- current gem artwork
+- current gem proportions
+- current board styling
+- touch interaction
+- existing gameplay
+
+The board should remain large enough to comfortably play with a finger, but its height must participate correctly in the overall responsive layout.
+
+If necessary, calculate the board size from the available width/height rather than using a hardcoded height.
+
+The board must NEVER overlap:
+- energy bar
+- ability bar
+- player/rival HUD
+- browser-safe bottom area
+
+TOP HUD:
+
+Keep the current visual design.
+
+Make sure:
+- YOU panel stays in its left region
+- RIVAL panel stays in its right region
+- VS/FIGHT/timer stays centered
+- nothing overlaps
+- scores remain readable
+- timer remains completely visible
+
+ENERGY BAR:
+
+Keep it directly above the board.
+
+It must not overlap the board or HUD.
+
+BOTTOM ABILITY BAR:
+
+Keep exactly three abilities:
+- ENERGY BURST
+- MEGA STRIKE
+- REWIND
+
+They must:
+- remain in one horizontal row
+- have equal visual height
+- remain completely visible
+- have readable labels and costs
+- remain comfortably tappable
+- never touch/cross the browser's bottom safe area
+- never be clipped
+
+The ability bar should NOT be pushed to the absolute bottom of an oversized parent.
+
+Instead, it should naturally follow the board with a controlled gap.
+
+MOBILE SAFE AREA:
+
+Account for phones with bottom home indicators.
+
+Use safe-area handling appropriately so the game UI does not collide with the operating system/browser controls.
+
+The game should visually end cleanly above the unsafe bottom region.
+
+DESKTOP/TABLET:
+
+Do not break the existing desktop/tablet presentation.
+
+Use responsive breakpoints only where genuinely necessary.
+
+VERY IMPORTANT:
+
+Do not modify gameplay logic.
+
+Do not modify:
+- gem matching
+- gem swapping
+- scoring
+- timer logic
+- energy logic
+- abilities
+- opponent logic
+- animations
+- VFX
+- audio
+- game rules
+
+This task is ONLY about responsive layout/composition.
+
+CSS QUALITY REQUIREMENT:
+
+The project already contains a very large override-heavy aaa-polish.css.
+
+DO NOT keep stacking new emergency overrides onto aaa-polish.css.
+
+Instead:
+1. identify which existing rules are causing the problem;
+2. consolidate/fix the relevant layout rules;
+3. remove or neutralize conflicting rules where appropriate;
+4. keep the final CSS understandable and maintainable.
+
+Do not create a chain of !important rules unless absolutely necessary.
+
+FINAL VISUAL TARGET:
+
+The entire screen should feel intentionally composed like a premium mobile game:
+
+HEADER
+PLAYER/RIVAL HUD
+ENERGY
+BOARD
+ABILITY CONTROLS
+
+No element should look accidentally pushed down, squeezed, floating, clipped, or overlapping.
+
+There should be NO huge unexplained empty region between the board and abilities.
+
+There should be NO clipping at the bottom.
+
+There should be NO overlap anywhere.
+
+The board should remain the visual centerpiece.
+
+TEST THE ACTUAL MOBILE VIEWPORT after implementation.
+
+Test at several aspect ratios, including a tall iPhone-style viewport and a shorter Android-style viewport.
+
+Before finishing, verify:
+✓ complete HUD visible
+✓ player panel visible
+✓ rival panel visible
+✓ VS/timer visible
+✓ energy bar visible
+✓ complete 8×8 board visible
+✓ all gems visible
+✓ all 3 ability buttons visible
+✓ ability labels visible
+✓ ability costs visible
+✓ no clipping
+✓ no overlap
+✓ no excessive blank vertical space
+✓ bottom safe area respected
+✓ touch targets remain usable
+✓ desktop layout not broken
+
+Do NOT tell me the task is complete just because the page technically fits.
+
+The final result must look like a professionally composed mobile game screen created by a professional game/UI studio.
