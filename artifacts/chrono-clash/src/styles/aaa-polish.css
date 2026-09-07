@@ -9302,12 +9302,45 @@ html body #app #match .player-side .board-socket-bed {
     inset 0 -1px 0 rgba(117, 223, 232, .1) !important;
 }
 
-/* Width is the limiting dimension on supported phones. Reclaim the small
-   horizontal gutter for the square board without changing the HUD or controls. */
+/* Size the square board from whichever mobile dimension is actually limiting:
+   the safe inline viewport or the space left after the fixed HUD, energy row,
+   and ability strip. The dynamic viewport keeps browser-chrome changes from
+   pushing the controls below the visible match area. */
 @media (max-width: 600px) {
+  html body #app #match.match-screen {
+    --mobile-board-inline: min(
+      482px,
+      calc(
+        100dvw
+        - var(--safe-left)
+        - var(--safe-right)
+        - 6px
+      )
+    );
+    --mobile-board-block: calc(
+      100dvh
+      - var(--safe-top)
+      - var(--safe-bottom)
+      - var(--game-pad-top)
+      - var(--game-pad-bottom)
+      - var(--brand-height)
+      - var(--battle-height)
+      - var(--energy-height)
+      - var(--control-height)
+      - 10px
+    );
+    --mobile-board-size: min(
+      var(--mobile-board-inline),
+      var(--mobile-board-block)
+    );
+  }
+
   html body #app #match .player-side .board-slot {
-    width: min(calc(100% + 2px), calc(100vw - var(--safe-left) - var(--safe-right) - 4px), 388px) !important;
-    max-width: min(calc(100% + 2px), calc(100vw - var(--safe-left) - var(--safe-right) - 4px), 388px) !important;
+    box-sizing: border-box !important;
+    width: var(--mobile-board-size) !important;
+    height: var(--mobile-board-size) !important;
+    max-width: var(--mobile-board-size) !important;
+    max-height: var(--mobile-board-size) !important;
   }
 }
 

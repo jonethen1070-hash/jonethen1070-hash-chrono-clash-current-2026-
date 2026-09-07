@@ -20,3 +20,9 @@ The player board should not use broad horizontal overscan to reclaim space. A ti
 **Why:** The beveled board's perspective transform expands its rendered rectangle beyond the CSS box, so even a mathematically centered enlargement can clip the right edge by a pixel.
 
 **How to apply:** Keep the square aspect ratio, cap any reclaimed gutter with safe-area math, and measure transformed left/right edges plus width/height at 360px and 390px widths.
+
+When a shared custom property supplies both board width and height, avoid embedding a percentage-based inline term in the shared value; use viewport-based inline math and apply the same resolved size to both axes.
+
+**Why:** A percentage inside a reusable `min()` variable resolves against the property’s axis. Reusing it for height produced a two-pixel outer rectangle mismatch even though the CSS declared a square aspect ratio.
+
+**How to apply:** Derive the mobile size from safe dynamic viewport width and remaining dynamic viewport height, then set `box-sizing: border-box` plus identical width, height, max-width, and max-height on the board frame.
