@@ -10024,3 +10024,63 @@ html body #app #results.active.loss::before {
   }
 }
 
+/* Keep the mobile action strip compact and anchored to the bottom of the
+   match viewport. The board remains width-led in its own track; only the
+   unused space assigned to the control row is reclaimed here. */
+@media (max-width: 600px) {
+  html body #app #match.match-screen {
+    --control-height: 52px;
+  }
+
+  html body #app #match .match-stage {
+    grid-template-rows:
+      var(--brand-height)
+      var(--battle-height)
+      var(--energy-height)
+      0px
+      minmax(0, 1fr)
+      var(--control-height) !important;
+    align-content: stretch !important;
+  }
+
+  html body #app #match .powers {
+    height: 46px !important;
+    min-height: 46px !important;
+    margin-top: 3px !important;
+    top: -3px !important;
+    padding: 3px 1px !important;
+    grid-template-rows: 46px !important;
+    gap: 5px !important;
+  }
+
+  html body #app #match .powers > .energy-attack,
+  html body #app #match .powers > #rewind {
+    height: 46px !important;
+    min-height: 46px !important;
+    padding: 4px 6px !important;
+  }
+}
+
+@media (max-width: 600px) and (max-height: 760px) {
+  html body #app #match.match-screen {
+    --control-height: 48px;
+  }
+
+  html body #app #match .powers {
+    height: 42px !important;
+    min-height: 42px !important;
+    margin-top: 3px !important;
+    top: -3px !important;
+    padding: 3px 1px !important;
+    grid-template-rows: 42px !important;
+    gap: 5px !important;
+  }
+
+  html body #app #match .powers > .energy-attack,
+  html body #app #match .powers > #rewind {
+    height: 42px !important;
+    min-height: 42px !important;
+    padding: 3px 3px 2px !important;
+  }
+}
+
