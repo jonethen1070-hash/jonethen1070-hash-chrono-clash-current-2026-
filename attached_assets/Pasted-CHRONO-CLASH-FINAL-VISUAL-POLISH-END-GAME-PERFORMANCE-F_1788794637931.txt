@@ -1,0 +1,337 @@
+CHRONO CLASH — FINAL VISUAL POLISH + END-GAME PERFORMANCE FIX
+
+IMPORTANT:
+Improve the CURRENT game. Do not rebuild it.
+Do not change gameplay mechanics, scoring, matching, board size, gem types, combo rules, energy rules, timer rules, lives, win/lose conditions, or controls.
+
+This is a visual polish + performance optimization pass only.
+
+==================================================
+PRIORITY 1 — FIX THE SMALL SLOWDOWN BEFORE VICTORY/DEFEAT
+==================================================
+
+There is a small but noticeable slowdown immediately before the Victory or Defeat screen appears.
+
+Normal gameplay is already good.
+
+DO NOT slow down normal gameplay.
+
+Find the actual cause of the end-of-match performance spike.
+
+Inspect:
+- final match resolution
+- final cascade
+- gem destruction effects
+- particle effects
+- Mega Strike effects
+- Energy Burst effects
+- screen shake
+- screen flash
+- glow/filter effects
+- score calculation
+- timer shutdown
+- animation loops
+- requestAnimationFrame
+- setTimeout/setInterval
+- DOM creation/removal
+- CSS filters
+- VFX cleanup
+- Victory/Defeat overlay creation
+
+The end-game sequence must work like this:
+
+FINAL GAMEPLAY ACTION
+→ determine result immediately
+→ stop gameplay processing
+→ clean up/cancel expensive temporary VFX
+→ show Victory/Defeat screen
+→ play only lightweight result animation
+
+Do NOT make the game wait for VFX to finish before showing the result.
+
+Do NOT add a long transition.
+
+The desired feeling is:
+
+FINAL MOVE
+→ tiny impact
+→ INSTANT RESULT
+→ smooth Victory/Defeat screen
+
+Any temporary VFX that are still running when the match ends should be safely cancelled, reused, or reduced.
+
+Make sure VFX do not accumulate.
+
+Every temporary effect must have proper cleanup.
+
+Do not allow:
+- abandoned animation frames
+- abandoned timers
+- duplicate event listeners
+- particles that remain alive
+- invisible DOM elements accumulating
+- repeated full-screen effects
+- multiple simultaneous screen-shake loops
+
+==================================================
+PRIORITY 2 — FIX THE DEFEAT/VICTORY SCREEN
+==================================================
+
+The current DEFEATED title is too large and overlaps the HUD/results content.
+
+Fix the layout.
+
+The result screen must have a clean hierarchy:
+
+RESULT TITLE
+↓
+PLAYER / RESULT INFORMATION
+↓
+SCORE CARDS
+↓
+RETRY
+↓
+CONTINUE
+
+The large DEFEATED or VICTORY title must remain, but:
+
+- scale it responsively
+- keep it inside its own header area
+- prevent horizontal overflow
+- prevent overlap with scores
+- prevent overlap with the Chrono Pilot/result card
+- do not cover the energy bar
+- do not cover buttons
+- keep everything readable on mobile
+- keep RETRY fully visible and clickable
+- keep CONTINUE fully visible and clickable
+
+Do not solve this by hiding the title.
+
+Use proper responsive positioning and stacking.
+
+Avoid arbitrary fixed pixel positioning that breaks on different mobile screen sizes.
+
+==================================================
+PRIORITY 3 — KEEP THE GEM COLORS
+==================================================
+
+DO NOT recolor the five gem types.
+
+The current gem palette is good and should remain:
+
+BLUE/CYAN
+PURPLE
+GREEN/EMERALD
+GOLD/YELLOW
+PINK/MAGENTA
+
+The gems are the visual focus of the game.
+
+Do not make them duller.
+
+Only reduce unnecessary OUTER glow/bloom slightly if required for performance.
+
+Target approximately 10–20% less expensive outer glow.
+
+Keep the internal crystal lighting and color intensity.
+
+==================================================
+PRIORITY 4 — IMPROVE THE BOARD FRAME
+==================================================
+
+The board currently has too much cyan glow around the frame.
+
+Keep the premium sci-fi look, but make the frame more sophisticated.
+
+Use:
+
+DARK GUNMETAL / DARK BLUE-BLACK
++
+SUBTLE CYAN EDGE LIGHTING
+
+Do not make the entire board frame bright cyan.
+
+The cyan should look like controlled futuristic illumination.
+
+The gems should remain the brightest elements on the board.
+
+==================================================
+PRIORITY 5 — CLEAN UP THE HUD
+==================================================
+
+Keep the current overall HUD design.
+
+Use a consistent visual hierarchy:
+
+PLAYER = CYAN
+RIVAL = CRIMSON/RED
+NEUTRAL INFORMATION = WHITE / COOL WHITE
+SPECIAL = PURPLE / GOLD
+
+Do not add unnecessary colors.
+
+Reduce excessive glow where possible.
+
+The HUD should support the gems rather than compete with them.
+
+The CHRONO CLASH logo should remain metallic cyan, but reduce its glow slightly so it does not compete with the board.
+
+==================================================
+PRIORITY 6 — FIX THE BOTTOM ABILITY BUTTONS
+==================================================
+
+The bottom ability buttons need better spacing and consistency.
+
+All three buttons should have the same basic structure.
+
+Keep them dark metallic.
+
+Use accent colors mainly for the icon and energy cost.
+
+ENERGY BURST = subtle green accent
+MEGA STRIKE = subtle red/crimson accent
+REWIND = subtle purple accent
+
+Do not make all three buttons extremely bright.
+
+Fix the REWIND layout so:
+
+REWIND
+
+and
+
+⚡ 26 ENERGY
+
+do not overlap or become cramped.
+
+Make all three buttons:
+- equally readable
+- evenly spaced
+- touch friendly
+- aligned
+- responsive on mobile
+
+==================================================
+PRIORITY 7 — PERFORMANCE-SAFE VFX
+==================================================
+
+Do NOT remove the game's exciting VFX.
+
+Instead make them efficient.
+
+Prioritize:
+1. touch responsiveness
+2. gameplay
+3. gem movement
+4. match detection
+5. VFX
+
+VFX must never block gameplay.
+
+When many effects happen at once, automatically reduce cosmetic effects.
+
+Reduce:
+- particle count
+- excessive glow
+- blur
+- screen shake
+- duplicate impact effects
+- floating score effects
+
+Keep the important visual impact.
+
+Mega Strike and Energy Burst should still feel powerful.
+
+Use fewer, higher-quality effects rather than many simultaneous effects.
+
+==================================================
+IMPORTANT TECHNICAL RULE
+==================================================
+
+Avoid expensive DOM/layout work during gameplay.
+
+Prefer:
+- transform
+- opacity
+- efficient animation
+- reused VFX elements
+- cleanup
+- capped simultaneous effects
+
+Avoid excessive:
+- backdrop-filter
+- large blur filters
+- huge box-shadow stacks
+- continuously animated full-screen effects
+- unnecessary layout recalculation
+
+Do not create unlimited temporary elements.
+
+Add sensible limits for simultaneous VFX.
+
+If the limit is reached:
+skip or reuse the lowest-priority cosmetic effect.
+
+NEVER skip gameplay logic.
+
+==================================================
+DO NOT BREAK EXISTING GAMEPLAY
+==================================================
+
+Do not change:
+- match detection
+- scoring
+- combos
+- timer
+- energy
+- lives
+- gem generation
+- board dimensions
+- player logic
+- rival logic
+- win/lose conditions
+- controls
+
+Do not rewrite working gameplay code unless absolutely necessary for the performance fix.
+
+==================================================
+FINAL TEST
+==================================================
+
+After making the changes, test:
+
+1. Normal gameplay
+2. Very fast consecutive swaps
+3. Multiple cascades
+4. Combos
+5. Energy Burst
+6. Mega Strike
+7. Rewind
+8. Final move leading to Victory
+9. Final move leading to Defeat
+10. Retry
+11. Continue
+
+Pay special attention to the final 1–2 seconds before Victory/Defeat.
+
+There must be no noticeable hitch.
+
+The game should feel:
+
+FAST
+RESPONSIVE
+PREMIUM
+CLEAN
+SCI-FI
+POLISHED
+
+Most important:
+
+DO NOT redesign Chrono Clash.
+
+Polish what is already working.
+Keep the current gem colors and overall identity.
+Fix the end-of-match performance spike.
+Fix the broken results-screen layout.
+Reduce unnecessary glow rather than removing visual quality.
