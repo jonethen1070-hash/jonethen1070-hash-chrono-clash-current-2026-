@@ -2134,8 +2134,17 @@ ui.playerBoard.addEventListener(
 function finishSwipe(e?: Event): void {
   const pointerId = e && "pointerId" in e ? Number((e as Event & { pointerId?: number }).pointerId) : null;
   if (swipe && pointerId != null && pointerId !== swipe.id) return;
+  const canceledPower = armedEnergyPower;
+  const now = performance.now();
   swipe = null;
-  if (armedEnergyPower) setArmedEnergyPower(null);
+  if (canceledPower) {
+    setArmedEnergyPower(null);
+    renderer.clearPowerTargeting();
+    session.setDrag(null);
+    renderer.setPowerTarget(null, now);
+    reportCanceledEnergyPower(canceledPower);
+    return;
+  }
   session.setDrag(null);
   renderer.setPowerTarget(null, performance.now());
 }

@@ -433,6 +433,59 @@ test("mobile targeted power release outside the board stays unspent and leaves s
   })).toBeGreaterThan(scoreBefore);
 });
 
+test("mobile targeted power cancellation keeps reduced-motion status and clears targeting", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  await expect(page.locator("#menu.active")).toBeVisible();
+
+  await page.locator("#menuGuest").click();
+  await expect(page.locator("#match.active")).toBeVisible();
+  await expect.poll(async () => page.locator("#overlay").evaluate((el) => el.classList.contains("hidden"))).toBe(true);
+
+  const board = page.locator("#playerBoard");
+  const boardBox = await board.boundingBox();
+  expect(boardBox).not.toBeNull();
+  const box = boardBox!;
+  const target = await page.evaluate(() => {
+    const session = (window as Window & {
+      __chrono?: { session?: { hintCells: (now: number) => Array<{ r: number; c: number }> } };
+    }).__chrono?.session;
+    return session?.hintCells(performance.now())[0] ?? { r: 0, c: 0 };
+  });
+  const targetPoint = cellCenter(box, target.r, target.c);
+
+  await page.evaluate(() => {
+    const session = (window as Window & { __chrono?: { session?: { player: { energy: number } } } }).__chrono?.session;
+    if (!session) throw new Error("Missing Chrono session");
+    session.player.energy = 100;
+  });
+  await page.locator("#energyBurstAttack").click();
+  await expect(page.locator("#energyBurstAttack")).toHaveAttribute("aria-pressed", "true");
+
+  await page.mouse.move(targetPoint.x, targetPoint.y);
+  await page.mouse.down();
+  await expect.poll(async () => page.evaluate(() => {
+    const state = (window as Window & { __chrono?: { renderState?: () => RenderState } }).__chrono?.renderState?.();
+    return state?.powerTargeting ?? null;
+  })).toEqual({ kind: "burst", target });
+  await page.evaluate(() => {
+    document.querySelector("#playerBoard")?.dispatchEvent(new PointerEvent("pointercancel", {
+      bubbles: true,
+      pointerId: 1,
+      pointerType: "mouse",
+    }));
+  });
+
+  await expect(page.locator("#energyBurstAttack")).toHaveAttribute("aria-pressed", "false");
+  await expect(page.locator("#matchStatus")).toHaveText("Target canceled. Select a gem on the board to use Energy Burst.");
+  await expect(page.locator("#callout")).toHaveText("TARGET CANCELED");
+  await expect.poll(async () => page.evaluate(() => {
+    const state = (window as Window & { __chrono?: { renderState?: () => RenderState } }).__chrono?.renderState?.();
+    return state?.powerTargeting ?? null;
+  })).toBeNull();
+  await page.mouse.up();
+});
+
 test("mobile Mega Strike release outside the board stays unspent and leaves swipes responsive", async ({ page, context }) => {
   await page.goto("/");
   await expect(page.locator("#menu.active")).toBeVisible();

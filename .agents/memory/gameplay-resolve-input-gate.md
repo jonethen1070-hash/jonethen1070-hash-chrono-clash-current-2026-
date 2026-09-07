@@ -9,7 +9,7 @@ The session’s short resolve window is a real input boundary for swaps, not a r
 
 **How to apply:** Keep swap gating tied to the session resolve/busy state, preserve utility-power timing unless a gameplay rule explicitly changes, and keep pointer cleanup scoped to the active pointer ID.
 
-Canceled targeted powers should provide both visible invalid-action feedback and a polite live status, then clear renderer targeting before the next board gesture.
+Canceled targeted powers should provide both visible invalid-action feedback and a polite live status, including pointer-cancel/lost-capture recovery, then clear renderer targeting before the next board gesture.
 
 **Why:** Touch releases can leave players unsure whether a power was spent or whether the board is still armed, especially when the release happens outside the board.
 

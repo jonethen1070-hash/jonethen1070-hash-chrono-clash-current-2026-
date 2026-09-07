@@ -360,7 +360,7 @@ export class BoardRenderer {
 
   setPowerTargeting(kind: PowerTargetKind | null, now: number): void {
     if (!kind) {
-      this.playerView.powerTargeting = null;
+      this.clearPowerTargeting();
       return;
     }
     const current = this.playerView.powerTargeting;
@@ -371,6 +371,10 @@ export class BoardRenderer {
       target: null,
       targetBorn: now,
     };
+  }
+
+  clearPowerTargeting(): void {
+    this.playerView.powerTargeting = null;
   }
 
   setPowerTarget(at: Coord | null, now: number): void {
