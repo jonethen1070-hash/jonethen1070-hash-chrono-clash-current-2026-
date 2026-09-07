@@ -1,0 +1,311 @@
+FIX CHRONO CLASH PERFORMANCE + DEFEAT SCREEN — DO NOT CHANGE GAMEPLAY
+
+There are two urgent issues visible in the current build.
+
+==================================================
+1. FIX THE DEFEATED / RESULTS SCREEN LAYOUT
+==================================================
+
+The current DEFEATED results screen is visually broken.
+
+The giant "DEFEATED" title is rendering across the top of the screen and overlapping:
+- YOU / RIVAL HUD
+- scores
+- energy bar
+- Chrono Pilot card
+- results content
+
+This makes the page difficult/unusable.
+
+Fix the results/defeat screen so it behaves like a proper full-screen results overlay.
+
+Requirements:
+- The results overlay must have a clear stacking order above the gameplay HUD.
+- Do NOT allow the giant DEFEATED title to overlap the result cards.
+- Keep the premium Chrono Clash sci-fi aesthetic.
+- Keep the existing visual design language.
+- Scale the DEFEATED title responsively so it fits within its designated results header area.
+- Do not let it overflow horizontally.
+- Do not use arbitrary fixed pixel positioning that breaks on mobile.
+- Results card should be centered and fully readable.
+- RETRY button must remain completely visible and clickable.
+- CONTINUE button must remain completely visible and clickable.
+- No HUD elements from the gameplay screen should visually leak through the results content unless intentionally designed.
+- Make sure z-index/layering is deterministic.
+- Check overflow, transforms, absolute positioning and stacking contexts.
+- Test the defeat screen on narrow mobile viewport widths.
+
+IMPORTANT:
+Do NOT solve this by simply hiding the DEFEATED title.
+Keep the title, but place and scale it correctly.
+
+==================================================
+2. FIX GAME SLOWDOWN DURING FAST PLAY
+==================================================
+
+The game still slows down when the player performs swaps/matches very quickly.
+
+VFX are a likely performance bottleneck.
+
+DO A PERFORMANCE AUDIT FIRST.
+
+Inspect the code responsible for:
+- swap effects
+- gem match effects
+- gem destruction
+- gem falling
+- combo effects
+- Mega Burst
+- Energy Blast
+- screen shake
+- glow effects
+- particle effects
+- trails
+- hit flashes
+- floating score text
+- animations/tweens
+- audio triggers
+- DOM creation/removal
+- timers
+- requestAnimationFrame loops
+- setInterval/setTimeout
+- event listeners
+
+Find anything that accumulates when the player plays rapidly.
+
+==================================================
+3. PREVENT VFX ACCUMULATION
+==================================================
+
+Every temporary VFX object must have a guaranteed cleanup path.
+
+Do NOT allow:
+- particles to remain alive after their effect finishes
+- DOM VFX elements to accumulate
+- abandoned animation frames
+- abandoned timers
+- duplicate event listeners
+- repeated glow layers
+- repeated screen-shake handlers
+- multiple simultaneous Mega Burst/Energy Blast animation loops
+
+Use pooling/reuse where practical instead of constantly creating and destroying large numbers of objects.
+
+Cap simultaneous VFX.
+
+Example policy:
+
+NORMAL MATCH:
+- lightweight effect
+- low particle count
+- short duration
+
+COMBO:
+- slightly stronger effect
+- still capped
+
+MEGA BURST:
+- visually impressive but strictly limited particle count
+- no expensive full-screen effect stacking
+
+ENERGY BLAST:
+- use a small number of high-quality effects instead of many particles
+- no repeated expensive blur/filter rendering
+
+==================================================
+4. ADAPTIVE VFX QUALITY
+==================================================
+
+Implement a lightweight VFX quality system.
+
+At normal gameplay:
+VFX = FULL
+
+If many matches/effects are happening simultaneously:
+VFX = REDUCED
+
+If frame rate/performance drops:
+VFX = MINIMAL
+
+The game must prioritize:
+1. touch responsiveness
+2. swap responsiveness
+3. gem movement
+4. match detection
+5. game logic
+
+VFX must NEVER block or delay gameplay.
+
+If the player plays extremely fast, automatically reduce:
+- particle count
+- glow intensity
+- screen shake
+- expensive blur/filter effects
+- duplicate impact effects
+- floating text
+- secondary decorative effects
+
+Do NOT slow the game itself to make VFX finish.
+
+==================================================
+5. VERY IMPORTANT — FAST SWAP FEEL
+==================================================
+
+A fast player should be able to perform:
+
+SWIPE → SWAP → MATCH → FALL → NEXT SWAP
+
+without the game waiting for cosmetic effects.
+
+Separate gameplay timing from VFX timing.
+
+Gameplay animations should finish quickly and predictably.
+
+VFX should be fire-and-forget.
+
+Never do:
+
+match → wait for VFX → resolve board → allow next input
+
+Instead:
+
+match → resolve gameplay immediately → trigger VFX independently
+
+The player must never feel that the board is slowing down because effects are playing.
+
+==================================================
+6. GEM FALL PERFORMANCE
+==================================================
+
+Keep the improved natural/candy-crush-like gem falling feel.
+
+Do NOT make gems fall slowly just because VFX are active.
+
+Gem falling should:
+- use efficient transforms
+- avoid expensive layout recalculation
+- avoid unnecessary DOM reads/writes
+- use a single efficient animation mechanism
+- allow multiple gems to fall simultaneously
+- feel fast and physical
+
+Avoid repeatedly triggering expensive CSS filters during gem movement.
+
+==================================================
+7. MEGA BURST + ENERGY BLAST
+==================================================
+
+These two effects previously caused noticeable slowdown.
+
+Optimize them aggressively.
+
+They should still LOOK powerful, but achieve the effect using:
+- fewer particles
+- sprite/element reuse
+- short-lived effects
+- transform/opacity animations
+- limited glow
+- limited blur
+- capped simultaneous instances
+
+Do not stack multiple full-screen filters.
+
+If Mega Burst or Energy Blast is triggered repeatedly, reuse/replace the existing effect rather than creating unlimited new effects.
+
+==================================================
+8. PERFORMANCE SAFETY
+==================================================
+
+Add a global VFX budget.
+
+For example:
+MAX_ACTIVE_PARTICLES
+MAX_ACTIVE_VFX
+MAX_FLOATING_TEXT
+MAX_SCREEN_SHAKES
+
+When the budget is exceeded:
+- reuse an existing effect
+OR
+- skip the lowest-priority cosmetic effect.
+
+NEVER skip gameplay.
+
+Also make sure completed VFX are actually removed from memory/DOM.
+
+==================================================
+9. DO NOT REDESIGN THE GAME
+==================================================
+
+Do NOT change:
+- scoring
+- match rules
+- combo rules
+- energy rules
+- lives
+- timers
+- board dimensions
+- gem types
+- player/rival logic
+- win/lose conditions
+
+This is a performance + presentation fix only.
+
+==================================================
+10. TEST EXTREME RAPID PLAY
+==================================================
+
+After implementation, deliberately stress-test the game:
+
+- perform swaps rapidly
+- create consecutive matches
+- trigger cascades
+- trigger combos
+- trigger Mega Burst
+- trigger Energy Blast
+- rapidly repeat effects
+- continue playing immediately after effects trigger
+
+Watch for:
+- frame drops
+- input delay
+- board freezing
+- delayed gem falls
+- growing DOM
+- growing number of active particles
+- growing number of timers
+- effects remaining after completion
+
+The game should remain responsive even under extreme rapid play.
+
+==================================================
+FINAL ACCEPTANCE CRITERIA
+==================================================
+
+A) DEFEATED screen:
+- readable
+- no giant title overlapping the content
+- RETRY works
+- CONTINUE works
+- responsive on mobile
+
+B) FAST PLAY:
+- no noticeable slowdown
+- swaps remain instant
+- gem falls remain fast
+- cascades remain responsive
+
+C) VFX:
+- still premium and satisfying
+- reduced intelligently under load
+- never block gameplay
+- never accumulate indefinitely
+
+D) MEGA BURST / ENERGY BLAST:
+- still visually powerful
+- no major frame drop
+- repeated activation remains responsive
+
+IMPORTANT:
+Do not just reduce all animation speeds or remove effects.
+Find the actual performance bottlenecks and optimize the VFX architecture while preserving the premium visual quality.
