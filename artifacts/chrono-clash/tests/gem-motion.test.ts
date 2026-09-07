@@ -92,6 +92,27 @@ describe("crystal gem motion curves", () => {
   });
 });
 
+describe("input and animation timing contracts", () => {
+  it("only primes a swap after the session accepts it", () => {
+    const main = readFileSync("src/main.ts", "utf8");
+    const commitStart = main.indexOf("function commitSwipe(");
+    const commitEnd = main.indexOf("\n}\n\nui.playerBoard.addEventListener", commitStart);
+    const commit = main.slice(commitStart, commitEnd);
+    expect(commit.indexOf("if (session.tryPlayerSwap")).toBeGreaterThan(-1);
+    expect(commit.indexOf("renderer.primeSwapPose")).toBeGreaterThan(commit.indexOf("if (session.tryPlayerSwap"));
+    expect(commit).not.toContain("renderer.primeSwapPose(from, target, gestureDx, gestureDy, now);\n  if");
+  });
+
+  it("keeps renderer gem travel and particle stepping on the capped animation clock", () => {
+    const renderer = readFileSync("src/ui/renderer.ts", "utf8");
+    expect(renderer).toContain("this.animDt = Math.min(0.033, Math.max(0.008");
+    expect(renderer).toContain("tile.moveAge += dt");
+    expect(renderer).toContain("tile.dieAge += dt");
+    expect(renderer).toContain("this.stepParticles(view, dt)");
+    expect(renderer).toContain("this.stepCrystalShards(view, dt)");
+  });
+});
+
 describe("occupied cells still have a gem pose", () => {
   it("follows interpolated travel instead of snapping to the rest well", () => {
     const restX = 10;

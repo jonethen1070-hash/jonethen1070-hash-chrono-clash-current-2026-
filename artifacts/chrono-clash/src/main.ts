@@ -2086,8 +2086,8 @@ function swipeMin(): number {
 }
 
 function commitSwipe(from: Coord, target: Coord, now: number, gestureDx = 0, gestureDy = 0): boolean {
-  renderer.primeSwapPose(from, target, gestureDx, gestureDy, now);
   if (session.tryPlayerSwap(from, target, now)) {
+    renderer.primeSwapPose(from, target, gestureDx, gestureDy, now);
     audio.playSwapWave();
     renderer.flashSwap(from, target, now);
     sendOnlineAction({ type: "swap", a: from, b: target });
