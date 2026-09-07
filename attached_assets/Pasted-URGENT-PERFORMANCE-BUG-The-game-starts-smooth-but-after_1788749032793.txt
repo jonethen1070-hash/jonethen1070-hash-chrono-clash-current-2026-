@@ -1,0 +1,354 @@
+URGENT PERFORMANCE BUG.
+
+The game starts smooth, but after I make a FAST gem match, the game suddenly becomes slow and less smooth.
+
+This strongly suggests that something is being created or left running during the:
+
+MATCH → CLEAR → VFX → FALL → CASCADE
+
+pipeline.
+
+DO NOT add more features or VFX until this is fixed.
+
+DO NOT simply make animations faster.
+
+Find the actual ROOT CAUSE.
+
+REPRODUCE THE BUG
+
+Start a fresh game.
+
+Then repeatedly perform:
+
+FAST GEM SWAP
+→ MATCH
+→ CLEAR
+→ FALL
+→ CASCADE
+→ NEXT MOVE
+
+Pay attention to the exact moment performance drops.
+
+Test:
+
+* one normal match
+* rapid consecutive matches
+* large match
+* multiple cascades
+* several matches within a few seconds
+* Mega Strike
+
+Determine exactly which event causes the slowdown.
+
+1. VFX ACCUMULATION — CHECK FIRST
+
+Inspect every gem-clear VFX system.
+
+Check whether each match creates:
+
+* new particle systems
+* new DOM elements
+* new canvas objects
+* new animation loops
+* new timers
+* new event listeners
+* new shadows/filters
+* new glow layers
+* new objects
+
+Then verify they are ACTUALLY destroyed/reused after the effect finishes.
+
+A VFX effect must not remain active after the gem disappears.
+
+If 10 gems are cleared, we should NOT accidentally leave 10 permanent animation systems running.
+
+Use pooling/reuse where appropriate.
+
+2. ANIMATION LOOP LEAK
+
+Audit every:
+
+requestAnimationFrame
+setTimeout
+setInterval
+animation loop
+transition callback
+
+Check whether every gem match starts another loop without stopping the previous one.
+
+CRITICAL TEST:
+
+Make one match.
+
+Count active animation loops.
+
+Make another match.
+
+Check again.
+
+Make 10 matches.
+
+If the number of active loops keeps increasing, FIX IT.
+
+There should not be an ever-growing number of active loops.
+
+3. EVENT LISTENER LEAK
+
+Check whether gem matching/clearing repeatedly attaches listeners.
+
+Especially after:
+
+* swaps
+* cascades
+* VFX
+* Mega Strike
+* restart
+
+Make sure listeners are not being registered repeatedly.
+
+4. DOM ACCUMULATION
+
+If gems/VFX use DOM elements:
+
+Check whether destroyed gems actually disappear from the DOM.
+
+Check whether VFX elements are removed after completion.
+
+Check whether hidden elements continue receiving animations or updates.
+
+Do not leave hundreds/thousands of inactive nodes behind.
+
+5. MEMORY / GARBAGE COLLECTION
+
+Measure memory before gameplay.
+
+Then:
+
+10 matches
+→ measure
+
+20 matches
+→ measure
+
+50 matches
+→ measure
+
+If memory continuously increases, identify what is accumulating.
+
+Also watch for garbage-collection spikes immediately after matches.
+
+Do not guess.
+
+6. MATCH/CASCADE CALCULATIONS
+
+Inspect match detection and cascade resolution.
+
+Make sure the game isn’t repeatedly recalculating the same board state unnecessarily.
+
+Look for:
+
+* duplicate match checks
+* recursive loops
+* repeated full-board scans
+* repeated state updates
+* unnecessary React renders
+* repeated board reconstruction
+
+Do NOT change the actual matching rules.
+
+Optimize the implementation only.
+
+7. GEM CLEAR / GRAVITY
+
+Audit:
+
+CLEAR
+→ REMOVE
+→ GRAVITY
+→ SPAWN
+→ MATCH CHECK
+
+Make sure this pipeline doesn’t execute multiple times accidentally for the same match.
+
+A single match should produce one intended resolution.
+
+8. REACT / UI RENDERING
+
+If React is being used:
+
+Check whether a single gem match causes the entire application to re-render repeatedly.
+
+Inspect component renders during:
+
+* swap
+* clear
+* falling
+* cascade
+
+Prevent unnecessary renders.
+
+Do not sacrifice correct state updates.
+
+9. CSS PERFORMANCE
+
+Check whether gem clearing activates expensive CSS effects such as:
+
+* filter
+* blur
+* backdrop-filter
+* huge box shadows
+* multiple animated gradients
+* expensive transforms
+* large-area animations
+
+Pay particular attention to effects triggered ONLY after a match.
+
+If one of these causes the frame rate to drop, optimize the effect rather than removing the entire visual style.
+
+10. VFX DIAGNOSTIC TEST
+
+Perform two controlled tests.
+
+TEST A:
+Gameplay with gem-clear VFX temporarily disabled.
+
+TEST B:
+Gameplay with normal VFX enabled.
+
+Use the SAME match sequence.
+
+If the slowdown disappears in TEST A, the VFX system is responsible.
+
+If the slowdown remains, continue investigating gameplay/rendering logic.
+
+Do not permanently disable VFX.
+
+11. IMPORTANT: CHECK FOR PROGRESSIVE SLOWDOWN
+
+Play continuously without refreshing.
+
+Test:
+
+MATCH #1
+MATCH #5
+MATCH #10
+MATCH #20
+MATCH #30
+
+Does performance get progressively worse?
+
+If yes, this is likely an accumulation/leak problem.
+
+Find exactly what accumulates.
+
+12. FAST MATCH TEST
+
+The bug specifically appears after making a FAST match.
+
+Test rapid input:
+
+SWAP
+→ MATCH
+→ immediately perform next valid move
+→ MATCH
+→ immediately perform next move
+
+Make sure the previous match has completely cleaned up before the next one begins.
+
+Prevent overlapping resolution systems from accumulating.
+
+13. DO NOT FIX BY HIDING THE PROBLEM
+
+DO NOT:
+
+* simply slow down the player
+* add delays
+* disable cascades
+* remove VFX permanently
+* reduce the game to basic graphics
+* reduce gem quality
+* refresh the page
+* force a reload after matches
+* cap gameplay artificially
+
+Find the actual technical cause.
+
+14. PERFORMANCE TARGET
+
+Gameplay should remain consistent:
+
+MATCH
+→ CLEAR
+→ FALL
+→ CASCADE
+→ NEXT MOVE
+
+with no sudden drop in responsiveness.
+
+The player must NOT experience:
+
+“Game starts fast → I make a match → suddenly everything becomes slow.”
+
+That exact problem must be eliminated.
+
+15. FINAL STRESS TEST
+
+After fixing:
+
+* 50+ normal matches
+* rapid consecutive matches
+* large clears
+* long cascades
+* Mega Strike
+* repeated abilities
+* multiple restarts
+
+Monitor performance throughout.
+
+Make sure the game does NOT progressively slow down.
+
+FINAL REPORT
+
+Do not simply say “fixed.”
+
+Report:
+
+ROOT CAUSE:
+What specifically caused the slowdown?
+
+MATCH PIPELINE:
+Which stage caused it?
+
+VFX:
+Were effects accumulating?
+
+ANIMATION LOOPS:
+Were loops duplicated?
+
+EVENT LISTENERS:
+Were listeners accumulating?
+
+DOM:
+Were elements accumulating?
+
+MEMORY:
+Did memory increase?
+
+FIX:
+Exactly what was changed?
+
+PERFORMANCE:
+What was the measurable before/after result?
+
+REGRESSION:
+Confirm matching, cascades, Mega Strike, scoring, and gameplay still work.
+
+PRIORITY
+
+1. SMOOTH GAMEPLAY
+2. STABLE PERFORMANCE
+3. CORRECT MATCH/CASCADE LOGIC
+4. INPUT RESPONSIVENESS
+5. VFX QUALITY
+
+Do not continue visual polish until this match-induced slowdown is completely resolved.
