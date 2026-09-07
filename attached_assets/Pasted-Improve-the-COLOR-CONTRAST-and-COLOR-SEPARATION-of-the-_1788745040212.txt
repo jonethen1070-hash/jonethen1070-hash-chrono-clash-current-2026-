@@ -1,0 +1,167 @@
+Improve the COLOR CONTRAST and COLOR SEPARATION of the gems.
+
+Use the current gem designs as the base. Do NOT replace the gem artwork or change gameplay.
+
+The goal is for every gem color to be instantly recognizable on the board, even during fast movement, cascades, and VFX.
+
+CURRENT PROBLEM
+
+The gems are very bright and heavily glowing, so some colors visually blend together.
+
+I want:
+
+* stronger color identity
+* clearer separation between gem types
+* better readability at a glance
+* premium crystalline materials
+* controlled glow instead of color washout
+
+COLOR IDENTITY
+
+Give each gem a strong, unmistakable primary color:
+
+BLUE
+
+* deep royal/space blue base
+* bright cyan internal energy
+* crisp blue/cyan highlights
+
+PURPLE
+
+* deep violet base
+* bright magenta/violet core
+* clearly different from blue
+
+GREEN
+
+* deep emerald base
+* bright green internal energy
+* stronger green edge lighting
+
+YELLOW
+
+* rich amber/gold base
+* bright golden core
+* avoid washing it out to white
+
+PINK / MAGENTA
+
+* deep hot-pink/magenta base
+* bright pink core
+* clearly separated from purple
+
+IMPORTANT CONTRAST RULE
+
+Do NOT make every gem simply:
+“bright neon + white glow.”
+
+Instead use:
+
+DARKER SATURATED MATERIAL
++
+BRIGHT COLORED CORE
++
+CONTROLLED SPECULAR HIGHLIGHT
+
+This will make the colors much more readable.
+
+GEM EDGES
+
+Strengthen each gem’s colored edge/rim.
+
+The silhouette should remain clearly visible against the dark board.
+
+Use:
+
+* colored rim light
+* subtle dark outer separation
+* crisp crystal facets
+* controlled internal glow
+
+Avoid excessive bloom that makes the edges disappear.
+
+INTERNAL CORE
+
+Make the energy inside each crystal strongly color-specific.
+
+The core should remain colored rather than becoming mostly white.
+
+White highlights are okay, but they should be small and concentrated.
+
+BOARD CONTRAST
+
+Keep the board/background darker and more neutral so the gems naturally stand out.
+
+Do NOT make the board brighter to compensate.
+
+The gems should be the brightest gameplay objects.
+
+DIFFERENTIATE SIMILAR COLORS
+
+Pay special attention to:
+
+BLUE vs PURPLE
+
+PURPLE vs MAGENTA
+
+YELLOW vs WHITE HIGHLIGHTS
+
+GREEN vs CYAN
+
+These must remain immediately distinguishable.
+
+VFX COLOR MATCH
+
+When a gem clears, its VFX must use the SAME color identity as the gem.
+
+Blue gem → blue/cyan VFX
+Purple gem → violet/magenta VFX
+Green gem → emerald/green VFX
+Yellow gem → gold/yellow VFX
+Pink gem → pink/magenta VFX
+
+Do not allow destruction VFX to wash the gem’s color into white.
+
+ACCESSIBILITY / READABILITY
+
+Test the board at the actual mobile size.
+
+The player should be able to identify a gem’s color immediately without needing to inspect it closely.
+
+Also make sure the gems remain distinguishable during:
+
+* normal gameplay
+* fast swaps
+* falling
+* cascades
+* Mega Strike
+* heavy VFX
+
+PREMIUM LOOK
+
+Do NOT make the gems look flat or cartoonish.
+
+Keep:
+
+* 3D crystal depth
+* facets
+* reflections
+* internal energy
+* premium materials
+* cinematic highlights
+
+The target is:
+
+high-contrast crystalline gems with distinct luxury sci-fi color identities.
+
+IMPORTANT
+
+Inspect the existing gem CSS/rendering first.
+
+Do NOT create another huge override stylesheet.
+
+There may already be later CSS rules overriding earlier visual changes. Modify the actual active rules and consolidate conflicting overrides where appropriate.
+
+After implementation, test every gem color together on the same board.
+
+The final board should have strong visual color separation while retaining the premium glowing crystal appearance.
