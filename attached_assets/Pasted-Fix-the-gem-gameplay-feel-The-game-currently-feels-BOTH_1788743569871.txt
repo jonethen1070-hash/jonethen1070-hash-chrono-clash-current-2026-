@@ -1,0 +1,198 @@
+Fix the gem gameplay feel. The game currently feels BOTH too slow AND not smooth.
+
+I do NOT want simply faster animations. I want the movement to be fast, fluid, consistent, and responsive.
+
+Do not change the core gameplay rules.
+
+SWAPPING — FAST + FLUID
+
+When I touch a gem and swap:
+
+* Input must respond immediately.
+* No waiting before movement starts.
+* Movement must be visually smooth from start to finish.
+* Use a proper easing curve.
+* No jerky frames.
+* No snapping.
+* No sudden acceleration.
+* No slow final approach.
+
+Target feel:
+
+TAP → INSTANT RESPONSE → FAST SMOOTH SWAP → IMMEDIATE RESULT
+
+Keep the swap short, approximately 120–160ms, and tune it based on actual playtesting.
+
+FALLING — FAST + NATURAL
+
+After gems disappear:
+
+* Gravity should begin immediately.
+* Gems should fall smoothly.
+* Short falls should be very fast.
+* Longer falls should scale naturally.
+* Use consistent acceleration/deceleration.
+* Do not make gems crawl downward.
+* Do not make gems teleport.
+
+Target:
+
+CLEAR → IMMEDIATE FALL → SMOOTH LANDING → NEXT ACTION
+
+NO RANDOM SLOWDOWN
+
+The same action must feel the same every time.
+
+Test:
+
+* 1-cell fall
+* 2-cell fall
+* 3+ cell fall
+* large cascade
+* multiple simultaneous clears
+* Mega Strike
+* repeated swaps
+
+If one situation becomes noticeably slower, find why.
+
+REMOVE UNNECESSARY WAITING
+
+Audit the complete sequence:
+
+INPUT
+→ SWAP
+→ MATCH
+→ CLEAR
+→ GRAVITY
+→ FALL
+→ CASCADE CHECK
+→ NEXT MOVE
+
+Find unnecessary delays between these states.
+
+Look for:
+
+* setTimeout
+* setInterval
+* animation promises
+* artificial cascade delays
+* transition waits
+* input-lock delays
+
+Remove unnecessary waiting.
+
+Do NOT remove timing that is required to keep the game state correct.
+
+SMOOTH ANIMATION
+
+Do not use crude linear movement.
+
+Use a consistent frame-based animation system with proper interpolation/easing.
+
+Make sure movement is not dependent on inconsistent timer callbacks.
+
+Avoid frame-rate-dependent movement.
+
+Movement should remain visually smooth even when the device experiences minor frame-time variation.
+
+IMPORTANT: DON’T BREAK STATE
+
+The visual animation and actual board state must remain synchronized.
+
+Do not allow:
+
+* duplicate gems
+* overlapping gems
+* incorrect matches
+* premature match detection
+* missing gems
+* input during an unsafe state
+* cascade corruption
+
+PERFORMANCE
+
+Profile the running game while gems are moving.
+
+Find any frame drops caused by:
+
+* excessive rendering
+* DOM updates
+* React re-renders
+* particle effects
+* CSS filters
+* JavaScript
+* memory allocation
+* garbage collection
+* duplicate animation loops
+
+Fix the actual bottleneck.
+
+VFX
+
+Do not remove the premium gem VFX permanently.
+
+If VFX cause stuttering:
+
+* pool/reuse effects
+* reduce unnecessary allocations
+* optimize particle counts
+* avoid expensive per-frame work
+
+The goal is:
+
+PREMIUM VFX + SMOOTH GAMEPLAY
+
+not one or the other.
+
+INPUT LOCK
+
+Review input locking.
+
+The player should be blocked only when necessary for board-state safety.
+
+As soon as the board is ready, accept the next input immediately.
+
+There must not be an invisible delay after the animation finishes.
+
+FINAL FEEL TEST
+
+Play the game repeatedly and judge the actual feel, not just automated tests.
+
+Perform:
+
+SWAP
+→ MATCH
+→ CLEAR
+→ FALL
+→ CASCADE
+→ NEXT MOVE
+
+Repeat this continuously.
+
+Then test:
+
+* rapid swapping
+* long falls
+* large cascades
+* Mega Strike
+* several consecutive matches
+* 10-minute gameplay session
+
+The final result must feel:
+
+FAST
+SMOOTH
+FLUID
+RESPONSIVE
+CONSISTENT
+PREMIUM
+
+If an animation is fast but still looks jerky, fix the animation/rendering problem.
+
+If it is smooth but feels slow, reduce the timing.
+
+I want BOTH:
+
+FAST + SMOOTH
+
+Do not consider this complete until the actual running game feels that way.
