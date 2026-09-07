@@ -399,6 +399,10 @@ export class AudioBus {
     this.prefetching = false;
     this.unlocked = false;
     this.catalogReady = false;
+    this.sfxVoices = 0;
+    this.swapWave = 0;
+    this.lastCueAt.clear();
+    this.variantAt.clear();
     this.ready = Promise.resolve();
     try {
       void this.ctx?.close();
@@ -908,26 +912,33 @@ export class AudioBus {
   }
 
   private async prefetchLobbyThenRest(): Promise<void> {
+    const lifecycle = this.lifecycle;
     try {
       const assets = uniqueAudioAssets();
       const lobby = assets.filter((item) => item.id === "music-lobby");
       const rest = assets.filter((item) => item.id !== "music-lobby");
-      await Promise.all(lobby.map((item) => this.fetchRaw(item)));
+      await Promise.all(lobby.map((item) => this.fetchRaw(item, lifecycle)));
+      if (lifecycle !== this.lifecycle) return;
       const ctx = this.audio();
       if (ctx) {
-        for (const item of lobby) await this.decodeItem(ctx, item);
+        for (const item of lobby) await this.decodeItem(ctx, item, lifecycle);
         this.promoteBedToFile();
       }
-      await Promise.all(rest.map((item) => this.fetchRaw(item)));
+      if (lifecycle !== this.lifecycle) return;
+      await Promise.all(rest.map((item) => this.fetchRaw(item, lifecycle)));
     } catch {
       /* decode can wait until the first gesture on locked autoplay browsers */
+    } finally {
+      if (lifecycle === this.lifecycle) this.prefetching = false;
     }
   }
 
-  private async fetchRaw(item: ReturnType<typeof uniqueAudioAssets>[number]): Promise<void> {
+  private async fetchRaw(item: ReturnType<typeof uniqueAudioAssets>[number], lifecycle = this.lifecycle): Promise<void> {
+    if (lifecycle !== this.lifecycle) return;
     if (this.raw.has(item.id) || this.buffers.has(item.id)) return;
     for (const url of urlsForAudioAsset(item)) {
       const found = await fetchAudioBuffer([url]);
+      if (lifecycle !== this.lifecycle) return;
       if (!found) continue;
       this.raw.set(item.id, found);
       return;

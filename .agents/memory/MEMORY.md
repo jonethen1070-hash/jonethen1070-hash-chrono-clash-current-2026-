@@ -17,3 +17,4 @@
 - [Power activation diagnostics](power-activation-diagnostics.md) — direct session power calls bypass the real two-step mobile UI path and can falsely report success.
 - [Gameplay resolve input gate](gameplay-resolve-input-gate.md) — reject overlapping swaps without delaying existing immediate ability flows; cancel off-board targeted releases.
 - [Cascade release timing](gem-motion-timing.md) — begin gravity at the swap-tied impact handoff, not after the full break animation, while preserving a visible committed swap.
+- [Browser performance probes](browser-performance-probes.md) — compare against a blank baseline and CPU profile before interpreting headless Canvas frame or Long Task numbers.

@@ -1025,6 +1025,7 @@ async function paintOnline(): Promise<void> {
 }
 
 let matchPoll: ReturnType<typeof setInterval> | null = null;
+let matchPollGeneration = 0;
 let emailMode: "sign-in" | "create-account" = "sign-in";
 
 function updateEmailDialogMode(): void {
@@ -1057,6 +1058,7 @@ function closeEmailDialog(): void {
 }
 
 function stopMatchPoll(): void {
+  matchPollGeneration += 1;
   if (matchPoll) {
     clearInterval(matchPoll);
     matchPoll = null;
@@ -1064,11 +1066,13 @@ function stopMatchPoll(): void {
 }
 
 let battlePoll: ReturnType<typeof setInterval> | null = null;
+let battleSyncGeneration = 0;
 let battleClientSeq = 0;
 let battleSyncInFlight = false;
 let battleSyncFailures = 0;
 
 function stopBattleSync(): void {
+  battleSyncGeneration += 1;
   if (battlePoll) {
     clearInterval(battlePoll);
     battlePoll = null;
@@ -1103,17 +1107,19 @@ function sendOnlineAction(action: Omit<BattleActionInput, "clientSeq">): void {
 
 function startBattleSync(matchId: string): void {
   stopBattleSync();
+  const generation = battleSyncGeneration;
   battleClientSeq = 0;
   session.pendingClientSeq = 0;
   battleSyncInFlight = true;
   void net
     .joinBattle(matchId)
     .then((snap) => {
+      if (generation !== battleSyncGeneration || session.onlineMatchId !== matchId) return;
       battleSyncInFlight = false;
       battleSyncFailures = 0;
       session.applyBattleSnapshot(snap);
       battlePoll = setInterval(() => {
-        if (!session.onlineMatchId) {
+        if (generation !== battleSyncGeneration || session.onlineMatchId !== matchId) {
           stopBattleSync();
           return;
         }
@@ -1122,6 +1128,7 @@ function startBattleSync(matchId: string): void {
         void net
           .syncBattle(session.onlineMatchId, session.onlineLastSeq)
           .then((next) => {
+            if (generation !== battleSyncGeneration || session.onlineMatchId !== matchId) return;
             battleSyncFailures = 0;
             session.applyBattleSnapshot(next);
           })
@@ -1135,6 +1142,7 @@ function startBattleSync(matchId: string): void {
       }, 250);
     })
     .catch((err: unknown) => {
+      if (generation !== battleSyncGeneration) return;
       battleSyncFailures += 1;
       battleSyncInFlight = false;
       ui.onlineStatus.textContent = err instanceof Error ? err.message : "battle join failed";
@@ -1183,6 +1191,8 @@ async function applyMatchState(state: { status: string; matchId: string | null; 
 }
 
 async function startOnlineMatch(): Promise<void> {
+  stopMatchPoll();
+  const generation = matchPollGeneration;
   ui.onlineStatus.textContent = "CONTACTING CHRONO CLASH SERVER...";
   try {
     await pullRemoteDailyRun();
@@ -1191,18 +1201,30 @@ async function startOnlineMatch(): Promise<void> {
       return;
     }
     const state = await net.findMatch();
+    if (generation !== matchPollGeneration || session.screen !== "online") return;
     await applyMatchState(state);
     if (state.status === "searching") {
-      stopMatchPoll();
-      matchPoll = setInterval(() => {
+      const poll = setInterval(() => {
+        if (generation !== matchPollGeneration || session.screen !== "online") {
+          clearInterval(poll);
+          if (matchPoll === poll) matchPoll = null;
+          return;
+        }
         void net
           .findMatch()
-          .then((next) => applyMatchState(next))
+          .then((next) => {
+            if (generation === matchPollGeneration && session.screen === "online") {
+              return applyMatchState(next);
+            }
+            return undefined;
+          })
           .catch((err: unknown) => {
+            if (generation !== matchPollGeneration || session.screen !== "online") return;
             stopMatchPoll();
             ui.onlineStatus.textContent = err instanceof Error ? err.message : "match start failed";
           });
       }, 1000);
+      matchPoll = poll;
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : "match start failed";

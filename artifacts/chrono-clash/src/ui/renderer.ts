@@ -25,6 +25,14 @@ const MATCH_STAGGER_MAX_MS = MATCH_STAGGER_MIN_MS + MATCH_STAGGER_STEP_MS * 2;
 const DRAG_FOLLOW = 0.985;
 const DRAG_NEIGHBOR_PUSH = 0.18;
 
+function retainInPlace<T>(items: T[], keep: (item: T) => boolean): void {
+  let write = 0;
+  for (const item of items) {
+    if (keep(item)) items[write++] = item;
+  }
+  items.length = write;
+}
+
 export interface RenderFx {
   quality: Intensity;
   animation: Intensity;
@@ -684,7 +692,7 @@ export class BoardRenderer {
     );
     this.consumeAttacks(snap, now);
     if (snap.freezeUntil > now) {
-      this.combatFloats = this.combatFloats.filter((f) => f.color !== "#E9D5FF");
+      retainInPlace(this.combatFloats, (f) => f.color !== "#E9D5FF");
     }
     this.drawBolts(
       opponentRect.left - parent.left + opponentRect.width / 2,
@@ -1351,18 +1359,33 @@ export class BoardRenderer {
 
     this.drawPowerEffects(view, now);
     this.drawPowerArenaLight(view, ox, oy, size, cell, now, isPlayer);
-    const megaClear = fx.find(
-      (fxEvent) =>
-        fxEvent.kind === "clear" &&
-        Boolean(fxEvent.cells?.length) &&
-        fx.some(
-          (powerEvent) =>
-            powerEvent.kind === "power" &&
-            powerEvent.text.toUpperCase().includes("MEGA STRIKE") &&
-            Math.abs(powerEvent.born - fxEvent.born) < 40 &&
-            (!powerEvent.side || powerEvent.side === fxEvent.side),
-        ),
-    );
+    let megaStrikeBorn = Number.NaN;
+    let megaStrikeSide: FxEvent["side"] | undefined;
+    for (const fxEvent of fx) {
+      if (
+        fxEvent.kind === "power" &&
+        fxEvent.text.toUpperCase().includes("MEGA STRIKE") &&
+        now - fxEvent.born >= 0 &&
+        now - fxEvent.born < 900
+      ) {
+        megaStrikeBorn = fxEvent.born;
+        megaStrikeSide = fxEvent.side;
+      }
+    }
+    let megaClear: FxEvent | undefined;
+    if (Number.isFinite(megaStrikeBorn)) {
+      for (const fxEvent of fx) {
+        if (
+          fxEvent.kind === "clear" &&
+          fxEvent.cells?.length &&
+          Math.abs(megaStrikeBorn - fxEvent.born) < 40 &&
+          (!megaStrikeSide || !fxEvent.side || megaStrikeSide === fxEvent.side)
+        ) {
+          megaClear = fxEvent;
+          break;
+        }
+      }
+    }
     if (megaClear?.cells?.length) {
       this.drawMegaStrikeWave(view, megaClear.cells, ix, iy, cell, now);
     }
@@ -1425,10 +1448,10 @@ export class BoardRenderer {
       if (tile.dying && tile.alpha <= 0) view.tiles.delete(id);
     }
 
-    const invalid =
-      isPlayer && now < this.invalidUntil
-        ? [this.invalidA, this.invalidB]
-        : [];
+    const hasInvalid =
+      isPlayer &&
+      now < this.invalidUntil &&
+      (this.invalidA !== null || this.invalidB !== null);
 
     this.hintBits.fill(0);
     for (const p of hints) {
@@ -1448,7 +1471,10 @@ export class BoardRenderer {
     for (const tile of tiles) {
       const sel = selected?.r === tile.r && selected?.c === tile.c && !tile.dying;
       const hinted = !tile.dying && this.hintBits[tile.r * COLS + tile.c] === 1;
-      const bad = invalid.some((p) => p && p.r === tile.r && p.c === tile.c);
+       const bad =
+         hasInvalid &&
+         ((this.invalidA?.r === tile.r && this.invalidA?.c === tile.c) ||
+           (this.invalidB?.r === tile.r && this.invalidB?.c === tile.c));
       const wobble = bad ? Math.sin(now / 18) * 3.2 : 0;
       const lift = sel ? 1.026 : 1;
       const restX = ix + GAP + tile.c * (cell + GAP);
@@ -1679,7 +1705,7 @@ export class BoardRenderer {
 
   private drawSocketPulses(view: BoardView, now: number): void {
     if (!view.socketPulses.length) return;
-    view.socketPulses = view.socketPulses.filter((pulse) => now - pulse.born < pulse.life);
+    retainInPlace(view.socketPulses, (pulse) => now - pulse.born < pulse.life);
     for (const pulse of view.socketPulses) {
       const progress = Math.max(0, Math.min(1, (now - pulse.born) / pulse.life));
       const envelope = Math.sin(Math.PI * progress);
@@ -1868,9 +1894,14 @@ export class BoardRenderer {
     now: number,
     isPlayer: boolean,
   ): void {
-    const effect = [...view.powerEffects]
-      .reverse()
-      .find((candidate) => candidate.kind !== "rewind" && now - candidate.born >= 0);
+    let effect: PowerEffect | undefined;
+    for (let i = view.powerEffects.length - 1; i >= 0; i--) {
+      const candidate = view.powerEffects[i]!;
+      if (candidate.kind !== "rewind" && now - candidate.born >= 0) {
+        effect = candidate;
+        break;
+      }
+    }
     if (!effect || this.fx.quality === "low" || this.fx.reducedMotion) return;
     const age = now - effect.born;
     const peakCenter = effect.kind === "mega" ? 146 : 92;
@@ -1994,9 +2025,15 @@ export class BoardRenderer {
   }
 
   private powerFractureDirection(view: BoardView, x: number, y: number, now: number): { x: number; y: number } {
-    const effect = [...view.powerEffects]
-      .reverse()
-      .find((candidate) => candidate.kind !== "rewind" && now - candidate.born >= 0 && now - candidate.born < 520);
+    let effect: PowerEffect | undefined;
+    for (let i = view.powerEffects.length - 1; i >= 0; i--) {
+      const candidate = view.powerEffects[i]!;
+      const age = now - candidate.born;
+      if (candidate.kind !== "rewind" && age >= 0 && age < 520) {
+        effect = candidate;
+        break;
+      }
+    }
     if (!effect) return { x: 0, y: 0 };
     const dx = x - effect.x;
     const dy = y - effect.y;
@@ -2028,9 +2065,15 @@ export class BoardRenderer {
             ? "#FF9D00"
             : hex;
 
-    const hero = [...view.powerEffects]
-      .reverse()
-      .find((candidate) => candidate.kind !== "rewind" && performance.now() - candidate.born < 620)?.kind;
+    const effectNow = performance.now();
+    let hero: PowerEffect["kind"] | undefined;
+    for (let i = view.powerEffects.length - 1; i >= 0; i--) {
+      const candidate = view.powerEffects[i]!;
+      if (candidate.kind !== "rewind" && effectNow - candidate.born >= 0 && effectNow - candidate.born < 620) {
+        hero = candidate.kind;
+        break;
+      }
+    }
     const megaHero = hero === "mega";
     const burstHero = hero === "burst";
     const heroMul = megaHero ? 1.8 : burstHero ? 1.42 : 1;
@@ -2154,7 +2197,7 @@ export class BoardRenderer {
   private drawShockwaves(view: BoardView, now: number): void {
     if (!view.shockwaves.length) return;
     const ctx = this.ctx;
-    view.shockwaves = view.shockwaves.filter((wave) => now - wave.born < wave.life);
+    retainInPlace(view.shockwaves, (wave) => now - wave.born < wave.life);
     ctx.save();
     for (const wave of view.shockwaves) {
       const t = Math.max(0, Math.min(1, (now - wave.born) / wave.life));
@@ -2824,7 +2867,7 @@ export class BoardRenderer {
   }
 
   private drawFloats(view: BoardView, now: number): void {
-    view.floats = view.floats.filter((f) => now - f.born < f.life);
+    retainInPlace(view.floats, (f) => now - f.born < f.life);
   }
 
   private drawAtmosphere(w: number, h: number, last10: boolean, danger: boolean, now: number): void {
@@ -2950,7 +2993,7 @@ export class BoardRenderer {
         impacted: false,
       });
     }
-    this.bolts = this.bolts.filter((b) => now - b.born < b.dur + 280);
+    retainInPlace(this.bolts, (b) => now - b.born < b.dur + 280);
   }
 
   private drawBolts(
@@ -3021,7 +3064,7 @@ export class BoardRenderer {
 
   private drawCombatFloats(now: number): void {
     const ctx = this.ctx;
-    this.combatFloats = this.combatFloats.filter((f) => now - f.born < f.life);
+    retainInPlace(this.combatFloats, (f) => now - f.born < f.life);
     ctx.save();
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
