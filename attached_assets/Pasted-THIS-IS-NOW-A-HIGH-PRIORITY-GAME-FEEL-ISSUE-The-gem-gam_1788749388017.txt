@@ -1,0 +1,569 @@
+THIS IS NOW A HIGH-PRIORITY GAME-FEEL ISSUE.
+
+The gem gameplay does NOT feel smooth or premium.
+
+I need an EXTREME REFINEMENT PASS specifically for GEM MOTION AND MATCH FLOW.
+
+The following must all feel exceptionally polished:
+
+SWAP
+MATCH
+CLEAR
+FALL
+CASCADE
+NEW GEM SPAWN
+
+Do NOT change the core gameplay rules.
+
+Do NOT add new gameplay mechanics.
+
+Do NOT simply make everything faster.
+
+The goal is:
+
+FAST + FLUID + PRECISE + CONSISTENT + PREMIUM
+
+⸻
+
+1. SWAP MUST FEEL PERFECT
+
+The swap is the most important interaction.
+
+Current problem:
+The player can feel the gems moving instead of feeling an immediate, smooth response.
+
+Fix the complete swap pipeline.
+
+Desired experience:
+
+TOUCH
+↓
+IMMEDIATE RESPONSE
+↓
+SMOOTH GEM MOVEMENT
+↓
+CLEAN ARRIVAL
+↓
+MATCH/CHECK
+
+There must be NO noticeable input delay.
+
+There must be NO:
+
+* jerk
+* stutter
+* hesitation
+* snapping
+* teleporting
+* uneven movement
+* slow start
+* awkward stop
+
+Use a high-quality easing/interpolation approach.
+
+The movement should have:
+
+* extremely fast response at the beginning
+* smooth acceleration
+* controlled deceleration
+* clean arrival
+
+Do NOT use a generic linear movement if it makes the swap feel mechanical.
+
+Target swap duration approximately 120–160ms, but tune it based on actual gameplay testing rather than blindly forcing a number.
+
+⸻
+
+2. SWAP MUST BE FRAME-RATE INDEPENDENT
+
+This is CRITICAL.
+
+Gem movement must not depend on inconsistent timer callbacks.
+
+Use elapsed-time based animation.
+
+The movement should remain smooth even when frame times vary slightly.
+
+Do NOT calculate movement as:
+
+“move X amount every frame.”
+
+Instead use elapsed time / normalized progress so the animation remains deterministic.
+
+⸻
+
+3. NO VISUAL/STATE DESYNCHRONIZATION
+
+The visual gem position and actual board state must remain synchronized.
+
+During a swap:
+
+* no duplicate gems
+* no overlapping gems
+* no disappearing gems
+* no incorrect cell assignment
+* no premature match detection
+* no accidental second swap
+
+The board state must transition cleanly.
+
+⸻
+
+4. INVALID SWAP
+
+If a swap is invalid:
+
+Do NOT make it feel broken.
+
+Desired:
+
+SWAP
+→ quick movement
+→ realize invalid
+→ smooth return
+→ board immediately ready
+
+The return should be fast and polished.
+
+No long pause.
+
+No sluggish back-and-forth.
+
+⸻
+
+5. MATCH FEEL
+
+When a valid match is detected:
+
+Do NOT immediately make the gems simply disappear.
+
+Use a tiny anticipation moment:
+
+MATCH DETECTED
+→ brief crystal energy pulse
+→ destruction
+→ VFX
+
+The anticipation must be extremely short and must NOT make the game feel slow.
+
+The player should feel the connection between:
+
+“I made the match”
+
+and
+
+“the gems reacted.”
+
+⸻
+
+6. GEM CLEAR
+
+Gem destruction must be tightly synchronized.
+
+Desired:
+
+MATCH
+→ anticipation
+→ crystal energy pulse
+→ fracture
+→ burst
+→ disappearance
+
+Do NOT allow the VFX to hold up the board unnecessarily.
+
+The underlying gameplay should continue as soon as it is safe.
+
+⸻
+
+7. FALLING MUST FEEL PHYSICAL
+
+This is the second major problem.
+
+When gems disappear:
+
+DO NOT make the remaining gems slowly float downward.
+
+They should react immediately to gravity.
+
+Desired:
+
+CLEAR
+↓
+IMMEDIATE GRAVITY
+↓
+FAST INITIAL MOVEMENT
+↓
+SMOOTH DECELERATION
+↓
+CLEAN LANDING
+
+Use distance-aware timing.
+
+Example concept:
+
+1 cell → very fast
+2 cells → slightly longer
+3–5 cells → longer but capped
+
+Never allow a large fall to become excessively slow.
+
+Never make a short fall feel sluggish.
+
+⸻
+
+8. FALLING MUST NOT LOOK ROBOTIC
+
+Use polished motion curves.
+
+Avoid:
+
+* constant-speed linear movement
+* abrupt stopping
+* bouncing excessively
+* snapping into place
+* uneven timing between adjacent gems
+
+Gems falling together should feel synchronized.
+
+Longer falls can have a little more travel time, but the movement must remain energetic.
+
+⸻
+
+9. LANDING FEEL
+
+When a gem reaches its destination:
+
+Give it a VERY subtle physical settle.
+
+For example:
+
+* tiny scale response
+* tiny glow response
+* microscopic positional settle
+
+Keep this extremely subtle.
+
+IMPORTANT:
+
+The settle animation must NOT block the next move.
+
+⸻
+
+10. CASCADES MUST FLOW
+
+This is extremely important.
+
+Current undesirable feeling:
+
+CLEAR
+→ WAIT
+→ FALL
+→ WAIT
+→ MATCH
+→ WAIT
+→ CLEAR
+
+Desired:
+
+CLEAR
+→ FALL
+→ MATCH CHECK
+→ CLEAR
+→ FALL
+→ MATCH CHECK
+
+The cascade should feel like a continuous chain reaction.
+
+Only use timing that is genuinely necessary for visual readability.
+
+⸻
+
+11. CASCADE ESCALATION
+
+When cascades happen:
+
+Cascade 1:
+smooth and satisfying
+
+Cascade 2:
+slightly more energetic
+
+Cascade 3:
+noticeably exciting
+
+Cascade 4+:
+spectacular
+
+Do NOT make the animations progressively slower.
+
+Intensity should increase through:
+
+* VFX
+* sound
+* energy
+* subtle camera response
+* combo feedback
+
+NOT through longer waiting times.
+
+⸻
+
+12. NEW GEMS
+
+New gems entering the board must feel natural.
+
+Avoid:
+
+* appearing instantly with no transition
+* slowly dropping from nowhere
+* popping awkwardly into position
+
+Use fast, controlled entry motion.
+
+They should feel like they are being generated and pulled into the board.
+
+⸻
+
+13. MULTIPLE GEMS MUST MOVE CONSISTENTLY
+
+When several gems fall simultaneously:
+
+* use synchronized timing
+* maintain consistent acceleration
+* avoid one gem lagging behind unexpectedly
+* avoid random-looking arrival times
+
+Movement should feel like the board has one coherent physics system.
+
+⸻
+
+14. PERFORMANCE DURING MOTION
+
+This is CRITICAL.
+
+The motion must remain smooth while:
+
+* swapping
+* clearing
+* falling
+* cascading
+* spawning gems
+* displaying VFX
+
+Profile the actual running game.
+
+Check:
+
+* FPS
+* frame time
+* JavaScript execution
+* DOM updates
+* React renders
+* layout/reflow
+* CSS filters
+* particles
+* memory allocation
+
+If frame rate drops during a match, find the exact cause.
+
+Do NOT simply reduce animation quality.
+
+⸻
+
+15. DO NOT STACK ANIMATIONS
+
+Prevent old animations from continuing after the gem has moved or disappeared.
+
+A gem should not have:
+
+* multiple movement animations
+* multiple timers
+* multiple requestAnimationFrame loops
+* multiple transitions
+
+running simultaneously.
+
+Cancel/replace previous movement cleanly when necessary.
+
+⸻
+
+16. DO NOT USE EXCESSIVE TIMEOUT CHAINS
+
+Audit all:
+
+* setTimeout
+* setInterval
+* animation delays
+* promise delays
+* transition waits
+
+especially inside:
+
+swap
+match
+clear
+gravity
+cascade
+
+Remove unnecessary waiting.
+
+Use a centralized state/animation sequence where appropriate.
+
+⸻
+
+17. INPUT MUST RETURN IMMEDIATELY
+
+Once the board is actually ready:
+
+INPUT ENABLED.
+
+No invisible extra 200–500ms delay.
+
+Do not lock the player while cosmetic VFX are still fading.
+
+Gameplay readiness should be determined by actual board state.
+
+⸻
+
+18. TEST THE FEEL, NOT JUST THE CODE
+
+Actually play the game repeatedly.
+
+Perform:
+
+SWAP
+→ MATCH
+→ CLEAR
+→ FALL
+→ CASCADE
+→ NEXT SWAP
+
+Repeat this continuously.
+
+Then test:
+
+* rapid swaps
+* invalid swaps
+* short falls
+* long falls
+* multiple simultaneous matches
+* 3+ cascades
+* Mega Strike
+* heavy VFX
+* several minutes of gameplay
+
+If anything feels even slightly sluggish or jerky, investigate it.
+
+⸻
+
+19. IMPORTANT: DO NOT “FIX” IT BY ONLY CHANGING SPEED
+
+A fast animation can still look terrible.
+
+I need BOTH:
+
+SPEED
+
+and
+
+MOTION QUALITY
+
+Fast + jerky = BAD
+
+Slow + smooth = BAD
+
+The target is:
+
+FAST + SILKY SMOOTH
+
+⸻
+
+20. FINAL QUALITY BAR
+
+The player should experience:
+
+TOUCH
+→ instant response
+
+SWAP
+→ silky smooth
+
+MATCH
+→ satisfying anticipation
+
+CLEAR
+→ crisp impact
+
+FALL
+→ fast physical movement
+
+CASCADE
+→ continuous flowing reaction
+
+NEXT MOVE
+→ immediately available
+
+There should be no moment where the player thinks:
+
+“Why is this waiting?”
+
+or:
+
+“Why did that gem stutter?”
+
+or:
+
+“Why did that movement feel slow?”
+
+⸻
+
+FINAL PERFORMANCE + GAMEPLAY TEST
+
+Before declaring completion:
+
+1. Run the game.
+2. Play continuously.
+3. Make fast matches.
+4. Trigger long cascades.
+5. Use Mega Strike.
+6. Perform rapid swaps.
+7. Play several complete matches.
+8. Restart and repeat.
+
+Run all existing automated tests.
+
+Confirm:
+
+* matching still works
+* gravity still works
+* cascades still work
+* Mega Strike still works correctly
+* scoring still works
+* turns still work
+* victory/defeat still work
+* no console errors
+* no progressive slowdown
+* no memory accumulation
+* no duplicate animation loops
+
+FINAL STANDARD:
+
+Chrono Clash must feel like a professionally tuned premium mobile match game.
+
+Not merely functional.
+
+Not merely fast.
+
+Not merely pretty.
+
+It must feel:
+
+EXTREMELY SMOOTH
+
+EXTREMELY RESPONSIVE
+
+EXTREMELY REFINED
+
+EXTREMELY SATISFYING
+
+Do not move on to additional visual features until this standard is achieved.
