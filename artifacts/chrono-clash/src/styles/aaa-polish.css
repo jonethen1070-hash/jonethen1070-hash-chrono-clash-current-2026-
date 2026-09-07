@@ -9323,6 +9323,7 @@ html body #app #match .player-side .board-socket-bed {
       0px
       max-content
       calc(var(--control-height) + 6px) !important;
+    height: max-content !important;
     align-content: start !important;
   }
 
