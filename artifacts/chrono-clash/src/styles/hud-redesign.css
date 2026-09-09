@@ -1,0 +1,523 @@
+/*
+ * Chrono Clash — final gameplay HUD
+ *
+ * This is intentionally separate from the board-frame and renderer layers.
+ * It only skins the match controls, fighter readouts, energy rail, and the
+ * three ability controls. The board remains the visual anchor.
+ */
+
+#match.active {
+  --hud-ink: #e8f4f5;
+  --hud-muted: #78949a;
+  --hud-rule: rgba(139, 204, 207, 0.24);
+  --hud-panel: rgba(5, 15, 20, 0.9);
+  --hud-panel-deep: rgba(2, 8, 12, 0.96);
+  --hud-cyan: #78e8e8;
+  --hud-cyan-dim: #2e8c98;
+  --hud-red: #ef8498;
+  --hud-red-dim: #922d4a;
+  --hud-gold: #e7c982;
+}
+
+/* The top row is a control shelf, not a brand/title strip. */
+html body #app #match.active .match-controls-row {
+  height: 100% !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+html body #app #match.active .match-brand-actions {
+  gap: 5px !important;
+  height: 100% !important;
+  align-items: center !important;
+}
+
+html body #app #match.active .hud-icon,
+html body #app #match.active .hud-mute {
+  box-sizing: border-box;
+  min-height: 0 !important;
+  height: 28px !important;
+  border-radius: 5px !important;
+  border: 1px solid rgba(120, 232, 232, 0.34) !important;
+  background:
+    linear-gradient(180deg, rgba(21, 42, 47, 0.92), rgba(4, 13, 18, 0.96)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(226, 255, 255, 0.14),
+    0 3px 8px rgba(0, 0, 0, 0.32) !important;
+  color: var(--hud-ink) !important;
+}
+
+html body #app #match.active .hud-icon {
+  width: 29px !important;
+  min-width: 29px !important;
+}
+
+html body #app #match.active .hud-mute {
+  padding: 4px 8px !important;
+  font-family: var(--font-display);
+  font-size: 8px !important;
+  letter-spacing: 0.13em !important;
+  white-space: nowrap;
+}
+
+html body #app #match.active .hud-icon:hover,
+html body #app #match.active .hud-mute:hover,
+html body #app #match.active .hud-icon:focus-visible,
+html body #app #match.active .hud-mute:focus-visible {
+  border-color: rgba(170, 247, 242, 0.76) !important;
+  color: #b5ffff !important;
+}
+
+html body #app #match.active .hud-icon-settings {
+  opacity: 1 !important;
+  border-color: rgba(239, 132, 152, 0.3) !important;
+}
+
+/* YOU / VS / RIVAL is one instrument: quiet panels, strong readout contrast. */
+html body #app #match.active .match-top {
+  gap: clamp(4px, 1.45vw, 8px) !important;
+  align-items: stretch !important;
+}
+
+html body #app #match.active .fighter {
+  box-sizing: border-box;
+  min-height: 0 !important;
+  padding: clamp(4px, 0.85dvh, 7px) clamp(5px, 1.55vw, 9px) !important;
+  gap: clamp(4px, 1.1vw, 7px) !important;
+  border-radius: 8px !important;
+  border-width: 1px !important;
+  background:
+    linear-gradient(180deg, rgba(17, 36, 42, 0.94), rgba(3, 11, 16, 0.97)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(229, 255, 255, 0.13),
+    0 5px 12px rgba(0, 0, 0, 0.36) !important;
+}
+
+html body #app #match.active .fighter.you {
+  border-color: rgba(120, 232, 232, 0.72) !important;
+  box-shadow:
+    inset 3px 0 0 var(--hud-cyan),
+    inset 0 1px 0 rgba(229, 255, 255, 0.16),
+    0 5px 12px rgba(0, 0, 0, 0.36) !important;
+}
+
+html body #app #match.active .fighter.rival {
+  border-color: rgba(239, 132, 152, 0.7) !important;
+  box-shadow:
+    inset -3px 0 0 var(--hud-red),
+    inset 0 1px 0 rgba(255, 230, 235, 0.14),
+    0 5px 12px rgba(0, 0, 0, 0.36) !important;
+}
+
+html body #app #match.active .fighter::before {
+  opacity: 0.08 !important;
+  mix-blend-mode: screen !important;
+}
+
+html body #app #match.active .avatar-ring,
+html body #app #match.active .fighter .avatar {
+  width: clamp(29px, 5.1dvh, 40px) !important;
+  height: clamp(29px, 5.1dvh, 40px) !important;
+}
+
+html body #app #match.active .avatar-ring {
+  padding: 2px !important;
+  box-shadow: 0 0 10px rgba(120, 232, 232, 0.34) !important;
+}
+
+html body #app #match.active .avatar-ring.rival {
+  box-shadow: 0 0 10px rgba(239, 132, 152, 0.3) !important;
+}
+
+html body #app #match.active .avatar-ring .avatar {
+  border: 1px solid rgba(239, 255, 255, 0.28) !important;
+  font-size: clamp(14px, 2.2dvh, 18px) !important;
+}
+
+html body #app #match.active .fighter-copy {
+  min-width: 0;
+}
+
+html body #app #match.active .fighter-copy small {
+  color: var(--hud-ink) !important;
+  font-size: clamp(7px, 1.15dvh, 9px) !important;
+  letter-spacing: 0.19em !important;
+  line-height: 1 !important;
+}
+
+html body #app #match.active .fighter.rival .fighter-copy small {
+  color: #ffe6eb !important;
+}
+
+html body #app #match.active .fighter-copy em {
+  margin-top: 3px;
+  color: var(--hud-muted) !important;
+  font-size: clamp(7px, 1.05dvh, 8px) !important;
+  letter-spacing: 0.12em !important;
+  line-height: 1 !important;
+}
+
+html body #app #match.active .rival-state {
+  max-width: 100%;
+  margin-top: 3px !important;
+  color: #9b6872 !important;
+  font-size: 6px !important;
+  letter-spacing: 0.08em !important;
+  line-height: 1 !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+html body #app #match.active .score-rail {
+  gap: 4px !important;
+  margin-top: 4px !important;
+}
+
+html body #app #match.active .score-rail b {
+  color: var(--hud-cyan) !important;
+  font-size: clamp(15px, 2.65dvh, 20px) !important;
+  line-height: 1 !important;
+  text-shadow: 0 0 10px rgba(120, 232, 232, 0.38) !important;
+}
+
+html body #app #match.active .fighter.rival .score-rail b {
+  color: var(--hud-red) !important;
+  text-shadow: 0 0 10px rgba(239, 132, 152, 0.34) !important;
+}
+
+html body #app #match.active .score-track {
+  height: 4px !important;
+  border: 0 !important;
+  border-radius: 1px !important;
+  background: rgba(158, 212, 213, 0.12) !important;
+}
+
+html body #app #match.active .fighter.you .score-track i {
+  background: var(--hud-cyan) !important;
+  box-shadow: 0 0 6px rgba(120, 232, 232, 0.65) !important;
+}
+
+html body #app #match.active .fighter.rival .score-track i {
+  background: var(--hud-red) !important;
+  box-shadow: 0 0 6px rgba(239, 132, 152, 0.58) !important;
+}
+
+html body #app #match.active .vs-column {
+  min-width: clamp(72px, 21vw, 86px) !important;
+  gap: 3px !important;
+  filter: none !important;
+}
+
+html body #app #match.active .vs-arcs,
+html body #app #match.active .vs-clash,
+html body #app #match.active .vs-reactor {
+  opacity: 0.46 !important;
+}
+
+html body #app #match.active .vs-arcs {
+  width: 82px !important;
+}
+
+html body #app #match.active .vs-badge {
+  color: #dcebec !important;
+  -webkit-text-fill-color: #dcebec !important;
+  background: none !important;
+  font-size: clamp(17px, 3.1dvh, 25px) !important;
+  letter-spacing: 0.14em !important;
+  filter: none !important;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.7) !important;
+}
+
+html body #app #match.active .vs-column .timer {
+  min-height: 0 !important;
+  padding: 4px 8px 5px !important;
+  border-radius: 4px !important;
+  border: 1px solid rgba(231, 201, 130, 0.56) !important;
+  background:
+    linear-gradient(180deg, rgba(62, 53, 33, 0.82), rgba(10, 12, 14, 0.96)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 239, 188, 0.2),
+    0 4px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+html body #app #match.active .vs-column .timer small {
+  color: var(--hud-gold) !important;
+  font-size: clamp(5px, 0.9dvh, 7px) !important;
+  letter-spacing: 0.15em !important;
+}
+
+html body #app #match.active .vs-column .timer b {
+  color: #faedc1 !important;
+  font-family: var(--font-display);
+  font-size: clamp(14px, 2.35dvh, 19px) !important;
+  line-height: 1 !important;
+  text-shadow: 0 0 8px rgba(231, 201, 130, 0.4) !important;
+}
+
+/* Replace the legacy watch glyph with a CSS tick, never a text emoji. */
+html body #app #match.active .vs-column .timer b::before {
+  content: "" !important;
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin: 0 5px 2px 0;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  opacity: 0.75;
+}
+
+/* Energy is a single instrument rail between the HUD and the board. */
+html body #app #match.active .boards > .energy-wrap {
+  box-sizing: border-box;
+  width: 100% !important;
+  min-height: 0 !important;
+  padding: 4px 8px !important;
+  gap: 8px !important;
+  border: 1px solid rgba(120, 232, 232, 0.24) !important;
+  border-radius: 4px !important;
+  background:
+    linear-gradient(90deg, rgba(21, 52, 57, 0.64), rgba(5, 17, 22, 0.9) 44%, rgba(25, 26, 25, 0.74)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(229, 255, 255, 0.11),
+    0 4px 10px rgba(0, 0, 0, 0.26) !important;
+}
+
+html body #app #match.active .energy-wrap small {
+  color: var(--hud-cyan) !important;
+  font-size: 8px !important;
+  letter-spacing: 0.2em !important;
+}
+
+html body #app #match.active .energy-wrap b {
+  min-width: 53px !important;
+  color: #d9eceb !important;
+  font-size: 9px !important;
+  letter-spacing: 0.08em !important;
+}
+
+html body #app #match.active .energy-wrap .energy {
+  height: 8px !important;
+  border: 1px solid rgba(120, 232, 232, 0.38) !important;
+  border-radius: 1px !important;
+  background:
+    repeating-linear-gradient(90deg, rgba(117, 205, 208, 0.14) 0 1px, transparent 1px 12px),
+    rgba(1, 8, 12, 0.9) !important;
+  box-shadow: inset 0 1px 0 rgba(232, 255, 255, 0.12) !important;
+}
+
+html body #app #match.active .energy-wrap .energy > span {
+  background:
+    linear-gradient(180deg, rgba(235, 255, 255, 0.42), transparent 45%),
+    linear-gradient(90deg, #2f8d99, #78e8e8 72%, #dffdf3) !important;
+  box-shadow: 0 0 8px rgba(120, 232, 232, 0.58) !important;
+}
+
+html body #app #match.active .energy-wrap .energy::before {
+  display: none !important;
+}
+
+/* The old deck is decoration behind these controls; remove it so the three
+   abilities read as three deliberate, equally weighted actions. */
+html body #app #match.active .powers > .ability-deck {
+  display: none !important;
+}
+
+html body #app #match.active .powers {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  grid-template-rows: 1fr !important;
+  gap: 6px !important;
+  padding: 0 1px !important;
+}
+
+html body #app #match.active .powers > .energy-attack,
+html body #app #match.active .powers > #rewind {
+  box-sizing: border-box;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  padding: 4px 6px !important;
+  border-radius: 5px !important;
+  border: 1px solid rgba(132, 203, 207, 0.42) !important;
+  background:
+    linear-gradient(180deg, rgba(22, 43, 48, 0.94), rgba(4, 12, 17, 0.98)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(232, 255, 255, 0.13),
+    inset 0 -8px 10px rgba(0, 0, 0, 0.38),
+    0 5px 10px rgba(0, 0, 0, 0.34) !important;
+  filter: none !important;
+}
+
+html body #app #match.active .powers > .energy-attack.burst {
+  --attack-color: var(--hud-cyan);
+  --attack-soft: rgba(120, 232, 232, 0.18);
+  border-top-color: rgba(120, 232, 232, 0.86) !important;
+}
+
+html body #app #match.active .powers > .energy-attack.strike {
+  --attack-color: var(--hud-red);
+  --attack-soft: rgba(239, 132, 152, 0.18);
+  border-top-color: rgba(239, 132, 152, 0.84) !important;
+  background:
+    linear-gradient(180deg, rgba(47, 28, 36, 0.95), rgba(13, 5, 9, 0.98)) !important;
+}
+
+html body #app #match.active .powers > #rewind {
+  --mod-core: rgba(231, 201, 130, 0.28);
+  border-top-color: rgba(231, 201, 130, 0.76) !important;
+  background:
+    linear-gradient(180deg, rgba(48, 40, 28, 0.94), rgba(14, 10, 7, 0.98)) !important;
+}
+
+html body #app #match.active .powers > .energy-attack {
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: minmax(0, 1fr) auto auto !important;
+  column-gap: 0 !important;
+  row-gap: 1px !important;
+  justify-items: center !important;
+}
+
+html body #app #match.active .powers > .energy-attack .energy-attack-glyph {
+  width: clamp(17px, 5.3vw, 24px) !important;
+  height: clamp(22px, 4.1dvh, 31px) !important;
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  filter: drop-shadow(0 0 5px currentColor) !important;
+}
+
+html body #app #match.active .powers > .energy-attack .energy-attack-copy {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  align-self: center !important;
+  justify-self: center !important;
+}
+
+html body #app #match.active .powers > .energy-attack .energy-attack-copy b,
+html body #app #match.active .powers > #rewind b {
+  color: var(--hud-ink) !important;
+  font-size: clamp(7px, 1.8vw, 9px) !important;
+  letter-spacing: 0.065em !important;
+  line-height: 1.05 !important;
+  white-space: nowrap !important;
+}
+
+html body #app #match.active .powers > .energy-attack .energy-attack-copy small,
+html body #app #match.active .powers > #rewind .need {
+  display: none !important;
+}
+
+html body #app #match.active .powers > .energy-attack .energy-attack-cost,
+html body #app #match.active .powers > #rewind .cost {
+  grid-column: 1 !important;
+  grid-row: 3 !important;
+  align-self: center !important;
+  justify-self: center !important;
+  min-width: max-content !important;
+  margin: 0 !important;
+  color: var(--attack-color, var(--hud-gold)) !important;
+  font-size: clamp(7px, 1.45vw, 9px) !important;
+  letter-spacing: 0.04em !important;
+}
+
+html body #app #match.active .powers > #rewind {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: minmax(0, 1fr) auto auto !important;
+  justify-items: center !important;
+  align-content: center !important;
+  gap: 1px !important;
+}
+
+html body #app #match.active .powers > #rewind .glyph {
+  width: clamp(23px, 4.1dvh, 29px) !important;
+  height: clamp(23px, 4.1dvh, 29px) !important;
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  color: transparent !important;
+  font-size: 0 !important;
+}
+
+html body #app #match.active .powers > #rewind b {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  justify-self: center !important;
+}
+
+html body #app #match.active .powers > .energy-attack:disabled,
+html body #app #match.active .powers > #rewind:disabled {
+  opacity: 0.48 !important;
+  filter: saturate(0.55) !important;
+}
+
+html body #app #match.active .powers > .energy-attack.ready,
+html body #app #match.active .powers > #rewind.ready,
+html body #app #match.active .powers > .energy-attack[aria-pressed="true"] {
+  border-color: rgba(215, 252, 247, 0.78) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(245, 255, 251, 0.24),
+    0 0 13px rgba(120, 232, 232, 0.26) !important;
+}
+
+@media (max-width: 374px) {
+  html body #app #match.active .hud-mute {
+    padding-inline: 6px !important;
+    font-size: 7px !important;
+  }
+
+  html body #app #match.active .fighter {
+    padding-inline: 4px !important;
+  }
+
+  html body #app #match.active .powers {
+    gap: 4px !important;
+  }
+
+  html body #app #match.active .powers > .energy-attack,
+  html body #app #match.active .powers > #rewind {
+    padding-inline: 4px !important;
+  }
+
+  html body #app #match.active .powers > .energy-attack .energy-attack-cost,
+  html body #app #match.active .powers > #rewind .cost {
+    font-size: 8px !important;
+  }
+}
+
+@media (max-height: 760px) {
+  /* The short-phone ability rail is 48px tall. Keep the icon, label, and
+     charge cost inside that fixed rail instead of letting the icon bleed
+     into the board row above. */
+  html body #app #match.active .powers > .energy-attack .energy-attack-glyph {
+    width: 17px !important;
+    height: 20px !important;
+  }
+
+  html body #app #match.active .powers > #rewind .glyph {
+    width: 21px !important;
+    height: 21px !important;
+  }
+
+  html body #app #match.active .powers > .energy-attack .energy-attack-copy b,
+  html body #app #match.active .powers > #rewind b {
+    font-size: 7px !important;
+  }
+
+  html body #app #match.active .powers > .energy-attack .energy-attack-cost,
+  html body #app #match.active .powers > #rewind .cost {
+    font-size: 7px !important;
+    letter-spacing: 0.02em !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body #app #match.active .hud-icon,
+  html body #app #match.active .hud-mute,
+  html body #app #match.active .energy-attack,
+  html body #app #match.active .power {
+    transition: none !important;
+  }
+}
