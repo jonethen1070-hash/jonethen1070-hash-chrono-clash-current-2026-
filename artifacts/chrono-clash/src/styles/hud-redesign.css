@@ -7,16 +7,20 @@
  */
 
 #match.active {
-  --hud-ink: #e8f4f5;
-  --hud-muted: #78949a;
-  --hud-rule: rgba(139, 204, 207, 0.24);
-  --hud-panel: rgba(5, 15, 20, 0.9);
-  --hud-panel-deep: rgba(2, 8, 12, 0.96);
-  --hud-cyan: #78e8e8;
-  --hud-cyan-dim: #2e8c98;
-  --hud-red: #ef8498;
-  --hud-red-dim: #922d4a;
-  --hud-gold: #e7c982;
+  --hud-ink: #f5ffff;
+  --hud-muted: #b2dadd;
+  --hud-rule: rgba(120, 232, 232, 0.48);
+  --hud-panel: rgba(4, 16, 22, 0.94);
+  --hud-panel-deep: rgba(1, 7, 12, 0.98);
+  --hud-cyan: #5ef6ff;
+  --hud-cyan-bright: #b9ffff;
+  --hud-cyan-dim: #087f9b;
+  --hud-red: #ff4d7a;
+  --hud-red-bright: #ffd2dc;
+  --hud-red-dim: #a51445;
+  --hud-green: #65ffd2;
+  --hud-purple: #c59bff;
+  --hud-gold: #fff0a8;
 }
 
 /* The top row is a control shelf, not a brand/title strip. */
@@ -43,12 +47,12 @@ html body #app #match.active .hud-mute {
   min-height: 0 !important;
   height: 28px !important;
   border-radius: 5px !important;
-  border: 1px solid rgba(120, 232, 232, 0.34) !important;
+  border: 1px solid rgba(120, 232, 232, 0.68) !important;
   background:
-    linear-gradient(180deg, rgba(21, 42, 47, 0.92), rgba(4, 13, 18, 0.96)) !important;
+    linear-gradient(180deg, rgba(20, 53, 60, 0.96), rgba(3, 15, 21, 0.98)) !important;
   box-shadow:
-    inset 0 1px 0 rgba(226, 255, 255, 0.14),
-    0 3px 8px rgba(0, 0, 0, 0.32) !important;
+    inset 0 1px 0 rgba(226, 255, 255, 0.26),
+    0 3px 8px rgba(0, 0, 0, 0.38) !important;
   color: var(--hud-ink) !important;
 }
 
@@ -75,7 +79,7 @@ html body #app #match.active .hud-mute:focus-visible {
 
 html body #app #match.active .hud-icon-settings {
   opacity: 1 !important;
-  border-color: rgba(239, 132, 152, 0.3) !important;
+  border-color: rgba(255, 77, 122, 0.68) !important;
 }
 
 /* YOU / VS / RIVAL is one instrument: quiet panels, strong readout contrast. */
@@ -92,25 +96,29 @@ html body #app #match.active .fighter {
   border-radius: 8px !important;
   border-width: 1px !important;
   background:
-    linear-gradient(180deg, rgba(17, 36, 42, 0.94), rgba(3, 11, 16, 0.97)) !important;
+    linear-gradient(180deg, rgba(15, 59, 72, 0.96), rgba(2, 13, 20, 0.98)) !important;
   box-shadow:
-    inset 0 1px 0 rgba(229, 255, 255, 0.13),
+    inset 0 1px 0 rgba(229, 255, 255, 0.24),
     0 5px 12px rgba(0, 0, 0, 0.36) !important;
 }
 
 html body #app #match.active .fighter.you {
-  border-color: rgba(120, 232, 232, 0.72) !important;
+  border-color: rgba(94, 246, 255, 0.94) !important;
+  background:
+    linear-gradient(90deg, rgba(0, 145, 175, 0.52), rgba(4, 22, 30, 0.96) 72%) !important;
   box-shadow:
     inset 3px 0 0 var(--hud-cyan),
-    inset 0 1px 0 rgba(229, 255, 255, 0.16),
+    inset 0 1px 0 rgba(229, 255, 255, 0.3),
     0 5px 12px rgba(0, 0, 0, 0.36) !important;
 }
 
 html body #app #match.active .fighter.rival {
-  border-color: rgba(239, 132, 152, 0.7) !important;
+  border-color: rgba(255, 77, 122, 0.94) !important;
+  background:
+    linear-gradient(270deg, rgba(148, 15, 63, 0.58), rgba(24, 5, 14, 0.96) 72%) !important;
   box-shadow:
     inset -3px 0 0 var(--hud-red),
-    inset 0 1px 0 rgba(255, 230, 235, 0.14),
+    inset 0 1px 0 rgba(255, 230, 235, 0.28),
     0 5px 12px rgba(0, 0, 0, 0.36) !important;
 }
 
@@ -127,11 +135,11 @@ html body #app #match.active .fighter .avatar {
 
 html body #app #match.active .avatar-ring {
   padding: 2px !important;
-  box-shadow: 0 0 10px rgba(120, 232, 232, 0.34) !important;
+  box-shadow: 0 0 12px rgba(94, 246, 255, 0.6) !important;
 }
 
 html body #app #match.active .avatar-ring.rival {
-  box-shadow: 0 0 10px rgba(239, 132, 152, 0.3) !important;
+  box-shadow: 0 0 12px rgba(255, 77, 122, 0.58) !important;
 }
 
 html body #app #match.active .avatar-ring .avatar {
@@ -144,19 +152,19 @@ html body #app #match.active .fighter-copy {
 }
 
 html body #app #match.active .fighter-copy small {
-  color: var(--hud-ink) !important;
+  color: #ffffff !important;
   font-size: clamp(7px, 1.15dvh, 9px) !important;
   letter-spacing: 0.19em !important;
   line-height: 1 !important;
 }
 
 html body #app #match.active .fighter.rival .fighter-copy small {
-  color: #ffe6eb !important;
+  color: #ffffff !important;
 }
 
 html body #app #match.active .fighter-copy em {
   margin-top: 3px;
-  color: var(--hud-muted) !important;
+  color: #d5f4f5 !important;
   font-size: clamp(7px, 1.05dvh, 8px) !important;
   letter-spacing: 0.12em !important;
   line-height: 1 !important;
@@ -165,7 +173,7 @@ html body #app #match.active .fighter-copy em {
 html body #app #match.active .rival-state {
   max-width: 100%;
   margin-top: 3px !important;
-  color: #9b6872 !important;
+  color: #ff9bb2 !important;
   font-size: 6px !important;
   letter-spacing: 0.08em !important;
   line-height: 1 !important;
@@ -179,22 +187,22 @@ html body #app #match.active .score-rail {
 }
 
 html body #app #match.active .score-rail b {
-  color: var(--hud-cyan) !important;
+  color: var(--hud-cyan-bright) !important;
   font-size: clamp(15px, 2.65dvh, 20px) !important;
   line-height: 1 !important;
-  text-shadow: 0 0 10px rgba(120, 232, 232, 0.38) !important;
+  text-shadow: 0 0 10px rgba(94, 246, 255, 0.6) !important;
 }
 
 html body #app #match.active .fighter.rival .score-rail b {
-  color: var(--hud-red) !important;
-  text-shadow: 0 0 10px rgba(239, 132, 152, 0.34) !important;
+  color: var(--hud-red-bright) !important;
+  text-shadow: 0 0 10px rgba(255, 77, 122, 0.58) !important;
 }
 
 html body #app #match.active .score-track {
   height: 4px !important;
   border: 0 !important;
   border-radius: 1px !important;
-  background: rgba(158, 212, 213, 0.12) !important;
+  background: rgba(180, 239, 239, 0.22) !important;
 }
 
 html body #app #match.active .fighter.you .score-track i {
@@ -224,39 +232,42 @@ html body #app #match.active .vs-arcs {
 }
 
 html body #app #match.active .vs-badge {
-  color: #dcebec !important;
-  -webkit-text-fill-color: #dcebec !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
   background: none !important;
   font-size: clamp(17px, 3.1dvh, 25px) !important;
   letter-spacing: 0.14em !important;
   filter: none !important;
-  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.7) !important;
+  text-shadow:
+    -4px 0 9px rgba(94, 246, 255, 0.62),
+    4px 0 9px rgba(255, 77, 122, 0.54),
+    0 2px 0 rgba(0, 0, 0, 0.7) !important;
 }
 
 html body #app #match.active .vs-column .timer {
   min-height: 0 !important;
   padding: 4px 8px 5px !important;
   border-radius: 4px !important;
-  border: 1px solid rgba(231, 201, 130, 0.56) !important;
+  border: 1px solid rgba(94, 246, 255, 0.72) !important;
   background:
-    linear-gradient(180deg, rgba(62, 53, 33, 0.82), rgba(10, 12, 14, 0.96)) !important;
+    linear-gradient(180deg, rgba(15, 67, 78, 0.9), rgba(4, 15, 20, 0.98)) !important;
   box-shadow:
-    inset 0 1px 0 rgba(255, 239, 188, 0.2),
+    inset 0 1px 0 rgba(226, 255, 255, 0.25),
     0 4px 8px rgba(0, 0, 0, 0.3) !important;
 }
 
 html body #app #match.active .vs-column .timer small {
-  color: var(--hud-gold) !important;
+  color: var(--hud-cyan-bright) !important;
   font-size: clamp(5px, 0.9dvh, 7px) !important;
   letter-spacing: 0.15em !important;
 }
 
 html body #app #match.active .vs-column .timer b {
-  color: #faedc1 !important;
+  color: #ffffff !important;
   font-family: var(--font-display);
   font-size: clamp(14px, 2.35dvh, 19px) !important;
   line-height: 1 !important;
-  text-shadow: 0 0 8px rgba(231, 201, 130, 0.4) !important;
+  text-shadow: 0 0 8px rgba(94, 246, 255, 0.62) !important;
 }
 
 /* Replace the legacy watch glyph with a CSS tick, never a text emoji. */
@@ -278,43 +289,43 @@ html body #app #match.active .boards > .energy-wrap {
   min-height: 0 !important;
   padding: 4px 8px !important;
   gap: 8px !important;
-  border: 1px solid rgba(120, 232, 232, 0.24) !important;
+  border: 1px solid rgba(101, 255, 210, 0.58) !important;
   border-radius: 4px !important;
   background:
-    linear-gradient(90deg, rgba(21, 52, 57, 0.64), rgba(5, 17, 22, 0.9) 44%, rgba(25, 26, 25, 0.74)) !important;
+    linear-gradient(90deg, rgba(15, 74, 67, 0.78), rgba(4, 25, 27, 0.94) 44%, rgba(14, 43, 38, 0.84)) !important;
   box-shadow:
     inset 0 1px 0 rgba(229, 255, 255, 0.11),
     0 4px 10px rgba(0, 0, 0, 0.26) !important;
 }
 
 html body #app #match.active .energy-wrap small {
-  color: var(--hud-cyan) !important;
+  color: var(--hud-green) !important;
   font-size: 8px !important;
   letter-spacing: 0.2em !important;
 }
 
 html body #app #match.active .energy-wrap b {
   min-width: 53px !important;
-  color: #d9eceb !important;
+  color: #edfffb !important;
   font-size: 9px !important;
   letter-spacing: 0.08em !important;
 }
 
 html body #app #match.active .energy-wrap .energy {
   height: 8px !important;
-  border: 1px solid rgba(120, 232, 232, 0.38) !important;
+  border: 1px solid rgba(101, 255, 210, 0.65) !important;
   border-radius: 1px !important;
   background:
     repeating-linear-gradient(90deg, rgba(117, 205, 208, 0.14) 0 1px, transparent 1px 12px),
-    rgba(1, 8, 12, 0.9) !important;
+    rgba(1, 10, 12, 0.94) !important;
   box-shadow: inset 0 1px 0 rgba(232, 255, 255, 0.12) !important;
 }
 
 html body #app #match.active .energy-wrap .energy > span {
   background:
     linear-gradient(180deg, rgba(235, 255, 255, 0.42), transparent 45%),
-    linear-gradient(90deg, #2f8d99, #78e8e8 72%, #dffdf3) !important;
-  box-shadow: 0 0 8px rgba(120, 232, 232, 0.58) !important;
+    linear-gradient(90deg, #18b889, #65ffd2 72%, #effff8) !important;
+  box-shadow: 0 0 8px rgba(101, 255, 210, 0.72) !important;
 }
 
 html body #app #match.active .energy-wrap .energy::before {
@@ -342,35 +353,43 @@ html body #app #match.active .powers > #rewind {
   height: 100% !important;
   padding: 4px 6px !important;
   border-radius: 5px !important;
-  border: 1px solid rgba(132, 203, 207, 0.42) !important;
+  border: 1px solid rgba(132, 203, 207, 0.72) !important;
   background:
-    linear-gradient(180deg, rgba(22, 43, 48, 0.94), rgba(4, 12, 17, 0.98)) !important;
+    linear-gradient(180deg, rgba(22, 58, 63, 0.98), rgba(3, 15, 20, 0.99)) !important;
   box-shadow:
-    inset 0 1px 0 rgba(232, 255, 255, 0.13),
+    inset 0 1px 0 rgba(232, 255, 255, 0.24),
     inset 0 -8px 10px rgba(0, 0, 0, 0.38),
     0 5px 10px rgba(0, 0, 0, 0.34) !important;
   filter: none !important;
 }
 
 html body #app #match.active .powers > .energy-attack.burst {
-  --attack-color: var(--hud-cyan);
-  --attack-soft: rgba(120, 232, 232, 0.18);
-  border-top-color: rgba(120, 232, 232, 0.86) !important;
+  --attack-color: var(--hud-green);
+  --attack-soft: rgba(101, 255, 210, 0.3);
+  color: var(--hud-green) !important;
+  border-color: rgba(101, 255, 210, 0.76) !important;
+  border-top-color: #a9ffe3 !important;
+  background:
+    linear-gradient(180deg, rgba(12, 92, 82, 0.88), rgba(2, 22, 22, 0.98)) !important;
 }
 
 html body #app #match.active .powers > .energy-attack.strike {
   --attack-color: var(--hud-red);
-  --attack-soft: rgba(239, 132, 152, 0.18);
-  border-top-color: rgba(239, 132, 152, 0.84) !important;
+  --attack-soft: rgba(255, 77, 122, 0.3);
+  color: var(--hud-red) !important;
+  border-color: rgba(255, 77, 122, 0.78) !important;
+  border-top-color: #ffb2c5 !important;
   background:
-    linear-gradient(180deg, rgba(47, 28, 36, 0.95), rgba(13, 5, 9, 0.98)) !important;
+    linear-gradient(180deg, rgba(103, 20, 48, 0.92), rgba(20, 4, 12, 0.98)) !important;
 }
 
 html body #app #match.active .powers > #rewind {
-  --mod-core: rgba(231, 201, 130, 0.28);
-  border-top-color: rgba(231, 201, 130, 0.76) !important;
+  --mod-core: rgba(197, 155, 255, 0.4);
+  color: var(--hud-purple) !important;
+  border-color: rgba(197, 155, 255, 0.76) !important;
+  border-top-color: #e6d4ff !important;
   background:
-    linear-gradient(180deg, rgba(48, 40, 28, 0.94), rgba(14, 10, 7, 0.98)) !important;
+    linear-gradient(180deg, rgba(65, 40, 102, 0.9), rgba(13, 7, 27, 0.98)) !important;
 }
 
 html body #app #match.active .powers > .energy-attack {
@@ -398,7 +417,7 @@ html body #app #match.active .powers > .energy-attack .energy-attack-copy {
 
 html body #app #match.active .powers > .energy-attack .energy-attack-copy b,
 html body #app #match.active .powers > #rewind b {
-  color: var(--hud-ink) !important;
+  color: #ffffff !important;
   font-size: clamp(7px, 1.8vw, 9px) !important;
   letter-spacing: 0.065em !important;
   line-height: 1.05 !important;
@@ -423,6 +442,10 @@ html body #app #match.active .powers > #rewind .cost {
   letter-spacing: 0.04em !important;
 }
 
+html body #app #match.active .powers > .energy-attack .energy-attack-glyph {
+  filter: drop-shadow(0 0 7px currentColor) brightness(1.16) !important;
+}
+
 html body #app #match.active .powers > #rewind {
   display: grid !important;
   grid-template-columns: minmax(0, 1fr) !important;
@@ -439,6 +462,7 @@ html body #app #match.active .powers > #rewind .glyph {
   grid-row: 1 !important;
   color: transparent !important;
   font-size: 0 !important;
+  filter: brightness(1.18) saturate(1.18) drop-shadow(0 0 6px var(--hud-purple)) !important;
 }
 
 html body #app #match.active .powers > #rewind b {
@@ -449,8 +473,18 @@ html body #app #match.active .powers > #rewind b {
 
 html body #app #match.active .powers > .energy-attack:disabled,
 html body #app #match.active .powers > #rewind:disabled {
-  opacity: 0.48 !important;
-  filter: saturate(0.55) !important;
+  opacity: 0.72 !important;
+  filter: saturate(0.78) brightness(0.82) !important;
+}
+
+html body #app #match.active .powers > .energy-attack:disabled .energy-attack-copy b,
+html body #app #match.active .powers > #rewind:disabled b {
+  color: rgba(245, 255, 255, 0.86) !important;
+}
+
+html body #app #match.active .powers > .energy-attack:disabled .energy-attack-cost,
+html body #app #match.active .powers > #rewind:disabled .cost {
+  opacity: 0.9 !important;
 }
 
 html body #app #match.active .powers > .energy-attack.ready,
