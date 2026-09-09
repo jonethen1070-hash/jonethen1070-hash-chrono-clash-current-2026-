@@ -44,3 +44,9 @@ When the gameplay title strip is removed, keep Audio/Chat/Settings in a short fi
 **Why:** An absolute control cluster can cover the Rival label, score, or avatar even when its own bounds remain inside the viewport.
 
 **How to apply:** Make the utility row an explicit first grid track, shift the battle/energy/board rows up behind it, and subtract only the utility-row height from mobile board sizing.
+
+The approved HUD visual system should live in one scoped match-active stylesheet loaded after the board-frame layer; legacy HUD rules may remain only as neutralized fallbacks.
+
+**Why:** Chrono Clash has several historical style layers, and distributing a redesign across them recreates cascade conflicts that can affect the board-adjacent layout.
+
+**How to apply:** Keep gameplay selectors under `#match.active`, preserve the existing functional DOM/IDs, and do not move HUD presentation rules into renderer or engine code.
