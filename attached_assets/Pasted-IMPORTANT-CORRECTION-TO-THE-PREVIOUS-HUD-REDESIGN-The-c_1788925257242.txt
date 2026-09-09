@@ -1,0 +1,178 @@
+IMPORTANT CORRECTION TO THE PREVIOUS HUD REDESIGN:
+
+The current result is TOO DARK, TOO GREY, TOO MUTED and lacks colour sharpness.
+
+Do NOT continue with this muted visual direction.
+
+Chrono Clash needs a PREMIUM, HIGH-CONTRAST, COLOUR-RICH SCI-FI GAME HUD.
+
+Use the EXISTING GAME BOARD as the colour and brightness reference.
+
+THE BOARD IS APPROVED AND MUST NOT BE CHANGED.
+
+==================================================
+COLOUR + BRIGHTNESS
+==================================================
+
+The HUD must have strong, immediately readable colour.
+
+PLAYER / YOU:
+- Bright electric cyan
+- Saturated cyan highlights
+- Crisp white typography
+- Clearly visible cyan illumination
+
+RIVAL:
+- Bright hot red / magenta
+- Saturated red-magenta highlights
+- Crisp white typography
+- Clearly visible red illumination
+
+VS:
+- Bright white
+- Subtle cyan + magenta energy around it
+- Clearly visible against the dark background
+
+TIMER:
+- Bright white/cyan
+- High contrast
+- Clearly readable at a glance
+- Never grey or washed out
+
+ENERGY:
+- Bright electric green/cyan
+- Clearly visible progress
+- Strong contrast against dark background
+
+BOTTOM ABILITIES:
+ENERGY BURST:
+- Bright electric green/cyan
+
+MEGA STRIKE:
+- Bright magenta/red
+
+REWIND:
+- Bright purple/cyan
+
+==================================================
+NO MUDDY UI
+==================================================
+
+Do NOT use:
+- Low-contrast grey text
+- Dark grey icons
+- Nearly invisible borders
+- Excessively transparent panels
+- Desaturated colours
+- Washed-out gradients
+- Dark-on-dark controls
+
+The current bottom ability bar is especially bad because the controls look DISABLED.
+
+Every ability must look ACTIVE, intentional and tappable.
+
+==================================================
+VISUAL CONTRAST
+==================================================
+
+Use a dark metallic/glass foundation BUT place bright colour accents on top.
+
+Think:
+
+DARK BACKGROUND
++
+BRIGHT SATURATED COLOUR
++
+CRISP WHITE TEXT
++
+CONTROLLED LIGHTING
+
+NOT:
+
+DARK BACKGROUND
++
+DARK GREY PANELS
++
+DARK GREY TEXT
+
+==================================================
+TOP HUD
+==================================================
+
+The YOU and RIVAL areas must have clearly visible cyan/red identity.
+
+Scores should be bright and prominent.
+
+The player icons should be clearly illuminated.
+
+VS should be bright.
+
+Timer should be bright.
+
+The top controls should also have enough contrast to be clearly visible without competing with the match information.
+
+==================================================
+BOTTOM ABILITIES
+==================================================
+
+Completely avoid the current almost-black appearance.
+
+The three ability controls need visible colour identity even when unavailable.
+
+AVAILABLE:
+- Bright icon
+- Bright accent
+- Strong readable label
+- Clear cost
+
+UNAVAILABLE:
+- Dimmed version of the SAME colour
+- Still readable
+- Never almost black
+
+The player must immediately understand what each ability is.
+
+==================================================
+IMPORTANT DESIGN PRINCIPLE
+==================================================
+
+DO NOT ADD MORE RANDOM GLOW.
+
+Instead improve:
+
+1. Colour saturation
+2. Brightness
+3. Contrast
+4. Typography brightness
+5. Icon brightness
+6. Clear active/inactive states
+7. Colour hierarchy
+
+The board already has excellent colourful gems.
+
+The HUD needs to visually match that level of colour intensity.
+
+==================================================
+FINAL CHECK
+==================================================
+
+Before finishing, look at the gameplay screen as a whole.
+
+The board should remain the visual hero.
+
+But the HUD must no longer look grey, dead, faded or disabled.
+
+The final screen should immediately read as:
+
+BRIGHT
+COLOURFUL
+SHARP
+PREMIUM
+FUTURISTIC
+HIGH-ENERGY
+MOBILE GAME
+
+Do NOT touch the board.
+Do NOT change gameplay.
+Do NOT add the CHRONO CLASH title bar back.
+Do NOT return to the previous muted grey HUD direction.
