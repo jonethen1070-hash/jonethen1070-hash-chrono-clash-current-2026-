@@ -1,0 +1,375 @@
+CHRONO CLASH — FINAL GAMEPLAY HUD REDESIGN
+
+This is a VISUAL REDESIGN ONLY.
+
+We have spent a long time polishing Chrono Clash, and the current board is now approved. The board is the strongest visual element and MUST NOT be redesigned.
+
+IMPORTANT:
+DO NOT CHANGE:
+- Game logic
+- Match logic
+- Gem mechanics
+- Gem artwork
+- Gem materials
+- Gem animations
+- Board grid
+- Board dimensions
+- Board frame
+- Board VFX
+- Scoring logic
+- Timer logic
+- Energy logic
+- Ability functionality
+- Touch interaction
+- Audio functionality
+
+The BOARD IS APPROVED. PROTECT IT.
+
+==================================================
+1. REDESIGN THE ENTIRE GAMEPLAY HUD
+==================================================
+
+Do NOT continue adding small CSS patches to the existing HUD.
+
+Treat the current top and bottom HUD as a failed visual system and redesign them as ONE coherent premium game interface.
+
+The target is:
+
+PREMIUM AAA-INSPIRED MOBILE SCI-FI GAME
+
+Not:
+- A website dashboard
+- A collection of glowing rectangles
+- An old arcade UI
+- Excessive cyberpunk decoration
+- Random beveled panels
+
+The interface should feel like it belongs to the same game as the existing board.
+
+==================================================
+2. REMOVE THE TITLE BAR COMPLETELY
+==================================================
+
+Remove the large "CHRONO CLASH" title bar from the gameplay screen.
+
+Do NOT replace it with another title bar.
+
+Do NOT leave empty space.
+
+The player-versus-player HUD should begin near the top of the gameplay area.
+
+==================================================
+3. COMPLETELY REDESIGN THE PLAYER HUD
+==================================================
+
+Replace the current bulky YOU / VS / RIVAL panel arrangement with a cleaner unified composition.
+
+Structure:
+
+YOU + SCORE       VS / TIMER       RIVAL + SCORE
+
+Requirements:
+
+- Perfect left/right symmetry
+- Strong visual hierarchy
+- Compact vertical footprint
+- Clear player identity
+- Clear score
+- Central VS element
+- Timer integrated naturally into the center
+- No overlapping elements
+- No giant empty rectangular panels
+
+The center VS + timer should feel like a single designed component.
+
+Do not simply move the existing panels around.
+
+Redesign their visual language.
+
+==================================================
+4. REDESIGN PLAYER IDENTITY
+==================================================
+
+The player side should use cyan/blue.
+
+The rival side should use red/magenta.
+
+Keep the existing gem/player symbols where appropriate.
+
+But simplify the presentation.
+
+Use:
+
+- Clean typography
+- Strong score hierarchy
+- Controlled glow
+- Glass/metal depth
+- Subtle 3D construction
+- Better spacing
+- Better proportions
+
+Avoid excessive borders.
+
+==================================================
+5. REDESIGN THE TOP CONTROL BUTTONS
+==================================================
+
+The current:
+
+CHAT
+AUDIO ON
+SETTINGS
+
+controls look like generic website buttons.
+
+Keep their functionality.
+
+Visually redesign them so they become small, premium game controls.
+
+They should:
+
+- Be compact
+- Sit naturally in the upper area
+- Not compete with YOU / VS / RIVAL
+- Use consistent iconography
+- Have consistent dimensions
+- Have subtle glass/metal treatment
+- Avoid giant glowing borders
+
+Do NOT allow them to push the gameplay HUD downward.
+
+==================================================
+6. REDESIGN ENERGY
+==================================================
+
+Keep the existing ENERGY functionality.
+
+But visually redesign the Energy display to match the new HUD.
+
+It should feel like an actual game resource meter.
+
+Use:
+
+- Compact height
+- Clear "ENERGY"
+- Current value / maximum
+- Strong progress visualization
+- Subtle sci-fi illumination
+- Premium glass/metal construction
+
+Do not make it another oversized rectangle.
+
+==================================================
+7. REDESIGN THE BOTTOM ABILITY BAR
+==================================================
+
+The current:
+
+ENERGY BOOST
+MEGA STRIKE
+REWIND
+
+section is one of the weakest parts of the screen.
+
+Completely redesign its visual presentation while keeping all existing functionality.
+
+These should feel like PREMIUM IN-GAME ABILITIES.
+
+Each ability should have:
+
+- Strong icon
+- Ability name
+- Resource/cost indicator
+- Current availability/state
+- Clear tap target
+- Distinct visual hierarchy
+
+The buttons should feel like game abilities, NOT website cards.
+
+Do not cram long labels into tiny spaces.
+
+Use clean abbreviated labels if necessary.
+
+The three abilities should look like members of the SAME SYSTEM.
+
+==================================================
+8. REMOVE EXCESSIVE VISUAL NOISE
+==================================================
+
+This is extremely important.
+
+Current HUD has too many:
+
+- Borders
+- Inner borders
+- Glow lines
+- Bevel lines
+- Decorative corners
+- Rectangular frames
+- Highlight strips
+- Inset boxes
+
+REDUCE these significantly.
+
+Do not add more decoration to make it feel "premium".
+
+Premium comes from:
+
+- Shape
+- Spacing
+- Hierarchy
+- Material
+- Lighting
+- Typography
+- Consistency
+
+The board already demonstrates this principle.
+
+==================================================
+9. MATCH THE BOARD'S VISUAL LANGUAGE
+==================================================
+
+The HUD must visually belong to the existing board.
+
+Use the board as the visual reference.
+
+Match:
+
+- Dark futuristic environment
+- Cyan illumination
+- Magenta/red opponent energy
+- Dimensional glass
+- Dark metal
+- Controlled reflections
+- Subtle depth
+- Premium sci-fi atmosphere
+
+The HUD should feel like it is physically part of the same arena.
+
+==================================================
+10. MOBILE-FIRST COMPOSITION
+==================================================
+
+This is a PORTRAIT MOBILE GAME.
+
+Prioritize the board.
+
+The final vertical hierarchy should be approximately:
+
+COMPACT TOP CONTROLS
+↓
+PLAYER VS PLAYER HUD
+↓
+ENERGY
+↓
+APPROVED BOARD
+↓
+ABILITY CONTROLS
+
+Do NOT make the HUD so tall that it steals space from the board.
+
+Do NOT shrink the board to accommodate the redesign.
+
+Recover space by removing unnecessary UI bulk.
+
+==================================================
+11. CSS ARCHITECTURE — VERY IMPORTANT
+==================================================
+
+The project contains a very large override-heavy aaa-polish.css.
+
+DO NOT simply add another large override block.
+
+Before changing styles:
+
+1. Inspect the existing gameplay HUD DOM.
+2. Identify the actual components/classes responsible for:
+   - Player HUD
+   - VS
+   - Timer
+   - Top controls
+   - Energy
+   - Bottom abilities
+3. Identify obsolete/redundant CSS rules affecting these components.
+4. Consolidate the new HUD styling into a clean, scoped system.
+5. Remove or neutralize obsolete conflicting styles where safe.
+
+Avoid:
+
+- !important everywhere
+- duplicate selectors
+- repeated media queries
+- endless override chains
+- duplicate HUD components
+- absolute positioning hacks that break responsive layouts
+
+The goal is to leave the code cleaner than it was.
+
+==================================================
+12. RESPONSIVE TEST
+==================================================
+
+Test the gameplay screen at portrait mobile dimensions.
+
+Verify:
+
+- Nothing overlaps
+- Nothing clips
+- YOU is readable
+- RIVAL is readable
+- Scores are readable
+- VS is centered
+- Timer is readable
+- Energy is readable
+- Board remains unchanged
+- Bottom abilities remain accessible
+- Touch targets remain usable
+
+==================================================
+13. IMPORTANT DESIGN RULE
+==================================================
+
+DO NOT TRY TO MAKE EVERY ELEMENT LOOK "COOL".
+
+The board already has enough visual richness.
+
+The HUD should SUPPORT the board.
+
+Think:
+
+BOARD = HERO
+HUD = INFORMATION
+ABILITIES = ACTION
+
+The interface should feel sophisticated, restrained and intentional.
+
+==================================================
+14. FINAL ACCEPTANCE CRITERIA
+==================================================
+
+Before finishing, compare the result against the current screenshot.
+
+The final result must clearly improve:
+
+1. Top HUD
+2. VS/timer composition
+3. Player score presentation
+4. Top controls
+5. Energy display
+6. Bottom ability controls
+7. Overall hierarchy
+8. Visual consistency
+
+The board should remain visually unchanged.
+
+If you find yourself changing the board to make the HUD work, STOP and fix the HUD instead.
+
+This is the FINAL GAMEPLAY HUD REDESIGN.
+
+Do not make unrelated changes.
+Do not redesign the board.
+Do not change gameplay.
+Do not add another title bar.
+Do not add more decorative CSS just for the sake of effects.
+
+Build ONE coherent premium HUD system.
