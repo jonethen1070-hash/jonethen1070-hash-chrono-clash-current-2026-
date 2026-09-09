@@ -148,6 +148,6 @@ describe("GameUI reskin assets", () => {
     expect(studio).toContain("rgba(251,113,133,0.6)");
     expect(studio).toContain("background: transparent");
     expect(studio).toMatch(/#match \.power \{[\s\S]*min-height: 48px/);
-    expect(studio).not.toMatch(/@media \(max-height: 740px\) \{[\s\S]*?\.match-brand \{ display: none/);
+    expect(studio).not.toMatch(/\.match-brand([^-a-zA-Z]|$)/);
   });
 });

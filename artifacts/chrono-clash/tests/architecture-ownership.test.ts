@@ -9,17 +9,19 @@ function read(path: string): string {
 }
 
 describe("architecture ownership contract", () => {
-  it("loads the canonical board frame after the legacy presentation layers", () => {
+  it("loads board frame after presentation sheets and HUD cosmetics last", () => {
     const html = read("index.html");
     const game = html.indexOf("/src/styles/game.css");
     const studio = html.indexOf("/src/styles/studio.css");
     const polish = html.indexOf("/src/styles/aaa-polish.css");
     const frame = html.indexOf("/src/styles/match-frame.css");
+    const hud = html.indexOf("/src/styles/hud-redesign.css");
 
     expect(game).toBeGreaterThanOrEqual(0);
     expect(studio).toBeGreaterThan(game);
     expect(polish).toBeGreaterThan(studio);
     expect(frame).toBeGreaterThan(polish);
+    expect(hud).toBeGreaterThan(frame);
 
     const frameCss = read("src/styles/match-frame.css");
     for (const selector of [
@@ -32,6 +34,30 @@ describe("architecture ownership contract", () => {
       ".board-fastener",
     ]) {
       expect(frameCss).toContain(selector);
+    }
+
+    const hudCss = read("src/styles/hud-redesign.css");
+    expect(hudCss).toContain("authoritative stylesheet for match HUD cosmetics");
+    expect(hudCss).not.toContain(".board-outer-rail");
+    expect(hudCss).not.toContain("#playerGems");
+  });
+
+  it("keeps the match title brand element removed while preserving utility actions", () => {
+    const main = read("src/main.ts");
+    const match = main.slice(main.indexOf('id="match"'), main.indexOf('id="sheet"'));
+    expect(match).toContain("match-brand-actions");
+    expect(match).not.toMatch(/class="match-brand"/);
+    expect(match).not.toContain("match-brand-row");
+
+    for (const rel of [
+      "src/styles/game.css",
+      "src/styles/studio.css",
+      "src/styles/aaa-polish.css",
+      "src/styles/hud-redesign.css",
+      "src/styles/match-frame.css",
+    ]) {
+      const css = read(rel);
+      expect(css).not.toMatch(/\.match-brand([^-a-zA-Z]|$)/);
     }
   });
 

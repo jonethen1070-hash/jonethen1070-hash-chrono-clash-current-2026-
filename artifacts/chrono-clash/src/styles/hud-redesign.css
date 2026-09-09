@@ -1,9 +1,30 @@
 /*
- * Chrono Clash — final gameplay HUD
+ * Chrono Clash — gameplay HUD visual authority
  *
- * This is intentionally separate from the board-frame and renderer layers.
- * It only skins the match controls, fighter readouts, energy rail, and the
- * three ability controls. The board remains the visual anchor.
+ * OWNERSHIP FREEZE (do not violate in future visual work):
+ *   This file is the single authoritative stylesheet for match HUD cosmetics.
+ *
+ * Owns (visual presentation only):
+ *   - utility controls (.match-controls-row, .match-brand-actions, .hud-icon, .hud-mute)
+ *   - top HUD / player-rival panels (.match-top, .fighter, .avatar-ring, .score-rail)
+ *   - VS / timer (.vs-column, .vs-badge, .timer)
+ *   - energy rail (.boards > .energy-wrap and children)
+ *   - ability dock (.powers, .energy-attack, #rewind) cosmetics
+ *   - short-phone HUD presentation tweaks that do NOT change geometry vars
+ *
+ * Does NOT own:
+ *   - match-stage grid geometry / --controls-height / --battle-height /
+ *     --energy-height / --control-height / --mobile-board-*  → aaa-polish.css
+ *     ("LOCKED BASELINE — CHRONO CLASH RESPONSIVE GEOMETRY")
+ *   - board frame / hardware materials → match-frame.css
+ *   - canvas gems, wells, VFX → src/ui/renderer.ts
+ *   - gameplay, input, audio, scoring → engine / main.ts logic
+ *
+ * Load order (index.html): game.css → studio.css → aaa-polish.css →
+ * match-frame.css → hud-redesign.css (this file last among HUD cosmetics).
+ *
+ * Future HUD redesigns: edit THIS file. Do not add new HUD cosmetic passes
+ * to aaa-polish.css / studio.css / game.css.
  */
 
 #match.active {
