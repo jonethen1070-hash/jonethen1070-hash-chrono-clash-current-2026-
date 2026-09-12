@@ -1869,7 +1869,7 @@ export class BoardRenderer {
     isPlayer: boolean,
   ): void {
     const theme = this.fx.boardTheme;
-    const key = `${Math.round(boardW)}x${Math.round(boardH)}|${Math.round(cell * 10)}|${isPlayer ? "p" : "o"}|${theme}|hw810`;
+    const key = `${Math.round(boardW)}x${Math.round(boardH)}|${Math.round(cell * 10)}|${isPlayer ? "p" : "o"}|${theme}|hw811`;
     let sheet = this.wellCache.get(key);
     if (!sheet) {
       sheet = document.createElement("canvas");
@@ -2097,7 +2097,7 @@ export class BoardRenderer {
 
   private gemSprite(atlas: HTMLCanvasElement, colorIndex: number, color: string, inner: number, selected: boolean): HTMLCanvasElement {
     const q = Math.max(GEM_CELL, Math.round(inner));
-    const key = `${colorIndex}|${q}|${selected ? 1 : 0}|c6`;
+    const key = `${colorIndex}|${q}|${selected ? 1 : 0}|c7`;
     let sheet = this.gemSprites.get(key);
     if (sheet) return sheet;
     sheet = document.createElement("canvas");
@@ -3456,19 +3456,32 @@ export class BoardRenderer {
     ctx.stroke();
     ctx.restore();
 
-    // Localized bloom only — idle gems keep a whisper; events own the emissive.
+    // Localized bloom only — idle gems stay nearly dry; events own the emissive.
     const bloomStrength = energized
       ? selected || charge > 0 || tile.dying
         ? 1
-        : 0.55 + Math.min(0.35, tile.glow * 0.5)
-      : 0.22;
+        : 0.48 + Math.min(0.32, tile.glow * 0.45)
+      : 0.08;
+    // Colored light spill onto the socket (source = this crystal). Idle spill is tiny.
+    const spill = energized ? 0.16 + Math.min(0.14, tile.glow * 0.2) : 0.055;
+    ctx.save();
+    ctx.globalAlpha *= spill;
+    ctx.beginPath();
+    ctx.ellipse(cx + s * 0.02, cy + s * 0.4, s * 0.42, s * 0.2, 0.08, 0, Math.PI * 2);
+    const spillGrad = ctx.createRadialGradient(cx, cy + s * 0.22, s * 0.02, cx, cy + s * 0.42, s * 0.48);
+    spillGrad.addColorStop(0, colorWithAlpha(crystal.core, 0.55));
+    spillGrad.addColorStop(0.45, colorWithAlpha(color, 0.28));
+    spillGrad.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = spillGrad;
+    ctx.fill();
+    ctx.restore();
     ctx.save();
     ctx.globalAlpha *= bloomStrength;
     ctx.beginPath();
-    ctx.arc(cx, cy + s * 0.04, s * (energized ? 0.4 : 0.3), 0, Math.PI * 2);
-    const halo = ctx.createRadialGradient(cx, cy - s * 0.04, s * 0.04, cx, cy + s * 0.06, s * (energized ? 0.4 : 0.3));
+    ctx.arc(cx, cy + s * 0.04, s * (energized ? 0.4 : 0.22), 0, Math.PI * 2);
+    const halo = ctx.createRadialGradient(cx, cy - s * 0.04, s * 0.04, cx, cy + s * 0.06, s * (energized ? 0.4 : 0.22));
     halo.addColorStop(0, crystal.bloom);
-    halo.addColorStop(0.34, `${color}${energized ? "18" : "0C"}`);
+    halo.addColorStop(0.34, `${color}${energized ? "18" : "08"}`);
     halo.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = halo;
     ctx.fill();
@@ -4140,10 +4153,11 @@ export class BoardRenderer {
 
     ctx.save();
     ctx.beginPath();
-    ctx.arc(cx, cy + s * 0.08, s * 0.36, 0, Math.PI * 2);
-    const under = ctx.createRadialGradient(cx, cy - s * 0.02, s * 0.02, cx, cy + s * 0.1, s * 0.36);
-    under.addColorStop(0, crystal.bloom);
-    under.addColorStop(0.38, `${color}45`);
+    ctx.arc(cx, cy + s * 0.08, s * (selected ? 0.36 : 0.28), 0, Math.PI * 2);
+    const under = ctx.createRadialGradient(cx, cy - s * 0.02, s * 0.02, cx, cy + s * 0.1, s * (selected ? 0.36 : 0.28));
+    // Idle crystals keep a tight under-glow; selected owns the emissive halo.
+    under.addColorStop(0, selected ? crystal.bloom : colorWithAlpha(crystal.core, 0.22));
+    under.addColorStop(0.38, selected ? `${color}45` : `${color}22`);
     under.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = under;
     ctx.fill();
@@ -4163,7 +4177,7 @@ export class BoardRenderer {
     // baked colors can otherwise overpower the live palette. A restrained
     // exact-primary tint makes each crystal read as its gameplay color while
     // preserving the atlas material detail.
-    ctx.fillStyle = colorWithAlpha(color, 0.48);
+    ctx.fillStyle = selected ? colorWithAlpha(color, 0.48) : colorWithAlpha(color, 0.4);
     ctx.fillRect(dx, dy, dest, dest);
     const occlude = ctx.createRadialGradient(cx + s * 0.14, cy + s * 0.24, s * 0.02, cx, cy, s * 0.52);
     occlude.addColorStop(0, "rgba(0, 4, 12, 0.4)");
@@ -4172,9 +4186,9 @@ export class BoardRenderer {
     ctx.fillStyle = occlude;
     ctx.fillRect(dx, dy, dest, dest);
     const volume = ctx.createRadialGradient(cx - s * 0.16, cy - s * 0.26, s * 0.01, cx, cy + s * 0.1, s * 0.5);
-    volume.addColorStop(0, selected ? "rgba(255,255,255,0.24)" : "rgba(255,255,255,0.08)");
-    volume.addColorStop(0.18, `${color}38`);
-    volume.addColorStop(0.46, `${crystal.edge}18`);
+    volume.addColorStop(0, selected ? "rgba(255,255,255,0.24)" : "rgba(255,255,255,0.05)");
+    volume.addColorStop(0.18, selected ? `${color}38` : `${color}22`);
+    volume.addColorStop(0.46, selected ? `${crystal.edge}18` : `${crystal.edge}0C`);
     volume.addColorStop(0.72, "rgba(0,0,0,0)");
     volume.addColorStop(1, "rgba(0,8,18,0.28)");
     ctx.fillStyle = volume;
@@ -4211,14 +4225,15 @@ export class BoardRenderer {
     ctx.stroke();
 
     ctx.globalCompositeOperation = "lighter";
-    const core = ctx.createRadialGradient(cx - s * 0.04, cy - s * 0.08, s * 0.006, cx, cy + s * 0.02, s * 0.26);
-    core.addColorStop(0, "rgba(255,255,255,0.28)");
-    core.addColorStop(0.16, colorWithAlpha(crystal.core, 0.82));
-    core.addColorStop(0.52, `${color}4d`);
+    const core = ctx.createRadialGradient(cx - s * 0.04, cy - s * 0.08, s * 0.006, cx, cy + s * 0.02, s * (selected ? 0.26 : 0.2));
+    // Keep the bright core string for selected/energized; idle reads as glass with a dim heart.
+    core.addColorStop(0, selected ? "rgba(255,255,255,0.28)" : "rgba(255,255,255,0.1)");
+    core.addColorStop(0.16, colorWithAlpha(crystal.core, selected ? 0.82 : 0.38));
+    core.addColorStop(0.52, selected ? `${color}4d` : `${color}28`);
     core.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = core;
     ctx.beginPath();
-    ctx.arc(cx, cy - s * 0.05, s * 0.26, 0, Math.PI * 2);
+    ctx.arc(cx, cy - s * 0.05, s * (selected ? 0.26 : 0.2), 0, Math.PI * 2);
     ctx.fill();
     paintSpeculars(ctx, cx, cy, s, crystal);
 
@@ -4583,10 +4598,12 @@ function paintDeviceBoard(
       roundRect(g, wx, wy, cell, cell, wellR);
       g.fillStyle = lipFill;
       g.fill();
-      const well = g.createLinearGradient(wx, wy, wx, wy + cell);
-      well.addColorStop(0, isPlayer ? "#005B7847" : "#8A123538");
-      well.addColorStop(0.42, "#01050A00");
-      well.addColorStop(1, "#01050AC7");
+      // Shared key from upper-left: cool rim catch + deeper lower-right pocket.
+      const well = g.createLinearGradient(wx, wy, wx + cell, wy + cell);
+      well.addColorStop(0, isPlayer ? "#1A6A824F" : "#9A284048");
+      well.addColorStop(0.28, isPlayer ? "#005B7847" : "#8A123538");
+      well.addColorStop(0.62, "#01050A00");
+      well.addColorStop(1, "#01050AD4");
       g.fillStyle = well;
       g.fill();
       roundRect(g, wx + pad, wy + pad, cell - pad * 2, cell - pad * 2, Math.max(2, wellR - 1.5));
@@ -4600,17 +4617,18 @@ function paintDeviceBoard(
          wy + cell * 0.72,
          cell * 0.5,
        );
-       contact.addColorStop(0, "rgba(0, 0, 0, 0.54)");
-       contact.addColorStop(0.52, "rgba(0, 0, 0, 0.18)");
+       contact.addColorStop(0, "rgba(0, 0, 0, 0.62)");
+       contact.addColorStop(0.52, "rgba(0, 0, 0, 0.22)");
        contact.addColorStop(1, "rgba(0, 0, 0, 0)");
        g.fillStyle = contact;
        g.beginPath();
        g.ellipse(wx + cell * 0.52, wy + cell * 0.7, cell * 0.36, cell * 0.2, 0, 0, Math.PI * 2);
        g.fill();
-      const dent = g.createLinearGradient(wx, wy, wx, wy + cell);
-      dent.addColorStop(0, "#FFFFFF0D");
-      dent.addColorStop(0.32, "#01050A00");
-      dent.addColorStop(1, "#01050A6B");
+      const dent = g.createLinearGradient(wx - cell * 0.05, wy - cell * 0.08, wx + cell * 0.85, wy + cell);
+      dent.addColorStop(0, "#FFFFFF14");
+      dent.addColorStop(0.22, "#FFFFFF08");
+      dent.addColorStop(0.48, "#01050A00");
+      dent.addColorStop(1, "#01050A88");
       g.fillStyle = dent;
       g.fill();
       const pocket = g.createRadialGradient(

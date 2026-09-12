@@ -7442,12 +7442,15 @@ html body #app #match #energyFill.surge {
 html body #app #match .energy-wrap.hot::after {
   content: "";
   position: absolute;
-  inset: -2px;
+  inset: 0;
   border-radius: inherit;
   pointer-events: none;
-  box-shadow: 0 0 18px rgba(34, 211, 238, .24);
-  opacity: .65;
-  animation: cc-energy-breathe 1.8s ease-in-out infinite;
+  /* Localized ready halo — bright edge, short falloff; must not outshine the board. */
+  box-shadow:
+    inset 0 0 0 1px rgba(170, 255, 255, 0.22),
+    0 0 6px rgba(34, 211, 238, 0.18);
+  opacity: 0.72;
+  animation: cc-energy-breathe 2.2s ease-in-out infinite;
 }
 
 html body #app #match .fighter.cpu-action {
@@ -7514,8 +7517,8 @@ html body #app #results.tie .result-burst {
     background-position: 0% 50%;
   }
   30% {
-    filter: brightness(2) saturate(1.45);
-    box-shadow: 0 0 14px rgba(80, 230, 255, 0.55), inset 0 0 10px rgba(180, 250, 255, 0.35);
+    filter: brightness(1.35) saturate(1.18);
+    box-shadow: 0 0 6px rgba(80, 230, 255, 0.32), inset 0 0 8px rgba(180, 250, 255, 0.4);
   }
   100% {
     filter: brightness(1);
@@ -7524,8 +7527,8 @@ html body #app #results.tie .result-burst {
 }
 
 @keyframes cc-energy-breathe {
-  0%, 100% { opacity: .34; }
-  50% { opacity: .9; }
+  0%, 100% { opacity: 0.55; filter: brightness(1); }
+  50% { opacity: 0.85; filter: brightness(1.08); }
 }
 
 @keyframes cc-cpu-action {
@@ -8141,12 +8144,12 @@ html body #app #match.cast-rewind .player-side .board-slot {
 }
 
 html body #app #match .energy-wrap.hot {
-  border-color: rgba(133, 248, 251, .9) !important;
+  border-color: rgba(133, 248, 251, .78) !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, .34),
     inset 0 -7px 11px rgba(0, 0, 0, .7),
     0 4px 0 rgba(0, 0, 0, .74),
-    0 0 22px rgba(42, 237, 242, .32) !important;
+    0 0 8px rgba(42, 237, 242, .16) !important;
 }
 
 @keyframes cc-nebula-breathe {
@@ -10990,3 +10993,59 @@ html body #app #match .power[data-ready="true"]:not(:disabled) {
     animation: none !important;
   }
 }
+
+
+/* ============================================================
+   FOCAL HIERARCHY — full-energy HUD supports the board
+   Board/gems remain the visual hero. Ready state stays powerful
+   via bright core + short-range emissive, not wide bloom fog.
+   ============================================================ */
+
+/* Full-energy rail: readable charged core, minimal atmospheric spill. */
+html body #app #match.active .energy-wrap.hot {
+  filter: none !important;
+  border-color: rgba(90, 220, 210, 0.62) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(220, 255, 245, 0.14),
+    inset 0 -10px 14px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(0, 0, 0, 0.55),
+    0 4px 10px rgba(0, 0, 0, 0.34) !important;
+}
+
+html body #app #match.active .energy-wrap.hot::after {
+  inset: 1px !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(180, 255, 250, 0.16),
+    0 0 3px rgba(34, 211, 238, 0.12) !important;
+  opacity: 0.55 !important;
+  animation: cc-energy-breathe 2.6s ease-in-out infinite !important;
+}
+
+html body #app #match.active .energy-wrap.hot .energy > span {
+  /* Richer charged cyan — less white-hot mass, keep specular lip. */
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.46), transparent 40%),
+    linear-gradient(90deg, #078a68 0%, #1ed4a0 48%, #5ef0c8 78%, #9af8de 100%) !important;
+  box-shadow:
+    0 0 2px rgba(47, 240, 184, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -2px 3px rgba(0, 50, 45, 0.28) !important;
+  filter: none !important;
+}
+
+/* VS: keep split semantic color, shrink competing dual bloom. */
+html body #app #match.active .vs-badge {
+  text-shadow:
+    -1px 0 3px rgba(47, 230, 247, 0.22),
+    1px 0 3px rgba(255, 61, 114, 0.2),
+    0 2px 0 rgba(0, 0, 0, 0.88) !important;
+  filter: none !important;
+}
+
+html body #app #match.active .vs-column .timer b {
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.88),
+    0 0 4px rgba(47, 230, 247, 0.2) !important;
+}
+
+/* Non-hot (low/normal energy) path intentionally untouched above. */
