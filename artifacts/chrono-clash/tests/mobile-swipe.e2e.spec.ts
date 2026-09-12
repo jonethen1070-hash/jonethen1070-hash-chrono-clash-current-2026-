@@ -79,15 +79,18 @@ type RenderSample = {
 
 const BOARD_FRAME = 6;
 const BOARD_GAP = 1.5;
-const BOARD_SIZE = 8;
+const BOARD_COLS = 8;
+const BOARD_ROWS = 10;
+const BOARD_TILES = BOARD_COLS * BOARD_ROWS;
 
 function cellCenter(board: BoardBox, row: number, col: number): { x: number; y: number } {
-  const inner = board.width - BOARD_FRAME * 2;
-  const cell = (inner - BOARD_GAP * (BOARD_SIZE + 1)) / BOARD_SIZE;
-  const rowCell = Math.max(
-    cell,
-    (board.height - BOARD_FRAME * 2 - BOARD_GAP * (BOARD_SIZE + 1)) / BOARD_SIZE,
+  const innerW = board.width - BOARD_FRAME * 2;
+  const innerH = board.height - BOARD_FRAME * 2;
+  const cell = Math.min(
+    (innerW - BOARD_GAP * (BOARD_COLS + 1)) / BOARD_COLS,
+    (innerH - BOARD_GAP * (BOARD_ROWS + 1)) / BOARD_ROWS,
   );
+  const rowCell = cell;
   const pitch = cell + BOARD_GAP;
   const rowPitch = rowCell + BOARD_GAP;
   return {
@@ -131,7 +134,7 @@ async function collectVfxTimeline(page: Page, timeoutMs: number): Promise<Render
       samples.push({ at, state });
       const settled =
         state !== null &&
-        state.tiles.length === 64 &&
+        state.tiles.length === BOARD_TILES &&
         state.dying.length === 0 &&
         state.moving.length === 0 &&
         state.vfx.particleCount === 0 &&
@@ -220,9 +223,9 @@ test.describe("mobile board clipping regression", () => {
           {
             id: "rewind",
             parts: [
-              { name: "icon", selector: ".glyph" },
-              { name: "label", selector: "b" },
-              { name: "cost", selector: ".cost" },
+              { name: "icon", selector: ".energy-attack-glyph" },
+              { name: "label", selector: ".energy-attack-copy b" },
+              { name: "cost", selector: ".energy-attack-cost" },
             ],
           },
         ] as const;
@@ -321,8 +324,8 @@ test.describe("mobile board clipping regression", () => {
       expect(canvas, `Missing player canvas geometry: ${detail}`).not.toBeNull();
       expect(geometry.buttons, `Ability buttons were not rendered: ${detail}`).toHaveLength(3);
       expect(geometry.canvasCount, `Expected an in-board canvas: ${detail}`).toBeGreaterThan(0);
-      expect(geometry.renderTileCount, `Expected all 64 board tiles: ${detail}`).toBe(64);
-      expect(geometry.renderCell, `Expected a measurable 8x8 cell size: ${detail}`).toBeGreaterThan(0);
+      expect(geometry.renderTileCount, `Expected all 80 board tiles: ${detail}`).toBe(BOARD_TILES);
+      expect(geometry.renderCell, `Expected a measurable 8x10 cell size: ${detail}`).toBeGreaterThan(0);
 
       expect(board!.height, `Board should use the available vertical match space: ${detail}`).toBeGreaterThanOrEqual(
         board!.width,
@@ -462,10 +465,10 @@ test("guest mobile matches survive rapid swipes, cancellation, and layout checks
   expect(energyHandlerState.pressed).toBe("false");
   expect(energyHandlerState.unavailable).toBe(true);
 
-  const centers = Array.from({ length: BOARD_SIZE * BOARD_SIZE }, (_, index) =>
-    cellCenter(box, Math.floor(index / BOARD_SIZE), index % BOARD_SIZE),
+  const centers = Array.from({ length: BOARD_TILES }, (_, index) =>
+    cellCenter(box, Math.floor(index / BOARD_COLS), index % BOARD_COLS),
   );
-  expect(centers).toHaveLength(64);
+  expect(centers).toHaveLength(BOARD_TILES);
   expect(centers.every(({ x, y }) => x > box.x && x < box.x + box.width && y > box.y && y < box.y + box.height)).toBe(true);
 
   await page.evaluate(() => {
@@ -1232,7 +1235,7 @@ test("real touch gestures play only the committed swap WAV progression", async (
     if (!session?.isInteractive(performance.now())) return false;
     const board = session.player.board.map((row) => row.map((piece) => (piece ? { ...piece } : null)));
     const hasMatch = (cells: Array<Array<{ color: number } | null>>): boolean => {
-      for (let r = 0; r < 8; r += 1) {
+      for (let r = 0; r < 10; r += 1) {
         for (let c = 0; c < 8; c += 1) {
           const color = cells[r]?.[c]?.color;
           if (color == null) continue;
@@ -1250,7 +1253,7 @@ test("real touch gestures play only the committed swap WAV progression", async (
       }
       return false;
     };
-    for (let r = 0; r < 8; r += 1) {
+    for (let r = 0; r < 10; r += 1) {
       for (let c = 0; c < 8; c += 1) {
         for (const [dr, dc] of [[0, 1], [1, 0]]) {
           const nr = r + dr;
@@ -1381,7 +1384,7 @@ test.describe("mobile cascade visibility", () => {
       const chrono = (window as Window & {
         __chrono?: { session?: { phase?: string }; renderState?: () => { tiles: unknown[] } };
       }).__chrono;
-      return chrono?.session?.phase === "playing" && (chrono.renderState?.().tiles.length ?? 0) >= 64;
+      return chrono?.session?.phase === "playing" && (chrono.renderState?.().tiles.length ?? 0) >= BOARD_TILES;
     })).toBe(true);
 
     const fixtureColors = [
@@ -1541,7 +1544,7 @@ test.describe("mobile cascade visibility", () => {
       const chrono = (window as Window & {
         __chrono?: { session?: { phase?: string }; renderState?: () => RenderState };
       }).__chrono;
-      return chrono?.session?.phase === "playing" && (chrono.renderState?.().tiles.length ?? 0) >= 64;
+      return chrono?.session?.phase === "playing" && (chrono.renderState?.().tiles.length ?? 0) >= BOARD_TILES;
     })).toBe(true);
 
     const board = page.locator("#playerBoard");
@@ -1647,7 +1650,7 @@ test.describe("mobile cascade visibility", () => {
         const state = chrono?.renderState?.();
         return Boolean(
           state &&
-          state.tiles.length === 64 &&
+          state.tiles.length === BOARD_TILES &&
           state.dying.length === 0 &&
           state.moving.length === 0 &&
           state.vfx.particleCount === 0 &&
@@ -1661,7 +1664,7 @@ test.describe("mobile cascade visibility", () => {
         return chrono?.renderState?.() ?? null;
       });
       expect(final).not.toBeNull();
-      expect(final.tiles).toHaveLength(64);
+      expect(final.tiles).toHaveLength(BOARD_TILES);
       expect(final.dying).toHaveLength(0);
       expect(final.moving).toHaveLength(0);
       expect(final.vfx, `${name} cleaned permanent VFX`).toMatchObject({

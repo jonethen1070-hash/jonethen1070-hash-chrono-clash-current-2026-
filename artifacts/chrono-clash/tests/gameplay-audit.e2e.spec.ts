@@ -4,11 +4,14 @@ type Coord = { r: number; c: number };
 
 const BOARD_FRAME = 6;
 const BOARD_GAP = 1.5;
-const BOARD_SIZE = 8;
+const BOARD_COLS = 8;
+const BOARD_ROWS = 10;
 
 function cellCenter(box: { x: number; y: number; width: number; height: number }, cell: Coord) {
-  const inner = box.width - BOARD_FRAME * 2;
-  const size = (inner - BOARD_GAP * (BOARD_SIZE + 1)) / BOARD_SIZE;
+  const size = Math.min(
+    (box.width - BOARD_FRAME * 2 - BOARD_GAP * (BOARD_COLS + 1)) / BOARD_COLS,
+    (box.height - BOARD_FRAME * 2 - BOARD_GAP * (BOARD_ROWS + 1)) / BOARD_ROWS,
+  );
   const pitch = size + BOARD_GAP;
   return {
     x: box.x + BOARD_FRAME + BOARD_GAP + cell.c * pitch + size / 2,
@@ -79,7 +82,7 @@ test("guest player can navigate, swap, use Mega Strike, recover from cancellatio
     const target = { r: 0, c: 0 };
     const color = board[target.r][target.c].color;
     const matching = [];
-    for (let r = 0; r < 8; r++) {
+    for (let r = 0; r < 10; r++) {
       for (let c = 0; c < 8; c++) {
         if (board[r][c]?.color === color) matching.push({ r, c });
       }

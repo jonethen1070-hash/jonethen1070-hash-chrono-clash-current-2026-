@@ -141,9 +141,12 @@ describe("GameUI reskin assets", () => {
     expect(boards.indexOf('class="energy-wrap"')).toBeLessThan(boards.indexOf('id="playerBoard"'));
     expect(studio).toContain("grid-template-rows: max-content max-content minmax(0, 1fr)");
     expect(studio).toContain("#match .rival-side .board-slot");
-    expect(studio).toContain("min(28vw, 14dvh, 120px)");
-    expect(polish).toContain("width: min(100%, calc(100vw - var(--safe-left) - var(--safe-right) - 2px), 388px)");
-    expect(studio).toContain("aspect-ratio: 1 / 1");
+    expect(studio).toContain("min(28vw, 11.2dvh, 96px)");
+    expect(polish).toContain("--mobile-board-side-gutter: 8px");
+    expect(polish).toContain("--board-after-energy-gap: 6px");
+    expect(polish).toContain("--board-before-abilities-gap: 8px");
+    expect(polish).toContain("width: var(--mobile-board-size) !important");
+    expect(studio).toContain("aspect-ratio: 8 / 10");
     expect(studio).toContain("#rewind .glyph");
     expect(studio).toContain("rgba(251,113,133,0.6)");
     expect(studio).toContain("background: transparent");

@@ -26,7 +26,7 @@ describe("arena HUD polish outside the gem board", () => {
     expect(main).not.toContain('id="playerAttack"');
     expect(main).not.toContain('id="oppAttack"');
     const studio = read("src/styles/studio.css");
-    expect(studio).toContain("min(28vw, 14dvh, 120px)");
+    expect(studio).toContain("min(28vw, 11.2dvh, 96px)");
   });
 
   it("layers a deeper cosmic arena with foreground debris", () => {

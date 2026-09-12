@@ -71,7 +71,7 @@ describe("power ability VFX presentation", () => {
     expect(styles).toContain("@keyframes cc-power-button-pulse");
     expect(styles).toContain('scale(0.94)');
     expect(renderer).toContain("const internal = ctx.createRadialGradient");
-    expect(renderer).toContain("const corePulse = 0.72 + Math.sin(now / 680");
+    expect(renderer).toContain("const corePulse = 0.78 + Math.sin(now / 620");
   });
 
   it("keeps real power resolution in the session path", () => {
