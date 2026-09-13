@@ -2,6 +2,7 @@ import { COLORS, COLS, Coord, Intensity, Piece, PieceKind, ROWS } from "../engin
 import { DragState, FxEvent, GameSnapshot } from "../engine/session";
 import { feelMul, particleBudget } from "./feel";
 import { GEM_CELL, gemAtlasCanvas, gemCellOrigin } from "./gemAtlas";
+import { applyGemMaterial, gemFacetSpec, hexHueSat } from "./gemMaterial";
 import {
   easeCrystalDie,
   gemDieDuration,
@@ -2081,7 +2082,7 @@ export class BoardRenderer {
 
   private gemSprite(atlas: HTMLCanvasElement, colorIndex: number, color: string, inner: number, selected: boolean): HTMLCanvasElement {
     const q = Math.max(GEM_CELL, Math.round(inner));
-    const key = `${colorIndex}|${q}|${selected ? 1 : 0}|c18facet`;
+    const key = `${colorIndex}|${q}|${selected ? 1 : 0}|m1crystal`;
     let sheet = this.gemSprites.get(key);
     if (sheet) return sheet;
     sheet = document.createElement("canvas");
@@ -3413,7 +3414,7 @@ export class BoardRenderer {
     // peeked under every gem and joined into a continuous mid-board band.
     ctx.save();
     jewelPath(ctx, cx + s * 0.028, cy + s * 0.085, s * 0.95, tile.color);
-    ctx.strokeStyle = colorWithAlpha(color, 0.18);
+    ctx.strokeStyle = colorWithAlpha(color, 0.1);
     ctx.lineWidth = Math.max(1, s * 0.02);
     ctx.stroke();
     ctx.restore();
@@ -3636,8 +3637,8 @@ export class BoardRenderer {
 
     const sweep = ctx.createLinearGradient(sweepX - s * 0.22, cy - s, sweepX + s * 0.22, cy + s);
     sweep.addColorStop(0, "rgba(255,255,255,0)");
-    sweep.addColorStop(0.44, `rgba(255,255,255,${(0.22 + idleSpark * 0.12) * intensity})`);
-    sweep.addColorStop(0.52, `rgba(255,255,255,${(0.36 + idleSpark * 0.16) * intensity})`);
+    sweep.addColorStop(0.44, `rgba(255,255,255,${(0.12 + idleSpark * 0.08) * intensity})`);
+    sweep.addColorStop(0.52, `rgba(255,255,255,${(0.2 + idleSpark * 0.12) * intensity})`);
     sweep.addColorStop(0.62, colorWithAlpha(crystal.edge, (0.18 + idleSpark * 0.1) * intensity));
     sweep.addColorStop(1, "rgba(255,255,255,0)");
     ctx.globalCompositeOperation = "lighter";
@@ -3668,8 +3669,8 @@ export class BoardRenderer {
       cy - s * 0.02,
       s * 0.18,
     );
-    internal.addColorStop(0, colorWithAlpha("#FFFFFF", (0.28 + idleSpark * 0.08) * intensity * corePulse));
-    internal.addColorStop(0.16, colorWithAlpha(crystal.core, (0.4 + idleSpark * 0.08) * intensity * corePulse));
+    internal.addColorStop(0, colorWithAlpha("#FFFFFF", (0.14 + idleSpark * 0.06) * intensity * corePulse));
+    internal.addColorStop(0.16, colorWithAlpha(crystal.core, (0.3 + idleSpark * 0.08) * intensity * corePulse));
     internal.addColorStop(0.48, colorWithAlpha(color, 0.16 * intensity));
     internal.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = internal;
@@ -4113,18 +4114,8 @@ export class BoardRenderer {
     const dy = cy - dest / 2;
     const crystal = crystalAccent(colorIndex);
 
-    ctx.save();
-    // Soft socket spill centered under the crystal — not a bottom light bar.
-    ctx.beginPath();
-    ctx.arc(cx, cy + s * 0.02, s * (selected ? 0.34 : 0.26), 0, Math.PI * 2);
-    const under = ctx.createRadialGradient(cx, cy - s * 0.06, s * 0.02, cx, cy + s * 0.04, s * (selected ? 0.34 : 0.26));
-    under.addColorStop(0, selected ? crystal.bloom : colorWithAlpha(crystal.core, 0.2));
-    under.addColorStop(0.4, selected ? `${color}3a` : `${color}18`);
-    under.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = under;
-    ctx.fill();
-    ctx.restore();
-
+    // Crystal body first: artwork + facet planes, then one material grade over
+    // those pixels. Flat colour fills used to sit on top and desaturate both.
     ctx.save();
     jewelPath(ctx, cx, cy, s, colorIndex);
     ctx.clip();
@@ -4133,14 +4124,26 @@ export class BoardRenderer {
     ctx.drawImage(atlas, sx, sy, GEM_CELL, GEM_CELL, dx, dy, dest, dest);
 
     ctx.globalCompositeOperation = "source-atop";
-    ctx.fillStyle = selected ? colorWithAlpha(color, 0.48) : colorWithAlpha(color, 0.3);
-    ctx.fillRect(dx, dy, dest, dest);
-    ctx.globalCompositeOperation = "overlay";
-    ctx.fillStyle = colorWithAlpha(color, 0.28);
-    ctx.fillRect(dx, dy, dest, dest);
-
-    ctx.globalCompositeOperation = "source-atop";
+    ctx.globalAlpha = selected ? 0.5 : 0.4;
     paintCrystalOptics(ctx, cx, cy, s, colorIndex, color);
+    ctx.globalAlpha = 1;
+    ctx.restore();
+
+    // Facet contrast, chroma lock, bevel volume, dark rim, internal core.
+    const chroma = hexHueSat(color);
+    const facetSpec = gemFacetSpec(colorIndex);
+    applyGemMaterial(ctx, cx, cy, s, {
+      hue: chroma.hue,
+      sat: chroma.sat,
+      facets: facetSpec.facets,
+      facetPhase: facetSpec.facetPhase,
+      selected,
+    });
+
+    ctx.save();
+    jewelPath(ctx, cx, cy, s, colorIndex);
+    ctx.clip();
+    ctx.globalCompositeOperation = "source-atop";
 
     const bottomShade = ctx.createLinearGradient(cx, cy + s * 0.12, cx, cy + s * 0.5);
     bottomShade.addColorStop(0, "rgba(0,0,0,0)");
@@ -4174,11 +4177,11 @@ export class BoardRenderer {
     ctx.stroke();
 
     ctx.globalCompositeOperation = "lighter";
-    const coreR = selected ? 0.18 : 0.14;
+    const coreR = selected ? 0.13 : 0.1;
     const core = ctx.createRadialGradient(cx, cy - s * 0.04, s * 0.003, cx, cy - s * 0.02, s * coreR);
-    core.addColorStop(0, selected ? "rgba(255,255,255,0.48)" : "rgba(255,255,255,0.28)");
-    core.addColorStop(0.2, colorWithAlpha(crystal.core, selected ? 0.78 : 0.58));
-    core.addColorStop(0.52, selected ? `${color}46` : `${color}32`);
+    core.addColorStop(0, selected ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.13)");
+    core.addColorStop(0.24, colorWithAlpha(crystal.core, selected ? 0.62 : 0.44));
+    core.addColorStop(0.58, selected ? `${color}3a` : `${color}26`);
     core.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = core;
     ctx.beginPath();
@@ -4188,16 +4191,30 @@ export class BoardRenderer {
 
     ctx.globalCompositeOperation = "source-atop";
     jewelPath(ctx, cx, cy, s * 0.92, colorIndex);
-    ctx.strokeStyle = "rgba(255,255,255,0.22)";
-    ctx.lineWidth = Math.max(0.8, s * 0.016);
+    ctx.strokeStyle = "rgba(255,255,255,0.14)";
+    ctx.lineWidth = Math.max(0.8, s * 0.014);
     ctx.stroke();
     jewelPath(ctx, cx, cy, s * 0.98, colorIndex);
     ctx.strokeStyle = crystal.edge;
-    ctx.globalAlpha = 0.46;
-    ctx.lineWidth = Math.max(0.9, s * 0.02);
+    ctx.globalAlpha = 0.4;
+    ctx.lineWidth = Math.max(0.9, s * 0.018);
     ctx.stroke();
     ctx.globalAlpha = 1;
 
+    ctx.restore();
+
+    // Socket spill sits behind the graded crystal so it never bleeds into the
+    // coverage field the bevel shading is derived from.
+    ctx.save();
+    ctx.globalCompositeOperation = "destination-over";
+    ctx.beginPath();
+    ctx.arc(cx, cy + s * 0.02, s * (selected ? 0.34 : 0.26), 0, Math.PI * 2);
+    const under = ctx.createRadialGradient(cx, cy - s * 0.06, s * 0.02, cx, cy + s * 0.04, s * (selected ? 0.34 : 0.26));
+    under.addColorStop(0, selected ? crystal.bloom : colorWithAlpha(crystal.core, 0.2));
+    under.addColorStop(0.4, selected ? `${color}3a` : `${color}18`);
+    under.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = under;
+    ctx.fill();
     ctx.restore();
   }
 
@@ -4728,9 +4745,9 @@ function paintStaticGemDepth(
   ctx.fillRect(cx - s, cy - s, s * 2, s * 2);
 
   const core = ctx.createRadialGradient(cx, cy - s * 0.04, 0, cx, cy - s * 0.02, s * 0.2);
-  core.addColorStop(0, colorWithAlpha("#FFFFFF", 0.16));
-  core.addColorStop(0.2, colorWithAlpha(accent.core, 0.32));
-  core.addColorStop(0.55, colorWithAlpha(color, 0.12));
+  core.addColorStop(0, colorWithAlpha("#FFFFFF", 0.07));
+  core.addColorStop(0.2, colorWithAlpha(accent.core, 0.22));
+  core.addColorStop(0.55, colorWithAlpha(color, 0.1));
   core.addColorStop(1, "rgba(0,0,0,0)");
   ctx.globalCompositeOperation = "lighter";
   ctx.fillStyle = core;

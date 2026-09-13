@@ -26,7 +26,7 @@ describe("visual depth polish", () => {
 
   it("bakes dimensional crystal lighting into cached gem sprites", () => {
     const renderer = readFileSync(join(root, "src/ui/renderer.ts"), "utf8");
-    expect(renderer).toContain("|c18");
+    expect(renderer).toContain("|m1crystal");
     expect(renderer).toContain("|hw8");
     const paint = renderer.slice(renderer.indexOf("private paintAtlasGem("), renderer.indexOf("private drawProceduralGem("));
     expect(paint).toContain("ctx.drawImage(atlas");
@@ -36,8 +36,10 @@ describe("visual depth polish", () => {
     expect(paint).toContain("crystal.edge");
     expect(paint).toContain("source-atop");
     expect(paint).toContain("lighter");
-    expect(paint).toContain("colorWithAlpha(color, 0.48)");
-    expect(paint).toContain("rgba(255,255,255,0.28)");
+    // The crystal body is graded per pixel instead of being covered by a flat
+    // colour fill, so facet planes and the internal core survive the bake.
+    expect(paint).toContain("applyGemMaterial(ctx, cx, cy, s, {");
+    expect(paint).not.toContain("colorWithAlpha(color, 0.48)");
     const drawGem = renderer.slice(renderer.indexOf("private drawGem("), renderer.indexOf("private drawAtlasGem("));
     expect(drawGem).toContain("ellipse(cx + s * 0.02, cy + s * 0.44");
     expect(drawGem).toContain("travelLift");
