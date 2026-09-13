@@ -952,18 +952,8 @@ export class BoardRenderer {
       this.drawPowerWake(view, ctx, ox, oy, boardW, boardH, now);
     }
 
-    ctx.save();
-    if (isPlayer) chamferedRect(ctx, ox + 1, oy + 1, boardW - 2, boardH - 2, 13);
-    else roundRect(ctx, ox + 1, oy + 1, boardW - 2, boardH - 2, 21);
-    ctx.clip();
-    const plane = ctx.createLinearGradient(ox, oy, ox + boardW, oy + boardH);
-    plane.addColorStop(0, isPlayer ? "#B9F8FF0D" : "#FFD6E20B");
-    plane.addColorStop(0.3, "#FFFFFF03");
-    plane.addColorStop(0.7, "#00000000");
-    plane.addColorStop(1, "#01050A00");
-    ctx.fillStyle = plane;
-    ctx.fillRect(ox, oy, boardW, boardH);
-    ctx.restore();
+    // No interior lighting wash — a diagonal plane gradient here used to
+    // split the playable field into a lit upper zone and a darker lower band.
 
     if (isPlayer) {
       this.paintPlayerFrameLighting(ctx, ox, oy, boardW, boardH, boosted, frozen);
