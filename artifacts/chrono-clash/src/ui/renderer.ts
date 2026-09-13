@@ -13,6 +13,8 @@ import {
   gemTravelDuration,
   gemTravelEase,
   liveGemDrawOrigin,
+  MATCH_ANTICIPATE_MS,
+  SWAP_TOTAL_MS,
   type GemMoveKind,
 } from "./gemMotion";
 
@@ -371,26 +373,17 @@ export class BoardRenderer {
     this.invalidA = a;
     this.invalidB = b;
     this.invalidUntil = now + 220;
-    this.playerView.shake = Math.max(this.playerView.shake, 5);
+    this.playerView.shake = Math.max(this.playerView.shake, 1.4);
   }
 
   flashSelect(at: Coord, now: number): void {
     const tile = [...this.playerView.tiles.values()].find((t) => t.r === at.r && t.c === at.c && !t.dying);
     if (!tile) return;
     const cell = this.lastPlayerCell;
-    tile.flash = Math.max(tile.flash, 0.72);
-    tile.glow = Math.max(tile.glow, 0.82);
+    tile.flash = Math.max(tile.flash, 0.78);
+    tile.glow = Math.max(tile.glow, 0.88);
+    tile.scale = Math.max(tile.scale, gemSelectPop());
     if (this.fx.reducedMotion) return;
-    this.playerView.shake = Math.max(this.playerView.shake, 0.8);
-    this.addShockwave(
-      this.playerView,
-      tile.x + cell / 2,
-      tile.y + cell / 2,
-      cell * 0.16,
-      "#7CF5FF",
-      260,
-      1.7,
-    );
     this.impactSpark(this.playerView, tile.x + cell / 2, tile.y + cell / 2, tile.color, cell);
     void now;
   }
@@ -1056,11 +1049,10 @@ export class BoardRenderer {
       : Number.isFinite(recentClearBorn)
         ? Math.max(0, now - recentClearBorn)
         : 0;
-    // Impact squash overlaps the end of the swap — do not add a dead pause
-    // after the gems have already seated.
-    const impactDelay = reduced ? 0 : swapWindowMs;
+    // Seat the swap, then a short charged anticipation, then the break.
+    const impactDelay = reduced ? 0 : swapWindowMs + MATCH_ANTICIPATE_MS;
     const clearLeadMs = hasMatchPresentation
-      ? gemDieDuration(anim, reduced) * 1000 * (reduced ? 0.45 : 0.68)
+      ? MATCH_ANTICIPATE_MS + gemDieDuration(anim, reduced) * 1000 * (reduced ? 0.4 : 0.58)
       : 0;
     const cascadeHold = hasMatchPresentation
       ? Math.max(0, swapWindowMs + clearLeadMs - clearAgeMs) / 1000
@@ -1232,7 +1224,7 @@ export class BoardRenderer {
                   const moveDistance = Math.hypot(moveX, moveY) || 1;
                   const settle = Math.min(3.2, Math.max(2, moveDistance * 0.055));
                   tile.settleAge = 0;
-                  tile.settleDur = 0.052;
+                  tile.settleDur = 0.068;
                   view.settleCount += 1;
                   tile.settleX = (moveX / moveDistance) * settle;
                   tile.settleY = (moveY / moveDistance) * settle;
@@ -1342,11 +1334,13 @@ export class BoardRenderer {
         );
          if (tile.breakStrength >= 4 || recentClearSize >= 6) {
            view.hitStopUntil = Math.max(view.hitStopUntil, now + 28);
-           view.shake = Math.max(view.shake, Math.min(5.5, 1.6 + tile.breakStrength * 0.52));
-           view.flash = Math.max(view.flash, 0.18 + Math.min(0.22, tile.breakStrength * 0.03));
+           view.shake = Math.max(view.shake, Math.min(3.2, 1.1 + tile.breakStrength * 0.28));
+           view.flash = Math.max(view.flash, 0.14 + Math.min(0.16, tile.breakStrength * 0.02));
          }
       }
-      if (isPlayer) view.shake = Math.max(view.shake, 0.9);
+      if (isPlayer) {
+        view.shake = Math.max(view.shake, recentClearCombo >= 3 ? 1.15 : recentClearCombo >= 2 ? 0.75 : 0.4);
+      }
     }
 
     let overlayPower: FxEvent | undefined;
@@ -1399,7 +1393,7 @@ export class BoardRenderer {
           x: px,
           y: py,
           text: fxEvent.text,
-          born: now,
+          born: now + (isPlayer && !reduced ? MATCH_ANTICIPATE_MS + SWAP_TOTAL_MS : 0),
           color: combo >= 4 || pts >= 400 ? (isPlayer ? "#EAFBFF" : "#FFD6E2") : "#F3FAFF",
           size: 14 + Math.min(18, Math.log10(pts + 12) * 7 + combo),
           rise: 24 + combo * 5 + Math.min(18, pts / 80),
@@ -1420,7 +1414,7 @@ export class BoardRenderer {
             life: 700 + Math.min(280, combo * 50),
           });
         }
-        view.shake = Math.max(view.shake, (combo >= 6 ? 5.2 : combo >= 4 ? 3.4 : combo >= 3 ? 2.2 : 1.4) * mul);
+        view.shake = Math.max(view.shake, (combo >= 6 ? 2.4 : combo >= 4 ? 1.8 : combo >= 3 ? 1.25 : 0.85) * mul);
         if (view.floats.length > 5) view.floats.splice(0, view.floats.length - 5);
       }
     }
@@ -1490,8 +1484,8 @@ export class BoardRenderer {
         );
          if (tile.breakStrength >= 4 || recentClearSize >= 6) {
            view.hitStopUntil = Math.max(view.hitStopUntil, now + 28);
-           view.shake = Math.max(view.shake, Math.min(5.5, 1.6 + tile.breakStrength * 0.52));
-           view.flash = Math.max(view.flash, 0.18 + Math.min(0.22, tile.breakStrength * 0.03));
+           view.shake = Math.max(view.shake, Math.min(3.2, 1.1 + tile.breakStrength * 0.28));
+           view.flash = Math.max(view.flash, 0.14 + Math.min(0.16, tile.breakStrength * 0.02));
          }
       }
       const pose = easeCrystalDie(Math.max(0, tile.dieAge) / dieDur);
@@ -1501,12 +1495,12 @@ export class BoardRenderer {
       } else if (tile.dieAge < 0) {
         // Match impact: brighten → charged squash → existing break VFX.
         const charge = Math.max(0, Math.min(1, (tile.dieAge + MATCH_IMPACT_MS / 1000) / (MATCH_IMPACT_MS / 1000)));
-        tile.scale = 1.04 - charge * 0.06;
+        tile.scale = 1.06 - charge * 0.09;
         tile.alpha = 1;
-        tile.flash = Math.max(tile.flash, 0.62 + charge * 0.36);
-        tile.glow = Math.max(tile.glow, 0.58 + charge * 0.38);
+        tile.flash = Math.max(tile.flash, 0.68 + charge * 0.32);
+        tile.glow = Math.max(tile.glow, 0.64 + charge * 0.34);
         if (isPlayer && charge > 0.82) {
-          view.flash = Math.max(view.flash, 0.12 + tile.breakStrength * 0.014);
+          view.flash = Math.max(view.flash, 0.1 + tile.breakStrength * 0.012);
         }
       } else {
         tile.scale = pose.scale;
@@ -3424,7 +3418,7 @@ export class BoardRenderer {
     if (!tile.dying && tile.moveKind !== "idle" && tile.moveDur > 0 && !this.fx.reducedMotion) {
       const t = Math.min(1, tile.moveAge / tile.moveDur);
       const arch = Math.sin(Math.PI * t);
-      travelLift = tile.moveKind === "fall" ? 1 + 0.03 * arch : 1 + 0.016 * arch;
+      travelLift = tile.moveKind === "fall" ? 1 + 0.035 * arch : 1 + 0.038 * arch;
     }
     const inset = Math.max(0.6, size * 0.012);
     const inner = Math.max(8, size - inset * 2);

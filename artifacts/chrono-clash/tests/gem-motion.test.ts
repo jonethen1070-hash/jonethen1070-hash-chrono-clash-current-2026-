@@ -14,6 +14,8 @@ import {
   SWAP_MAGNET_MS,
   SWAP_PUSH_MS,
   SWAP_TOTAL_MS,
+  MATCH_ANTICIPATE_MS,
+  matchImpactDelayMs,
 } from "../src/ui/gemMotion";
 import { COLS, INVALID_RETURN_MS, ROWS, SWAP_INPUT_LOCK_MS } from "../src/engine/types";
 import { cloneBoard, createSeededRng, findMatches, makePiece, resetIds, trySwap } from "../src/engine/board";
@@ -105,6 +107,8 @@ describe("crystal gem motion curves", () => {
     expect(gemFallDelay(7, 8, "high", false)).toBeLessThanOrEqual(0.016);
     expect(INVALID_RETURN_MS).toBe(110);
     expect(SWAP_INPUT_LOCK_MS).toBe(140);
+    expect(MATCH_ANTICIPATE_MS).toBe(44);
+    expect(matchImpactDelayMs()).toBe(164);
   });
 
   it("blooms then dissolves matched crystals instead of popping them", () => {
@@ -241,7 +245,7 @@ describe("landing feedback", () => {
     expect(renderer).toContain("x: tile.toX + cell / 2");
     expect(renderer).toContain("const lift = sel ? 1.026 : 1");
     expect(renderer).toContain("tile.scale = Math.max(tile.scale, 1.035)");
-    expect(renderer).toContain("tile.settleDur = 0.052");
+    expect(renderer).toContain("tile.settleDur = 0.068");
     expect(renderer).toContain("tile.scale = 0.985");
     expect(renderer).toContain("tile.scale = 1.015");
     expect(renderer).toContain("primeSwapPose");
@@ -251,6 +255,7 @@ describe("landing feedback", () => {
     expect(renderer).toContain("const MATCH_STAGGER_STEP_MS = 4");
     expect(renderer).toContain("const cascadeHold");
     expect(renderer).toContain("swapWindowMs + clearLeadMs");
+    expect(renderer).toContain("swapWindowMs + MATCH_ANTICIPATE_MS");
     expect(renderer).not.toContain("swapWindowMs + MATCH_IMPACT_MS");
     const session = readFileSync("src/engine/session.ts", "utf8");
     expect(session).toContain("this.busyUntil = now + SWAP_INPUT_LOCK_MS");

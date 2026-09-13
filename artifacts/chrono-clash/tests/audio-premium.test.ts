@@ -177,7 +177,7 @@ describe("independent mix and mute", () => {
 describe("live game audio wiring", () => {
   it("routes new SFX through the existing AudioBus from main", () => {
     const src = readFileSync("src/main.ts", "utf8");
-    expect(src).toContain("playBattleCues(audio, fx, fx.combo || 1)");
+    expect(src).toContain("playBattleCues(audio, fx, fx.combo || 1, feelDelay)");
     expect(src).not.toContain('audio.play("oppscore")');
     expect(src).toContain("Rival board SFX stay silent");
     expect(src).toContain('audio.play("warning")');
