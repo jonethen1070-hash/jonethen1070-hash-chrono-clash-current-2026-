@@ -9144,12 +9144,11 @@ html body #app #match.active .you-meta {
       - var(--board-before-abilities-gap)
       - 4px
     );
-    /* Fit 8:10 rect: width limited by inline budget and by block*(8/10). */
-    --mobile-board-size: min(
-      var(--mobile-board-inline),
-      calc(var(--mobile-board-block) * 8 / 10)
-    );
-    --mobile-board-height: calc(var(--mobile-board-size) * 10 / 8);
+    /* Keep board WIDTH on the inline budget. Use the leftover vertical
+       block for HEIGHT so the board stays tall and the power deck sits
+       directly beneath it (no empty arena well under the powers). */
+    --mobile-board-size: var(--mobile-board-inline);
+    --mobile-board-height: var(--mobile-board-block);
   }
 
   html body #app #match .match-stage {
@@ -9159,7 +9158,7 @@ html body #app #match.active .you-meta {
       var(--energy-height)
       0px
       max-content
-      auto !important;
+      var(--control-height) !important;
     height: 100% !important;
     align-content: start !important;
   }
@@ -9171,7 +9170,7 @@ html body #app #match.active .you-meta {
     max-width: var(--mobile-board-size) !important;
     max-height: var(--mobile-board-height) !important;
     min-height: 0 !important;
-    aspect-ratio: 8 / 10 !important;
+    aspect-ratio: auto !important;
     justify-self: center !important;
     align-self: start !important;
     margin-inline: auto !important;
@@ -9181,8 +9180,12 @@ html body #app #match.active .you-meta {
 
   html body #app #match .powers {
     align-self: start !important;
+    justify-self: center !important;
+    box-sizing: border-box !important;
+    width: var(--mobile-board-size) !important;
+    max-width: var(--mobile-board-size) !important;
     height: var(--control-height) !important;
-    margin: var(--board-before-abilities-gap) auto 0 !important;
+    margin: calc(var(--board-before-abilities-gap) + 6px) auto 0 !important;
     transform: translateZ(2px) !important;
   }
 
