@@ -9219,7 +9219,7 @@ html body #app #match.active .you-meta {
     --board-after-energy-gap: 6px;
     --board-before-abilities-gap: 4px;
     --battle-height: 56px;
-    --energy-height: 28px;
+    --energy-height: 38px;
     /* Slightly shorter control band frees arena floor without collapsing Phase 1 icon stack. */
     --control-height: 108px;
   }
