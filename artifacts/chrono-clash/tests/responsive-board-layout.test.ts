@@ -27,7 +27,7 @@ function boardHeightForWidth(boardW: number): number {
 describe("production responsive board layout", () => {
   it("keeps an 8x10 board with square cell layout math", () => {
     expect(COLS).toBe(8);
-    expect(ROWS).toBe(10);
+    expect(ROWS).toBe(13);
     const renderer = readFileSync("src/ui/renderer.ts", "utf8");
     expect(renderer).toContain("const cellW = (innerW - GAP * (COLS + 1)) / COLS");
     expect(renderer).toContain("const cellH = (innerH - GAP * (ROWS + 1)) / ROWS");

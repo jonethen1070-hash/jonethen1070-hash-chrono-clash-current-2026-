@@ -5,7 +5,7 @@ type Coord = { r: number; c: number };
 const BOARD_FRAME = 6;
 const BOARD_GAP = 1.5;
 const BOARD_COLS = 8;
-const BOARD_ROWS = 10;
+const BOARD_ROWS = 13;
 
 function cellCenter(box: { x: number; y: number; width: number; height: number }, cell: Coord) {
   const size = Math.min(

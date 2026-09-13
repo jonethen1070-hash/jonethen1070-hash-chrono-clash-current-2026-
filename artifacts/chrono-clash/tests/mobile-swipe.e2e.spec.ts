@@ -80,7 +80,7 @@ type RenderSample = {
 const BOARD_FRAME = 6;
 const BOARD_GAP = 1.5;
 const BOARD_COLS = 8;
-const BOARD_ROWS = 10;
+const BOARD_ROWS = 13;
 const BOARD_TILES = BOARD_COLS * BOARD_ROWS;
 
 function cellCenter(board: BoardBox, row: number, col: number): { x: number; y: number } {

@@ -4349,7 +4349,7 @@ function boardLayout(x: number, y: number, w: number, h: number): {
   const inset = Math.max(0.6, cell * 0.012);
   const gemDraw = Math.max(8, cell - inset * 2) * GEM_VISUAL_SCALE;
   const refRowGap = 2.8;
-  const rowCell = Math.min(fillRowCell, Math.max(cell, gemDraw + refRowGap - GAP));
+  const rowCell = Math.max(cell, gemDraw + refRowGap - GAP);
   const gridW = cell * COLS + GAP * (COLS + 1);
   const fillGridH = fillRowCell * ROWS + GAP * (ROWS + 1);
   const gemGridH = rowCell * ROWS + GAP * (ROWS + 1);

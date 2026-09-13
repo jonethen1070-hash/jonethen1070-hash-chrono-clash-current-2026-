@@ -1,5 +1,5 @@
 export const COLS = 8;
-export const ROWS = 10;
+export const ROWS = 13;
 export const COLOR_COUNT = 6;
 export const MATCH_SECONDS = 60;
 export const SCORE_FALLBACK_SECONDS = 90;
