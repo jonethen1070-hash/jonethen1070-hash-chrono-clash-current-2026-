@@ -1873,7 +1873,7 @@ export class BoardRenderer {
     isPlayer: boolean,
   ): void {
     const theme = this.fx.boardTheme;
-    const key = `${Math.round(boardW)}x${Math.round(boardH)}|${Math.round(cell * 10)}x${Math.round(rowCell * 10)}|${isPlayer ? "p" : "o"}|${theme}|hw814`;
+    const key = `${Math.round(boardW)}x${Math.round(boardH)}|${Math.round(cell * 10)}x${Math.round(rowCell * 10)}|${isPlayer ? "p" : "o"}|${theme}|hw815`;
     let sheet = this.wellCache.get(key);
     if (!sheet) {
       sheet = document.createElement("canvas");
@@ -4446,12 +4446,6 @@ function paintDeviceBoard(
   glass.addColorStop(0.42, "rgba(255,255,255,0.05)");
   glass.addColorStop(1, "rgba(255,255,255,0)");
   g.fillStyle = glass;
-  g.fill();
-
-  const innerShade = g.createLinearGradient(0, boardH * 0.62, 0, boardH);
-  innerShade.addColorStop(0, "rgba(0,0,0,0)");
-  innerShade.addColorStop(1, "rgba(0,0,0,0.38)");
-  g.fillStyle = innerShade;
   g.fill();
 
   const wellGlass = g.createLinearGradient(boardW * 0.08, boardH * 0.08, boardW * 0.4, boardH * 0.32);
