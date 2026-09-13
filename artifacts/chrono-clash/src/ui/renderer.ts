@@ -4349,7 +4349,11 @@ function boardLayout(x: number, y: number, w: number, h: number): {
   const inset = Math.max(0.6, cell * 0.012);
   const gemDraw = Math.max(8, cell - inset * 2) * GEM_VISUAL_SCALE;
   const refRowGap = 2.8;
-  const rowCell = Math.max(cell, gemDraw + refRowGap - GAP);
+  // 13 rows at the preferred pitch overflow the playable inner by ~18css and
+  // clip the last row. Fit the same row count inside innerH; 2css slack keeps
+  // bezels off the frame. Horizontal cell size is unchanged.
+  const fitRowCell = (innerH - 2 - GAP * (ROWS + 1)) / ROWS;
+  const rowCell = Math.min(fitRowCell, Math.max(cell, gemDraw + refRowGap - GAP));
   const gridW = cell * COLS + GAP * (COLS + 1);
   const fillGridH = fillRowCell * ROWS + GAP * (ROWS + 1);
   const gemGridH = rowCell * ROWS + GAP * (ROWS + 1);
@@ -4366,7 +4370,7 @@ function boardLayout(x: number, y: number, w: number, h: number): {
     cell,
     rowCell,
     ix: ox + FRAME,
-    iy: oy + FRAME + Math.max(0, (fillGridH - gemGridH) / 2),
+    iy: oy + FRAME + Math.max(0, (innerH - gemGridH) / 2),
   };
 }
 
