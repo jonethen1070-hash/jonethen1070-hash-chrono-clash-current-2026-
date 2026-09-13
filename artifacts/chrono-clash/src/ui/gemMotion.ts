@@ -75,11 +75,11 @@ export function gemTravelDuration(
     if (animation === "medium") return 0.15;
     return SWAP_TOTAL_MS / 1000;
   }
-  // Keep the first cell punchy, then give deeper drops just enough extra
-  // travel to read as physical without putting dead time between cascades.
-  const base = animation === "low" ? 0.09 : animation === "medium" ? 0.095 : 0.1;
-  const perCell = animation === "low" ? 0.035 : animation === "medium" ? 0.038 : 0.04;
-  return Math.min(0.28, base + Math.max(0, cells - 1) * perCell);
+  // Short hops stay punchy; longer drops add a little travel, then cap so
+  // deep refill columns never feel sluggish between cascade waves.
+  const base = animation === "low" ? 0.11 : animation === "medium" ? 0.115 : 0.12;
+  const perCell = animation === "low" ? 0.022 : animation === "medium" ? 0.024 : 0.025;
+  return Math.min(0.22, base + Math.max(0, cells - 1) * perCell);
 }
 
 export function gemFallDelay(
@@ -89,9 +89,9 @@ export function gemFallDelay(
   reduced: boolean,
 ): number {
   if (reduced || animation === "low") return 0;
-  const spread = animation === "medium" ? 0.002 : 0.003;
-  const lead = animation === "medium" ? 0.006 : 0.008;
-  return Math.min(0.045, lead + col * spread + Math.max(0, cellsFallen) * 0.001);
+  const spread = animation === "medium" ? 0.001 : 0.0015;
+  const lead = animation === "medium" ? 0.003 : 0.004;
+  return Math.min(0.016, lead + col * spread + Math.max(0, cellsFallen) * 0.0005);
 }
 
 export function gemDieDuration(animation: Intensity, reduced: boolean): number {

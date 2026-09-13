@@ -53,6 +53,7 @@ import {
   GameMode,
   INVALID_RETURN_MS,
   LocalProgress,
+  SWAP_INPUT_LOCK_MS,
   MATCH_SECONDS,
   MatchState,
   POWER_LOCK_MS,
@@ -937,10 +938,9 @@ export class GameSession {
     this.lastPlayerSnap.push(pre);
     if (this.lastPlayerSnap.length > REWIND_HISTORY) this.lastPlayerSnap.shift();
     this.applyResolve(this.player, result, boost, now, "player");
-    // Keep the input gate long enough to prevent overlapping resolves, but do
-    // not turn the visual settle window into an artificial pause between
-    // otherwise valid swipes.
-    this.busyUntil = now + Math.min(300, 132 + result.events.length * 16);
+    // Logic is already fully resolved (including cascades). Gate only the swap
+    // tween so a second gesture cannot overlap the first swap pose.
+    this.busyUntil = now + SWAP_INPUT_LOCK_MS;
     this.resolving = false;
     if (this.mode === "score" && this.player.score >= this.scoreTarget) this.endMatch(now);
     return true;

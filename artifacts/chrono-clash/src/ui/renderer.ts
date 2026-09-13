@@ -1049,12 +1049,21 @@ export class BoardRenderer {
     const hadPendingSwap = view.pendingSwapIds.size > 0;
     const hasMatchPresentation = Number.isFinite(recentClearBorn) || hadPendingSwap;
     const swapWindowMs = Math.max(swapRemainingMs, pendingSwapMs);
-    const clearAgeMs = Number.isFinite(recentClearBorn) ? Math.max(0, now - recentClearBorn) : 0;
-    const impactDelay = reduced
-      ? 20
-      : Math.max(MATCH_IMPACT_MS, swapWindowMs + MATCH_IMPACT_MS);
+    // A fresh player swap owns this frame's hold. Ignore a leftover clear FX
+    // from the previous resolve so rapid follow-up moves stay snappy.
+    const clearAgeMs = hadPendingSwap
+      ? 0
+      : Number.isFinite(recentClearBorn)
+        ? Math.max(0, now - recentClearBorn)
+        : 0;
+    // Impact squash overlaps the end of the swap — do not add a dead pause
+    // after the gems have already seated.
+    const impactDelay = reduced ? 0 : swapWindowMs;
+    const clearLeadMs = hasMatchPresentation
+      ? gemDieDuration(anim, reduced) * 1000 * (reduced ? 0.45 : 0.68)
+      : 0;
     const cascadeHold = hasMatchPresentation
-      ? Math.max(0, impactDelay - clearAgeMs) / 1000
+      ? Math.max(0, swapWindowMs + clearLeadMs - clearAgeMs) / 1000
       : 0;
     const populated = view.tiles.size > 0;
     for (let r = 0; r < ROWS; r++) {
@@ -1311,7 +1320,7 @@ export class BoardRenderer {
         : 0;
       if (tile.dieStaggerMs > 0) view.staggerCount += 1;
       const impactRemaining = hasMatchPresentation
-        ? Math.max(0, impactDelay - (Number.isFinite(recentClearBorn) ? now - recentClearBorn : 0))
+        ? Math.max(0, impactDelay - clearAgeMs)
         : 0;
       tile.dieAge = -(impactRemaining + tile.dieStaggerMs) / 1000;
       if (!swapTarget) tile.moveKind = "idle";

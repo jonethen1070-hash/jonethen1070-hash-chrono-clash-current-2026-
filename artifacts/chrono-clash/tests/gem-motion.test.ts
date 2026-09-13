@@ -15,7 +15,7 @@ import {
   SWAP_PUSH_MS,
   SWAP_TOTAL_MS,
 } from "../src/ui/gemMotion";
-import { COLS, INVALID_RETURN_MS, ROWS } from "../src/engine/types";
+import { COLS, INVALID_RETURN_MS, ROWS, SWAP_INPUT_LOCK_MS } from "../src/engine/types";
 import { cloneBoard, createSeededRng, findMatches, makePiece, resetIds, trySwap } from "../src/engine/board";
 import { LARGE_MATCH_VFX_FIXTURES } from "./vfxFixtures";
 
@@ -66,17 +66,19 @@ describe("crystal gem motion curves", () => {
     expect(SWAP_MAGNET_MS).toBe(48);
     expect(SWAP_TOTAL_MS).toBe(120);
     expect(swap).toBe(0.12);
-    expect(fallOne).toBeCloseTo(0.1, 5);
+    expect(fallOne).toBeCloseTo(0.12, 5);
     expect(fallThree).toBeGreaterThan(fallOne);
     expect(fallFar).toBeGreaterThan(fallThree);
-    expect(fallThree).toBeCloseTo(0.18, 5);
-    expect(fallFar).toBeCloseTo(0.26, 5);
-    expect(gemTravelDuration(40 * 4, 40, "fall", "high", false)).toBeCloseTo(0.22, 5);
-    expect(gemTravelDuration(40 * 8, 40, "fall", "high", false)).toBe(0.28);
+    expect(fallThree).toBeCloseTo(0.17, 5);
+    expect(fallFar).toBeCloseTo(0.22, 5);
+    expect(gemTravelDuration(40 * 4, 40, "fall", "high", false)).toBeCloseTo(0.195, 5);
+    expect(gemTravelDuration(40 * 8, 40, "fall", "high", false)).toBe(0.22);
     expect(fallFar).toBeGreaterThan(swap);
     expect(gemFallDelay(0, 3, "high", false)).toBeLessThan(gemFallDelay(7, 3, "high", false));
     expect(gemFallDelay(3, 2, "high", true)).toBe(0);
-    expect(INVALID_RETURN_MS).toBe(160);
+    expect(gemFallDelay(7, 8, "high", false)).toBeLessThanOrEqual(0.016);
+    expect(INVALID_RETURN_MS).toBe(110);
+    expect(SWAP_INPUT_LOCK_MS).toBe(140);
   });
 
   it("blooms then dissolves matched crystals instead of popping them", () => {
@@ -222,6 +224,11 @@ describe("landing feedback", () => {
     expect(renderer).toContain("const MATCH_STAGGER_MIN_MS = 8");
     expect(renderer).toContain("const MATCH_STAGGER_STEP_MS = 4");
     expect(renderer).toContain("const cascadeHold");
+    expect(renderer).toContain("swapWindowMs + clearLeadMs");
+    expect(renderer).not.toContain("swapWindowMs + MATCH_IMPACT_MS");
+    const session = readFileSync("src/engine/session.ts", "utf8");
+    expect(session).toContain("this.busyUntil = now + SWAP_INPUT_LOCK_MS");
+    expect(session).not.toContain("132 + result.events.length");
     expect(renderer).toContain("life: megaHero ? 0.28 : burstHero ? 0.23 : 0.18");
     expect(renderer).toContain("const charge =");
     expect(renderer).toContain("branchAngle");
