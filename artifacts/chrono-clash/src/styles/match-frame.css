@@ -396,7 +396,6 @@ html body #app #match.active .player-side .board-canvas,
 html body #app #match.active #playerGems {
   filter:
     saturate(1.1)
-    contrast(1.07)
     brightness(1.02)
     drop-shadow(0 6px 8px rgba(0, 0, 0, 0.96))
     drop-shadow(0 2px 2px rgba(0, 0, 0, 0.7)) !important;
