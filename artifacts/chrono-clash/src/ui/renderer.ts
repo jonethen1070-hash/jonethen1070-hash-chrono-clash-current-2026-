@@ -1010,7 +1010,8 @@ export class BoardRenderer {
       }
     }
     const swapRemainingMs = [...view.tiles.values()].reduce((max, tile) => {
-      if (tile.moveKind !== "swap" || tile.moveDur <= 0) return max;
+      // Leftover dying swap poses must not stretch the next resolve's gravity hold.
+      if (tile.dying || tile.moveKind !== "swap" || tile.moveDur <= 0) return max;
       return Math.max(max, (tile.moveDur - tile.moveAge) * 1000);
     }, 0);
     if (isPlayer && view.pendingSwap) {
@@ -1054,9 +1055,15 @@ export class BoardRenderer {
     const clearLeadMs = hasMatchPresentation
       ? MATCH_ANTICIPATE_MS + gemDieDuration(anim, reduced) * 1000 * (reduced ? 0.4 : 0.58)
       : 0;
-    const cascadeHold = hasMatchPresentation
+    const seatedHold = hasMatchPresentation
       ? Math.max(0, swapWindowMs + clearLeadMs - clearAgeMs) / 1000
       : 0;
+    // A quiet board still seats the shatter before gravity. If a previous
+    // resolve is already dying/falling, do not re-queue the next refill.
+    const gravityLive = [...view.tiles.values()].some(
+      (tile) => tile.dying || tile.moveKind === "fall",
+    );
+    const cascadeHold = gravityLive ? 0 : seatedHold;
     const populated = view.tiles.size > 0;
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
