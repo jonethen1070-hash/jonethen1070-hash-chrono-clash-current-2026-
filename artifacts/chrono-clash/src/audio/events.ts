@@ -42,11 +42,11 @@ export function isPlayerBoardFx(fx: BattleFx): boolean {
   return fx.side !== "opponent" && isBoardDestroyFx(fx);
 }
 
-/** One shatter layer for the whole resolve. Combo banners must not fire a second copy. */
+/** First-wave shatter, then cascade cues. Combo banners must not fire a second shatter. */
 export function playerBoardDestroyCue(fx: BattleFx): BattleCue | null {
   if (isRivalBoardFx(fx)) return null;
   if (fx.kind !== "clear" || fx.side === "opponent") return null;
-  return "matchWave";
+  return (fx.combo ?? 1) >= 2 ? "cascade" : "matchWave";
 }
 
 export function battleCuesFromFx(fx: BattleFx): BattleCue[] {
@@ -74,9 +74,19 @@ export function battleCuesFromFx(fx: BattleFx): BattleCue[] {
   return [];
 }
 
-export function playBattleCues(bus: AudioBus, fx: BattleFx, combo?: number): void {
+export function playBattleCues(bus: AudioBus, fx: BattleFx, combo?: number, delayMs = 0): void {
   const peak = combo ?? fx.combo ?? 1;
-  for (const cue of battleCuesFromFx(fx)) playBattleCue(bus, cue, peak, fx.text);
+  for (const cue of battleCuesFromFx(fx)) {
+    if (delayMs > 0 && cue === "matchWave") {
+      bus.playMatchWaveLater(peak, delayMs);
+      continue;
+    }
+    if (delayMs > 0 && (cue === "cascade" || cue === "combo" || cue === "bigCombo")) {
+      bus.playLater(cue === "bigCombo" ? "highcombo" : "combo", delayMs, peak);
+      continue;
+    }
+    playBattleCue(bus, cue, peak, fx.text);
+  }
 }
 
 export function playBattleCue(bus: AudioBus, cue: BattleCue, combo = 1, text = ""): void {

@@ -4,9 +4,9 @@ export { hapticPattern, gameplayHapticArmed } from "./haptics";
 
 export function scoreTickerRate(animation: Intensity, reducedMotion: boolean): number {
   if (reducedMotion) return 1;
-  if (animation === "low") return 0.72;
-  if (animation === "medium") return 0.28;
-  return 0.13;
+  if (animation === "low") return 0.8;
+  if (animation === "medium") return 0.5;
+  return 0.42;
 }
 
 export function comboBurstClass(combo: number): "mid" | "big" | "epic" | "mega" {

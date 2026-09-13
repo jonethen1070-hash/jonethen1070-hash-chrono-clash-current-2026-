@@ -24,6 +24,7 @@ import { GameSession, type FxEvent } from "./engine/session";
 import { BOARD_FRAME, BOARD_GAP, BoardRenderer, RenderFx } from "./ui/renderer";
 import { prefetchGemAtlas } from "./ui/gemAtlas";
 import { comboBurstClass, resultHeadline, scoreTickerRate } from "./ui/feel";
+import { matchImpactDelayMs } from "./ui/gemMotion";
 import { HapticBus, hapticCuesFromFx } from "./ui/haptics";
 import { chatHtml, dailyRunHtml, equippedAvatarName, matchPowerQty, powerArmoryHtml, profileView, readyPowerStripHtml, renderMenuPilot, trophiesHtml } from "./ui/metaViews";
 import { RewardGrant, grantHasBounty, xpToNext } from "./engine/progress";
@@ -2199,6 +2200,7 @@ function commitSwipe(from: Coord, target: Coord, now: number, gestureDx = 0, ges
     return true;
   }
   renderer.flashInvalid(from, target, now);
+  feelHaptic("invalid");
   return false;
 }
 
@@ -2217,6 +2219,7 @@ ui.playerBoard.addEventListener(
     session.setDrag(cell, 0, 0);
     if (armedEnergyPower) renderer.setPowerTarget(cell, now);
     renderer.flashSelect(cell, now);
+    feelHaptic("tap");
     try {
       ui.playerBoard.setPointerCapture(e.pointerId);
     } catch {
@@ -2530,9 +2533,15 @@ function frame(now: number): void {
     setWidth(ui.playerScoreFill, `${Math.min(100, (shownPlayer / scoreCap) * 100)}%`);
     setWidth(ui.oppScoreFill, `${Math.min(100, (shownOpp / scoreCap) * 100)}%`);
     if (snap.player.score !== lastPlayerScore) {
-      if (snap.player.score > lastPlayerScore) audio.play("score");
+      if (snap.player.score > lastPlayerScore) {
+        const delay = matchImpactDelayMs(reducedMotion());
+        if (delay > 0) audio.playLater("score", delay);
+        else audio.play("score");
+        window.setTimeout(() => pop(ui.playerCard), delay);
+      } else {
+        pop(ui.playerCard);
+      }
       lastPlayerScore = snap.player.score;
-      pop(ui.playerCard);
     }
     if (snap.opponent.score !== lastOppScore) {
       // Rival board SFX stay silent — no oppscore / gem-break / match cues.
@@ -2645,8 +2654,13 @@ function frame(now: number): void {
       if (fx.id <= seenFx) continue;
       seenFx = Math.max(seenFx, fx.id);
       freshFx.push(fx);
-      playBattleCues(audio, fx, fx.combo || 1);
-      haptics.dispatch(hapticCuesFromFx(fx), now);
+      const boardFeel = fx.side !== "opponent" && (fx.kind === "clear" || fx.kind === "combo");
+      const feelDelay = boardFeel ? matchImpactDelayMs(reducedMotion()) : 0;
+      playBattleCues(audio, fx, fx.combo || 1, feelDelay);
+      const hapticCues = hapticCuesFromFx(fx).map((cue) =>
+        feelDelay > 0 && !cue.delayMs ? { ...cue, delayMs: feelDelay } : cue,
+      );
+      haptics.dispatch(hapticCues, now);
       if (fx.kind === "countdown") {
         if (fx.text === "CLASH!") {
           audio.playMatchStart(String(fx.id));
@@ -2654,8 +2668,9 @@ function frame(now: number): void {
         } else audio.play("countdown");
       }
       if (fx.kind === "clear" && fx.side !== "opponent") {
-        // Short arena + board impact pulse on every player clear.
-        flashImpact();
+        // Pulse the arena on the break, not on the swipe.
+        if (feelDelay > 0) window.setTimeout(() => flashImpact(), feelDelay);
+        else flashImpact();
       }
       if (fx.kind === "combo" && (fx.combo ?? 0) >= 2 && fx.side !== "opponent") {
         flashCombo(fx.combo ?? 1);
@@ -2712,7 +2727,8 @@ function frame(now: number): void {
         break;
       }
     }
-    if (burst && now - burst.born < 880 && settings.showComboEffects && settings.effects !== "low") {
+    const comboFeelAt = burst ? burst.born + matchImpactDelayMs(reducedMotion()) : 0;
+    if (burst && now >= comboFeelAt && now - burst.born < 880 + matchImpactDelayMs(reducedMotion()) && settings.showComboEffects && settings.effects !== "low") {
       const intensity = comboBurstClass(burst.combo ?? 1);
       ui.comboBurst.textContent = comboBurstText(burst.combo ?? 1);
       ui.comboBurst.className = `combo-burst pop ${intensity}`;
