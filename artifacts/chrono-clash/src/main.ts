@@ -2187,7 +2187,7 @@ function cellSize(): number {
 }
 
 function swipeMin(): number {
-  return Math.max(8, cellSize() * 0.12);
+  return Math.max(6, cellSize() * 0.1);
 }
 
 function commitSwipe(from: Coord, target: Coord, now: number, gestureDx = 0, gestureDy = 0): boolean {

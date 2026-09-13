@@ -26,7 +26,10 @@ export const ATTACK_MAX = 100;
 export const PRESSURE_MS = 1200;
 export const POWER_LOCK_MS = 280;
 export const COMBO_HOLD_MS = 900;
-export const INVALID_RETURN_MS = 160;
+/** Snap-back for an invalid swipe. Input is not locked during this. */
+export const INVALID_RETURN_MS = 110;
+/** Hold input only through the swap tween. The board is already logically stable. */
+export const SWAP_INPUT_LOCK_MS = 140;
 export const RIVAL_FREEZE_MS = 2500;
 
 export const XP_PER_LEVEL = 120;
