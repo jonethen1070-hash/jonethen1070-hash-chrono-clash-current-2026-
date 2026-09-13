@@ -1852,7 +1852,7 @@ export class BoardRenderer {
     isPlayer: boolean,
   ): void {
     const theme = this.fx.boardTheme;
-    const key = `${Math.round(boardW)}x${Math.round(boardH)}|${Math.round(cell * 10)}x${Math.round(rowCell * 10)}|${isPlayer ? "p" : "o"}|${theme}|hw819`;
+    const key = `${Math.round(boardW)}x${Math.round(boardH)}|${Math.round(cell * 10)}x${Math.round(rowCell * 10)}|${isPlayer ? "p" : "o"}|${theme}|hw822`;
     let sheet = this.wellCache.get(key);
     if (!sheet) {
       sheet = document.createElement("canvas");
@@ -4526,16 +4526,26 @@ function paintDeviceBoard(
   const lipFill = isPlayer ? "#06111C" : "#190812";
   const rowPitch = rowCell + GAP;
   const colPitch = cell + GAP;
-  // Keep wells square and gem-sized; on tall boards, pad them into the row
-  // band so sockets stay aligned with centered square crystals.
+  // Square gem seats stay cell-sized and centered. On tall portrait boards the
+  // leftover row pitch used to sit as empty pit between those squares — a
+  // full-width dark gutter after every row. Fill the whole grid first so the
+  // socket field is one plate from row 1 through row 10.
   const gemYPad = Math.max(0, (rowCell - cell) / 2);
+  roundRect(
+    g,
+    FRAME + GAP,
+    FRAME + GAP,
+    COLS * colPitch - GAP,
+    ROWS * rowPitch - GAP,
+    wellR,
+  );
+  g.fillStyle = lipFill;
+  g.fill();
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       const wx = FRAME + GAP + c * colPitch;
       const wy = FRAME + GAP + r * rowPitch + gemYPad;
       roundRect(g, wx, wy, cell, cell, wellR);
-      g.fillStyle = lipFill;
-      g.fill();
       // Shared key from upper-left: cool rim catch. No full-cell black pocket.
       const well = g.createLinearGradient(wx, wy, wx + cell, wy + cell);
       well.addColorStop(0, isPlayer ? "#1A6A824F" : "#9A284048");
@@ -4576,24 +4586,9 @@ function paintDeviceBoard(
       g.fillStyle = lip;
       roundRect(g, wx + pad, wy + pad, cell - pad * 2, Math.max(4, (cell - pad * 2) * 0.38), Math.max(2, wellR - 1.5));
       g.fill();
-      g.strokeStyle = "#01050A7A";
-      g.lineWidth = 1;
-      roundRect(g, wx + 0.8, wy + 0.8, cell - 1.6, cell - 1.6, wellR);
-      g.stroke();
-      g.strokeStyle = rimDim;
-      g.lineWidth = 0.55;
-      roundRect(g, wx + 0.5, wy + 0.5, cell - 1, cell - 1, wellR);
-      g.stroke();
-       const socketRim = g.createLinearGradient(wx, wy, wx + cell, wy + cell);
-       socketRim.addColorStop(0, isPlayer ? "#B9F8FF42" : "#FFD6E22E");
-       socketRim.addColorStop(0.3, isPlayer ? "#00D9FF12" : "#FF174F0B");
-       socketRim.addColorStop(0.72, "#01050A00");
-       socketRim.addColorStop(1, "#00000070");
-       g.strokeStyle = socketRim;
-       g.lineWidth = Math.max(0.65, cell * 0.014);
-       roundRect(g, wx + pad * 0.62, wy + pad * 0.62, cell - pad * 1.24, cell - pad * 1.24, Math.max(2, wellR - 1.2));
-       g.stroke();
-       g.strokeStyle = isPlayer ? "#12394A2E" : "#8F163D22";
+      // No full-cell dark stroke — those rims met across 8 columns and framed
+      // the portrait row gutters into one horizontal dark band.
+      g.strokeStyle = isPlayer ? "#12394A2E" : "#8F163D22";
       g.lineWidth = 0.55;
       roundRect(g, wx + pad * 0.45, wy + pad * 0.45, cell - pad * 0.9, cell - pad * 0.9, Math.max(2, wellR - 1));
       g.stroke();
