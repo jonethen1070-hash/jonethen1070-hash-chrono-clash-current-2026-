@@ -173,12 +173,11 @@ html body #app #match.active .player-side .board-slot::after {
     linear-gradient(180deg, transparent 14%, rgba(50, 170, 185, 0.22) 50%, transparent 86%) right / 1.5px 34% no-repeat,
     linear-gradient(90deg, transparent 22%, rgba(200, 60, 110, 0.14) 50%, transparent 78%) bottom / 24% 1px no-repeat !important;
   box-shadow:
-    /* deep cavity AO — primary recess signal */
-    inset 0 18px 28px rgba(0, 0, 0, 0.92),
-    inset 0 6px 12px rgba(0, 0, 0, 0.7),
-    inset 12px 0 18px rgba(0, 0, 0, 0.78),
-    inset -10px 0 16px rgba(0, 0, 0, 0.72),
-    inset 0 -10px 16px rgba(0, 0, 0, 0.55),
+    /* Rim only — the previous 10–28px inset AO covered the outer gems. */
+    inset 0 3px 4px rgba(0, 0, 0, 0.28),
+    inset 3px 0 4px rgba(0, 0, 0, 0.22),
+    inset -3px 0 4px rgba(0, 0, 0, 0.22),
+    inset 0 -3px 4px rgba(0, 0, 0, 0.24),
     inset 0 0 0 1px rgba(70, 190, 205, 0.32),
     inset 0 -1px 0 rgba(120, 210, 220, 0.14) !important;
 }
