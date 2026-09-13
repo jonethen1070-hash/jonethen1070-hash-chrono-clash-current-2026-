@@ -257,7 +257,8 @@ describe("landing feedback", () => {
     expect(renderer).toContain("swapWindowMs + clearLeadMs");
     expect(renderer).toContain("swapWindowMs + MATCH_ANTICIPATE_MS");
     expect(renderer).toContain("const gravityLive");
-    expect(renderer).toContain("const cascadeHold = gravityLive ? 0 : seatedHold");
+    expect(renderer).toContain("const cascadeHold = 0");
+    expect(renderer).not.toContain("const cascadeHold = gravityLive ? 0 : seatedHold");
     expect(renderer).toContain("const beginMatch =");
     expect(renderer).toContain("this.lastMatchPhase !== \"countdown\"");
     expect(renderer).toContain("if (tile.dying || tile.moveKind !== \"swap\" || tile.moveDur <= 0) return max");

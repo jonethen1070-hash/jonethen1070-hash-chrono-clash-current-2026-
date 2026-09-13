@@ -1067,12 +1067,13 @@ export class BoardRenderer {
     const seatedHold = hasMatchPresentation
       ? Math.max(0, swapWindowMs + clearLeadMs - clearAgeMs) / 1000
       : 0;
-    // A quiet board still seats the shatter before gravity. If a previous
-    // resolve is already dying/falling, do not re-queue the next refill.
+    // Shatter/sparkle stays decorative. Gravity and refill must never park
+    // behind that seat — including the first paint, when dying flags are
+    // not set yet and gravityLive would still be false.
     const gravityLive = [...view.tiles.values()].some(
       (tile) => tile.dying || tile.moveKind === "fall",
     );
-    const cascadeHold = gravityLive ? 0 : seatedHold;
+    const cascadeHold = 0;
     const populated = view.tiles.size > 0;
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
