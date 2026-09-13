@@ -4336,19 +4336,25 @@ function boardLayout(x: number, y: number, w: number, h: number): {
   ix: number;
   iy: number;
 } {
-  // Keep gem chips perfectly square on the 8x10 grid. On tall portrait boards
-  // (height budget > 8:10), use the extra vertical space as row pitch (rowCell)
-  // so the frame fills the slot without stretching gems or widening the board.
+  // Keep gem chips perfectly square on the 8x10 grid. The board frame still
+  // fills a tall portrait slot; leftover height is top/bottom inset, not extra
+  // space between rows. Row pitch is gem draw size + the 2.8css gutter measured
+  // on the 390×844 reference (live was ~15.7css).
   const innerW = Math.max(0, w - FRAME * 2);
   const innerH = Math.max(0, h - FRAME * 2);
   const cellW = (innerW - GAP * (COLS + 1)) / COLS;
   const cellH = (innerH - GAP * (ROWS + 1)) / ROWS;
   const cell = Math.min(cellW, cellH);
-  const rowCell = cellH > cellW ? cellH : cell;
+  const fillRowCell = cellH > cellW ? cellH : cell;
+  const inset = Math.max(0.6, cell * 0.012);
+  const gemDraw = Math.max(8, cell - inset * 2) * GEM_VISUAL_SCALE;
+  const refRowGap = 2.8;
+  const rowCell = Math.min(fillRowCell, Math.max(cell, gemDraw + refRowGap - GAP));
   const gridW = cell * COLS + GAP * (COLS + 1);
-  const gridH = rowCell * ROWS + GAP * (ROWS + 1);
+  const fillGridH = fillRowCell * ROWS + GAP * (ROWS + 1);
+  const gemGridH = rowCell * ROWS + GAP * (ROWS + 1);
   const boardW = gridW + FRAME * 2;
-  const boardH = gridH + FRAME * 2;
+  const boardH = fillGridH + FRAME * 2;
   const ox = x + (w - boardW) / 2;
   const oy = y + (h - boardH) / 2;
   return {
@@ -4360,7 +4366,7 @@ function boardLayout(x: number, y: number, w: number, h: number): {
     cell,
     rowCell,
     ix: ox + FRAME,
-    iy: oy + FRAME,
+    iy: oy + FRAME + Math.max(0, (fillGridH - gemGridH) / 2),
   };
 }
 
@@ -4584,6 +4590,8 @@ function paintDeviceBoard(
   const rowPitch = rowCell + GAP;
   const colPitch = cell + GAP;
   const gemYPad = Math.max(0, (rowCell - cell) / 2);
+  const gemGridH = rowCell * ROWS + GAP * (ROWS + 1);
+  const rowPad = Math.max(0, (boardH - FRAME * 2 - gemGridH) / 2);
   // Portrait row pitch is taller than the square gem. Painting sockets only
   // at cell height left a full-width pit gutter after every row — the dark
   // band. Skip-wells (flat pit) removed it. Grow each socket to the row band
@@ -4592,10 +4600,10 @@ function paintDeviceBoard(
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       const wx = FRAME + GAP + c * colPitch;
-      const rowY = FRAME + GAP + r * rowPitch;
+      const rowY = FRAME + rowPad + GAP + r * rowPitch;
       const wy = rowY + gemYPad;
       if (r === 0) {
-        roundRect(g, wx, FRAME + GAP, cell, ROWS * rowPitch - GAP, wellR);
+        roundRect(g, wx, FRAME + rowPad + GAP, cell, ROWS * rowPitch - GAP, wellR);
         g.fillStyle = seatFill;
         g.fill();
         g.fillStyle = isPlayer ? "#005B7852" : "#8A12353D";
