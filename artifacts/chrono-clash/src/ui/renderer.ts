@@ -22,8 +22,11 @@ export { LIVE_GEM_MAX_IN_CELL_DROP, liveGemDrawOrigin } from "./gemMotion";
 const GAP = BOARD_GAP;
 const FRAME = BOARD_FRAME;
 const MATCH_IMPACT_MS = 54;
-/* Idle draw size seats atlas crystals to the reference gem-to-cell occupancy. */
-const GEM_VISUAL_SCALE = 1.52;
+/* Idle draw size seats atlas crystals to the reference gem-to-cell occupancy.
+   Measured on the 390×844 reference: h-pitch 44.4css, visible gem ~41.1css
+   (gold ~42.5), h-gap ~3.5css. Atlas solid ≈ 0.92 of the sprite, so s ≈ 44.6
+   → scale 1.06 against inner = cell - inset. */
+const GEM_VISUAL_SCALE = 1.06;
 /**
  * Atlas gems draw their own artwork: baked at device resolution, unclipped, and
  * without the procedural silhouette/material overlays on top. The artwork owns
@@ -3407,7 +3410,7 @@ export class BoardRenderer {
       selected && this.fx.animation !== "low" && !this.fx.reducedMotion
         ? 1 + Math.sin(now / 140) * 0.028
         : 1;
-    const visScale = Math.min(tile.scale * GEM_VISUAL_SCALE, 1.56);
+    const visScale = Math.min(tile.scale * GEM_VISUAL_SCALE, 1.16);
     let travelLift = 1;
     if (!tile.dying && tile.moveKind !== "idle" && tile.moveDur > 0 && !this.fx.reducedMotion) {
       const t = Math.min(1, tile.moveAge / tile.moveDur);
