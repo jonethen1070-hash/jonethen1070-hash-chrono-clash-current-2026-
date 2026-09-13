@@ -1852,7 +1852,7 @@ export class BoardRenderer {
     isPlayer: boolean,
   ): void {
     const theme = this.fx.boardTheme;
-    const key = `${Math.round(boardW)}x${Math.round(boardH)}|${Math.round(cell * 10)}x${Math.round(rowCell * 10)}|${isPlayer ? "p" : "o"}|${theme}|hw822`;
+    const key = `${Math.round(boardW)}x${Math.round(boardH)}|${Math.round(cell * 10)}x${Math.round(rowCell * 10)}|${isPlayer ? "p" : "o"}|${theme}|hw823`;
     let sheet = this.wellCache.get(key);
     if (!sheet) {
       sheet = document.createElement("canvas");
@@ -4523,28 +4523,26 @@ function paintDeviceBoard(
 
   const wellR = Math.max(2.8, cell * 0.12);
   const pad = Math.max(1.2, cell * 0.045);
-  const lipFill = isPlayer ? "#06111C" : "#190812";
   const rowPitch = rowCell + GAP;
   const colPitch = cell + GAP;
-  // Square gem seats stay cell-sized and centered. On tall portrait boards the
-  // leftover row pitch used to sit as empty pit between those squares — a
-  // full-width dark gutter after every row. Fill the whole grid first so the
-  // socket field is one plate from row 1 through row 10.
   const gemYPad = Math.max(0, (rowCell - cell) / 2);
-  roundRect(
-    g,
-    FRAME + GAP,
-    FRAME + GAP,
-    COLS * colPitch - GAP,
-    ROWS * rowPitch - GAP,
-    wellR,
-  );
-  g.fillStyle = lipFill;
-  g.fill();
+  // Portrait row pitch is taller than the square gem. Painting sockets only
+  // at cell height left a full-width pit gutter after every row — the dark
+  // band. Skip-wells (flat pit) removed it. Grow each socket to the row band
+  // so the field is continuous; gem seats stay square and centered.
+  const seatFill = isPlayer ? "#04101A" : "#190812";
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       const wx = FRAME + GAP + c * colPitch;
-      const wy = FRAME + GAP + r * rowPitch + gemYPad;
+      const rowY = FRAME + GAP + r * rowPitch;
+      const wy = rowY + gemYPad;
+      if (r === 0) {
+        roundRect(g, wx, FRAME + GAP, cell, ROWS * rowPitch - GAP, wellR);
+        g.fillStyle = seatFill;
+        g.fill();
+        g.fillStyle = isPlayer ? "#005B7852" : "#8A12353D";
+        g.fill();
+      }
       roundRect(g, wx, wy, cell, cell, wellR);
       // Shared key from upper-left: cool rim catch. No full-cell black pocket.
       const well = g.createLinearGradient(wx, wy, wx + cell, wy + cell);
