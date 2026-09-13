@@ -1862,7 +1862,7 @@ export class BoardRenderer {
     isPlayer: boolean,
   ): void {
     const theme = this.fx.boardTheme;
-    const key = `${Math.round(boardW)}x${Math.round(boardH)}|${Math.round(cell * 10)}x${Math.round(rowCell * 10)}|${isPlayer ? "p" : "o"}|${theme}|hw815`;
+    const key = `${Math.round(boardW)}x${Math.round(boardH)}|${Math.round(cell * 10)}x${Math.round(rowCell * 10)}|${isPlayer ? "p" : "o"}|${theme}|hw816`;
     let sheet = this.wellCache.get(key);
     if (!sheet) {
       sheet = document.createElement("canvas");
@@ -4476,8 +4476,8 @@ function paintDeviceBoard(
   g.fill();
   const pit = g.createRadialGradient(boardW * 0.5, boardH * 0.38, size * 0.05, boardW * 0.5, boardH * 0.52, size * 0.76);
   pit.addColorStop(0, isPlayer ? "#005B7852" : "#8A12353D");
-  pit.addColorStop(0.5, "rgba(0,0,0,0.22)");
-  pit.addColorStop(1, "rgba(0,0,0,0.7)");
+  pit.addColorStop(0.5, isPlayer ? "#005B7838" : "#8A12352E");
+  pit.addColorStop(1, isPlayer ? "#005B7828" : "#8A123522");
   g.fillStyle = pit;
   g.fill();
   g.strokeStyle = rimDim;
