@@ -307,6 +307,7 @@ export class BoardRenderer {
   private playerView = new BoardView();
   private oppView = new BoardView();
   private lastScreen = "";
+  private lastMatchPhase = "";
   private invalidUntil = 0;
   private invalidA: Coord | null = null;
   private invalidB: Coord | null = null;
@@ -655,8 +656,15 @@ export class BoardRenderer {
     }
     this.lastAnimAt = now;
 
-    if (snap.screen !== this.lastScreen) {
-      if (snap.screen === "match") {
+    // A new match always starts in countdown. Reset on that beat even when
+    // lastScreen is still "match" (quit-to-menu / Guest replay never redraws
+    // the menu, so the screen-name gate would keep leftover die/VFX live).
+    const beginMatch =
+      snap.screen === "match" &&
+      snap.phase === "countdown" &&
+      this.lastMatchPhase !== "countdown";
+    if (snap.screen !== this.lastScreen || beginMatch) {
+      if (snap.screen === "match" && (snap.screen !== this.lastScreen || beginMatch)) {
         this.recycleViewEffects(this.playerView);
         this.recycleViewEffects(this.oppView);
         this.playerView.reset();
@@ -668,6 +676,7 @@ export class BoardRenderer {
       }
       this.lastScreen = snap.screen;
     }
+    this.lastMatchPhase = snap.screen === "match" ? snap.phase : "";
 
     const parent = this.canvasOrigin();
     this.ctx.save();
