@@ -76,6 +76,14 @@ describe("visual depth polish", () => {
     expect(css).not.toMatch(/\.board-slot[\s\S]{0,120}--arena-x/);
   });
 
+  it("keeps the match perspective floor behind the playable board", () => {
+    const polish = readFileSync(join(root, "src/styles/aaa-polish.css"), "utf8");
+    const after = polish.slice(polish.lastIndexOf("html body #app #match.active::after"));
+    expect(after).toContain("z-index: -1 !important");
+    expect(after).toContain("mix-blend-mode: normal !important");
+    expect(after).not.toContain("mix-blend-mode: multiply");
+  });
+
   it("keeps arena parallax tiny, CSS-driven, and motion-safe", () => {
     expect(ARENA_PARALLAX_FAR).toBe(5);
     expect(ARENA_PARALLAX_MID).toBe(9);

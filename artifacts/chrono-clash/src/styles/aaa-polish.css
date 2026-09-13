@@ -10946,15 +10946,15 @@ html:has(#match.active) body::before {
     linear-gradient(90deg, rgba(0, 150, 190, 0.018), transparent 26% 74%, rgba(200, 30, 80, 0.016)) !important;
 }
 
-html body #app #match.active::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 2;
-  background: radial-gradient(ellipse 58% 48% at 50% 52%, transparent 55%, rgba(0, 0, 0, 0.22) 100%);
-  mix-blend-mode: multiply;
-  opacity: 0.7;
+/* #match::after is the match-screen perspective floor (dark rotated deck,
+   !important geometry earlier in this file). A later vignette pass set
+   z-index:2 + mix-blend multiply on the same pseudo, which composited that
+   floor across the playable board as a horizontal luminance break. Keep the
+   floor behind .boards (z-index 2). Do not paint a covering gradient. */
+html body #app #match.active::after,
+html body #app #match.match-screen::after {
+  z-index: -1 !important;
+  mix-blend-mode: normal !important;
 }
 
 html body #app #match .power {
