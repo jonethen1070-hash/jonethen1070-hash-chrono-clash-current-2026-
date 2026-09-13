@@ -3419,22 +3419,6 @@ export class BoardRenderer {
     const atlas = gemAtlasCanvas();
     const useAtlas = Boolean(atlas && tile.color >= 1 && tile.color <= 6);
 
-    // Subtle contact shadow on the board plane — must not dominate gem illumination.
-    const shadowX = cx + s * 0.05;
-    const shadowY = cy + s * 0.46;
-    ctx.fillStyle = "rgba(0, 0, 0, 0.32)";
-    ctx.beginPath();
-    ctx.ellipse(shadowX, shadowY, s * 0.4, s * 0.14, 0.12, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = "rgba(0, 0, 0, 0.42)";
-    ctx.beginPath();
-    ctx.ellipse(shadowX, shadowY, s * 0.28, s * 0.09, 0.1, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = "rgba(0, 0, 0, 0.22)";
-    ctx.beginPath();
-    ctx.ellipse(cx, cy + s * 0.4, s * 0.3, s * 0.09, 0, 0, Math.PI * 2);
-    ctx.fill();
-
     // Recessed socket occluder reinforces elevation without competing bloom.
     ctx.save();
     jewelPath(ctx, cx + s * 0.028, cy + s * 0.085, s * 0.95, tile.color);
@@ -3476,7 +3460,7 @@ export class BoardRenderer {
     ctx.fill();
     ctx.restore();
 
-    // Squash & stretch: match impact + drag response (shadow already painted).
+    // Squash & stretch: match impact + drag response.
     let stretchSx = 1;
     let stretchSy = 1;
     let stretchAngle = 0;
