@@ -1010,7 +1010,8 @@ export class BoardRenderer {
       }
     }
     const swapRemainingMs = [...view.tiles.values()].reduce((max, tile) => {
-      if (tile.moveKind !== "swap" || tile.moveDur <= 0) return max;
+      // Leftover dying swap poses must not stretch the next resolve's gravity hold.
+      if (tile.dying || tile.moveKind !== "swap" || tile.moveDur <= 0) return max;
       return Math.max(max, (tile.moveDur - tile.moveAge) * 1000);
     }, 0);
     if (isPlayer && view.pendingSwap) {
@@ -1140,6 +1141,7 @@ export class BoardRenderer {
         } else if (moved) {
           const dist = Math.hypot(tx - tile.x, ty - tile.y);
           const kind: GemMoveKind = this.playerView.pendingSwapIds.has(piece.id) ? "swap" : "fall";
+          const alreadyFalling = kind === "fall" && tile.moveKind === "fall";
           tile.fromX = tile.x;
           tile.fromY = tile.y;
           tile.toX = tx;
@@ -1153,9 +1155,11 @@ export class BoardRenderer {
              anim,
              reduced,
            );
+          // Seated gems wait for this resolve's shatter. In-flight falls keep
+          // moving so a follow-up match cannot re-queue gravity behind VFX.
           tile.moveHold =
             kind === "fall"
-              ? gemFallDelay(c, Math.abs(r - prevR), anim, reduced) + cascadeHold
+              ? gemFallDelay(c, Math.abs(r - prevR), anim, reduced) + (alreadyFalling ? 0 : cascadeHold)
               : 0;
           tile.glow = Math.max(tile.glow, kind === "swap" ? 0.28 : 0.12);
           tile.settleAge = 1;
