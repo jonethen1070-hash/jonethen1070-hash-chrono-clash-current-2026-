@@ -143,9 +143,9 @@ export function applyGemMaterial(
         const mid = (index + 0.5) * span - Math.PI - params.facetPhase;
         const planeLam = Math.cos(mid) * LIGHT_X + Math.sin(mid) * LIGHT_Y;
         const alt = index % 2 === 0 ? 1 : -1;
-        v *= 1 + (0.22 * planeLam + 0.075 * alt) * crown;
+        v *= 1 + (0.26 * planeLam + 0.1 * alt) * crown;
         const crease = Math.abs(slot - index - 0.5) * 2; // 0 mid-plane, 1 on crease
-        v *= 1 - 0.17 * smoothstep(0.82, 1, crease) * crown;
+        v *= 1 - 0.24 * smoothstep(0.74, 1, crease) * crown;
       }
 
       // 5. Outer and lower falloff: the rim stays darker than the interior.
