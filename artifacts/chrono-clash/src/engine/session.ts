@@ -1013,7 +1013,9 @@ export class GameSession {
       const boost = now < this.scoreBoostUntil || (this.mode === "time" && now < this.timeshiftUntil) ? 1.35 : 1;
       this.applyResolve(this.player, result, boost, now, "player");
       this.powerLockUntil = now + 620;
-      this.busyUntil = Math.max(this.busyUntil, now + 620);
+      // Board is already fully resolved. Gate swipes like a normal swap so
+      // power VFX cannot hold the next legal move for 620ms.
+      this.busyUntil = Math.max(this.busyUntil, now + SWAP_INPUT_LOCK_MS);
       this.rivalPressureUntil = Math.max(
         this.rivalPressureUntil,
         now + (id === "megaStrike" ? PRESSURE_MS * 2 : PRESSURE_MS),

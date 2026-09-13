@@ -264,6 +264,8 @@ describe("landing feedback", () => {
     expect(renderer).not.toContain("swapWindowMs + MATCH_IMPACT_MS");
     const session = readFileSync("src/engine/session.ts", "utf8");
     expect(session).toContain("this.busyUntil = now + SWAP_INPUT_LOCK_MS");
+    expect(session).toContain("this.busyUntil = Math.max(this.busyUntil, now + SWAP_INPUT_LOCK_MS)");
+    expect(session).not.toContain("this.busyUntil = Math.max(this.busyUntil, now + 620)");
     expect(session).not.toContain("132 + result.events.length");
     expect(renderer).toContain("life: megaHero ? 0.28 : burstHero ? 0.23 : 0.18");
     expect(renderer).toContain("const charge =");
