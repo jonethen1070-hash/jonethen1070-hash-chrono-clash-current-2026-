@@ -32,9 +32,35 @@ const THREE_ROW_CASCADE_FIXTURE = [
   [2, 1, 2, 1, 2, 1, 2, 3],
 ] as const;
 
+function padToLiveRows(colors: readonly (readonly number[])[]): number[][] {
+  const rows = colors.map((row) => [...row]);
+  while (rows.length < ROWS) {
+    const r = rows.length;
+    const prev = rows[r - 1]!;
+    const prev2 = rows[r - 2] ?? prev;
+    const row: number[] = [];
+    for (let c = 0; c < COLS; c++) {
+      let color = 1 + ((r + c * 2) % 6);
+      const left = row[c - 1];
+      const left2 = row[c - 2];
+      const up = prev[c]!;
+      const up2 = prev2[c]!;
+      for (let i = 0; i < 8; i++) {
+        const tripleH = left != null && left2 != null && color === left && color === left2;
+        const tripleV = color === up && color === up2;
+        if (!tripleH && !tripleV && color !== up) break;
+        color = (color % 6) + 1;
+      }
+      row.push(color);
+    }
+    rows.push(row);
+  }
+  return rows;
+}
+
 function cascadeFixture() {
   resetIds();
-  return THREE_ROW_CASCADE_FIXTURE.map((row) => row.map((color) => makePiece(color)));
+  return padToLiveRows(THREE_ROW_CASCADE_FIXTURE).map((row) => row.map((color) => makePiece(color)));
 }
 
 describe("crystal gem motion curves", () => {
@@ -174,7 +200,7 @@ describe("large-match VFX fixtures", () => {
   it("keeps deterministic 3, 4, and 5+ gem recognition cases", () => {
     for (const [name, fixture] of Object.entries(LARGE_MATCH_VFX_FIXTURES).slice(0, 3)) {
       resetIds();
-      const board = fixture.board.map((row) => row.map((color) => makePiece(color)));
+      const board = padToLiveRows(fixture.board).map((row) => row.map((color) => makePiece(color)));
       expect(findMatches(board), `${name} starts without a match`).toHaveLength(0);
       const result = trySwap(board, fixture.from, fixture.to, createSeededRng(fixture.rngSeed));
       expect(result, `${name} accepts its fixture swap`).not.toBeNull();
@@ -187,7 +213,7 @@ describe("large-match VFX fixtures", () => {
     for (const name of ["oneCascade", "multipleCascade", "longFall"] as const) {
       const fixture = LARGE_MATCH_VFX_FIXTURES[name];
       resetIds();
-      const before = fixture.board.map((row) => row.map((color) => makePiece(color)));
+      const before = padToLiveRows(fixture.board).map((row) => row.map((color) => makePiece(color)));
       const originalPositions = new Map(
         before.flatMap((row, r) => row.map((piece, c) => [piece.id, { r, c }] as const)),
       );
