@@ -1862,7 +1862,7 @@ export class BoardRenderer {
     isPlayer: boolean,
   ): void {
     const theme = this.fx.boardTheme;
-    const key = `${Math.round(boardW)}x${Math.round(boardH)}|${Math.round(cell * 10)}x${Math.round(rowCell * 10)}|${isPlayer ? "p" : "o"}|${theme}|hw818`;
+    const key = `${Math.round(boardW)}x${Math.round(boardH)}|${Math.round(cell * 10)}x${Math.round(rowCell * 10)}|${isPlayer ? "p" : "o"}|${theme}|hw819`;
     let sheet = this.wellCache.get(key);
     if (!sheet) {
       sheet = document.createElement("canvas");
@@ -4613,13 +4613,6 @@ function paintDeviceBoard(
   g.save();
   roundRect(g, FRAME, FRAME, boardW - FRAME * 2, boardH - FRAME * 2, 13);
   g.clip();
-  const sheen = g.createLinearGradient(FRAME, FRAME, boardW * 0.7, FRAME + (boardH - FRAME * 2) * 0.4);
-  sheen.addColorStop(0, isPlayer ? "#DDF8FF0E" : "#FFD6E20A");
-  sheen.addColorStop(0.3, "#FFFFFF05");
-  sheen.addColorStop(0.58, "#FFFFFF00");
-  sheen.addColorStop(1, "#01050A1F");
-  g.fillStyle = sheen;
-  g.fillRect(FRAME, FRAME, boardW - FRAME * 2, boardH - FRAME * 2);
   const innerLit = g.createLinearGradient(FRAME, FRAME, FRAME, FRAME + 16);
   innerLit.addColorStop(0, "#FFFFFF12");
   innerLit.addColorStop(1, "#FFFFFF00");
