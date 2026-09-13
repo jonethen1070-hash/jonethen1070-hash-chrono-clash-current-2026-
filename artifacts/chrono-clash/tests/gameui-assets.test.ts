@@ -72,6 +72,7 @@ describe("GameUI reskin assets", () => {
     const renderer = readFileSync(join(process.cwd(), "src/ui/renderer.ts"), "utf8");
     const paint = renderer.slice(renderer.indexOf("private paintAtlasGem("), renderer.indexOf("private drawProceduralGem("));
     expect(paint).toContain("ctx.drawImage(atlas");
+    expect(paint).toContain("if (ATLAS_ARTWORK_FAITHFUL)");
     expect(paint).toContain("jewelPath(ctx, cx, cy, s, colorIndex)");
     expect(paint).toContain("ctx.clip()");
     expect(paint).toContain("paintCrystalOptics(ctx, cx, cy, s, colorIndex, color)");

@@ -26,18 +26,22 @@ describe("visual depth polish", () => {
 
   it("bakes dimensional crystal lighting into cached gem sprites", () => {
     const renderer = readFileSync(join(root, "src/ui/renderer.ts"), "utf8");
-    expect(renderer).toContain("|m1crystal");
+    expect(renderer).toContain("|m2faithful");
     expect(renderer).toContain("|hw8");
+    expect(renderer).toContain("ATLAS_ARTWORK_FAITHFUL");
     const paint = renderer.slice(renderer.indexOf("private paintAtlasGem("), renderer.indexOf("private drawProceduralGem("));
     expect(paint).toContain("ctx.drawImage(atlas");
+    // Faithful path: 1:1 atlas blit, no jewelPath clip before the first drawImage.
+    const faithful = paint.slice(0, paint.indexOf("const dest = s * 1.06"));
+    expect(faithful).toContain("if (ATLAS_ARTWORK_FAITHFUL)");
+    expect(faithful).not.toContain("jewelPath(");
+    expect(faithful).not.toContain("applyGemMaterial");
     expect(paint).toContain("paintCrystalOptics");
     expect(paint).toContain("paintSpeculars");
     expect(paint).toContain("crystal.core");
     expect(paint).toContain("crystal.edge");
     expect(paint).toContain("source-atop");
     expect(paint).toContain("lighter");
-    // The crystal body is graded per pixel instead of being covered by a flat
-    // colour fill, so facet planes and the internal core survive the bake.
     expect(paint).toContain("applyGemMaterial(ctx, cx, cy, s, {");
     expect(paint).not.toContain("colorWithAlpha(color, 0.48)");
     const drawGem = renderer.slice(renderer.indexOf("private drawGem("), renderer.indexOf("private drawAtlasGem("));

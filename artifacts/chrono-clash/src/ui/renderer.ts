@@ -24,6 +24,13 @@ const FRAME = BOARD_FRAME;
 const MATCH_IMPACT_MS = 54;
 /* Idle draw size seats atlas crystals to the reference gem-to-cell occupancy. */
 const GEM_VISUAL_SCALE = 1.52;
+/**
+ * Atlas gems draw their own artwork: baked at device resolution, unclipped, and
+ * without the procedural silhouette/material overlays on top. The artwork owns
+ * the silhouette, bezel, facets and core, so anything that masked or relit it
+ * only destroyed detail. Set to false to fall back to the overlay pipeline.
+ */
+const ATLAS_ARTWORK_FAITHFUL = true;
 const MATCH_STAGGER_MIN_MS = 8;
 const MATCH_STAGGER_STEP_MS = 4;
 const MATCH_STAGGER_MAX_MS = MATCH_STAGGER_MIN_MS + MATCH_STAGGER_STEP_MS * 2;
@@ -2080,9 +2087,23 @@ export class BoardRenderer {
     if (this.shardPool.length < 96) this.shardPool.push(shard);
   }
 
+  /** Device-pixel scale of the target context, so sprites bake 1:1 to screen. */
+  private spriteScale(): number {
+    const t = this.ctx.getTransform?.();
+    const a = t ? Math.hypot(t.a, t.b) : 0;
+    if (a > 0.1) return a;
+    const dpr = typeof window === "undefined" ? 1 : window.devicePixelRatio || 1;
+    return Math.min(2, dpr);
+  }
+
   private gemSprite(atlas: HTMLCanvasElement, colorIndex: number, color: string, inner: number, selected: boolean): HTMLCanvasElement {
-    const q = Math.max(GEM_CELL, Math.round(inner));
-    const key = `${colorIndex}|${q}|${selected ? 1 : 0}|m1crystal`;
+    // Bake at the size the gem actually occupies on screen. The old fixed 256
+    // bake was minified 2x at blit time, which cost ~21% of the artwork's edge
+    // detail for nothing.
+    const q = ATLAS_ARTWORK_FAITHFUL
+      ? Math.max(24, Math.round(inner * this.spriteScale()))
+      : Math.max(GEM_CELL, Math.round(inner));
+    const key = `${colorIndex}|${q}|${selected ? 1 : 0}|m2faithful`;
     let sheet = this.gemSprites.get(key);
     if (sheet) return sheet;
     sheet = document.createElement("canvas");
@@ -2095,7 +2116,7 @@ export class BoardRenderer {
     g.imageSmoothingEnabled = true;
     g.imageSmoothingQuality = "high";
     this.paintAtlasGem(atlas, q / 2, q / 2, q, colorIndex, color, selected);
-    paintStaticGemDepth(g, q / 2, q / 2, q, colorIndex, color);
+    if (!ATLAS_ARTWORK_FAITHFUL) paintStaticGemDepth(g, q / 2, q / 2, q, colorIndex, color);
     this.ctx = prev;
     this.gemSprites.set(key, sheet);
     if (this.gemSprites.size > 40) {
@@ -3409,15 +3430,18 @@ export class BoardRenderer {
     ctx.globalAlpha *= tile.alpha;
     const atlas = gemAtlasCanvas();
     const useAtlas = Boolean(atlas && tile.color >= 1 && tile.color <= 6);
+    const faithfulAtlas = useAtlas && ATLAS_ARTWORK_FAITHFUL;
 
     // Recessed socket rim only — the previous 70% black occluder fill
     // peeked under every gem and joined into a continuous mid-board band.
+    if (!faithfulAtlas) {
     ctx.save();
     jewelPath(ctx, cx + s * 0.028, cy + s * 0.085, s * 0.95, tile.color);
     ctx.strokeStyle = colorWithAlpha(color, 0.1);
     ctx.lineWidth = Math.max(1, s * 0.02);
     ctx.stroke();
     ctx.restore();
+    }
 
     // Localized bloom only — idle gems stay nearly dry; events own the emissive.
     const bloomStrength = energized
@@ -3427,6 +3451,7 @@ export class BoardRenderer {
       : 0.08;
     // Colored light spill onto the socket (source = this crystal). Idle spill is tiny.
     const spill = energized ? 0.16 + Math.min(0.14, tile.glow * 0.2) : 0.02;
+    if (!faithfulAtlas) {
     ctx.save();
     ctx.globalAlpha *= spill;
     ctx.beginPath();
@@ -3449,6 +3474,7 @@ export class BoardRenderer {
     ctx.fillStyle = halo;
     ctx.fill();
     ctx.restore();
+    }
 
     // Squash & stretch: match impact + drag response.
     let stretchSx = 1;
@@ -3491,7 +3517,7 @@ export class BoardRenderer {
       }
       ctx.restore();
     }
-    if (tile.glow > 0.05 && !tile.dying) {
+    if (!faithfulAtlas && tile.glow > 0.05 && !tile.dying) {
       ctx.beginPath();
       ctx.arc(cx, cy - s * 0.12, s * 0.2, 0, Math.PI * 2);
       ctx.fillStyle = `rgba(255,255,255,${Math.min(0.3, tile.glow * 0.42)})`;
@@ -3515,7 +3541,7 @@ export class BoardRenderer {
       else this.drawProceduralGem(cx + ox, cy + oy, s, tile.color, color, selected);
       ctx.restore();
     }
-    if (!dragging && !tile.dying) {
+    if (!faithfulAtlas && !dragging && !tile.dying) {
       roundRect(ctx, x + 0.8, y + 0.8, size - 1.6, size - 1.6, Math.max(5, size * 0.2));
       ctx.clip();
     }
@@ -3524,7 +3550,7 @@ export class BoardRenderer {
     } else {
       this.drawProceduralGem(cx, cy, s, tile.color, color, selected);
     }
-    this.drawGemMaterialLighting(cx, cy, s, tile.color, color, now, selected);
+    if (!faithfulAtlas) this.drawGemMaterialLighting(cx, cy, s, tile.color, color, now, selected);
     const targeting = powerTargeting;
     if (
       targeting &&
@@ -4095,6 +4121,8 @@ export class BoardRenderer {
     const ctx = this.ctx;
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
+    // Sprite is baked at s * deviceScale, then drawn at s CSS px. That is a
+    // 1:1 device-pixel blit — one resample from the 256 atlas cell, not 256→128.
     ctx.drawImage(sprite, cx - s / 2, cy - s / 2, s, s);
   }
 
@@ -4109,6 +4137,16 @@ export class BoardRenderer {
   ): void {
     const ctx = this.ctx;
     const { sx, sy } = gemCellOrigin(colorIndex);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+
+    // Atlas artwork already owns silhouette, bezel, facets and core. Draw it
+    // 1:1 into the sprite with no procedural silhouette mask and no overlays.
+    if (ATLAS_ARTWORK_FAITHFUL) {
+      ctx.drawImage(atlas, sx, sy, GEM_CELL, GEM_CELL, cx - s / 2, cy - s / 2, s, s);
+      return;
+    }
+
     const dest = s * 1.06;
     const dx = cx - dest / 2;
     const dy = cy - dest / 2;
