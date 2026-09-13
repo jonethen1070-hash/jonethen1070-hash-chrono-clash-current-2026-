@@ -26,7 +26,7 @@ describe("visual depth polish", () => {
 
   it("bakes dimensional crystal lighting into cached gem sprites", () => {
     const renderer = readFileSync(join(root, "src/ui/renderer.ts"), "utf8");
-    expect(renderer).toContain("|c7");
+    expect(renderer).toContain("|c17");
     expect(renderer).toContain("|hw8");
     const paint = renderer.slice(renderer.indexOf("private paintAtlasGem("), renderer.indexOf("private drawProceduralGem("));
     expect(paint).toContain("ctx.drawImage(atlas");
@@ -39,7 +39,7 @@ describe("visual depth polish", () => {
     expect(paint).toContain("colorWithAlpha(color, 0.48)");
     expect(paint).toContain("rgba(255,255,255,0.28)");
     const drawGem = renderer.slice(renderer.indexOf("private drawGem("), renderer.indexOf("private drawAtlasGem("));
-    expect(drawGem).toContain("ellipse(cx, cy + s * 0.44");
+    expect(drawGem).toContain("ellipse(cx + s * 0.02, cy + s * 0.44");
     expect(drawGem).toContain("travelLift");
     const atlasBranch = drawGem.slice(drawGem.indexOf("if (useAtlas && atlas)"), drawGem.indexOf("} else {"));
     expect(atlasBranch).not.toContain("jewelPath");

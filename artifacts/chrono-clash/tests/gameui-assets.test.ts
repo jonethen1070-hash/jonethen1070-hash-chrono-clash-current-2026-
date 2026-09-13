@@ -74,7 +74,8 @@ describe("GameUI reskin assets", () => {
     expect(paint).toContain("ctx.drawImage(atlas");
     expect(paint).toContain("jewelPath(ctx, cx, cy, s, colorIndex)");
     expect(paint).toContain("ctx.clip()");
-    expect(paint).toContain("drawGemIcon(ctx, cx, cy, s, colorIndex, color)");
+    expect(paint).toContain("paintCrystalOptics(ctx, cx, cy, s, colorIndex, color)");
+    expect(paint).toContain("globalCompositeOperation = \"overlay\"");
     expect(paint).toContain("crystal.edge");
     expect(paint).not.toContain("ellipse(cx - s * 0.16");
   });
