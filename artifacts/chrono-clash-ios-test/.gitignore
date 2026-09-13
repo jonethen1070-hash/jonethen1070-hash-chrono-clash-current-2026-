@@ -1,0 +1,11 @@
+www
+ios/App/Pods
+ios/App/App/public
+ios/App/output
+ios/DerivedData
+ios/App/App.xcworkspace/xcuserdata
+ios/App/App.xcodeproj/xcuserdata
+ios/App/App.xcodeproj/project.xcworkspace/xcuserdata
+*.ipa
+*.dSYM.zip
+.DS_Store
