@@ -1862,7 +1862,7 @@ export class BoardRenderer {
     isPlayer: boolean,
   ): void {
     const theme = this.fx.boardTheme;
-    const key = `${Math.round(boardW)}x${Math.round(boardH)}|${Math.round(cell * 10)}x${Math.round(rowCell * 10)}|${isPlayer ? "p" : "o"}|${theme}|hw817`;
+    const key = `${Math.round(boardW)}x${Math.round(boardH)}|${Math.round(cell * 10)}x${Math.round(rowCell * 10)}|${isPlayer ? "p" : "o"}|${theme}|hw818`;
     let sheet = this.wellCache.get(key);
     if (!sheet) {
       sheet = document.createElement("canvas");
@@ -4457,11 +4457,9 @@ function paintDeviceBoard(
   roundRect(g, 6.2, 6.2, boardW - 12.4, boardH - 12.4, 14);
    g.fillStyle = isPlayer ? "#04101A" : "#190812";
   g.fill();
-  const pit = g.createRadialGradient(boardW * 0.5, boardH * 0.38, size * 0.05, boardW * 0.5, boardH * 0.52, size * 0.76);
-  pit.addColorStop(0, isPlayer ? "#005B7852" : "#8A12353D");
-  pit.addColorStop(0.5, isPlayer ? "#005B7838" : "#8A12352E");
-  pit.addColorStop(1, isPlayer ? "#005B7828" : "#8A123522");
-  g.fillStyle = pit;
+  // Flat well tint — the old radial (hot at 38% boardH) split the playfield
+  // into a lit upper zone and a darker lower-middle band.
+  g.fillStyle = isPlayer ? "#005B7852" : "#8A12353D";
   g.fill();
   g.strokeStyle = rimDim;
   g.lineWidth = 1;
@@ -4548,7 +4546,7 @@ function paintDeviceBoard(
       roundRect(g, wx, wy, cell, cell, wellR);
       g.fillStyle = lipFill;
       g.fill();
-      // Shared key from upper-left: cool rim catch + deeper lower-right pocket.
+      // Shared key from upper-left: cool rim catch. No full-cell black pocket.
       const well = g.createLinearGradient(wx, wy, wx + cell, wy + cell);
       well.addColorStop(0, isPlayer ? "#1A6A824F" : "#9A284048");
       well.addColorStop(0.28, isPlayer ? "#005B7847" : "#8A123538");
