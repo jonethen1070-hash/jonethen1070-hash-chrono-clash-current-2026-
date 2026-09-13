@@ -1862,7 +1862,7 @@ export class BoardRenderer {
     isPlayer: boolean,
   ): void {
     const theme = this.fx.boardTheme;
-    const key = `${Math.round(boardW)}x${Math.round(boardH)}|${Math.round(cell * 10)}x${Math.round(rowCell * 10)}|${isPlayer ? "p" : "o"}|${theme}|hw816`;
+    const key = `${Math.round(boardW)}x${Math.round(boardH)}|${Math.round(cell * 10)}x${Math.round(rowCell * 10)}|${isPlayer ? "p" : "o"}|${theme}|hw817`;
     let sheet = this.wellCache.get(key);
     if (!sheet) {
       sheet = document.createElement("canvas");
@@ -3419,11 +3419,10 @@ export class BoardRenderer {
     const atlas = gemAtlasCanvas();
     const useAtlas = Boolean(atlas && tile.color >= 1 && tile.color <= 6);
 
-    // Recessed socket occluder reinforces elevation without competing bloom.
+    // Recessed socket rim only — the previous 70% black occluder fill
+    // peeked under every gem and joined into a continuous mid-board band.
     ctx.save();
     jewelPath(ctx, cx + s * 0.028, cy + s * 0.085, s * 0.95, tile.color);
-    ctx.fillStyle = "rgba(0, 3, 10, 0.7)";
-    ctx.fill();
     ctx.strokeStyle = colorWithAlpha(color, 0.18);
     ctx.lineWidth = Math.max(1, s * 0.02);
     ctx.stroke();
@@ -4554,11 +4553,11 @@ function paintDeviceBoard(
       well.addColorStop(0, isPlayer ? "#1A6A824F" : "#9A284048");
       well.addColorStop(0.28, isPlayer ? "#005B7847" : "#8A123538");
       well.addColorStop(0.62, "#01050A00");
-      well.addColorStop(1, "#01050AD4");
+      well.addColorStop(1, "#01050A00");
       g.fillStyle = well;
       g.fill();
       roundRect(g, wx + pad, wy + pad, cell - pad * 2, cell - pad * 2, Math.max(2, wellR - 1.5));
-       g.fillStyle = (r + c) % 2 === 0 ? "#02060D" : "#06111C";
+       g.fillStyle = (r + c) % 2 === 0 ? "#04101A" : "#06111C";
       g.fill();
        const contact = g.createRadialGradient(
          wx + cell * 0.52,
@@ -4568,31 +4567,19 @@ function paintDeviceBoard(
          wy + cell * 0.72,
          cell * 0.5,
        );
-       contact.addColorStop(0, "rgba(0, 0, 0, 0.62)");
-       contact.addColorStop(0.52, "rgba(0, 0, 0, 0.22)");
+       contact.addColorStop(0, "rgba(0, 0, 0, 0.22)");
+       contact.addColorStop(0.52, "rgba(0, 0, 0, 0.08)");
        contact.addColorStop(1, "rgba(0, 0, 0, 0)");
        g.fillStyle = contact;
        g.beginPath();
-       g.ellipse(wx + cell * 0.52, wy + cell * 0.7, cell * 0.36, cell * 0.2, 0, 0, Math.PI * 2);
+       g.ellipse(wx + cell * 0.52, wy + cell * 0.7, cell * 0.28, cell * 0.14, 0, 0, Math.PI * 2);
        g.fill();
       const dent = g.createLinearGradient(wx - cell * 0.05, wy - cell * 0.08, wx + cell * 0.85, wy + cell);
       dent.addColorStop(0, "#FFFFFF14");
       dent.addColorStop(0.22, "#FFFFFF08");
       dent.addColorStop(0.48, "#01050A00");
-      dent.addColorStop(1, "#01050A88");
+      dent.addColorStop(1, "#01050A22");
       g.fillStyle = dent;
-      g.fill();
-      const pocket = g.createRadialGradient(
-        wx + cell * 0.5,
-        wy + cell * 0.72,
-        cell * 0.04,
-        wx + cell * 0.5,
-        wy + cell * 0.58,
-        cell * 0.46,
-      );
-      pocket.addColorStop(0, "#01050A9E");
-      pocket.addColorStop(1, "#01050A00");
-      g.fillStyle = pocket;
       g.fill();
       const lip = g.createLinearGradient(wx, wy, wx + cell * 0.62, wy + cell * 0.28);
       lip.addColorStop(0, "#FFFFFF1A");
