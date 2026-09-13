@@ -945,17 +945,6 @@ export class BoardRenderer {
 
     this.blitWells(ctx, ox, oy, boardW, boardH, cell, rowCell, isPlayer);
     this.drawBoardDepth(ctx, ox, oy, boardW, boardH, isPlayer, boosted, frozen);
-    ctx.save();
-    if (isPlayer) chamferedRect(ctx, ox + FRAME, oy + FRAME, boardW - FRAME * 2, boardH - FRAME * 2, 8);
-    else roundRect(ctx, ox + FRAME, oy + FRAME, boardW - FRAME * 2, boardH - FRAME * 2, 14);
-    ctx.clip();
-    const cavity = ctx.createLinearGradient(ox + FRAME, oy + FRAME, ox + boardW - FRAME, oy + boardH - FRAME);
-    cavity.addColorStop(0, "rgba(0, 2, 8, 0.1)");
-    cavity.addColorStop(0.55, "rgba(0, 2, 8, 0.2)");
-    cavity.addColorStop(1, "rgba(0, 2, 8, 0.42)");
-    ctx.fillStyle = cavity;
-    ctx.fillRect(ox + FRAME, oy + FRAME, boardW - FRAME * 2, boardH - FRAME * 2);
-    ctx.restore();
 
     this.drawBoardEnergy(ctx, ox, oy, boardW, boardH, isPlayer, boosted, frozen, now);
     if (isPlayer) {
@@ -970,8 +959,8 @@ export class BoardRenderer {
     const plane = ctx.createLinearGradient(ox, oy, ox + boardW, oy + boardH);
     plane.addColorStop(0, isPlayer ? "#B9F8FF0D" : "#FFD6E20B");
     plane.addColorStop(0.3, "#FFFFFF03");
-    plane.addColorStop(0.7, "#0000000A");
-    plane.addColorStop(1, "#01050A8F");
+    plane.addColorStop(0.7, "#00000000");
+    plane.addColorStop(1, "#01050A00");
     ctx.fillStyle = plane;
     ctx.fillRect(ox, oy, boardW, boardH);
     ctx.restore();
