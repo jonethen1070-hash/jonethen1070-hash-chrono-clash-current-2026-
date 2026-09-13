@@ -13,7 +13,7 @@ describe("battle audio events", () => {
   it("plays one player glass shatter per resolve and keeps the rival board silent", () => {
     expect(battleCuesFromFx({ kind: "clear", text: "+120", combo: 1 })).toEqual(["matchWave"]);
     expect(battleCuesFromFx({ kind: "clear", text: "+240", combo: 2, side: "player" })).toEqual(["cascade"]);
-    expect(battleCuesFromFx({ kind: "clear", text: "+400", combo: 4, side: "player" })).toEqual(["cascade"]);
+    expect(battleCuesFromFx({ kind: "clear", text: "+400", combo: 4, side: "player" })).toEqual(["bigCombo"]);
     expect(battleCuesFromFx({ kind: "combo", text: "NICE!", combo: 3, side: "player" })).toEqual([]);
     expect(battleCuesFromFx({ kind: "combo", text: "GREAT!", combo: 4, side: "player" })).toEqual([]);
     expect(
@@ -21,7 +21,7 @@ describe("battle audio events", () => {
         ...battleCuesFromFx({ kind: "clear", text: "+240", combo: 3, side: "player" }),
         ...battleCuesFromFx({ kind: "combo", text: "NICE!", combo: 3, side: "player" }),
       ],
-    ).toEqual(["cascade"]);
+    ).toEqual(["bigCombo"]);
     expect(battleCuesFromFx({ kind: "clear", text: "+80", combo: 1, side: "opponent" })).toEqual([]);
     expect(battleCuesFromFx({ kind: "clear", text: "+240", combo: 3, side: "opponent" })).toEqual([]);
     expect(battleCuesFromFx({ kind: "combo", text: "COMBO x2", combo: 2, side: "opponent" })).toEqual([]);

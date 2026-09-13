@@ -43,7 +43,7 @@ export function easeInOutSine(t: number): number {
 export function easeMagneticSwap(t: number): number {
   const x = clamp01(t);
   const magnetStart = SWAP_PUSH_MS / SWAP_TOTAL_MS;
-  const approachDistance = 0.86;
+  const approachDistance = 0.84;
   if (x <= magnetStart) {
     return approachDistance * easeInOutCubic(x / magnetStart);
   }
@@ -123,9 +123,10 @@ export function easeCrystalDie(t: number): { scale: number; alpha: number; flash
 }
 
 /** Match-impact squash: compress into the board, then release into the die bloom. */
-export function gemMatchImpactStretch(charge: number): { sx: number; sy: number } {
+export function gemMatchImpactStretch(charge: number, combo = 1): { sx: number; sy: number } {
   const c = clamp01(charge);
-  return { sx: 1 + 0.11 * c, sy: 1 - 0.16 * c };
+  const amp = combo >= 3 ? 1.18 : combo >= 2 ? 1.08 : 1;
+  return { sx: 1 + 0.12 * c * amp, sy: 1 - 0.17 * c * amp };
 }
 
 /** Drag stretch along velocity — restrained, mobile-readable. */
@@ -142,7 +143,7 @@ export function gemDragStretch(vx: number, vy: number): { sx: number; sy: number
 
 /** Select / press settle: tiny scale-up then ease back via tile.scale spring. */
 export function gemSelectPop(): number {
-  return 1.068;
+  return 1.085;
 }
 
 /**

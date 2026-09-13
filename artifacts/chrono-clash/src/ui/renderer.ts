@@ -1,6 +1,6 @@
 import { COLORS, COLS, Coord, Intensity, Piece, PieceKind, ROWS } from "../engine/types";
 import { DragState, FxEvent, GameSnapshot } from "../engine/session";
-import { feelMul, particleBudget } from "./feel";
+import { feelMul, particleBudget, rewardScoreFloat } from "./feel";
 import { GEM_CELL, gemAtlasCanvas, gemCellOrigin } from "./gemAtlas";
 import { applyGemMaterial, gemFacetSpec, hexHueSat } from "./gemMaterial";
 import {
@@ -1389,15 +1389,16 @@ export class BoardRenderer {
         const pts = Math.abs(Number(String(fxEvent.text).replace(/[^\d]/g, "")) || 0);
         const px = fxEvent.at ? ix + GAP + fxEvent.at.c * (cell + GAP) + cell / 2 : ox + boardW / 2;
         const py = fxEvent.at ? rowCenter(fxEvent.at.r) : oy + boardH * 0.46;
+        const pop = rewardScoreFloat(combo, pts, isPlayer);
         view.floats.push({
           x: px,
           y: py,
           text: fxEvent.text,
           born: now + (isPlayer && !reduced ? MATCH_ANTICIPATE_MS + SWAP_TOTAL_MS : 0),
-          color: combo >= 4 || pts >= 400 ? (isPlayer ? "#EAFBFF" : "#FFD6E2") : "#F3FAFF",
-          size: 14 + Math.min(18, Math.log10(pts + 12) * 7 + combo),
-          rise: 24 + combo * 5 + Math.min(18, pts / 80),
-          life: 640 + Math.min(280, combo * 40 + pts / 12),
+          color: pop.color,
+          size: pop.size,
+          rise: pop.rise,
+          life: pop.life,
         });
         if (view.floats.length > 5) view.floats.splice(0, view.floats.length - 5);
       }
@@ -3418,7 +3419,7 @@ export class BoardRenderer {
     if (!tile.dying && tile.moveKind !== "idle" && tile.moveDur > 0 && !this.fx.reducedMotion) {
       const t = Math.min(1, tile.moveAge / tile.moveDur);
       const arch = Math.sin(Math.PI * t);
-      travelLift = tile.moveKind === "fall" ? 1 + 0.035 * arch : 1 + 0.038 * arch;
+      travelLift = tile.moveKind === "fall" ? 1 + 0.035 * arch : 1 + 0.046 * arch;
     }
     const inset = Math.max(0.6, size * 0.012);
     const inner = Math.max(8, size - inset * 2);
@@ -3487,7 +3488,7 @@ export class BoardRenderer {
     let stretchSy = 1;
     let stretchAngle = 0;
     if (charge > 0 && !this.fx.reducedMotion) {
-      const impact = gemMatchImpactStretch(charge);
+      const impact = gemMatchImpactStretch(charge, tile.breakStrength);
       stretchSx = impact.sx;
       stretchSy = impact.sy;
     } else if (dragging && !tile.dying && !this.fx.reducedMotion) {

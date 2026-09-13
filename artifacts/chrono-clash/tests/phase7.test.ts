@@ -8,8 +8,8 @@ describe("phase 7 visual presentation helpers", () => {
     expect(comboFlavor(3)).toBe("NICE!");
     expect(comboBurstText(3)).toBe("COMBO x3\nNICE!");
     expect(comboBurstText(5)).toBe("COMBO x5\nAMAZING!");
-    expect(comboBurstClass(3)).toBe("mid");
-    expect(comboBurstClass(5)).toBe("big");
+    expect(comboBurstClass(3)).toBe("epic");
+    expect(comboBurstClass(5)).toBe("mega");
     expect(comboBurstClass(8)).toBe("mega");
     expect(comboFlavor(8)).toBe("MEGA COMBO");
     expect(comboBurstText(8)).toBe("COMBO x8\nMEGA COMBO");

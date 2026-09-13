@@ -66,15 +66,20 @@ export function hapticPattern(kind: HapticEvent, combo = 1): number | number[] {
   if (kind === "tap") return 12;
   if (kind === "invalid") return [10, 20, 14];
   if (kind === "swap") return 12;
-  if (kind === "match") return 20;
+  if (kind === "match") {
+    if (combo >= 3) return 30;
+    if (combo >= 2) return 24;
+    return 16;
+  }
   if (kind === "countdown") return 40;
   if (kind === "combo") {
-    if (combo >= 8) return 62;
-    if (combo >= 6) return 50;
-    if (combo >= 4) return 42;
-    return 32;
+    if (combo >= 8) return 60;
+    if (combo >= 5) return 52;
+    if (combo >= 4) return 46;
+    if (combo >= 3) return 40;
+    return 34;
   }
-  if (kind === "power") return 58;
+  if (kind === "power") return 48;
   if (kind === "freeze") return 24;
   if (kind === "timeshift") return 28;
   if (kind === "rewind") return 30;
@@ -112,6 +117,9 @@ export function attackBoltDelayMs(text: string): number {
 
 export function hapticCuesFromFx(fx: BattleFx): HapticCue[] {
   if (fx.kind === "clear" && fx.side !== "opponent" && (fx.combo ?? 1) < 2) {
+    const gems = fx.cells?.length ?? 0;
+    if (gems >= 5) return [{ kind: "match", combo: 3 }];
+    if (gems >= 4) return [{ kind: "match", combo: 2 }];
     return [{ kind: "match" }];
   }
   if (fx.kind === "combo" && fx.side !== "opponent" && (fx.combo ?? 0) >= 2) {
