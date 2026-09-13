@@ -256,7 +256,8 @@ describe("landing feedback", () => {
     expect(renderer).toContain("const cascadeHold");
     expect(renderer).toContain("swapWindowMs + clearLeadMs");
     expect(renderer).toContain("swapWindowMs + MATCH_ANTICIPATE_MS");
-    expect(renderer).toContain("alreadyFalling ? 0 : cascadeHold");
+    expect(renderer).toContain("const gravityLive");
+    expect(renderer).toContain("const cascadeHold = gravityLive ? 0 : seatedHold");
     expect(renderer).toContain("if (tile.dying || tile.moveKind !== \"swap\" || tile.moveDur <= 0) return max");
     expect(renderer).not.toContain("swapWindowMs + MATCH_IMPACT_MS");
     const session = readFileSync("src/engine/session.ts", "utf8");
