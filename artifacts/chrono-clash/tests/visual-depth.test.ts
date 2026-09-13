@@ -26,7 +26,7 @@ describe("visual depth polish", () => {
 
   it("bakes dimensional crystal lighting into cached gem sprites", () => {
     const renderer = readFileSync(join(root, "src/ui/renderer.ts"), "utf8");
-    expect(renderer).toContain("|c17");
+    expect(renderer).toContain("|c18");
     expect(renderer).toContain("|hw8");
     const paint = renderer.slice(renderer.indexOf("private paintAtlasGem("), renderer.indexOf("private drawProceduralGem("));
     expect(paint).toContain("ctx.drawImage(atlas");

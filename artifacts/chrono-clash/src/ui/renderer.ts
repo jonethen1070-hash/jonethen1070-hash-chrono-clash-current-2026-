@@ -2102,7 +2102,7 @@ export class BoardRenderer {
 
   private gemSprite(atlas: HTMLCanvasElement, colorIndex: number, color: string, inner: number, selected: boolean): HTMLCanvasElement {
     const q = Math.max(GEM_CELL, Math.round(inner));
-    const key = `${colorIndex}|${q}|${selected ? 1 : 0}|c17crystal`;
+    const key = `${colorIndex}|${q}|${selected ? 1 : 0}|c18facet`;
     let sheet = this.gemSprites.get(key);
     if (sheet) return sheet;
     sheet = document.createElement("canvas");
@@ -4171,70 +4171,35 @@ export class BoardRenderer {
     ctx.drawImage(atlas, sx, sy, GEM_CELL, GEM_CELL, dx, dy, dest, dest);
 
     ctx.globalCompositeOperation = "source-atop";
-    // Gameplay-color wash stays thin so atlas facet luminance survives.
-    ctx.fillStyle = selected ? colorWithAlpha(color, 0.48) : colorWithAlpha(color, 0.26);
+    ctx.fillStyle = selected ? colorWithAlpha(color, 0.48) : colorWithAlpha(color, 0.3);
     ctx.fillRect(dx, dy, dest, dest);
-
-    // Overlay saturates the crystal body without flattening facet contrast.
     ctx.globalCompositeOperation = "overlay";
-    ctx.fillStyle = colorWithAlpha(color, selected ? 0.62 : 0.5);
-    ctx.fillRect(dx, dy, dest, dest);
-
-    ctx.globalCompositeOperation = "multiply";
-    const bodyMul = ctx.createRadialGradient(cx, cy - s * 0.04, s * 0.06, cx, cy, s * 0.5);
-    bodyMul.addColorStop(0, "rgb(255,255,255)");
-    bodyMul.addColorStop(0.38, shade(color, 1.28));
-    bodyMul.addColorStop(0.72, shade(color, 0.62));
-    bodyMul.addColorStop(1, shade(color, 0.28));
-    ctx.fillStyle = bodyMul;
+    ctx.fillStyle = colorWithAlpha(color, 0.28);
     ctx.fillRect(dx, dy, dest, dest);
 
     ctx.globalCompositeOperation = "source-atop";
-    const bottomShade = ctx.createLinearGradient(cx, cy - s * 0.08, cx, cy + s * 0.5);
+    paintCrystalOptics(ctx, cx, cy, s, colorIndex, color);
+
+    const bottomShade = ctx.createLinearGradient(cx, cy + s * 0.12, cx, cy + s * 0.5);
     bottomShade.addColorStop(0, "rgba(0,0,0,0)");
-    bottomShade.addColorStop(0.58, "rgba(0,0,0,0)");
-    bottomShade.addColorStop(0.84, "rgba(0, 3, 10, 0.2)");
-    bottomShade.addColorStop(1, "rgba(0, 6, 14, 0.38)");
+    bottomShade.addColorStop(0.55, "rgba(0, 3, 10, 0.12)");
+    bottomShade.addColorStop(1, "rgba(0, 6, 14, 0.36)");
     ctx.fillStyle = bottomShade;
     ctx.fillRect(dx, dy, dest, dest);
 
-    const occlude = ctx.createRadialGradient(cx, cy - s * 0.04, s * 0.12, cx, cy, s * 0.52);
+    const occlude = ctx.createRadialGradient(cx, cy - s * 0.03, s * 0.28, cx, cy, s * 0.52);
     occlude.addColorStop(0, "rgba(0,0,0,0)");
-    occlude.addColorStop(0.5, "rgba(0,0,0,0)");
-    occlude.addColorStop(0.78, "rgba(0, 4, 12, 0.26)");
-    occlude.addColorStop(1, "rgba(0, 6, 14, 0.5)");
+    occlude.addColorStop(0.62, "rgba(0,0,0,0)");
+    occlude.addColorStop(0.84, "rgba(0, 4, 12, 0.22)");
+    occlude.addColorStop(1, "rgba(0, 6, 14, 0.48)");
     ctx.fillStyle = occlude;
     ctx.fillRect(dx, dy, dest, dest);
 
-    const volume = ctx.createRadialGradient(cx, cy - s * 0.04, s * 0.006, cx, cy, s * 0.4);
-    volume.addColorStop(0, selected ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.1)");
-    volume.addColorStop(0.14, selected ? colorWithAlpha(crystal.core, 0.62) : colorWithAlpha(crystal.core, 0.46));
-    volume.addColorStop(0.42, selected ? `${color}4d` : `${color}38`);
-    volume.addColorStop(0.74, selected ? `${crystal.edge}14` : `${crystal.edge}0C`);
-    volume.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = volume;
-    ctx.fillRect(dx, dy, dest, dest);
-
-    const refraction = ctx.createLinearGradient(
-      cx - s * 0.42,
-      cy - s * 0.48,
-      cx + s * 0.4,
-      cy + s * 0.36,
-    );
-    refraction.addColorStop(0, "rgba(255,255,255,0.08)");
-    refraction.addColorStop(0.28, colorWithAlpha(crystal.edge, 0.12));
-    refraction.addColorStop(0.48, colorWithAlpha(crystal.core, 0.06));
-    refraction.addColorStop(0.72, "rgba(255,255,255,0)");
-    refraction.addColorStop(1, "rgba(0, 6, 14, 0.1)");
-    ctx.fillStyle = refraction;
-    ctx.fillRect(dx, dy, dest, dest);
-    paintCrystalOptics(ctx, cx, cy, s, colorIndex, color);
-
     const bevel = ctx.createLinearGradient(cx - s * 0.4, cy - s * 0.5, cx + s * 0.42, cy + s * 0.42);
-    bevel.addColorStop(0, "rgba(255,255,255,0.1)");
-    bevel.addColorStop(0.28, "rgba(255,255,255,0.02)");
-    bevel.addColorStop(0.55, "rgba(0,0,0,0)");
-    bevel.addColorStop(1, "rgba(0,5,14,0.32)");
+    bevel.addColorStop(0, "rgba(255,255,255,0.06)");
+    bevel.addColorStop(0.32, "rgba(255,255,255,0)");
+    bevel.addColorStop(0.7, "rgba(0,0,0,0)");
+    bevel.addColorStop(1, "rgba(0,5,14,0.18)");
     ctx.fillStyle = bevel;
     ctx.fillRect(dx, dy, dest, dest);
     const edgeShade = ctx.createLinearGradient(cx - s * 0.4, cy - s * 0.45, cx + s * 0.45, cy + s * 0.45);
@@ -4870,29 +4835,37 @@ function paintCrystalOptics(
   ctx.save();
   ctx.lineJoin = "round";
   ctx.lineCap = "round";
+  const crease = Math.max(0.7, s * 0.018);
   if (colorIndex === 1) {
-    // Pink inverted triangle: darker outer facets, brighter upper core band.
     ctx.beginPath();
     ctx.moveTo(cx, cy - r * 0.18);
     ctx.lineTo(cx - r * 0.58, cy - r * 0.4);
     ctx.lineTo(cx, cy + r * 0.68);
     ctx.closePath();
-    ctx.fillStyle = "#8F08486A";
+    ctx.fillStyle = "#8F0848A8";
     ctx.fill();
     ctx.beginPath();
     ctx.moveTo(cx, cy - r * 0.18);
     ctx.lineTo(cx + r * 0.58, cy - r * 0.4);
     ctx.lineTo(cx, cy + r * 0.68);
     ctx.closePath();
-    ctx.fillStyle = "#6A063C52";
+    ctx.fillStyle = "#FF6AB66A";
     ctx.fill();
     ctx.beginPath();
     ctx.moveTo(cx, cy - r * 0.08);
     ctx.lineTo(cx - r * 0.28, cy - r * 0.28);
     ctx.lineTo(cx + r * 0.28, cy - r * 0.28);
     ctx.closePath();
-    ctx.fillStyle = "#FF86C85C";
+    ctx.fillStyle = "#FF86C8A0";
     ctx.fill();
+    ctx.strokeStyle = "#FF9AD188";
+    ctx.lineWidth = crease;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - r * 0.18);
+    ctx.lineTo(cx, cy + r * 0.68);
+    ctx.moveTo(cx - r * 0.28, cy - r * 0.28);
+    ctx.lineTo(cx + r * 0.28, cy - r * 0.28);
+    ctx.stroke();
   } else if (colorIndex === 2) {
     for (let i = 0; i < 5; i++) {
       const a0 = -Math.PI / 2 + (Math.PI * 2 * i) / 5;
@@ -4902,40 +4875,53 @@ function paintCrystalOptics(
       ctx.lineTo(cx + Math.cos(a0) * r * 0.74, cy + Math.sin(a0) * r * 0.74);
       ctx.lineTo(cx + Math.cos(a1) * r * 0.74, cy + Math.sin(a1) * r * 0.74);
       ctx.closePath();
-       ctx.fillStyle = i % 2 === 0 ? "#FFD04A47" : "#FFE08A24";
+      ctx.fillStyle = i % 2 === 0 ? "#FFB00078" : "#FFE08A50";
       ctx.fill();
     }
-    ctx.beginPath();
-     ctx.strokeStyle = "#FFE08A59";
-    ctx.lineWidth = Math.max(1.4, s * 0.03);
+    ctx.strokeStyle = "#FFE08A99";
+    ctx.lineWidth = crease;
     polygonPath(ctx, cx, cy, r * 0.78, 5, -Math.PI / 2);
     ctx.stroke();
+    for (let i = 0; i < 5; i++) {
+      const a0 = -Math.PI / 2 + (Math.PI * 2 * i) / 5;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(a0) * r * 0.74, cy + Math.sin(a0) * r * 0.74);
+      ctx.stroke();
+    }
   } else if (colorIndex === 3) {
-    // Green upright triangle: darker base facets, brighter near the upper tip.
     ctx.beginPath();
     ctx.moveTo(cx, cy - r * 0.5);
     ctx.lineTo(cx - r * 0.46, cy + r * 0.34);
     ctx.lineTo(cx, cy + r * 0.18);
     ctx.closePath();
-    ctx.fillStyle = "#005C385A";
+    ctx.fillStyle = "#005C3898";
     ctx.fill();
     ctx.beginPath();
     ctx.moveTo(cx, cy - r * 0.5);
     ctx.lineTo(cx + r * 0.46, cy + r * 0.34);
     ctx.lineTo(cx, cy + r * 0.18);
     ctx.closePath();
-    ctx.fillStyle = "#0048304A";
+    ctx.fillStyle = "#3DFFA06A";
     ctx.fill();
     ctx.beginPath();
     ctx.moveTo(cx, cy - r * 0.42);
     ctx.lineTo(cx + r * 0.22, cy - r * 0.02);
     ctx.lineTo(cx - r * 0.22, cy - r * 0.02);
     ctx.closePath();
-    ctx.fillStyle = "#8DFFBF55";
+    ctx.fillStyle = "#8DFFBFA0";
     ctx.fill();
+    ctx.strokeStyle = "#9CFFD188";
+    ctx.lineWidth = crease;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - r * 0.5);
+    ctx.lineTo(cx, cy + r * 0.18);
+    ctx.moveTo(cx - r * 0.46, cy + r * 0.34);
+    ctx.lineTo(cx + r * 0.46, cy + r * 0.34);
+    ctx.stroke();
   } else if (colorIndex === 4) {
     const t = r * 0.38;
-    ctx.fillStyle = `${color}30`;
+    ctx.fillStyle = `${color}48`;
     roundRect(ctx, cx - t, cy - t, t * 2, t * 2, r * 0.08);
     ctx.fill();
     ctx.beginPath();
@@ -4944,7 +4930,7 @@ function paintCrystalOptics(
     ctx.lineTo(cx + t, cy - t);
     ctx.lineTo(cx - t, cy - t);
     ctx.closePath();
-     ctx.fillStyle = "#9DD7FF42";
+    ctx.fillStyle = "#9DD7FF78";
     ctx.fill();
     ctx.beginPath();
     ctx.moveTo(cx + r * 0.64, cy - r * 0.64);
@@ -4952,7 +4938,7 @@ function paintCrystalOptics(
     ctx.lineTo(cx + t, cy + t);
     ctx.lineTo(cx + t, cy - t);
     ctx.closePath();
-    ctx.fillStyle = "#073A9E38";
+    ctx.fillStyle = "#073A9E70";
     ctx.fill();
     ctx.beginPath();
     ctx.moveTo(cx - r * 0.64, cy + r * 0.64);
@@ -4960,8 +4946,12 @@ function paintCrystalOptics(
     ctx.lineTo(cx + t, cy + t);
     ctx.lineTo(cx - t, cy + t);
     ctx.closePath();
-    ctx.fillStyle = "#02182855";
+    ctx.fillStyle = "#02182888";
     ctx.fill();
+    ctx.strokeStyle = "#9CDFFF77";
+    ctx.lineWidth = crease;
+    roundRect(ctx, cx - t, cy - t, t * 2, t * 2, r * 0.08);
+    ctx.stroke();
   } else if (colorIndex === 5) {
     ctx.beginPath();
     ctx.moveTo(cx, cy - r * 0.74);
@@ -4973,7 +4963,7 @@ function paintCrystalOptics(
     ctx.lineTo(cx - r * 0.68, cy);
     ctx.lineTo(cx - r * 0.24, cy - r * 0.08);
     ctx.closePath();
-    ctx.fillStyle = `${color}36`;
+    ctx.fillStyle = `${color}55`;
     ctx.fill();
     ctx.beginPath();
     ctx.moveTo(cx, cy - r * 0.42);
@@ -4981,19 +4971,27 @@ function paintCrystalOptics(
     ctx.lineTo(cx, cy + r * 0.42);
     ctx.lineTo(cx - r * 0.28, cy);
     ctx.closePath();
-     ctx.fillStyle = "#D8A5FF38";
+    ctx.fillStyle = "#D8A5FF70";
     ctx.fill();
+    ctx.strokeStyle = "#E0A5FF88";
+    ctx.lineWidth = crease;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - r * 0.74);
+    ctx.lineTo(cx, cy + r * 0.74);
+    ctx.moveTo(cx - r * 0.68, cy);
+    ctx.lineTo(cx + r * 0.68, cy);
+    ctx.stroke();
   } else {
-     ctx.fillStyle = "#52E8FF1F";
+    ctx.fillStyle = "#52E8FF46";
     ctx.beginPath();
     ctx.arc(cx, cy, r * 0.58, 0, Math.PI * 2);
     ctx.fill();
-     ctx.fillStyle = "#9AF7FF29";
+    ctx.fillStyle = "#9AF7FF55";
     ctx.beginPath();
     ctx.arc(cx, cy, r * 0.34, 0, Math.PI * 2);
     ctx.fill();
-     ctx.strokeStyle = "#9AF7FF61";
-    ctx.lineWidth = Math.max(1.6, s * 0.028);
+    ctx.strokeStyle = "#9AF7FF99";
+    ctx.lineWidth = crease;
     ctx.beginPath();
     ctx.arc(cx, cy, r * 0.5, 0, Math.PI * 2);
     ctx.stroke();
@@ -5007,8 +5005,10 @@ function paintCrystalOptics(
       ctx.lineTo(cx + Math.cos(a) * r * 0.62, cy + Math.sin(a) * r * 0.62);
       ctx.lineTo(cx + Math.cos(a + 0.38) * r * 0.5, cy + Math.sin(a + 0.38) * r * 0.5);
       ctx.closePath();
-       ctx.fillStyle = i % 2 === 0 ? "#52E8FF1A" : "#005C731A";
+      ctx.fillStyle = i % 2 === 0 ? "#52E8FF48" : "#005C7348";
       ctx.fill();
+      ctx.strokeStyle = "#9AF7FF66";
+      ctx.stroke();
     }
   }
   ctx.globalCompositeOperation = "lighter";
