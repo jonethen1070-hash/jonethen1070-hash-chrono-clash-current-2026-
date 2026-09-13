@@ -53,7 +53,6 @@ body {
 .logo h1,
 .logo.menu-hero h1,
 .studio-name,
-.match-brand,
 .vs-badge,
 .results h2 {
   font-family: var(--font-display);
@@ -161,7 +160,7 @@ body,
   --match-inline-pad: max(2px, env(safe-area-inset-left, 0px));
   --match-inline-pad-end: max(2px, env(safe-area-inset-right, 0px));
   --match-board-gap: 12px;
-  /* Production lock: 8x8 YOUR BOARD is a 1:1 square sized to the padded viewport, never a fixed px width. */
+  /* Production lock: 8x10 YOUR BOARD is an 8:10 rectangle with square cells, sized to the padded viewport. */
   --board-inline: min(100%, calc(100dvw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
   padding-top: calc(4px + env(safe-area-inset-top, 0px));
   padding-right: var(--match-inline-pad-end);
@@ -219,15 +218,6 @@ body,
   border: 1px solid #ff004c;
   box-shadow: 0 0 10px rgba(255, 0, 76, 0.32);
   backdrop-filter: none;
-}
-.match-brand {
-  font-size: clamp(10px, 3.1vw, 13px);
-  letter-spacing: 0.46em;
-  margin: 0;
-  background: none;
-  color: #5ef6ff;
-  -webkit-text-fill-color: #5ef6ff;
-  filter: none;
 }
 #match .match-controls-row {
   display: flex;
@@ -452,13 +442,13 @@ body,
 }
 #match .rival-side .board-slot {
   flex: 0 0 auto;
-  width: min(28vw, 14dvh, 120px);
-  height: min(28vw, 14dvh, 120px);
-  min-width: 72px;
-  min-height: 72px;
-  max-width: 120px;
-  max-height: 120px;
-  aspect-ratio: 1 / 1;
+  width: min(28vw, 11.2dvh, 96px);
+  height: auto;
+  min-width: 58px;
+  min-height: 0;
+  max-width: 96px;
+  max-height: none;
+  aspect-ratio: 8 / 10;
   border-radius: 12px;
   border: 2px solid #ff004c;
   box-shadow:
@@ -467,17 +457,17 @@ body,
     inset 0 0 0 1px rgba(255, 77, 122, 0.35);
 }
 #match .player-side .board-slot {
-  /* Do not size this square from 100cqh: the parent grid row is itself sized by
-     this element, which creates a circular intrinsic-size dependency and can
-     collapse the board to 0px in Chromium/WebView. */
+  /* 8x10 playable board. Do not size from 100cqh: the parent grid row is itself
+     sized by this element, which creates a circular intrinsic-size dependency
+     and can collapse the board to 0px in Chromium/WebView. */
   flex: 0 1 auto;
-  width: min(100%, var(--board-inline), 52dvh, 560px);
+  width: min(100%, var(--board-inline), 42dvh, 480px);
   height: auto;
-  max-width: min(100%, var(--board-inline), 52dvh, 560px);
+  max-width: min(100%, var(--board-inline), 42dvh, 480px);
   max-height: none;
   min-width: 0;
   min-height: 0;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 8 / 10;
   align-self: center;
   margin-inline: auto;
   margin-top: 0;
@@ -930,7 +920,6 @@ body,
   .avatar-ring { width: 36px; height: 36px; }
   .fighter small { letter-spacing: 0.12em; }
   .fighter { min-height: 44px; padding: 3px 5px; }
-  #match .match-brand { letter-spacing: 0.22em; font-size: 9px; }
   #match .hud-icon { width: 26px; height: 26px; min-width: 26px; min-height: 26px; }
   #match .hud-icon .dock-ico { width: 14px; height: 14px; }
   #match .hud-mute { min-height: 26px; padding: 3px 6px; font-size: 8px; letter-spacing: 0.1em; }
@@ -961,10 +950,6 @@ body,
     min-height: 68px;
     max-width: 104px;
     max-height: 104px;
-  }
-  .match-brand {
-    font-size: 9px;
-    letter-spacing: 0.32em;
   }
 }
 @media (max-height: 680px) {
@@ -2670,7 +2655,7 @@ button,
   animation: none;
 }
 
-/* Short iPhone chrome: later visual rules inflate VS/ability height and starve the 8x8 board. */
+/* Short iPhone chrome: later visual rules inflate VS/ability height and starve the 8x10 board. */
 @media (max-height: 760px) {
   #match .match-stage { gap: 3px 0; }
   #match .boards { gap: 3px; }

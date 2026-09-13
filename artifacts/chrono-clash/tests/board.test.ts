@@ -18,7 +18,7 @@ import { recordMatch } from "../src/engine/progress";
 import { EMPTY_PROGRESS } from "../src/engine/types";
 
 describe("board generation", () => {
-  it("creates an 8x8 board with no opening matches and a valid swap", () => {
+  it("creates an 8x10 board with no opening matches and a valid swap", () => {
     resetIds();
     const rng = createSeededRng(42);
     const board = generateBoard(rng);
@@ -132,7 +132,7 @@ describe("swapping", () => {
     const result = trySwap(board, { r: 0, c: 3 }, { r: 0, c: 4 }, rng);
 
     expect(result).not.toBeNull();
-    expect(result!.events.filter((event) => event.type === "clear").map((event) => event.combo)).toEqual([1, 2]);
+    expect(result!.events.filter((event) => event.type === "clear").map((event) => event.combo)).toEqual([1, 2, 3]);
     expect(findMatches(board)).toHaveLength(0);
     expect(board.flat().filter(Boolean)).toHaveLength(ROWS * COLS);
   });
@@ -195,8 +195,8 @@ describe("match session", () => {
     (game as unknown as { rng: () => number }).rng = rng;
 
     expect(game.tryPlayerSwap({ r: 0, c: 3 }, { r: 0, c: 4 }, 1_000)).toBe(true);
-    expect(game.fx.filter((event) => event.kind === "clear" && event.side === "player").map((event) => event.combo)).toEqual([1, 2]);
-    expect(game.fx.filter((event) => event.kind === "combo" && event.side === "player").map((event) => event.combo)).toEqual([2]);
+    expect(game.fx.filter((event) => event.kind === "clear" && event.side === "player").map((event) => event.combo)).toEqual([1, 2, 3]);
+    expect(game.fx.filter((event) => event.kind === "combo" && event.side === "player").map((event) => event.combo)).toEqual([2, 3]);
     expect(game.player.board.flat().filter(Boolean)).toHaveLength(ROWS * COLS);
   });
 });

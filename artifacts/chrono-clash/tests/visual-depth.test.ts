@@ -26,20 +26,26 @@ describe("visual depth polish", () => {
 
   it("bakes dimensional crystal lighting into cached gem sprites", () => {
     const renderer = readFileSync(join(root, "src/ui/renderer.ts"), "utf8");
-    expect(renderer).toContain("|c6");
+    expect(renderer).toContain("|m2faithful");
     expect(renderer).toContain("|hw8");
+    expect(renderer).toContain("ATLAS_ARTWORK_FAITHFUL");
     const paint = renderer.slice(renderer.indexOf("private paintAtlasGem("), renderer.indexOf("private drawProceduralGem("));
     expect(paint).toContain("ctx.drawImage(atlas");
+    // Faithful path: 1:1 atlas blit, no jewelPath clip before the first drawImage.
+    const faithful = paint.slice(0, paint.indexOf("const dest = s * 1.06"));
+    expect(faithful).toContain("if (ATLAS_ARTWORK_FAITHFUL)");
+    expect(faithful).not.toContain("jewelPath(");
+    expect(faithful).not.toContain("applyGemMaterial");
     expect(paint).toContain("paintCrystalOptics");
     expect(paint).toContain("paintSpeculars");
     expect(paint).toContain("crystal.core");
     expect(paint).toContain("crystal.edge");
     expect(paint).toContain("source-atop");
     expect(paint).toContain("lighter");
-    expect(paint).toContain("colorWithAlpha(color, 0.48)");
-    expect(paint).toContain("rgba(255,255,255,0.28)");
+    expect(paint).toContain("applyGemMaterial(ctx, cx, cy, s, {");
+    expect(paint).not.toContain("colorWithAlpha(color, 0.48)");
     const drawGem = renderer.slice(renderer.indexOf("private drawGem("), renderer.indexOf("private drawAtlasGem("));
-    expect(drawGem).toContain("ellipse(cx, cy + s * 0.44");
+    expect(drawGem).toContain("ellipse(cx + s * 0.02, cy + s * 0.44");
     expect(drawGem).toContain("travelLift");
     const atlasBranch = drawGem.slice(drawGem.indexOf("if (useAtlas && atlas)"), drawGem.indexOf("} else {"));
     expect(atlasBranch).not.toContain("jewelPath");
@@ -74,6 +80,14 @@ describe("visual depth polish", () => {
     expect(css).toContain("space-far");
     expect(css).not.toMatch(/canvas#stage[\s\S]{0,80}--arena-x/);
     expect(css).not.toMatch(/\.board-slot[\s\S]{0,120}--arena-x/);
+  });
+
+  it("keeps the match perspective floor behind the playable board", () => {
+    const polish = readFileSync(join(root, "src/styles/aaa-polish.css"), "utf8");
+    const after = polish.slice(polish.lastIndexOf("html body #app #match.active::after"));
+    expect(after).toContain("z-index: -1 !important");
+    expect(after).toContain("mix-blend-mode: normal !important");
+    expect(after).not.toContain("mix-blend-mode: multiply");
   });
 
   it("keeps arena parallax tiny, CSS-driven, and motion-safe", () => {

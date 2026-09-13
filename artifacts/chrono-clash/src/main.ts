@@ -8,11 +8,13 @@ import { GameSettings, applyMatchAudioMute, isMatchAudioMuted, loadSettings, sav
 import { unlockGameAudio } from "./audio/unlock";
 import { canSkipIntro } from "./engine/intro";
 import {
+  COLS,
   ENERGY_BURST,
   ENERGY_FREEZE,
   ENERGY_MAX,
   ENERGY_MEGA_STRIKE,
   ENERGY_REWIND,
+  ROWS,
   SCORE_TARGETS,
   type Coord,
 } from "./engine/types";
@@ -287,9 +289,39 @@ app.innerHTML = `
       <div class="match-stage">
       <div class="arena-architecture" aria-hidden="true">
         <div class="arena-backplane"></div>
+        <div class="arena-energy-chamber">
+          <i class="chamber-rib a"></i>
+          <i class="chamber-rib b"></i>
+          <i class="chamber-rib c"></i>
+          <i class="chamber-conduit left"></i>
+          <i class="chamber-conduit right"></i>
+          <i class="chamber-core"></i>
+          <i class="chamber-haze"></i>
+        </div>
         <div class="arena-pylon arena-pylon-left"><i></i><i></i><i></i></div>
         <div class="arena-pylon arena-pylon-right"><i></i><i></i><i></i></div>
-        <div class="arena-deck"></div>
+        <div class="arena-board-cradle"></div>
+        <div class="arena-deck">
+          <i class="deck-plate"></i>
+          <i class="deck-seam"></i>
+          <i class="deck-conduit"></i>
+          <i class="deck-reactor a"></i>
+          <i class="deck-reactor b"></i>
+          <i class="deck-reactor c"></i>
+        </div>
+        <div class="arena-lower-floor" data-env-surface="arena-floor">
+          <i class="floor-wash"></i>
+          <i class="floor-perspective"></i>
+          <i class="floor-bridge"></i>
+          <i class="floor-bay left"></i>
+          <i class="floor-bay center"></i>
+          <i class="floor-bay right"></i>
+          <i class="floor-seams"></i>
+          <i class="floor-spine"></i>
+          <i class="floor-rail player"></i>
+          <i class="floor-rail rival"></i>
+          <i class="floor-edge"></i>
+        </div>
       </div>
       <div class="match-controls-row">
         <div class="match-brand-actions">
@@ -376,9 +408,27 @@ app.innerHTML = `
         <div class="ability-deck" aria-hidden="true">
           <i class="ability-deck-rail"></i>
           <i class="ability-deck-core"></i>
+          <i class="ability-deck-bay a"></i>
+          <i class="ability-deck-bay b"></i>
+          <i class="ability-deck-bay c"></i>
         </div>
         <button type="button" class="energy-attack burst" id="energyBurstAttack" data-power-id="burst">
-          <span class="energy-attack-glyph" aria-hidden="true"></span>
+          <span class="ability-icon-stage" aria-hidden="true">
+            <span class="energy-attack-glyph">
+              <svg class="ability-icon" viewBox="0 0 64 64" focusable="false">
+                <defs>
+                  <linearGradient id="burstGrad" x1="18" y1="4" x2="46" y2="60" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#b8ffff"/>
+                    <stop offset="45%" stop-color="#3de8ff"/>
+                    <stop offset="100%" stop-color="#0890b0"/>
+                  </linearGradient>
+                </defs>
+                <path fill="url(#burstGrad)" d="M38.5 3.2 15.2 33.8h12.4L21.4 60.8 50.2 24.6H35.8l2.7-21.4z"/>
+                <path fill="rgba(255,255,255,0.55)" d="M36.6 9.2 32.8 24.6h9.4z"/>
+                <path fill="rgba(255,255,255,0.22)" d="M27.6 33.8h8.2l-3.4 14.2z"/>
+              </svg>
+            </span>
+          </span>
           <span class="energy-attack-copy">
             <b>ENERGY BURST</b>
             <small>Destroy 3x3 area</small>
@@ -386,14 +436,53 @@ app.innerHTML = `
           <span class="energy-attack-cost"><i aria-hidden="true"></i>${ENERGY_BURST}</span>
         </button>
         <button type="button" class="energy-attack strike" id="megaStrikeAttack" data-power-id="megaStrike">
-          <span class="energy-attack-glyph" aria-hidden="true"></span>
+          <span class="ability-icon-stage" aria-hidden="true">
+            <span class="energy-attack-glyph">
+              <svg class="ability-icon" viewBox="0 0 64 64" focusable="false">
+                <defs>
+                  <linearGradient id="strikeGrad" x1="12" y1="4" x2="52" y2="60" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#ffd0e0"/>
+                    <stop offset="40%" stop-color="#ff4d88"/>
+                    <stop offset="100%" stop-color="#9a1848"/>
+                  </linearGradient>
+                </defs>
+                <path fill="url(#strikeGrad)" d="M32 3.5 54 22.8 42.2 60.5H21.8L10 22.8z"/>
+                <path fill="rgba(255,255,255,0.42)" d="M32 3.5 43.5 23H20.5z"/>
+                <path fill="rgba(255,255,255,0.18)" d="M32 23 42.2 60.5 32 51.2 21.8 60.5z"/>
+                <path fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.4" d="M32 12.5 44 24.5 36.5 52"/>
+              </svg>
+            </span>
+          </span>
           <span class="energy-attack-copy">
             <b>MEGA STRIKE</b>
             <small>Destroy all gems of a color</small>
           </span>
           <span class="energy-attack-cost"><i aria-hidden="true"></i>${ENERGY_MEGA_STRIKE}</span>
         </button>
-        <button class="power" id="rewind"><span class="glyph" aria-hidden="true">↺</span><i class="ability-fx" aria-hidden="true"></i><b>REWIND</b><span class="cost">${ENERGY_REWIND} ENERGY</span><span class="need">Restores your last valid move.</span></button>
+        <button type="button" class="energy-attack rewind power" id="rewind" data-power-id="rewind">
+          <span class="ability-icon-stage" aria-hidden="true">
+            <span class="energy-attack-glyph glyph">
+              <svg class="ability-icon" viewBox="0 0 64 64" focusable="false">
+                <defs>
+                  <linearGradient id="rewindGrad" x1="10" y1="8" x2="54" y2="56" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#f0e0ff"/>
+                    <stop offset="45%" stop-color="#c59bff"/>
+                    <stop offset="100%" stop-color="#6a38b8"/>
+                  </linearGradient>
+                </defs>
+                <path fill="none" stroke="url(#rewindGrad)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" d="M20.5 21.5a18.5 18.5 0 1 1-3.8 20.2"/>
+                <path fill="url(#rewindGrad)" d="M21 10.2v18.8H5.4z"/>
+                <circle cx="32" cy="34" r="4.2" fill="rgba(255,255,255,0.55)"/>
+              </svg>
+            </span>
+          </span>
+          <i class="ability-fx" aria-hidden="true"></i>
+          <span class="energy-attack-copy">
+            <b>REWIND</b>
+            <small class="need">Restores your last valid move.</small>
+          </span>
+          <span class="energy-attack-cost cost"><i aria-hidden="true"></i>${ENERGY_REWIND}</span>
+        </button>
         <div class="power-cancel" hidden>
           <button type="button" class="power-cancel-button" id="cancelPowerTarget" aria-controls="playerBoard">CANCEL TARGET</button>
         </div>
@@ -793,7 +882,7 @@ function displayCallout(id: VoiceLineId): void {
   const line = VOICE[id];
   showCallout(line.text, line.intensity);
   if (line.priority >= 40 && settings.effects !== "low") {
-    restartAnim(ui.match, "impact");
+    flashImpact();
   }
 }
 
@@ -1615,6 +1704,16 @@ function flashCast(matchClass: string, btn?: HTMLButtonElement): void {
   }, 420);
 }
 
+let impactPulseTimer = 0;
+function flashImpact(): void {
+  // Short arena/board pulse — must clear so rails return to quiet idle.
+  restartAnim(ui.match, "impact");
+  window.clearTimeout(impactPulseTimer);
+  impactPulseTimer = window.setTimeout(() => {
+    ui.match.classList.remove("impact");
+  }, 220);
+}
+
 let comboPulseTimer = 0;
 function flashCombo(combo: number): void {
   ui.match.classList.remove("combo-pulse", "combo-hot", "combo-max", "combo-mega");
@@ -1674,7 +1773,7 @@ function reportCanceledEnergyPower(id: "burst" | "megaStrike"): void {
   const name = id === "burst" ? "Energy Burst" : "Mega Strike";
   ui.matchStatus.textContent = `Target canceled. Select a gem on the board to use ${name}.`;
   showCallout("TARGET CANCELED", "urgent", 520);
-  restartAnim(ui.match, "impact");
+  flashImpact();
 }
 
 function cancelArmedEnergyPower(): void {
@@ -2078,9 +2177,12 @@ function cellSize(): number {
   ensureInputLayout();
   if (cachedCellSize > 0) return cachedCellSize;
   const rect = layout.player;
-  const size = Math.min(rect.width, rect.height);
-  const inner = size - BOARD_FRAME * 2;
-  cachedCellSize = (inner - BOARD_GAP * (8 + 1)) / 8;
+  // Square cells on an 8x10 board: limited by both width and height budgets.
+  const innerW = rect.width - BOARD_FRAME * 2;
+  const innerH = rect.height - BOARD_FRAME * 2;
+  const cellW = (innerW - BOARD_GAP * (COLS + 1)) / COLS;
+  const cellH = (innerH - BOARD_GAP * (ROWS + 1)) / ROWS;
+  cachedCellSize = Math.min(cellW, cellH);
   return cachedCellSize;
 }
 
@@ -2252,6 +2354,8 @@ let matchEffectsStopped = false;
 let lastRivalActionAt = -Infinity;
 let lastFinalSecond = 0;
 let lastMegaReady = false;
+let lastBurstReady = false;
+let lastRewindReady = false;
 let objectiveCompleted = false;
 const RESULTS_BOARD_FADE_MS = 220;
 
@@ -2330,6 +2434,8 @@ function onScreenEnter(id: string, now: number): void {
     lastPlayerEnergy = 0;
     lastFinalSecond = 0;
     lastMegaReady = false;
+    lastBurstReady = false;
+    lastRewindReady = false;
     lastRivalActionAt = -Infinity;
     objectiveCompleted = false;
     matchObjective = MATCH_OBJECTIVES[session.progress.matchesSeen % MATCH_OBJECTIVES.length]!;
@@ -2499,6 +2605,16 @@ function frame(now: number): void {
        restartAnim(ui.megaStrikeAttack, "ready-pulse");
      }
      lastMegaReady = megaReady;
+    const burstThresholdReady = snap.player.energy >= ENERGY_BURST;
+    if (burstThresholdReady && !lastBurstReady) {
+      restartAnim(ui.energyBurstAttack, "ready-pulse");
+    }
+    lastBurstReady = burstThresholdReady;
+    const rewindThresholdReady = snap.player.energy >= ENERGY_REWIND;
+    if (rewindThresholdReady && !lastRewindReady) {
+      restartAnim(ui.rewind, "ready-pulse");
+    }
+    lastRewindReady = rewindThresholdReady;
     if (snap.player.energy > lastPlayerEnergy + 0.5) {
       if (energyWrap instanceof HTMLElement) restartAnim(energyWrap, "gain");
       restartAnim(ui.energyFill, "surge");
@@ -2518,7 +2634,9 @@ function frame(now: number): void {
     ui.energyBurstAttack.classList.toggle("unavailable", !burstReady);
     ui.megaStrikeAttack.classList.toggle("unavailable", !megaStrikeReady);
      ui.megaStrikeAttack.classList.toggle("charged", megaReady);
-    ui.rewind.classList.toggle("ready", playing && snap.player.energy >= ENERGY_REWIND);
+    const rewindReady = playing && snap.player.energy >= ENERGY_REWIND && !ui.rewind.disabled;
+    ui.rewind.classList.toggle("ready", rewindReady);
+    ui.rewind.classList.toggle("unavailable", !rewindReady);
      updateMatchObjective(snap);
 
     const comboAt = session.screen === "match" ? lastGameplayCalloutAt : announcer.lastComboAt;
@@ -2534,6 +2652,10 @@ function frame(now: number): void {
           audio.playMatchStart(String(fx.id));
           flashCast("clash-in");
         } else audio.play("countdown");
+      }
+      if (fx.kind === "clear" && fx.side !== "opponent") {
+        // Short arena + board impact pulse on every player clear.
+        flashImpact();
       }
       if (fx.kind === "combo" && (fx.combo ?? 0) >= 2 && fx.side !== "opponent") {
         flashCombo(fx.combo ?? 1);
@@ -2697,6 +2819,7 @@ armFrame();
 if (location.hostname === "127.0.0.1" || location.hostname === "localhost") {
   const chrono = {
     session,
+    renderer,
     audio() {
       return audio.status();
     },

@@ -137,23 +137,96 @@ function isolateAtlasGems(data: ImageData): void {
 
   const copy = new Uint8ClampedArray(px);
   px.fill(0);
+
+  // Scale each isolated gem to fill most of its 256 cell so crystals read at
+  // match-3 size on the board. Same source artwork — presentation crop/fit only.
+  const fit = GEM_CELL * 0.995;
+  const scratch =
+    typeof document !== "undefined" ? document.createElement("canvas") : null;
+  const scratchCtx = scratch?.getContext("2d");
+
   for (let idx = 0; idx < 6; idx++) {
     const gem = ordered[idx]!;
     const col = idx % GEM_COLS;
     const row = Math.floor(idx / GEM_COLS);
-    const destCx = col * GEM_CELL + GEM_CELL / 2;
-    const destCy = row * GEM_CELL + GEM_CELL / 2;
-    const ox = Math.round(destCx - gem.sx);
-    const oy = Math.round(destCy - gem.sy);
     const x0 = col * GEM_CELL;
     const y0 = row * GEM_CELL;
     const x1 = x0 + GEM_CELL;
     const y1 = y0 + GEM_CELL;
+
+    let minX = width;
+    let minY = height;
+    let maxX = -1;
+    let maxY = -1;
     for (const p of gem.pixels) {
       const x = p % width;
       const y = (p - x) / width;
-      const nx = x + ox;
-      const ny = y + oy;
+      if (x < minX) minX = x;
+      if (y < minY) minY = y;
+      if (x > maxX) maxX = x;
+      if (y > maxY) maxY = y;
+    }
+    const bw = Math.max(1, maxX - minX + 1);
+    const bh = Math.max(1, maxY - minY + 1);
+    const scale = Math.min(fit / bw, fit / bh);
+    const dw = Math.max(1, Math.round(bw * scale));
+    const dh = Math.max(1, Math.round(bh * scale));
+    const dx = x0 + Math.round((GEM_CELL - dw) / 2);
+    const dy = y0 + Math.round((GEM_CELL - dh) / 2);
+
+    if (scratch && scratchCtx) {
+      scratch.width = bw;
+      scratch.height = bh;
+      const src = scratchCtx.createImageData(bw, bh);
+      const sp = src.data;
+      for (const p of gem.pixels) {
+        const x = p % width;
+        const y = (p - x) / width;
+        const lx = x - minX;
+        const ly = y - minY;
+        const di = (ly * bw + lx) * 4;
+        const si = p * 4;
+        sp[di] = copy[si]!;
+        sp[di + 1] = copy[si + 1]!;
+        sp[di + 2] = copy[si + 2]!;
+        sp[di + 3] = copy[si + 3]!;
+      }
+      scratchCtx.putImageData(src, 0, 0);
+
+      const cellCanvas = document.createElement("canvas");
+      cellCanvas.width = GEM_CELL;
+      cellCanvas.height = GEM_CELL;
+      const cellCtx = cellCanvas.getContext("2d");
+      if (!cellCtx) continue;
+      cellCtx.imageSmoothingEnabled = true;
+      cellCtx.imageSmoothingQuality = "high";
+      cellCtx.clearRect(0, 0, GEM_CELL, GEM_CELL);
+      cellCtx.drawImage(scratch, 0, 0, bw, bh, dx - x0, dy - y0, dw, dh);
+      const out = cellCtx.getImageData(0, 0, GEM_CELL, GEM_CELL).data;
+      for (let ly = 0; ly < GEM_CELL; ly++) {
+        for (let lx = 0; lx < GEM_CELL; lx++) {
+          const si = (ly * GEM_CELL + lx) * 4;
+          if ((out[si + 3] ?? 0) < 1) continue;
+          const di = ((y0 + ly) * width + (x0 + lx)) * 4;
+          px[di] = out[si]!;
+          px[di + 1] = out[si + 1]!;
+          px[di + 2] = out[si + 2]!;
+          px[di + 3] = out[si + 3]!;
+        }
+      }
+      continue;
+    }
+
+    // Fallback without DOM canvas: nearest-neighbor scale into the cell.
+    const srcCx = (minX + maxX) / 2;
+    const srcCy = (minY + maxY) / 2;
+    const destCx = x0 + GEM_CELL / 2;
+    const destCy = y0 + GEM_CELL / 2;
+    for (const p of gem.pixels) {
+      const x = p % width;
+      const y = (p - x) / width;
+      const nx = Math.round(destCx + (x - srcCx) * scale);
+      const ny = Math.round(destCy + (y - srcCy) * scale);
       if (nx < x0 || ny < y0 || nx >= x1 || ny >= y1) continue;
       const di = (ny * width + nx) * 4;
       const si = p * 4;

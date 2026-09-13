@@ -14,7 +14,7 @@ describe("match screen graphics-only polish", () => {
   it("keeps gem identities, board math, and Chrono Power wiring locked", () => {
     expect([...COLORS]).toEqual(["#D1166D", "#D38800", "#008F5B", "#1754C7", "#6D25C9", "#008EAA"]);
     expect(COLS).toBe(8);
-    expect(ROWS).toBe(8);
+    expect(ROWS).toBe(13);
     expect(BOARD_FRAME).toBe(6);
     expect(BOARD_GAP).toBe(1.5);
     const main = read("src/main.ts");
@@ -33,7 +33,7 @@ describe("match screen graphics-only polish", () => {
   it("does not rewrite the board-fit layout tokens", () => {
     const studio = read("src/styles/studio.css");
     expect(studio).toContain("--board-inline:");
-    expect(studio).toContain("width: min(100%, var(--board-inline), 52dvh, 560px)");
+    expect(studio).toContain("width: min(100%, var(--board-inline), 42dvh, 480px)");
     expect(studio).toContain("container-type: size");
     expect(studio).toContain("--match-board-gap: 12px");
     const polish = read("src/styles/aaa-polish.css");

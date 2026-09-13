@@ -534,12 +534,18 @@ button:active {
   animation: finalTick 0.28s ease;
 }
 
-#megaStrikeAttack.ready-pulse {
+#megaStrikeAttack.ready-pulse,
+#energyBurstAttack.ready-pulse,
+#rewind.ready-pulse {
   animation: readyPulse 0.48s ease;
 }
 
 #megaStrikeAttack.charged {
   box-shadow: 0 0 18px rgba(255, 209, 102, 0.34);
+}
+
+#energyBurstAttack.ready {
+  box-shadow: 0 0 16px rgba(47, 230, 247, 0.28);
 }
 
 #oppCard.danger {
@@ -595,10 +601,30 @@ button:active {
 .callout.urgent { color: var(--warn); }
 .callout.triumphant { color: var(--win); }
 .callout.subtle { color: #7dd3fc; font-size: clamp(18px, 5vw, 28px); }
+/* In-match toasts sit on the BOARD crown — never over timer / fighters / energy.
+   Center with left/right+margin so overlaypop scale animation cannot desync X. */
 .callout.ingame {
-  top: 9%;
-  font-size: clamp(18px, 5.2vw, 30px);
-  letter-spacing: 0.12em;
+  top: max(124px, calc(env(safe-area-inset-top, 0px) + 118px));
+  left: 0;
+  right: 0;
+  margin-inline: auto;
+  width: max-content;
+  max-width: min(92vw, 340px);
+  transform: none;
+  font-size: clamp(14px, 3.8vw, 20px);
+  letter-spacing: 0.1em;
+  line-height: 1.15;
+  white-space: normal;
+  padding: 6px 12px;
+  border-radius: 12px;
+  background: rgba(4, 8, 18, 0.72);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(180, 230, 255, 0.12);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.75);
+}
+
+.callout.ingame.powerful,
+.callout.ingame.dramatic {
+  font-size: clamp(15px, 4.1vw, 22px);
 }
 
 .boards {
@@ -2080,13 +2106,6 @@ button:active {
     radial-gradient(70% 36% at 50% 100%, rgba(251, 113, 133, 0.1), transparent 58%);
 }
 
-.match-brand-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  min-height: 22px;
-}
 .hud-mute {
   flex: 0 0 auto;
   min-height: 28px;
@@ -2102,20 +2121,6 @@ button:active {
   color: #fecaca;
   border-color: rgba(248, 113, 113, 0.45);
 }
-.match-brand {
-  text-align: center;
-  font-family: Orbitron, Outfit, sans-serif;
-  font-weight: 900;
-  font-size: clamp(11px, 3.4vw, 15px);
-  letter-spacing: 0.42em;
-  background: linear-gradient(180deg, #ffffff 10%, #e0f2fe 48%, #7dd3fc 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  filter: drop-shadow(0 0 12px rgba(125, 211, 252, 0.55));
-  margin: 0 0 4px;
-}
-
 .match-top {
   align-items: center;
   gap: 6px;
@@ -2416,7 +2421,6 @@ button:active {
 }
 
 @media (max-height: 720px) {
-  .match-brand { font-size: 10px; margin-bottom: 0; }
   .match-screen .boards { grid-template-rows: max-content max-content minmax(160px, 1fr); }
   .match-screen .power { min-height: 74px; border-radius: 28px; }
   .match-screen .power .glyph { width: 34px; height: 34px; font-size: 16px; }
@@ -2630,15 +2634,26 @@ button:active {
   width: min(68%, 248px);
 }
 
+/* Keep in-match callouts on the board crown (duplicate late rule — must not reintroduce HUD overlap). */
 .callout.ingame {
-  top: 7.5%;
-  max-width: 92%;
+  top: max(124px, calc(env(safe-area-inset-top, 0px) + 118px));
+  left: 0;
+  right: 0;
+  margin-inline: auto;
+  width: max-content;
+  max-width: min(92vw, 340px);
+  transform: none;
   white-space: normal;
-  font-size: clamp(15px, 4.4vw, 24px);
+  font-size: clamp(14px, 3.8vw, 20px);
   line-height: 1.15;
-  padding: 4px 10px;
+  padding: 6px 12px;
   border-radius: 12px;
-  background: rgba(6, 8, 20, 0.55);
+  background: rgba(4, 8, 18, 0.72);
+}
+
+.callout.ingame.powerful,
+.callout.ingame.dramatic {
+  font-size: clamp(15px, 4.1vw, 22px);
 }
 
 #match > .combo-burst {

@@ -9,7 +9,7 @@ describe("2.5D arena presentation", () => {
     expect(renderer).toContain("const vanishingX = w * 0.5 + drift * 0.35");
     expect(renderer).toContain("ctx.ellipse(w * 0.5, horizonY");
     expect(renderer).toContain("private drawBoardDepth");
-    expect(renderer).toContain("ctx.shadowOffsetY = size * 0.028");
+    expect(renderer).toContain("ctx.shadowOffsetY = scale * 0.028");
     expect(renderer).toContain("const topRail = ctx.createLinearGradient");
   });
 

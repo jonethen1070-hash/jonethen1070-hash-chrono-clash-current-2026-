@@ -23,6 +23,7 @@ import {
   ENERGY_TIMESHIFT,
   FREEZE_MS,
   MATCH_SECONDS,
+  ROWS,
   TIME_STEAL_MS,
   TIMESHIFT_MS,
 } from "../src/engine/types";
@@ -40,7 +41,7 @@ function play(game: GameSession, now = 1_000): number {
 function fill(colors: number[][]) {
   resetIds();
   const board = emptyBoard();
-  for (let r = 0; r < 8; r++) {
+  for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < 8; c++) {
       board[r]![c] = makePiece(colors[r]?.[c] ?? ((r + c) % 6) + 1);
     }
