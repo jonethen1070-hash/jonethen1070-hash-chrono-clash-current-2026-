@@ -2096,20 +2096,21 @@ export class BoardRenderer {
 
   /** Device-pixel scale of the target context, so sprites bake 1:1 to screen. */
   private spriteScale(): number {
-    const t = this.ctx.getTransform?.();
-    const a = t ? Math.hypot(t.a, t.b) : 0;
-    if (a > 0.1) return a;
     const dpr = typeof window === "undefined" ? 1 : window.devicePixelRatio || 1;
     return Math.min(2, dpr);
   }
 
   private gemSprite(atlas: HTMLCanvasElement, colorIndex: number, color: string, inner: number, selected: boolean): HTMLCanvasElement {
-    // Bake at the size the gem actually occupies on screen. The old fixed 256
-    // bake was minified 2x at blit time, which cost ~21% of the artwork's edge
-    // detail for nothing.
+    // Bake at the seated cell size, not the per-frame travel/die/select scale.
+    // Keying off animated `inner` allocated a new canvas whenever a gem's
+    // drawn size changed by 1px, blew the 40-sprite cap, and the discarded
+    // backing stores piled up for the whole match.
+    const cell = this.lastPlayerCell > 2 ? this.lastPlayerCell : inner;
+    const inset = Math.max(0.6, cell * 0.012);
+    const restCss = Math.max(8, cell - inset * 2) * GEM_VISUAL_SCALE;
     const q = ATLAS_ARTWORK_FAITHFUL
-      ? Math.max(24, Math.round(inner * this.spriteScale()))
-      : Math.max(GEM_CELL, Math.round(inner));
+      ? Math.max(24, Math.round(restCss * this.spriteScale()))
+      : Math.max(GEM_CELL, Math.round(restCss));
     const key = `${colorIndex}|${q}|${selected ? 1 : 0}|m2faithful`;
     let sheet = this.gemSprites.get(key);
     if (sheet) return sheet;
