@@ -21,8 +21,8 @@ export { LIVE_GEM_MAX_IN_CELL_DROP, liveGemDrawOrigin } from "./gemMotion";
 const GAP = BOARD_GAP;
 const FRAME = BOARD_FRAME;
 const MATCH_IMPACT_MS = 54;
-/* Idle draw size seats atlas crystals tightly in each square cell (~94–98%). */
-const GEM_VISUAL_SCALE = 1.28;
+/* Idle draw size seats atlas crystals to the reference gem-to-cell occupancy. */
+const GEM_VISUAL_SCALE = 1.52;
 const MATCH_STAGGER_MIN_MS = 8;
 const MATCH_STAGGER_STEP_MS = 4;
 const MATCH_STAGGER_MAX_MS = MATCH_STAGGER_MIN_MS + MATCH_STAGGER_STEP_MS * 2;
@@ -3385,7 +3385,7 @@ export class BoardRenderer {
       selected && this.fx.animation !== "low" && !this.fx.reducedMotion
         ? 1 + Math.sin(now / 140) * 0.028
         : 1;
-    const visScale = Math.min(tile.scale * GEM_VISUAL_SCALE, 1.32);
+    const visScale = Math.min(tile.scale * GEM_VISUAL_SCALE, 1.56);
     let travelLift = 1;
     if (!tile.dying && tile.moveKind !== "idle" && tile.moveDur > 0 && !this.fx.reducedMotion) {
       const t = Math.min(1, tile.moveAge / tile.moveDur);
