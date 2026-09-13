@@ -20,9 +20,9 @@ describe("phase 5 juice helpers", () => {
     expect(comboFlavor(5)).toBe("AMAZING!");
     expect(comboFlavor(6)).toBe("PERFECT!");
     expect(comboBurstText(4)).toBe("COMBO x4\nGREAT!");
-    expect(comboBurstClass(2)).toBe("mid");
-    expect(comboBurstClass(4)).toBe("big");
-    expect(comboBurstClass(6)).toBe("epic");
+    expect(comboBurstClass(2)).toBe("big");
+    expect(comboBurstClass(4)).toBe("epic");
+    expect(comboBurstClass(6)).toBe("mega");
     expect(comboBurstClass(8)).toBe("mega");
     expect(comboBurstText(8)).toBe("COMBO x8\nMEGA COMBO");
   });

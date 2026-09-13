@@ -1719,10 +1719,10 @@ let comboPulseTimer = 0;
 function flashCombo(combo: number): void {
   ui.match.classList.remove("combo-pulse", "combo-hot", "combo-max", "combo-mega");
   restartAnim(ui.match, "combo-pulse");
-  if (combo >= 4) ui.match.classList.add("combo-hot");
-  if (combo >= 6) ui.match.classList.add("combo-max");
-  if (combo >= 8) ui.match.classList.add("combo-mega");
-  if (combo >= 3 && settings.effects !== "low") {
+  if (combo >= 2) ui.match.classList.add("combo-hot");
+  if (combo >= 3) ui.match.classList.add("combo-max");
+  if (combo >= 5) ui.match.classList.add("combo-mega");
+  if (combo >= 2 && settings.effects !== "low") {
     ui.energyBurst.classList.remove("hidden");
     restartAnim(ui.energyBurst, "pop");
   }
@@ -2338,6 +2338,8 @@ function pop(el: HTMLElement): void {
 
 let shownPlayer = 0;
 let shownOpp = 0;
+let revealPlayerScore = 0;
+let pendingPlayerScoreAt = 0;
 let lastPlayerScore = 0;
 let lastOppScore = 0;
 let lastPlayerEnergy = 0;
@@ -2518,9 +2520,27 @@ function frame(now: number): void {
       matchEffectsStopped = true;
     }
     const rate = scoreTickerRate(settings.animation, reducedMotion());
-    shownPlayer += (snap.player.score - shownPlayer) * rate;
+    if (snap.player.score !== lastPlayerScore) {
+      if (snap.player.score > lastPlayerScore) {
+        const delay = matchImpactDelayMs(reducedMotion());
+        pendingPlayerScoreAt = now + delay;
+        if (delay > 0) audio.playLater("score", delay);
+        else audio.play("score");
+        window.setTimeout(() => pop(ui.playerCard), delay);
+      } else {
+        revealPlayerScore = snap.player.score;
+        pendingPlayerScoreAt = 0;
+        pop(ui.playerCard);
+      }
+      lastPlayerScore = snap.player.score;
+    }
+    if (pendingPlayerScoreAt && now >= pendingPlayerScoreAt) {
+      revealPlayerScore = lastPlayerScore;
+      pendingPlayerScoreAt = 0;
+    }
+    shownPlayer += (revealPlayerScore - shownPlayer) * rate;
     shownOpp += (snap.opponent.score - shownOpp) * rate;
-    if (Math.abs(snap.player.score - shownPlayer) < 0.6) shownPlayer = snap.player.score;
+    if (Math.abs(revealPlayerScore - shownPlayer) < 0.6) shownPlayer = revealPlayerScore;
     if (Math.abs(snap.opponent.score - shownOpp) < 0.6) shownOpp = snap.opponent.score;
     setText(ui.playerScore, String(Math.round(shownPlayer)));
     setText(ui.oppScore, String(Math.round(shownOpp)));
@@ -2532,17 +2552,6 @@ function frame(now: number): void {
     );
     setWidth(ui.playerScoreFill, `${Math.min(100, (shownPlayer / scoreCap) * 100)}%`);
     setWidth(ui.oppScoreFill, `${Math.min(100, (shownOpp / scoreCap) * 100)}%`);
-    if (snap.player.score !== lastPlayerScore) {
-      if (snap.player.score > lastPlayerScore) {
-        const delay = matchImpactDelayMs(reducedMotion());
-        if (delay > 0) audio.playLater("score", delay);
-        else audio.play("score");
-        window.setTimeout(() => pop(ui.playerCard), delay);
-      } else {
-        pop(ui.playerCard);
-      }
-      lastPlayerScore = snap.player.score;
-    }
     if (snap.opponent.score !== lastOppScore) {
       // Rival board SFX stay silent — no oppscore / gem-break / match cues.
       lastOppScore = snap.opponent.score;
@@ -2775,6 +2784,9 @@ function frame(now: number): void {
     renderer.clear();
     shownPlayer = 0;
     shownOpp = 0;
+    revealPlayerScore = 0;
+    pendingPlayerScoreAt = 0;
+    lastPlayerScore = 0;
     boardsDrawn = false;
   }
 
