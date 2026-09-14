@@ -113,10 +113,11 @@ describe("production responsive board layout", () => {
     expect(match).not.toContain('id="timeshift"');
     expect(match).not.toContain('id="freezeQty"');
     expect(match).not.toContain('id="shiftQty"');
-    expect(match).toContain('id="rewind"');
-    expect(match).toContain('id="energyBurstAttack"');
-    expect(match).toContain('id="megaStrikeAttack"');
-    expect(match.indexOf('class="powers"')).toBeGreaterThan(match.indexOf('id="playerBoard"'));
+    expect(match).not.toContain('id="rewind"');
+    expect(match).not.toContain('id="energyBurstAttack"');
+    expect(match).not.toContain('id="megaStrikeAttack"');
+    expect(match).not.toContain('class="powers"');
+    expect(match).not.toContain('class="energy-wrap"');
     expect(match).toContain('id="stage"');
     expect(match.indexOf('id="stage"')).toBeGreaterThan(match.indexOf('id="playerBoard"'));
     expect(match.indexOf('id="overlay"')).toBeGreaterThan(match.indexOf('id="stage"'));

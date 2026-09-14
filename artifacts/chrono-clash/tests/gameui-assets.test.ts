@@ -134,13 +134,16 @@ describe("GameUI reskin assets", () => {
     expect(css).toContain("@keyframes finalTick");
   });
 
-  it("keeps the rival board a compact square below the HUD and above energy", () => {
+  it("keeps the rival board a compact square below the HUD", () => {
     const studio = readFileSync(join(process.cwd(), "src/styles/studio.css"), "utf8");
     const polish = readFileSync(join(process.cwd(), "src/styles/aaa-polish.css"), "utf8");
     const main = readFileSync(join(process.cwd(), "src/main.ts"), "utf8");
-    const boards = main.slice(main.indexOf('class="boards"'), main.indexOf('class="powers"'));
-    expect(boards.indexOf('id="oppBoard"')).toBeLessThan(boards.indexOf('class="energy-wrap"'));
-    expect(boards.indexOf('class="energy-wrap"')).toBeLessThan(boards.indexOf('id="playerBoard"'));
+    const match = main.slice(main.indexOf('id="match"'), main.indexOf('id="sheet"'));
+    expect(match).toContain('id="oppBoard"');
+    expect(match).toContain('id="playerBoard"');
+    expect(match).not.toContain('class="energy-wrap"');
+    expect(match).not.toContain('class="powers"');
+    expect(match.indexOf('id="oppBoard"')).toBeGreaterThan(match.indexOf('id="playerBoard"'));
     expect(studio).toContain("grid-template-rows: max-content max-content minmax(0, 1fr)");
     expect(studio).toContain("#match .rival-side .board-slot");
     expect(studio).toContain("min(28vw, 11.2dvh, 96px)");

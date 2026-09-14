@@ -185,7 +185,7 @@ test.describe("mobile board clipping regression", () => {
   test.describe.configure({ timeout: 60_000 });
 
   for (const target of MOBILE_BOARD_VIEWPORTS) {
-    test(`${target.name} ${target.width}x${target.height} keeps the board and abilities visible`, async ({ page }) => {
+    test(`${target.name} ${target.width}x${target.height} keeps the board visible`, async ({ page }) => {
       await page.setViewportSize({ width: target.width, height: target.height });
       await page.goto("/");
       await expect(page.locator("#menu.active")).toBeVisible();
@@ -322,7 +322,13 @@ test.describe("mobile board clipping regression", () => {
       console.log(`[mobile-board] ${detail}`);
       expect(board, `Missing transformed board geometry: ${detail}`).not.toBeNull();
       expect(canvas, `Missing player canvas geometry: ${detail}`).not.toBeNull();
-      expect(geometry.buttons, `Ability buttons were not rendered: ${detail}`).toHaveLength(3);
+      expect(geometry.buttons, `Old energy/power buttons must be gone: ${detail}`).toHaveLength(0);
+      await expect(page.locator(".energy-wrap")).toHaveCount(0);
+      await expect(page.locator(".powers")).toHaveCount(0);
+      await expect(page.locator("#energyFill")).toHaveCount(0);
+      await expect(page.locator("#energyBurstAttack")).toHaveCount(0);
+      await expect(page.locator("#megaStrikeAttack")).toHaveCount(0);
+      await expect(page.locator("#rewind")).toHaveCount(0);
       expect(geometry.canvasCount, `Expected an in-board canvas: ${detail}`).toBeGreaterThan(0);
       expect(geometry.renderTileCount, `Expected all 80 board tiles: ${detail}`).toBe(BOARD_TILES);
       expect(geometry.renderCell, `Expected a measurable 8x10 cell size: ${detail}`).toBeGreaterThan(0);
@@ -346,45 +352,10 @@ test.describe("mobile board clipping regression", () => {
       expect(canvas!.display, `Canvas was display-hidden: ${detail}`).not.toBe("none");
       expect(canvas!.visibility, `Canvas was visibility-hidden: ${detail}`).not.toBe("hidden");
 
-      for (const button of geometry.buttons) {
-        expect(button.width, `Ability ${button.id} has no width: ${detail}`).toBeGreaterThan(0);
-        expect(button.height, `Ability ${button.id} has no height: ${detail}`).toBeGreaterThan(0);
-        expect(button.left, `Ability ${button.id} clipped at the left edge: ${detail}`).toBeGreaterThanOrEqual(viewportLeft - 1);
-        expect(button.right, `Ability ${button.id} clipped at the right edge: ${detail}`).toBeLessThanOrEqual(viewportRight + 1);
-        expect(button.top, `Ability ${button.id} overlaps the board: ${detail}`).toBeGreaterThanOrEqual(board!.bottom - 1);
-        expect(button.bottom, `Ability ${button.id} clipped at the bottom edge: ${detail}`).toBeLessThanOrEqual(viewportBottom + 1);
-        expect(button.display, `Ability ${button.id} was display-hidden: ${detail}`).not.toBe("none");
-        expect(button.visibility, `Ability ${button.id} was visibility-hidden: ${detail}`).not.toBe("hidden");
-      }
-
-      expect(geometry.abilityContent, `Ability content was not rendered: ${detail}`).toHaveLength(3);
-      for (const ability of geometry.abilityContent) {
-        expect(ability.button, `Missing ${ability.id} button geometry: ${detail}`).not.toBeNull();
-        const button = ability.button!;
-        for (const part of ability.parts) {
-          const partDetail = `${detail} ${ability.id} ${part.name}`;
-          expect(part.rect, `Missing ability ${part.name} geometry: ${partDetail}`).not.toBeNull();
-          const rect = part.rect!;
-          expect(rect.width, `Ability ${part.name} has no width: ${partDetail}`).toBeGreaterThan(0);
-          expect(rect.height, `Ability ${part.name} has no height: ${partDetail}`).toBeGreaterThan(0);
-          expect(
-            rect.left,
-            `Ability ${part.name} clipped on the left: ${partDetail}`,
-          ).toBeGreaterThanOrEqual(button.left);
-          expect(
-            rect.right,
-            `Ability ${part.name} clipped on the right: ${partDetail}`,
-          ).toBeLessThanOrEqual(button.right);
-          expect(
-            rect.top,
-            `Ability ${part.name} clipped at the top: ${partDetail}`,
-          ).toBeGreaterThanOrEqual(button.top);
-          expect(
-            rect.bottom,
-            `Ability ${part.name} clipped at the bottom: ${partDetail}`,
-          ).toBeLessThanOrEqual(button.bottom);
-        }
-      }
+      expect(
+        geometry.abilityContent.every((ability) => ability.button === null),
+        `Old energy/power chrome must not render: ${detail}`,
+      ).toBe(true);
     });
   }
 });
@@ -434,36 +405,15 @@ test("guest mobile matches survive rapid swipes, cancellation, and layout checks
   expect(geometry.canvasHeight).toBeLessThanOrEqual(geometry.height);
   expect(geometry.touchAction).toBe("none");
 
-  const visiblePowerIds = await page.locator(".powers > button").evaluateAll((buttons) =>
-    buttons.map((button) => button.id),
-  );
-  expect(visiblePowerIds).toEqual(["energyBurstAttack", "megaStrikeAttack", "rewind"]);
+  expect(await page.locator(".powers").count()).toBe(0);
+  expect(await page.locator(".energy-wrap").count()).toBe(0);
+  expect(await page.locator("#energyBurstAttack").count()).toBe(0);
+  expect(await page.locator("#megaStrikeAttack").count()).toBe(0);
+  expect(await page.locator("#rewind").count()).toBe(0);
   expect(await page.locator(".energy-options").count()).toBe(0);
   expect(await page.locator("#freeze").count()).toBe(0);
   expect(await page.locator("#timeshift").count()).toBe(0);
   expect(geometry.width).toBeGreaterThan(374);
-
-  const actionGeometry = await page.locator(".powers > button").evaluateAll((buttons) =>
-    buttons.map((button) => {
-      const rect = button.getBoundingClientRect();
-      return { top: rect.top, bottom: rect.bottom, left: rect.left, right: rect.right };
-    }),
-  );
-  expect(actionGeometry.every(({ top, bottom, left, right }) => top >= 0 && bottom <= view.height + 1 && left >= 0 && right <= view.width + 1)).toBe(true);
-  expect(actionGeometry[0].top).toBeGreaterThan(geometry.bottom);
-
-  const energyHandlerState = await page.evaluate(async () => {
-    const button = document.querySelector<HTMLButtonElement>("#energyBurstAttack");
-    if (!button) throw new Error("Missing Energy Burst button");
-    button.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-    return {
-      pressed: button.getAttribute("aria-pressed"),
-      unavailable: button.classList.contains("unavailable"),
-    };
-  });
-  expect(energyHandlerState.pressed).toBe("false");
-  expect(energyHandlerState.unavailable).toBe(true);
 
   const centers = Array.from({ length: BOARD_TILES }, (_, index) =>
     cellCenter(box, Math.floor(index / BOARD_COLS), index % BOARD_COLS),
@@ -575,7 +525,7 @@ test("guest mobile matches survive rapid swipes, cancellation, and layout checks
   expect(state.scrollTop).toBe(0);
 });
 
-test("mobile targeted power release outside the board stays unspent and leaves swipes responsive", async ({ page, context }) => {
+test.skip("mobile targeted power release outside the board stays unspent and leaves swipes responsive", async ({ page, context }) => {
   await page.goto("/");
   await expect(page.locator("#menu.active")).toBeVisible();
 
@@ -674,7 +624,7 @@ test("mobile targeted power release outside the board stays unspent and leaves s
   })).toBeGreaterThan(scoreBefore);
 });
 
-test("mobile targeted power cancellation keeps reduced-motion status and clears targeting", async ({ page }) => {
+test.skip("mobile targeted power cancellation keeps reduced-motion status and clears targeting", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
   await expect(page.locator("#menu.active")).toBeVisible();
@@ -727,7 +677,7 @@ test("mobile targeted power cancellation keeps reduced-motion status and clears 
   await page.mouse.up();
 });
 
-test("mobile Mega Strike release outside the board stays unspent and leaves swipes responsive", async ({ page, context }) => {
+test.skip("mobile Mega Strike release outside the board stays unspent and leaves swipes responsive", async ({ page, context }) => {
   await page.goto("/");
   await expect(page.locator("#menu.active")).toBeVisible();
 
@@ -826,7 +776,7 @@ test("mobile Mega Strike release outside the board stays unspent and leaves swip
   })).toBeGreaterThan(scoreBefore);
 });
 
-test("online Mega Strike cancellation stays local and the next valid swap reaches transport", async ({ page, context }) => {
+test.skip("online Mega Strike cancellation stays local and the next valid swap reaches transport", async ({ page, context }) => {
   const sentActions: Array<{ type?: string; id?: string; target?: { r: number; c: number } }> = [];
   await page.route("**/v1/match/m_online/action", async (route) => {
     const payload = JSON.parse(route.request().postData() ?? "{}") as {
@@ -1016,7 +966,7 @@ test("online Mega Strike cancellation stays local and the next valid swap reache
   expect(sentActions[0]?.target).toBeUndefined();
 });
 
-test("mobile Mega Strike valid touch charges once and clears only the selected color", async ({ page, context }) => {
+test.skip("mobile Mega Strike valid touch charges once and clears only the selected color", async ({ page, context }) => {
   await page.goto("/");
   await expect(page.locator("#menu.active")).toBeVisible();
 
