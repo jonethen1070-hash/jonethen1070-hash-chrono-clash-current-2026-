@@ -11,23 +11,26 @@ function read(rel: string): string {
 }
 
 describe("match screen graphics-only polish", () => {
-  it("keeps gem identities, board math, and Chrono Power wiring locked", () => {
+  it("keeps gem identities, board math, and match HUD wiring locked", () => {
     expect([...COLORS]).toEqual(["#D1166D", "#D38800", "#008F5B", "#1754C7", "#6D25C9", "#008EAA"]);
     expect(COLS).toBe(8);
     expect(ROWS).toBe(13);
     expect(BOARD_FRAME).toBe(6);
     expect(BOARD_GAP).toBe(1.5);
     const main = read("src/main.ts");
-    expect(main).not.toContain('id="freeze"');
-    expect(main).not.toContain('id="timeshift"');
-    expect(main).toContain('id="rewind"');
-    expect(main).toContain(">REWIND<");
-    expect(main).toContain('id="energyBurstAttack"');
-    expect(main).toContain('id="megaStrikeAttack"');
-    expect(main).toContain('id="playerGems"');
-    expect(main).toContain('id="oppGems"');
-    expect(main).toContain('id="energyFill"');
-    expect(main).toContain('id="timer"');
+    const match = main.slice(main.indexOf('id="match"'), main.indexOf('id="sheet"'));
+    expect(match).not.toContain('id="freeze"');
+    expect(match).not.toContain('id="timeshift"');
+    expect(match).not.toContain('id="rewind"');
+    expect(match).not.toContain(">REWIND<");
+    expect(match).not.toContain('id="energyBurstAttack"');
+    expect(match).not.toContain('id="megaStrikeAttack"');
+    expect(match).not.toContain('id="energyFill"');
+    expect(match).not.toContain('class="energy-wrap"');
+    expect(match).not.toContain('class="powers"');
+    expect(match).toContain('id="playerGems"');
+    expect(match).toContain('id="oppGems"');
+    expect(match).toContain('id="timer"');
   });
 
   it("does not rewrite the board-fit layout tokens", () => {
