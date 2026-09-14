@@ -322,6 +322,7 @@ export class BoardRenderer {
   private lastDpr = 0;
   private lastAnimAt = 0;
   private animDt = 1 / 60;
+  private hitchMotionDt = 1 / 60;
   private lastPlayerCell = 32;
   private parentLeft = 0;
   private parentTop = 0;
@@ -650,9 +651,14 @@ export class BoardRenderer {
     this.ctx.clearRect(0, 0, w, h);
     gemAtlasCanvas();
     if (this.lastAnimAt) {
-      this.animDt = Math.min(0.033, Math.max(0.008, (now - this.lastAnimAt) / 1000));
+      const rawElapsed = (now - this.lastAnimAt) / 1000;
+      this.animDt = Math.min(0.033, Math.max(0.008, rawElapsed));
+      // Normal frames stay on the 33ms cap. After a long main-thread pause,
+      // dying/falling must catch up to wall-clock so frozen tiles expire.
+      this.hitchMotionDt = rawElapsed > 0.1 ? rawElapsed : this.animDt;
     } else {
       this.animDt = 1 / 60;
+      this.hitchMotionDt = this.animDt;
     }
     this.lastAnimAt = now;
 
@@ -998,6 +1004,7 @@ export class BoardRenderer {
     const live = view.live;
     live.clear();
     const dt = this.animDt;
+    const hitchExtra = Math.max(0, this.hitchMotionDt - dt);
     const anim = this.fx.animation ?? this.fx.quality;
     const reduced = this.fx.reducedMotion;
     const fxSide = isPlayer ? "player" : "opponent";
@@ -1067,12 +1074,13 @@ export class BoardRenderer {
     const seatedHold = hasMatchPresentation
       ? Math.max(0, swapWindowMs + clearLeadMs - clearAgeMs) / 1000
       : 0;
-    // A quiet board still seats the shatter before gravity. If a previous
-    // resolve is already dying/falling, do not re-queue the next refill.
+    // Shatter/sparkle stays decorative. Gravity and refill must never park
+    // behind that seat — including the first paint, when dying flags are
+    // not set yet and gravityLive would still be false.
     const gravityLive = [...view.tiles.values()].some(
       (tile) => tile.dying || tile.moveKind === "fall",
     );
-    const cascadeHold = gravityLive ? 0 : seatedHold;
+    const cascadeHold = 0;
     const populated = view.tiles.size > 0;
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
@@ -1213,11 +1221,12 @@ export class BoardRenderer {
 
         if (tile.moveKind !== "idle") {
           if (tile.moveHold > 0) {
-            tile.moveHold -= dt;
+            tile.moveHold -= dt + hitchExtra;
             tile.vx = 0;
             tile.vy = 0;
           } else {
             tile.moveAge += dt;
+            if (hitchExtra) tile.moveAge += hitchExtra;
             const t = tile.moveDur <= 0 ? 1 : Math.min(1, tile.moveAge / tile.moveDur);
             const e = gemTravelEase(tile.moveKind, t);
             const nx = tile.fromX + (tile.toX - tile.fromX) * e;
@@ -1474,6 +1483,7 @@ export class BoardRenderer {
       if (!tile.dying) continue;
       if (tile.moveKind === "swap" && tile.moveDur > 0) {
         tile.moveAge += dt;
+        if (hitchExtra) tile.moveAge += hitchExtra;
         const swapT = Math.min(1, tile.moveAge / tile.moveDur);
         const swapE = gemTravelEase("swap", swapT);
         tile.x = tile.fromX + (tile.toX - tile.fromX) * swapE;
@@ -1485,6 +1495,7 @@ export class BoardRenderer {
         }
       }
        tile.dieAge += dt;
+      if (hitchExtra) tile.dieAge += hitchExtra;
       if (!tile.burstEmitted && tile.dieAge >= 0) {
         tile.burstEmitted = true;
         view.fractureCount += 1;
