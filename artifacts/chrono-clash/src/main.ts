@@ -1490,12 +1490,11 @@ ui.emailForm.addEventListener("submit", (event) => {
 $("#menuGuest").addEventListener("click", () => {
   unlockGameAudio(audio, settings.music, false);
   pressUi();
-  // TEMPORARY DIRECT GAMEPLAY BYPASS — REMOVE AFTER GAMEPLAY TESTING
   session.clearOnlineMatch();
-  audio.resetSwapWave();
-  session.startMatch();
+  session.openModes();
   syncScreenNow();
-  if (settings.music) audio.syncBed("battle");
+  if (session.screen === "tutorial") renderTutorial();
+  if (session.screen === "modes") renderScoreTargets();
 });
 $("#hudMute").addEventListener("click", () => {
   const muted = !isMatchAudioMuted(settings);

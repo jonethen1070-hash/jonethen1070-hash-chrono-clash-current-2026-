@@ -22,6 +22,14 @@ describe("main menu Sign In / Guest and match HUD audio", () => {
     expect(src.match(/new ChronoClient\(/g)?.length).toBe(1);
   });
 
+  it("routes Continue as Guest to Modes instead of starting a match", () => {
+    const src = readFileSync("src/main.ts", "utf8");
+    const guest = src.slice(src.indexOf('$("#menuGuest")'), src.indexOf('$("#hudMute")'));
+    expect(guest).toContain("session.openModes()");
+    expect(guest).not.toContain("session.startMatch()");
+    expect(guest).not.toContain("TEMPORARY DIRECT GAMEPLAY BYPASS");
+  });
+
   it("keeps Guest available on ONLINE when provider credentials are absent", () => {
     const identity = readFileSync("src/net/identity.ts", "utf8");
     expect(identity).toContain("if ((!config || config.guest) && allowed.includes(\"guest\"))");
