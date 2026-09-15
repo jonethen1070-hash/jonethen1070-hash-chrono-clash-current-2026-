@@ -636,6 +636,11 @@ function formatClock(ms: number): string {
 
 function setText(el: HTMLElement | null | undefined, value: string): void {
   if (!el) return;
+  if (el.id === "playerScore" || el.id === "oppScore") {
+    const digits = String(value).replace(/\D/g, "").length || 1;
+    const key = String(Math.min(5, digits));
+    if (el.dataset.digits !== key) el.dataset.digits = key;
+  }
   if (el.textContent !== value) el.textContent = value;
 }
 

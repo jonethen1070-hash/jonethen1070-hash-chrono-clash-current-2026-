@@ -48,6 +48,16 @@ describe("arena HUD polish outside the gem board", () => {
     expect(polish).toContain("#app:has(#match.active) .space-planet");
   });
 
+  it("fits 3+ digit match scores inside the fighter capsules", () => {
+    const hud = read("src/styles/hud-redesign.css");
+    expect(hud).toContain('.score-rail b[data-digits="3"]');
+    expect(hud).toContain('.score-rail b[data-digits="4"]');
+    expect(hud).toContain("font-variant-numeric: tabular-nums");
+    const main = read("src/main.ts");
+    expect(main).toContain('el.id === "playerScore" || el.id === "oppScore"');
+    expect(main).toContain("el.dataset.digits");
+  });
+
   it("gives match HUD physical glass/metal depth without touching player board chrome tokens", () => {
     const polish = read("src/styles/aaa-polish.css");
     expect(polish).toContain("Arena HUD 3D");
