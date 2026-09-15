@@ -324,21 +324,27 @@ export function gemFacetSpec(colorIndex: number): { facets: number; facetPhase: 
  * alone so bezels and sparkles stay metallic.
  *
  * Cell index matches the isolated sheet (same layout as GEM_ORDER):
- *   0 cyan, 1 green, 2 gold, 3 purple, 4 magenta, 5 blue
+ *   0 cyan, 1 green, 2 gold, 3 purple, 4 inverted-triangle (now crimson), 5 blue
  */
 const ATLAS_CELL_COLOR = [6, 3, 2, 5, 1, 4] as const;
+/** Crimson/ruby identity for the inverted-triangle gem (was magenta/pink). */
+const CRIMSON_RED_HUE = 0.994; // ~357.8° — deep red, not orange (~20°) and not pink (~330°)
 const GEM_BODY_HUE = [
-  -1, // magenta — already identifiable; do not retint
+  CRIMSON_RED_HUE, // inverted triangle: magenta/pink → crimson/ruby red
   -1, // gold
   0.375, // green ~135° emerald
   0.614, // blue ~221° electric blue (away from indigo/violet)
   0.808, // purple ~291° violet (away from blue 221° and cyan 185°)
   0.514, // cyan ~185° aqua
 ] as const;
-const GEM_HUE_MIX = [0, 0, 0.58, 0.62, 0.52, 0.38] as const;
+const GEM_HUE_MIX = [0.94, 0, 0.58, 0.62, 0.52, 0.38] as const;
 
 function extraPull(colorIndex: number, hueDeg: number): number {
   switch (colorIndex) {
+    case 1: // triangle: strip remaining magenta/pink/purple; reject orange
+      if (hueDeg > 240 && hueDeg < 352) return 0.96;
+      if (hueDeg > 8 && hueDeg < 55) return 0.78;
+      return 0;
     case 3: // green: cyan/teal/white-cyan highlights must become green
       return hueDeg > 155 && hueDeg < 220 ? 0.72 : 0;
     case 4: // blue: indigo/violet/magenta or too-cyan highlights must become blue
@@ -451,6 +457,7 @@ export function gradeIsolatedAtlasColors(data: ImageData, cell = 256, cols = 3):
         hue = mixHue(hue, target, k);
 
         let outSat = sat;
+        if (colorIndex === 1 && sat > 0.18) outSat = Math.min(1, sat * 1.14);
         if (colorIndex === 3 && sat > 0.22) outSat = Math.min(1, sat * 1.08);
         if (colorIndex === 4 && sat > 0.22) outSat = Math.min(1, sat * 1.1);
         if (colorIndex === 5 && sat > 0.22) outSat = Math.min(1, sat * 1.06);
