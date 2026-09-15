@@ -1045,6 +1045,76 @@ button:active {
 .results.loss h2 { color: var(--warn); text-shadow: 0 0 36px rgba(255, 93, 117, 0.48); }
 .results.tie h2 { color: var(--gold); text-shadow: 0 0 28px rgba(255, 213, 102, 0.32); }
 
+.result-coins {
+  width: 100%;
+}
+.result-coins-card {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 18px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow:
+    var(--shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 4px 0 0 var(--room-accent, var(--gold));
+}
+.result-coins-card.room-rookie { --room-accent: var(--cyan); }
+.result-coins-card.room-pro { --room-accent: var(--green); }
+.result-coins-card.room-elite { --room-accent: var(--gold); }
+.result-coins-card.room-master { --room-accent: var(--violet); }
+.result-coins-card.room-champion { --room-accent: var(--magenta); }
+.result-coins-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.result-coins-grid span,
+.result-coins-balance {
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: rgba(0, 8, 18, 0.55);
+  border: 1px solid rgba(0, 212, 255, 0.16);
+}
+.result-coins-grid small,
+.result-coins-balance small {
+  color: var(--accent-2);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  font-weight: 800;
+}
+.result-coins-grid b,
+.result-coins-balance b {
+  color: var(--text);
+  font-size: 15px;
+  letter-spacing: 0.08em;
+}
+.result-coins-grid b.up,
+.result-coins-balance b {
+  color: var(--gold);
+}
+.result-coins-grid b.down { color: var(--warn); }
+.result-coins-grid b.flat { color: var(--muted); }
+#results.coin-result {
+  justify-content: flex-start;
+  gap: 10px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+#results.coin-result h2 {
+  margin: 1.2vh 0 0;
+  font-size: clamp(32px, 10vw, 48px);
+}
+#resultPlayAgain,
+#resultBackRooms {
+  min-height: 48px;
+  letter-spacing: 0.16em;
+}
+
 .stat-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

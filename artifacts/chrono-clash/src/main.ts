@@ -27,7 +27,7 @@ import { prefetchGemAtlas } from "./ui/gemAtlas";
 import { comboBurstClass, resultHeadline, scoreTickerRate } from "./ui/feel";
 import { matchImpactDelayMs } from "./ui/gemMotion";
 import { HapticBus, hapticCuesFromFx } from "./ui/haptics";
-import { chatHtml, coinReadyViewHtml, dailyRunHtml, equippedAvatarName, matchPowerQty, powerArmoryHtml, profileView, readyPowerStripHtml, renderMenuPilot, roomsViewHtml, trophiesHtml } from "./ui/metaViews";
+import { chatHtml, coinReadyViewHtml, coinResultViewHtml, dailyRunHtml, equippedAvatarName, matchPowerQty, powerArmoryHtml, profileView, readyPowerStripHtml, renderMenuPilot, roomsViewHtml, trophiesHtml } from "./ui/metaViews";
 import { RewardGrant, grantHasBounty, xpToNext } from "./engine/progress";
 import { paintAvatarElement } from "./ui/avatarFace";
 import { mountAvatarPhotoFlow } from "./ui/avatarPhotoFlow";
@@ -453,9 +453,14 @@ app.innerHTML = `
         <div class="stat"><span>Best combo</span><b id="resCombo">0</b></div>
         <div class="stat"><span>Mode</span><b id="resMode">TIME</b></div>
       </div>
-      <div class="stack result-actions">
+      <div id="resultCoins" class="result-coins hidden"></div>
+      <div class="stack result-actions" id="resultStandardActions">
         <button class="primary" id="retryMatch">RETRY</button>
         <button class="ghost" id="toRewards">CONTINUE</button>
+      </div>
+      <div class="stack result-actions hidden" id="resultCoinActions">
+        <button type="button" class="primary" id="resultPlayAgain">PLAY AGAIN</button>
+        <button type="button" class="ghost" id="resultBackRooms">BACK TO ROOMS</button>
       </div>
     </section>
 
@@ -582,6 +587,11 @@ const ui = {
   resultMark: $("#resultMark"),
   retryMatch: $("#retryMatch") as HTMLButtonElement,
   toRewards: $("#toRewards") as HTMLButtonElement,
+  resultCoins: $("#resultCoins"),
+  resultStandardActions: $("#resultStandardActions"),
+  resultCoinActions: $("#resultCoinActions"),
+  resultPlayAgain: $("#resultPlayAgain") as HTMLButtonElement,
+  resultBackRooms: $("#resultBackRooms") as HTMLButtonElement,
   resPlayer: $("#resPlayer"),
   resOpp: $("#resOpp"),
   resCombo: $("#resCombo"),
@@ -1677,6 +1687,24 @@ $("#retryMatch").addEventListener("click", () => {
   leaveOnlineBattle();
   session.playAgain();
   syncScreenNow();
+});
+$("#resultPlayAgain").addEventListener("click", () => {
+  pressUi("confirm");
+  audio.startMusic();
+  audio.resetSwapWave();
+  leaveOnlineBattle();
+  const replay = session.replayCoinRoom();
+  syncScreenNow();
+  if (replay.ok) paintReady();
+  else paintRooms();
+});
+$("#resultBackRooms").addEventListener("click", () => {
+  pressUi();
+  audio.stopMusic();
+  leaveOnlineBattle();
+  session.openRooms();
+  syncScreenNow();
+  paintRooms();
 });
 $("#again").addEventListener("click", () => {
   pressUi("confirm");
@@ -2824,12 +2852,19 @@ function frame(now: number): void {
   if ((screen === "results" || screen === "rewards") && result) {
     const r = result;
     const lives = session.dailyLives();
-    const key = `${r.outcome}|${r.playerScore}|${r.opponentScore}|${r.playerBestCombo}|${r.mode}|${r.grant?.xp ?? 0}|${lives}`;
+    const key = `${r.outcome}|${r.playerScore}|${r.opponentScore}|${r.playerBestCombo}|${r.mode}|${r.grant?.xp ?? 0}|${lives}|${r.coinRoom?.matchId ?? ""}|${r.coinRoom?.payout ?? ""}`;
     if (key !== lastResultKey) {
       lastResultKey = key;
       ui.results.classList.remove("win", "loss", "tie");
       ui.results.classList.add(r.outcome);
-      ui.resultTitle.textContent = resultHeadline(r.outcome);
+      ui.results.classList.toggle("coin-result", Boolean(r.coinRoom));
+      ui.resultTitle.textContent = r.coinRoom
+        ? r.outcome === "win"
+          ? "VICTORY"
+          : r.outcome === "loss"
+            ? "DEFEAT"
+            : "DRAW"
+        : resultHeadline(r.outcome);
       ui.resultXp.textContent = r.inspection
         ? "DEV INSPECTION · NO XP OR COINS"
         : r.grant
@@ -2847,6 +2882,17 @@ function frame(now: number): void {
       ui.resOpp.textContent = String(r.opponentScore);
       ui.resCombo.textContent = `x${r.playerBestCombo}`;
       ui.resMode.textContent = r.mode === "score" ? "SCORE BATTLE" : "TIME BATTLE";
+      const coin = r.coinRoom;
+      ui.resultCoins.classList.toggle("hidden", !coin);
+      ui.resultStandardActions.classList.toggle("hidden", Boolean(coin));
+      ui.resultCoinActions.classList.toggle("hidden", !coin);
+      if (coin) {
+        ui.resultPlayAgain.className = r.outcome === "loss" ? "primary play-cta" : "ghost game-ctl";
+        ui.resultBackRooms.className = r.outcome === "win" ? "primary play-cta" : "ghost game-ctl";
+        ui.resultCoins.innerHTML = coinResultViewHtml(coin, session.progress.winningCoins);
+      } else {
+        ui.resultCoins.innerHTML = "";
+      }
     }
   } else if (screen !== "results" && screen !== "rewards") {
     lastResultKey = "";

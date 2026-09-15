@@ -15,9 +15,11 @@ import { POWER_CHARGE_COIN_COST, PowerDefinition, storefrontPowers } from "../en
 import { GameMode, LocalProgress } from "../engine/types";
 import {
   canAffordCoinRoom,
+  coinRoomById,
   coinRooms,
   type CoinRoom,
   type CoinRoomEnterResult,
+  type CoinRoomSettlement,
 } from "../engine/rooms";
 import { DAILY_LIFE_ADS_MAX, DAILY_LIVES_MAX, dailyRunFromProgress } from "../engine/dailyRun";
 import { isDevBattleBypassEnabled } from "../engine/devBattleBypass";
@@ -182,6 +184,12 @@ function coinsLabel(value: number): string {
   return `${Math.max(0, Math.trunc(Number(value) || 0)).toLocaleString("en-US")} 🪙`;
 }
 
+function signedCoinsLabel(value: number): string {
+  const amount = Math.trunc(Number(value) || 0);
+  if (amount < 0) return `-${coinsLabel(Math.abs(amount))}`;
+  return `+${coinsLabel(amount)}`;
+}
+
 export function roomsViewHtml(
   p: LocalProgress,
   selectedId: string,
@@ -257,6 +265,24 @@ export function coinReadyViewHtml(p: LocalProgress, room: CoinRoom): string {
         <span>TEST</span>
       </div>
     </div>
+  </div>`;
+}
+
+export function coinResultViewHtml(settlement: CoinRoomSettlement, balance: number): string {
+  const room = coinRoomById(settlement.roomId);
+  const entry = Math.max(0, Math.trunc(Number(settlement.entryCoins) || room.entryCoins));
+  const winnings = Math.max(0, Math.trunc(Number(settlement.payout) || 0));
+  const net = winnings - entry;
+  const have = Math.max(0, Math.trunc(Number(balance) || 0));
+  const netClass = net > 0 ? "up" : net < 0 ? "down" : "flat";
+  return `<div class="result-coins-card room-${room.id}" data-result-room="${room.id}" data-result-entry="${entry}" data-result-winnings="${winnings}" data-result-net="${net}" data-result-balance="${have}">
+    <div class="result-coins-grid">
+      <span><small>ROOM</small><b>${room.name.toUpperCase()}</b></span>
+      <span><small>ENTRY</small><b>${coinsLabel(entry)}</b></span>
+      <span><small>WINNINGS</small><b class="up">${signedCoinsLabel(winnings)}</b></span>
+      <span><small>NET</small><b class="${netClass}">${signedCoinsLabel(net)}</b></span>
+    </div>
+    <div class="result-coins-balance"><small>BALANCE</small><b>${coinsLabel(have)}</b></div>
   </div>`;
 }
 

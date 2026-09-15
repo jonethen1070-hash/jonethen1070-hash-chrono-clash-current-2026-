@@ -481,9 +481,36 @@ export class GameSession {
       return;
     }
     this.refreshDailyRun();
-    if (this.screen === "menu" || this.screen === "modes" || this.screen === "profile") {
+    if (this.screen === "menu" || this.screen === "modes" || this.screen === "profile" || this.screen === "results" || this.screen === "rewards") {
       this.screen = "rooms";
     }
+  }
+
+  /**
+   * Re-enter the same selected coin room from results. Does not deduct.
+   * Charge happens only when the next match actually starts.
+   */
+  replayCoinRoom(now = performance.now()): CoinRoomEnterResult {
+    const room = this.coinRoom();
+    const mode = this.mode === "score" ? "score" : "time";
+    if (this.screen !== "results" && this.screen !== "rewards") {
+      const have = Math.max(0, Math.trunc(Number(this.progress.winningCoins) || 0));
+      const result: CoinRoomEnterResult = {
+        ok: false,
+        reason: "unavailable",
+        room,
+        have,
+        need: room.entryCoins,
+        charged: 0,
+      };
+      this.lastCoinRoomEnter = result;
+      return result;
+    }
+    this.clearOnlineMatch();
+    this.result = null;
+    this.ended = false;
+    this.screen = "rooms";
+    return this.enterCoinRoomMatch(mode, room.id, now);
   }
 
   playNow(now = performance.now()): void {
