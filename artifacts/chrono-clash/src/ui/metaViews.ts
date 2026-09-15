@@ -12,7 +12,12 @@ import {
   utcWeekKey,
 } from "../engine/economy";
 import { POWER_CHARGE_COIN_COST, PowerDefinition, storefrontPowers } from "../engine/powers";
-import { LocalProgress } from "../engine/types";
+import { GameMode, LocalProgress } from "../engine/types";
+import {
+  canAffordCoinRoom,
+  coinRooms,
+  type CoinRoomEnterResult,
+} from "../engine/rooms";
 import { DAILY_LIFE_ADS_MAX, DAILY_LIVES_MAX, dailyRunFromProgress } from "../engine/dailyRun";
 import { isDevBattleBypassEnabled } from "../engine/devBattleBypass";
 
@@ -170,6 +175,62 @@ export function dailyRunHtml(p: LocalProgress, adsAvailable: boolean): string {
         : ""
     }
   </div>`;
+}
+
+function coinsLabel(value: number): string {
+  return `${Math.max(0, Math.trunc(Number(value) || 0)).toLocaleString("en-US")} 🪙`;
+}
+
+export function roomsViewHtml(
+  p: LocalProgress,
+  selectedId: string,
+  battleMode: GameMode,
+  canEnterBattle: boolean,
+  lastEnter: CoinRoomEnterResult | null = null,
+): string {
+  const have = Math.max(0, Math.trunc(Number(p.winningCoins) || 0));
+  const rooms = coinRooms();
+  const cards = rooms
+    .map((room, index) => {
+      const afford = canAffordCoinRoom(have, room);
+      const canPlay = afford && canEnterBattle;
+      const selected = room.id === selectedId;
+      const gate = String(index + 1).padStart(2, "0");
+      const access = !canEnterBattle
+        ? "NO LIVES LEFT"
+        : afford
+          ? "ENTRY OPEN"
+          : `NEED ${coinsLabel(Math.max(0, room.entryCoins - have))}`;
+      const enterLabel = canPlay ? `Enter ${room.name}` : `${room.name} locked`;
+      return `<article class="room-card room-${room.id}${selected ? " on" : ""}${afford ? " open" : " locked"}" data-room="${room.id}" aria-selected="${selected ? "true" : "false"}">
+      <div class="room-card-copy">
+        <small>GATE ${gate}</small>
+        <b>${room.name.toUpperCase()} — ${coinsLabel(room.entryCoins)}</b>
+        <span class="room-balance">YOUR BALANCE ${coinsLabel(have)}</span>
+        <span class="room-access ${canPlay ? "ready" : "need"}">${access}</span>
+      </div>
+      <button type="button" class="${canPlay ? "primary" : "ghost"} room-enter" data-enter="${room.id}" ${canPlay ? "" : "disabled"} aria-label="${enterLabel}">${canPlay ? "ENTER" : "LOCKED"}</button>
+    </article>`;
+    })
+    .join("");
+  let status = "Select a room, then ENTER. Coins are taken when the match starts.";
+  if (!canEnterBattle) status = "No lives left. Coin rooms stay closed until the daily run resets.";
+  else if (lastEnter && !lastEnter.ok) {
+    status =
+      lastEnter.reason === "funds"
+        ? `${lastEnter.room.name.toUpperCase()} needs ${coinsLabel(lastEnter.need)}. You have ${coinsLabel(lastEnter.have)}.`
+        : "This room is unavailable right now.";
+  }
+  return `<div class="rooms-wallet" data-wallet="${have}">
+    <small>WINNING COINS</small>
+    <b>${coinsLabel(have)}</b>
+  </div>
+  <div class="chips rooms-modes" role="group" aria-label="Battle mode for coin rooms">
+    <button type="button" class="chip ${battleMode === "time" ? "on" : ""}" data-rooms-mode="time">TIME BATTLE</button>
+    <button type="button" class="chip ${battleMode === "score" ? "on" : ""}" data-rooms-mode="score">SCORE BATTLE</button>
+  </div>
+  <div class="room-list">${cards}</div>
+  <p class="rooms-status muted">${status}</p>`;
 }
 
 export function readyPowerStripHtml(p: LocalProgress): string {

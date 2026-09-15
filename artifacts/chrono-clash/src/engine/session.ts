@@ -96,6 +96,7 @@ export type Screen =
   | "profile"
   | "trophies"
   | "modes"
+  | "rooms"
   | "ready"
   | "match"
   | "results"
@@ -463,7 +464,26 @@ export class GameSession {
       return;
     }
     this.refreshDailyRun();
-    if (this.screen === "menu" || this.screen === "profile" || this.screen === "trophies") this.screen = "modes";
+    if (
+      this.screen === "menu" ||
+      this.screen === "profile" ||
+      this.screen === "trophies" ||
+      this.screen === "rooms"
+    ) {
+      this.screen = "modes";
+    }
+  }
+
+  /** Player-facing coin-room lobby. Does not deduct coins or start a match. */
+  openRooms(): void {
+    if (!this.progress.tutorialDone) {
+      this.openTutorial();
+      return;
+    }
+    this.refreshDailyRun();
+    if (this.screen === "menu" || this.screen === "modes" || this.screen === "profile") {
+      this.screen = "rooms";
+    }
   }
 
   playNow(now = performance.now()): void {

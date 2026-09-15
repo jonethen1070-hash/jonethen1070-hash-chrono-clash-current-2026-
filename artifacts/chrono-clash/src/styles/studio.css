@@ -94,7 +94,8 @@ button {
 #trophies.screen,
 #settingsScreen.screen,
 #online.screen,
-#modes.screen {
+#modes.screen,
+#rooms.screen {
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;

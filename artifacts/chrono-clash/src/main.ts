@@ -17,6 +17,7 @@ import {
   ROWS,
   SCORE_TARGETS,
   type Coord,
+  type GameMode,
 } from "./engine/types";
 import { GAME_MODES, modeInfo } from "./engine/catalog";
 import { comboBurstText } from "./engine/combat";
@@ -26,7 +27,7 @@ import { prefetchGemAtlas } from "./ui/gemAtlas";
 import { comboBurstClass, resultHeadline, scoreTickerRate } from "./ui/feel";
 import { matchImpactDelayMs } from "./ui/gemMotion";
 import { HapticBus, hapticCuesFromFx } from "./ui/haptics";
-import { chatHtml, dailyRunHtml, equippedAvatarName, matchPowerQty, powerArmoryHtml, profileView, readyPowerStripHtml, renderMenuPilot, trophiesHtml } from "./ui/metaViews";
+import { chatHtml, dailyRunHtml, equippedAvatarName, matchPowerQty, powerArmoryHtml, profileView, readyPowerStripHtml, renderMenuPilot, roomsViewHtml, trophiesHtml } from "./ui/metaViews";
 import { RewardGrant, grantHasBounty, xpToNext } from "./engine/progress";
 import { paintAvatarElement } from "./ui/avatarFace";
 import { mountAvatarPhotoFlow } from "./ui/avatarPhotoFlow";
@@ -245,6 +246,11 @@ app.innerHTML = `
           <b>${GAME_MODES.score.name}</b>
           <span>${GAME_MODES.score.detail}</span>
         </button>
+        <button class="mode-card" id="modeRooms">
+          <small>VIRTUAL STAKES</small>
+          <b>COIN ROOMS</b>
+          <span>Pick a room. Entry coins are taken only when the match starts.</span>
+        </button>
       </div>
       <div id="powerArmory" class="power-armory"></div>
       <div class="target-setup">
@@ -252,6 +258,12 @@ app.innerHTML = `
         <div class="chips" id="scoreTargets"></div>
       </div>
       <div class="stack"><button class="ghost" id="modesBack">BACK</button></div>
+    </section>
+
+    <section id="rooms" class="screen">
+      <div class="logo compact"><h1>COIN ROOMS</h1><p>SELECT YOUR STAKE</p></div>
+      <div id="roomsView" class="rooms-view"></div>
+      <div class="stack"><button class="ghost" id="roomsBack">BACK</button></div>
     </section>
 
     <section id="ready" class="screen ready">
@@ -508,6 +520,8 @@ const ui = {
   profile: $("#profile"),
   trophies: $("#trophies"),
   modes: $("#modes"),
+  rooms: $("#rooms"),
+  roomsView: $("#roomsView"),
   ready: $("#ready"),
   tutorial: $("#tutorial"),
   settings: $("#settingsScreen"),
@@ -548,6 +562,7 @@ const ui = {
   dailyRun: $("#dailyRun"),
   modeTime: $("#modeTime") as HTMLButtonElement,
   modeScore: $("#modeScore") as HTMLButtonElement,
+  modeRooms: $("#modeRooms") as HTMLButtonElement,
   readyPowers: $("#readyPowers"),
   youAvatar: $("#youAvatar"),
   youName: $("#youName"),
@@ -599,6 +614,7 @@ const SCREEN_NODES: [HTMLElement, string][] = [
   [ui.profile, "profile"],
   [ui.trophies, "trophies"],
   [ui.modes, "modes"],
+  [ui.rooms, "rooms"],
   [ui.ready, "ready"],
   [ui.tutorial, "tutorial"],
   [ui.settings, "settings"],
@@ -860,7 +876,7 @@ function paintDailyRun(): void {
   const bypass = isDevBattleBypassEnabled();
   const blocked = !session.canEnterLocalBattle();
   ui.modes.classList.toggle("dev-local-open", bypass);
-  for (const btn of [ui.modeTime, ui.modeScore]) {
+  for (const btn of [ui.modeTime, ui.modeScore, ui.modeRooms]) {
     btn.disabled = blocked;
     btn.classList.toggle("off", blocked);
     btn.setAttribute("aria-disabled", blocked ? "true" : "false");
@@ -869,6 +885,18 @@ function paintDailyRun(): void {
 
 function paintReadyPowers(): void {
   ui.readyPowers.innerHTML = readyPowerStripHtml(session.progress);
+}
+
+let roomsBattleMode: GameMode = session.mode === "score" ? "score" : "time";
+
+function paintRooms(): void {
+  ui.roomsView.innerHTML = roomsViewHtml(
+    session.progress,
+    session.selectedRoomId,
+    roomsBattleMode,
+    session.canEnterLocalBattle(),
+    session.lastCoinRoomEnter,
+  );
 }
 
 async function pullTrustedClock(): Promise<void> {
@@ -1532,6 +1560,46 @@ $("#modeScore").addEventListener("click", () => {
   audio.play("clash");
   session.chooseMode("score");
   syncScreenNow();
+});
+$("#modeRooms").addEventListener("click", () => {
+  pressUi("confirm");
+  roomsBattleMode = session.mode === "score" ? "score" : "time";
+  session.openRooms();
+  syncScreenNow();
+  paintRooms();
+});
+$("#roomsBack").addEventListener("click", () => {
+  pressUi();
+  session.openModes();
+  syncScreenNow();
+  if (session.screen === "modes") renderScoreTargets();
+});
+ui.roomsView.addEventListener("click", (e) => {
+  const t = e.target as HTMLElement;
+  const modeChip = t.closest<HTMLElement>("[data-rooms-mode]");
+  if (modeChip?.dataset.roomsMode === "time" || modeChip?.dataset.roomsMode === "score") {
+    roomsBattleMode = modeChip.dataset.roomsMode;
+    pressUi();
+    paintRooms();
+    return;
+  }
+  const enter = t.closest<HTMLButtonElement>("[data-enter]");
+  if (enter?.dataset.enter) {
+    if (enter.disabled) return;
+    pressUi("confirm");
+    const result = session.enterCoinRoomMatch(roomsBattleMode, enter.dataset.enter);
+    if (result.ok) {
+      syncScreenNow();
+      return;
+    }
+    paintRooms();
+    return;
+  }
+  const card = t.closest<HTMLElement>("[data-room]");
+  if (!card?.dataset.room) return;
+  pressUi();
+  session.selectCoinRoom(card.dataset.room);
+  paintRooms();
 });
 ui.dailyRun.addEventListener("click", (e) => {
   const ad = (e.target as HTMLElement).closest<HTMLElement>("[data-life-ad]");
@@ -2345,6 +2413,9 @@ function onScreenEnter(id: string, now: number): void {
     void pullRemoteDailyRun();
     paintDailyRun();
   }
+  if (id === "rooms") {
+    paintRooms();
+  }
   if (id === "ready") {
     const info = modeInfo(session.mode, session.scoreTarget);
     ui.readyTitle.textContent = info.name;
@@ -2799,6 +2870,7 @@ if (location.hostname === "127.0.0.1" || location.hostname === "localhost") {
       paintDailyRun();
       paintArmory();
       paintReadyPowers();
+      paintRooms();
     },
     renderState() {
       return renderer.inspectPlayer();
