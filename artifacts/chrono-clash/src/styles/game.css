@@ -1089,8 +1089,9 @@ button:active {
 .result-coins-grid b,
 .result-coins-balance b {
   color: var(--text);
-  font-size: 15px;
-  letter-spacing: 0.08em;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
 }
 .result-coins-grid b.up,
 .result-coins-balance b {
