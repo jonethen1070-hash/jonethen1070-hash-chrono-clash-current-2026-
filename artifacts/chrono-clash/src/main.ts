@@ -27,7 +27,7 @@ import { prefetchGemAtlas } from "./ui/gemAtlas";
 import { comboBurstClass, resultHeadline, scoreTickerRate } from "./ui/feel";
 import { matchImpactDelayMs } from "./ui/gemMotion";
 import { HapticBus, hapticCuesFromFx } from "./ui/haptics";
-import { chatHtml, coinReadyViewHtml, coinResultViewHtml, dailyRunHtml, equippedAvatarName, matchPowerQty, powerArmoryHtml, profileView, readyPowerStripHtml, renderMenuPilot, roomsViewHtml, trophiesHtml } from "./ui/metaViews";
+import { chatHtml, coinReadyViewHtml, coinResultViewHtml, dailyRunHtml, equippedAvatarName, modesWalletHtml, profileView, readyPowerStripHtml, renderMenuPilot, roomsViewHtml, trophiesHtml } from "./ui/metaViews";
 import { RewardGrant, grantHasBounty, xpToNext } from "./engine/progress";
 import { paintAvatarElement } from "./ui/avatarFace";
 import { mountAvatarPhotoFlow } from "./ui/avatarPhotoFlow";
@@ -252,7 +252,7 @@ app.innerHTML = `
           <span>Pick a room. Entry coins are taken only when the match starts.</span>
         </button>
       </div>
-      <div id="powerArmory" class="power-armory"></div>
+      <div id="modesWallet"></div>
       <div class="target-setup">
         <small>SCORE BATTLE TARGET</small>
         <div class="chips" id="scoreTargets"></div>
@@ -565,7 +565,7 @@ const ui = {
   energyBurstAttack: document.querySelector<HTMLButtonElement>("#energyBurstAttack"),
   megaStrikeAttack: document.querySelector<HTMLButtonElement>("#megaStrikeAttack"),
   cancelPowerTarget: document.querySelector<HTMLButtonElement>("#cancelPowerTarget"),
-  powerArmory: $("#powerArmory"),
+  modesWallet: $("#modesWallet"),
   dailyRun: $("#dailyRun"),
   modeTime: $("#modeTime") as HTMLButtonElement,
   modeScore: $("#modeScore") as HTMLButtonElement,
@@ -865,12 +865,11 @@ function renderScoreTargets(): void {
     (n) =>
       `<button type="button" class="chip ${session.scoreTarget === n ? "on" : ""}" data-target="${n}">${n.toLocaleString()}</button>`,
   ).join("");
-  paintArmory();
   paintDailyRun();
 }
 
-function paintArmory(): void {
-  ui.powerArmory.innerHTML = powerArmoryHtml(session.progress, ads.isAvailable());
+function paintModesWallet(): void {
+  ui.modesWallet.innerHTML = modesWalletHtml(session.progress);
 }
 
 let dailyAudioKey = "";
@@ -888,6 +887,7 @@ function paintDailyRun(): void {
   }
   dailyAudioKey = key;
   ui.dailyRun.innerHTML = dailyRunHtml(session.progress, ads.isAvailable());
+  paintModesWallet();
   const bypass = isDevBattleBypassEnabled();
   const blocked = !session.canEnterLocalBattle();
   ui.modes.classList.toggle("dev-local-open", bypass);
@@ -959,6 +959,7 @@ async function pullRemoteEconomy(): Promise<void> {
       /* keep local economy if the server is unreachable */
     }
   }
+  paintModesWallet();
 }
 
 async function pullRemoteDailyRun(): Promise<void> {
@@ -978,47 +979,6 @@ async function pullRemoteDailyRun(): Promise<void> {
     }
   }
   paintDailyRun();
-}
-
-async function buyArmoryPower(id: string): Promise<void> {
-  if (net.token) {
-    try {
-      const out = await net.buyPower(id);
-      if (out.ok) {
-        session.syncEconomy(out.economy);
-        audio.play("confirm");
-      } else if (out.reason === "funds") audio.play("deny");
-      paintArmory();
-      return;
-    } catch {
-      /* fall through to local wallet */
-    }
-  }
-  const local = session.buyPowerCharge(id);
-  if (local.ok) audio.play("confirm");
-  else if (local.reason === "funds") audio.play("deny");
-  paintArmory();
-}
-
-async function watchArmoryAd(id: string): Promise<void> {
-  const shown = await ads.showRewarded(id);
-  if (!shown.ok) {
-    paintArmory();
-    return;
-  }
-  if (net.token) {
-    try {
-      const out = await net.claimAdReward(id, shown.receiptId);
-      ads.redeemReceipt(shown.receiptId);
-      if (out.ok) session.syncEconomy(out.economy);
-    } catch {
-      /* keep the receipt unredeemed so a network retry can still reach the server */
-    }
-    paintArmory();
-    return;
-  }
-  session.claimPowerAd(id, shown.receiptId, (receipt) => ads.redeemReceipt(receipt));
-  paintArmory();
 }
 
 async function watchDailyLifeAd(): Promise<void> {
@@ -1651,17 +1611,6 @@ ui.dailyRun.addEventListener("click", (e) => {
   if (!ad) return;
   pressUi();
   void watchDailyLifeAd();
-});
-ui.powerArmory.addEventListener("click", (e) => {
-  const buy = (e.target as HTMLElement).closest<HTMLElement>("[data-buy]");
-  const ad = (e.target as HTMLElement).closest<HTMLElement>("[data-ad]");
-  if (buy?.dataset.buy) {
-    pressUi();
-    void buyArmoryPower(buy.dataset.buy);
-  } else if (ad?.dataset.ad) {
-    pressUi();
-    void watchArmoryAd(ad.dataset.ad);
-  }
 });
 $("#tutNext").addEventListener("click", () => {
   pressUi();
@@ -2945,7 +2894,6 @@ if (location.hostname === "127.0.0.1" || location.hostname === "localhost") {
     },
     paint() {
       paintDailyRun();
-      paintArmory();
       paintReady();
       paintRooms();
     },

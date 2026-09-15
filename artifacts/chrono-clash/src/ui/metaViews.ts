@@ -2,16 +2,8 @@ import { cosmeticsOf, isOwned } from "../engine/catalog";
 import { hasAvatarPhoto, loadAvatarPhoto } from "../engine/avatarPhoto";
 import { avatarFaceHtml, isCustomAvatarEquipped } from "./avatarFace";
 import { ACHIEVEMENTS, favoritePower, winRate, xpToNext } from "../engine/progress";
-import {
-  WINNING_COINS_DAILY_WIN,
-  WINNING_COINS_WEEKLY_BONUS,
-  WINNING_COINS_WEEKLY_WINS,
-  economyFromProgress,
-  getCharge,
-  utcDayKey,
-  utcWeekKey,
-} from "../engine/economy";
-import { POWER_CHARGE_COIN_COST, PowerDefinition, storefrontPowers } from "../engine/powers";
+import { economyFromProgress, getCharge } from "../engine/economy";
+import { storefrontPowers } from "../engine/powers";
 import { GameMode, LocalProgress } from "../engine/types";
 import {
   canAffordCoinRoom,
@@ -134,25 +126,9 @@ export function trophiesHtml(p: LocalProgress): string {
   }).join("");
 }
 
-export function powerArmoryHtml(p: LocalProgress, adsAvailable: boolean): string {
-  const econ = economyFromProgress(p);
-  const cards = storefrontPowers()
-    .map((power) => armoryCard(power, econ.winningCoins, getCharge(econ, power.id), adsAvailable))
-    .join("");
-  const day = utcDayKey();
-  const week = utcWeekKey();
-  const dailyClaimed = p.coinDailyDay === day;
-  const weeklyWins = p.coinWeeklyWeek === week ? p.coinWeeklyWins : 0;
-  const weeklyClaimed = weeklyWins >= WINNING_COINS_WEEKLY_WINS;
-  return `<div class="armory">
-    <div class="armory-head"><small>CHRONO POWERS</small><b>WINNING COINS ${econ.winningCoins}</b></div>
-    <p class="armory-note">${POWER_CHARGE_COIN_COST} coins = 1 charge. Coins are rare. Ads grant +1 charge, not coins.</p>
-    <div class="armory-objectives">
-      <span>DAILY WIN ${dailyClaimed ? "CLAIMED" : `+${WINNING_COINS_DAILY_WIN}`}</span>
-      <span>WEEKLY ${weeklyWins}/${WINNING_COINS_WEEKLY_WINS} WINS ${weeklyClaimed ? "CLAIMED" : `+${WINNING_COINS_WEEKLY_BONUS}`}</span>
-    </div>
-    ${cards}
-  </div>`;
+export function modesWalletHtml(p: LocalProgress): string {
+  const have = Math.max(0, Math.trunc(Number(p.winningCoins) || 0));
+  return `<div class="armory-head"><small>WINNING COINS</small><b>${have}</b></div>`;
 }
 
 export function dailyRunHtml(p: LocalProgress, adsAvailable: boolean): string {
@@ -303,24 +279,4 @@ export function matchPowerQty(p: LocalProgress, id: string, fallback: string): s
   const power = storefrontPowers().find((item) => item.id === id);
   if (!power) return fallback;
   return `${getCharge(economyFromProgress(p), id)}/${power.maxCharges}`;
-}
-
-function armoryCard(power: PowerDefinition, coins: number, qty: number, adsAvailable: boolean): string {
-  const full = qty >= power.maxCharges;
-  const afford = coins >= power.coinCost;
-  const buyOff = full || !afford;
-  const adOff = full || !adsAvailable || !power.rewardedAd;
-  const buyWhy = full ? "FULL 5/5" : !afford ? "NEED COINS" : `BUY ${power.coinCost}`;
-  const adWhy = full ? "FULL 5/5" : !adsAvailable || !power.rewardedAd ? "AD UNAVAILABLE" : "WATCH AD +1";
-  return `<article class="armory-card ${full ? "full" : ""}">
-    <span class="armory-icon" aria-hidden="true">${power.icon}</span>
-    <div class="armory-copy">
-      <b>${power.displayName}</b>
-      <span class="armory-qty">${qty}/${power.maxCharges}</span>
-    </div>
-    <div class="armory-actions">
-      <button type="button" class="ghost armory-buy" data-buy="${power.id}" ${buyOff ? "disabled" : ""}>${buyWhy}</button>
-      <button type="button" class="ghost armory-ad" data-ad="${power.id}" ${adOff ? "disabled" : ""}>${adWhy}</button>
-    </div>
-  </article>`;
 }

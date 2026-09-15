@@ -32,7 +32,7 @@ import { ChronoClashServer } from "../src/server/core";
 import { ChronoStore } from "../src/server/db";
 import { routeServer } from "../src/server/http";
 import type { MatchmakingState } from "../src/server/types";
-import { powerArmoryHtml } from "../src/ui/metaViews";
+import { modesWalletHtml } from "../src/ui/metaViews";
 
 function fresh() {
   return {
@@ -89,19 +89,30 @@ async function pairGuests(game: ChronoClashServer) {
 }
 
 describe("before-match UI", () => {
-  it("renders armory quantities, coin refill, and watch-ad controls", () => {
+  it("keeps Modes Winning Coins without the old Chrono Powers armory", () => {
     const main = readFileSync(new URL("../src/main.ts", import.meta.url), "utf8");
     const views = readFileSync(new URL("../src/ui/metaViews.ts", import.meta.url), "utf8");
-    expect(main).toContain('id="powerArmory"');
+    expect(main).not.toContain('id="powerArmory"');
+    expect(main).not.toContain("paintArmory");
+    expect(main).not.toContain("buyArmoryPower");
+    expect(main).not.toContain("watchArmoryAd");
+    expect(main).not.toContain("powerArmoryHtml");
+    expect(main).toContain('id="modesWallet"');
     expect(main).toContain('id="readyPowers"');
     expect(main).not.toContain('id="freezeQty"');
     expect(main).not.toContain('id="shiftQty"');
-    expect(main).toContain("paintArmory");
-    expect(views).toContain("WATCH AD +1");
+    expect(views).not.toContain("CHRONO POWERS");
+    expect(views).not.toContain("50 coins = 1 charge");
+    expect(views).not.toContain("Ads grant +1 charge");
+    expect(views).not.toContain("function powerArmoryHtml");
+    expect(views).not.toContain("function armoryCard");
     expect(views).toContain("WINNING COINS");
     expect(views).toContain("DAILY WIN");
-    expect(powerArmoryHtml(fresh(), false)).toContain("50 coins = 1 charge");
-    expect(powerArmoryHtml(fresh(), false)).toContain("Ads grant +1 charge, not coins");
+    const wallet = modesWalletHtml({ ...fresh(), winningCoins: 42 });
+    expect(wallet).toContain("WINNING COINS");
+    expect(wallet).toContain("42");
+    expect(wallet).not.toContain("CHRONO POWERS");
+    expect(wallet).not.toContain("Freeze Time");
   });
 });
 
