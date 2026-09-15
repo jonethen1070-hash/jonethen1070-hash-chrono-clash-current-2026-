@@ -106,6 +106,15 @@ describe("GameUI reskin assets", () => {
     const atlas = readFileSync(join(process.cwd(), "src/ui/gemAtlas.ts"), "utf8");
     expect(atlas).toContain("isolateAtlasGems");
     expect(atlas).toContain("comps.slice(0, 6)");
+    expect(atlas).toContain("gradeIsolatedAtlasColors");
+  });
+
+  it("grades isolated atlas body hues without replacing the sheet", () => {
+    const material = readFileSync(join(process.cwd(), "src/ui/gemMaterial.ts"), "utf8");
+    expect(material).toContain("export function gradeIsolatedAtlasColors");
+    expect(material).toContain("extraPull");
+    expect(material).toContain("GEM_BODY_HUE");
+    expect(material).toContain("contaminated highlights");
   });
 
   it("keeps match HUD overlays out of document flow", () => {

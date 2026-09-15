@@ -1,5 +1,7 @@
 /** GameUI 3×2 gem sheet. Presentation only — does not change COLORS or match rules. */
 
+import { gradeIsolatedAtlasColors } from "./gemMaterial";
+
 export const GEM_ATLAS_URL = "/assets/chrono-clash-gems.png";
 export const GEM_ORDER = [4, 2, 1, 5, 3, 0] as const;
 export const GEM_CELL = 256;
@@ -71,7 +73,7 @@ function applyBlackKey(img: HTMLImageElement): HTMLCanvasElement | null {
       if (lum < 18) px[i + 3] = 0;
       else if (lum < 36) px[i + 3] = Math.round(a * ((lum - 18) / 18));
     }
-    isolateAtlasGems(data);
+    if (isolateAtlasGems(data)) gradeIsolatedAtlasColors(data, GEM_CELL, GEM_COLS);
     ctx.putImageData(data, 0, 0);
   } catch {
     // Android/WebView can reject getImageData; keep the unkeyed sheet so gems still draw.
@@ -84,7 +86,7 @@ function applyBlackKey(img: HTMLImageElement): HTMLCanvasElement | null {
  * Bottom-row 256 crops therefore contain the gem above plus the intended gem.
  * Keep the six largest keyed blobs and place exactly one, centered, in each cell.
  */
-function isolateAtlasGems(data: ImageData): void {
+function isolateAtlasGems(data: ImageData): boolean {
   const { width, height, data: px } = data;
   const n = width * height;
   const seen = new Uint8Array(n);
@@ -129,7 +131,7 @@ function isolateAtlasGems(data: ImageData): void {
 
   comps.sort((a, b) => b.pixels.length - a.pixels.length);
   const gems = comps.slice(0, 6);
-  if (gems.length < 6) return;
+  if (gems.length < 6) return false;
   gems.sort((a, b) => a.sy - b.sy || a.sx - b.sx);
   const top = gems.slice(0, 3).sort((a, b) => a.sx - b.sx);
   const bot = gems.slice(3, 6).sort((a, b) => a.sx - b.sx);
@@ -236,4 +238,5 @@ function isolateAtlasGems(data: ImageData): void {
       px[di + 3] = copy[si + 3]!;
     }
   }
+  return true;
 }

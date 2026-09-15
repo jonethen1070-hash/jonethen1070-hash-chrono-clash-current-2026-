@@ -313,6 +313,153 @@ export function gemFacetSpec(colorIndex: number): { facets: number; facetPhase: 
   }
 }
 
+/**
+ * Fast-play color identity for the isolated 3×2 atlas.
+ *
+ * Live path: ATLAS_ARTWORK_FAITHFUL 1:1 blit of this keyed sheet. The first
+ * grade mixed BODY pixels only and skipped bright facets, so blue kept
+ * violet/magenta glints, purple kept cyan/blue glints, and green kept cyan
+ * veins. This pass also retints contaminated highlights toward each gem's
+ * identity hue. Neutral white/silver gloss (low sat, high value) is left
+ * alone so bezels and sparkles stay metallic.
+ *
+ * Cell index matches the isolated sheet (same layout as GEM_ORDER):
+ *   0 cyan, 1 green, 2 gold, 3 purple, 4 magenta, 5 blue
+ */
+const ATLAS_CELL_COLOR = [6, 3, 2, 5, 1, 4] as const;
+const GEM_BODY_HUE = [
+  -1, // magenta — already identifiable; do not retint
+  -1, // gold
+  0.375, // green ~135° emerald
+  0.614, // blue ~221° electric blue (away from indigo/violet)
+  0.808, // purple ~291° violet (away from blue 221° and cyan 185°)
+  0.514, // cyan ~185° aqua
+] as const;
+const GEM_HUE_MIX = [0, 0, 0.58, 0.62, 0.52, 0.38] as const;
+
+function extraPull(colorIndex: number, hueDeg: number): number {
+  switch (colorIndex) {
+    case 3: // green: cyan/teal/white-cyan highlights must become green
+      return hueDeg > 155 && hueDeg < 220 ? 0.72 : 0;
+    case 4: // blue: indigo/violet/magenta or too-cyan highlights must become blue
+      if (hueDeg > 228 && hueDeg < 345) return 0.88;
+      if (hueDeg < 205) return 0.48;
+      return 0;
+    case 5: // purple: cyan/blue/indigo highlights must become violet
+      return hueDeg < 272 ? 0.78 : 0;
+    case 6: // cyan: keep aqua, pull green-leaning or royal-blue drift
+      if (hueDeg < 168) return 0.42;
+      if (hueDeg > 208) return 0.4;
+      return 0;
+    default:
+      return 0;
+  }
+}
+
+function writeHsv(px: Uint8ClampedArray, o: number, hue: number, sat: number, v: number): void {
+  const hs = hue * 6;
+  const hi = Math.floor(hs) % 6;
+  const f = hs - Math.floor(hs);
+  const p = v * (1 - sat);
+  const q = v * (1 - f * sat);
+  const t = v * (1 - (1 - f) * sat);
+  let r = v;
+  let g = t;
+  let b = p;
+  switch (hi) {
+    case 0:
+      r = v;
+      g = t;
+      b = p;
+      break;
+    case 1:
+      r = q;
+      g = v;
+      b = p;
+      break;
+    case 2:
+      r = p;
+      g = v;
+      b = t;
+      break;
+    case 3:
+      r = p;
+      g = q;
+      b = v;
+      break;
+    case 4:
+      r = t;
+      g = p;
+      b = v;
+      break;
+    default:
+      r = v;
+      g = p;
+      b = q;
+      break;
+  }
+  px[o] = Math.round(r * 255);
+  px[o + 1] = Math.round(g * 255);
+  px[o + 2] = Math.round(b * 255);
+}
+
+export function gradeIsolatedAtlasColors(data: ImageData, cell = 256, cols = 3): void {
+  const { width, data: px } = data;
+  const cells = ATLAS_CELL_COLOR.length;
+  for (let idx = 0; idx < cells; idx++) {
+    const colorIndex = ATLAS_CELL_COLOR[idx]!;
+    const target = GEM_BODY_HUE[colorIndex - 1] ?? -1;
+    const mix = GEM_HUE_MIX[colorIndex - 1] ?? 0;
+    if (target < 0 || mix <= 0) continue;
+    const col = idx % cols;
+    const row = Math.floor(idx / cols);
+    const x0 = col * cell;
+    const y0 = row * cell;
+    for (let y = 0; y < cell; y++) {
+      for (let x = 0; x < cell; x++) {
+        const o = ((y0 + y) * width + (x0 + x)) * 4;
+        const a = px[o + 3] ?? 0;
+        if (a < 16) continue;
+        const r = (px[o] ?? 0) / 255;
+        const g = (px[o + 1] ?? 0) / 255;
+        const b = (px[o + 2] ?? 0) / 255;
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        const delta = max - min;
+        const v = max;
+        const sat = max > 0.001 ? delta / max : 0;
+        if (v < 0.1) continue;
+
+        let hue = 0;
+        if (delta > 0.001) {
+          if (max === r) hue = (((g - b) / delta) % 6 + 6) % 6;
+          else if (max === g) hue = (b - r) / delta + 2;
+          else hue = (r - g) / delta + 4;
+          hue /= 6;
+        }
+
+        const hueDeg = hue * 360;
+        const pull = extraPull(colorIndex, hueDeg);
+        // Pale wrong-family tints (violet on blue, cyan on green) look like
+        // gloss but must be retinted. True silver/white metal stays put.
+        if (pull <= 0 && (sat < 0.16 || (sat < 0.22 && v > 0.84))) continue;
+        if (pull > 0 && sat < 0.08) continue;
+
+        const body = smoothstep(0.16, 0.42, sat);
+        const k = Math.min(1, mix * body + pull * smoothstep(0.12, 0.4, sat));
+        if (k < 0.03) continue;
+        hue = mixHue(hue, target, k);
+
+        let outSat = sat;
+        if (colorIndex === 3 && sat > 0.22) outSat = Math.min(1, sat * 1.08);
+        if (colorIndex === 4 && sat > 0.22) outSat = Math.min(1, sat * 1.1);
+        if (colorIndex === 5 && sat > 0.22) outSat = Math.min(1, sat * 1.06);
+        writeHsv(px, o, hue, outSat, v);
+      }
+    }
+  }
+}
+
 /** Palette hex -> hue/saturation for the chroma lock. */
 export function hexHueSat(hex: string): { hue: number; sat: number } {
   const n = parseInt(hex.slice(1), 16);
