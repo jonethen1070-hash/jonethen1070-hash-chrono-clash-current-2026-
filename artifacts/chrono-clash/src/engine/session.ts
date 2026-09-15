@@ -36,6 +36,7 @@ import {
 } from "./dailyRun";
 import { isDevBattleBypassEnabled } from "./devBattleBypass";
 import { loadSettings, saveSettings } from "./settings";
+import { coinRoomById, parseCoinRoomId, type CoinRoom, type CoinRoomId } from "./rooms";
 import { INTRO_TOTAL_MS, introBeat, IntroBeat } from "./intro";
 import {
   ATTACK_MAX,
@@ -127,6 +128,7 @@ export interface GameSnapshot {
   matchState: MatchState;
   mode: GameMode;
   target: number;
+  coinRoomId: CoinRoomId;
   remainingMs: number;
   countdownMs: number;
   readyMs: number;
@@ -199,6 +201,7 @@ export class GameSession {
   phase: MatchPhase = "countdown";
   mode: GameMode = "time";
   scoreTarget = SCORE_TARGET;
+  selectedRoomId: CoinRoomId = "rookie";
   muted = false;
   selected: Coord | null = null;
   drag: DragState | null = null;
@@ -291,6 +294,7 @@ export class GameSession {
     this.muted = !loadSettings().sfx;
     const settings = loadSettings();
     this.mode = this.progress.lastMode === "score" ? "score" : "time";
+    this.selectedRoomId = parseCoinRoomId(this.progress.lastCoinRoomId);
     this.scoreTarget = clampScoreTarget(settings.scoreTarget, SCORE_TARGET);
     this.splashAt = typeof performance !== "undefined" ? performance.now() : 0;
   }
@@ -352,6 +356,7 @@ export class GameSession {
       matchState: this.matchState(now),
       mode: this.mode,
       target: this.mode === "score" ? this.scoreTarget : 0,
+      coinRoomId: this.selectedRoomId,
       remainingMs: remaining,
       countdownMs: this.countdownMs(now),
       readyMs: this.screen === "ready" ? Math.max(0, READY_MS - (now - this.readyAt)) : 0,
@@ -613,6 +618,19 @@ export class GameSession {
     settings.scoreTarget = this.scoreTarget;
     saveSettings(settings);
     return this.scoreTarget;
+  }
+
+  /** Remember a virtual coin room. Does not deduct coins or start a match. */
+  selectCoinRoom(id: string): CoinRoom {
+    const room = coinRoomById(id);
+    this.selectedRoomId = room.id;
+    this.progress = { ...this.progress, lastCoinRoomId: room.id };
+    saveProgress(this.progress);
+    return room;
+  }
+
+  coinRoom(): CoinRoom {
+    return coinRoomById(this.selectedRoomId);
   }
 
   chooseMode(mode: GameMode, now = performance.now()): void {

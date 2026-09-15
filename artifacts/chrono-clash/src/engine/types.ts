@@ -124,6 +124,8 @@ export interface LocalProgress {
   tutorialDone: boolean;
   matchesSeen: number;
   lastMode: GameMode;
+  /** Selected virtual coin room id. Clamped to the rooms catalog on load. */
+  lastCoinRoomId: string;
   vfxTheme: string;
   recentMatches: RecentMatch[];
   winningCoins: number;
@@ -172,6 +174,7 @@ export const EMPTY_PROGRESS: LocalProgress = {
   tutorialDone: false,
   matchesSeen: 0,
   lastMode: "time",
+  lastCoinRoomId: "rookie",
   vfxTheme: "core",
   recentMatches: [],
   winningCoins: 0,
