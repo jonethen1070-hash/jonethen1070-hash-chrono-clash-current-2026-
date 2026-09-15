@@ -286,6 +286,17 @@ export function grantWinningCoins(state: EconomyState, amount: number): EconomyR
   };
 }
 
+export function spendWinningCoins(state: EconomyState, amount: number): EconomyResult {
+  const cost = Math.trunc(Number(amount) || 0);
+  if (cost <= 0) return { ok: false, reason: "unknown", state };
+  if (state.winningCoins < cost) return { ok: false, reason: "funds", state };
+  return {
+    ok: true,
+    spent: cost,
+    state: { ...state, winningCoins: state.winningCoins - cost },
+  };
+}
+
 export function coinsForOutcome(outcome: "win" | "loss" | "tie"): number {
   if (outcome === "win") return WINNING_COINS_WIN;
   if (outcome === "tie") return WINNING_COINS_TIE;

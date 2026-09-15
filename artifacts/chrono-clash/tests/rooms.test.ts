@@ -32,7 +32,7 @@ describe("virtual coin rooms", () => {
     expect(rooms.map((room) => room.entryCoins)).toEqual([500, 1_500, 5_000, 15_000, 50_000]);
     expect(rooms.map((room) => room.name)).toEqual(["Rookie", "Pro", "Elite", "Master", "Champion"]);
     for (const room of rooms) {
-      expect(room.rewardCoins).toBeNull();
+      expect(room.rewardCoins).toBe(room.entryCoins * 2);
       expect(coinRoomById(room.id)).toEqual(room);
     }
     expect(COIN_ROOMS).toBe(rooms);

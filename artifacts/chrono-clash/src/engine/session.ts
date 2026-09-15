@@ -21,7 +21,9 @@ import {
   economyFromProgress,
   EconomyFail,
   getCharge,
+  grantWinningCoins,
   spendCharge,
+  spendWinningCoins,
 } from "./economy";
 import { powerConsumesCharge, powerEnergyCost, resolveTargetedPower } from "./powers";
 import {
@@ -36,7 +38,22 @@ import {
 } from "./dailyRun";
 import { isDevBattleBypassEnabled } from "./devBattleBypass";
 import { loadSettings, saveSettings } from "./settings";
-import { coinRoomById, parseCoinRoomId, type CoinRoom, type CoinRoomId } from "./rooms";
+import {
+  canAffordCoinRoom,
+  clampCoinRoomMatch,
+  coinRoomById,
+  markCoinRoomCharged,
+  markCoinRoomSettled,
+  openCoinRoomRecord,
+  parseCoinRoomId,
+  roomPayoutForOutcome,
+  type CoinRoom,
+  type CoinRoomEnterResult,
+  type CoinRoomId,
+  type CoinRoomMatchRecord,
+  type CoinRoomSettlement,
+  type CoinRoomSettleOutcome,
+} from "./rooms";
 import { INTRO_TOTAL_MS, introBeat, IntroBeat } from "./intro";
 import {
   ATTACK_MAX,
@@ -110,6 +127,7 @@ export interface MatchResult {
   progress: LocalProgress;
   grant: RewardGrant | null;
   inspection?: boolean;
+  coinRoom?: CoinRoomSettlement | null;
 }
 
 export interface DragState {
@@ -202,6 +220,8 @@ export class GameSession {
   mode: GameMode = "time";
   scoreTarget = SCORE_TARGET;
   selectedRoomId: CoinRoomId = "rookie";
+  lastCoinRoomEnter: CoinRoomEnterResult | null = null;
+  lastCoinRoomSettlement: CoinRoomSettlement | null = null;
   muted = false;
   selected: Coord | null = null;
   drag: DragState | null = null;
@@ -288,6 +308,8 @@ export class GameSession {
     attack: 0,
   };
   private snapDrag: DragState | null = null;
+  private coinRoomIntent: CoinRoomMatchRecord | null = null;
+  private activeCoinRoom: CoinRoomMatchRecord | null = null;
 
   constructor() {
     this.resetFighters();
@@ -297,6 +319,7 @@ export class GameSession {
     this.selectedRoomId = parseCoinRoomId(this.progress.lastCoinRoomId);
     this.scoreTarget = clampScoreTarget(settings.scoreTarget, SCORE_TARGET);
     this.splashAt = typeof performance !== "undefined" ? performance.now() : 0;
+    this.reconcileAbandonedCoinRoom();
   }
 
   get intro(): boolean {
@@ -408,6 +431,8 @@ export class GameSession {
   }
 
   toMenu(): void {
+    this.abandonOpenCoinRoomMatch();
+    this.coinRoomIntent = null;
     this.screen = "menu";
     this.phase = "countdown";
     this.result = null;
@@ -573,9 +598,12 @@ export class GameSession {
     if (this.screen === "match" && shouldResume && this.phase === "paused") this.resume(now);
   }
 
-  quitToMenu(): void {
+  quitToMenu(now = performance.now()): void {
     this.pausedForSettings = false;
     this.settingsBack = "menu";
+    if (this.hasOpenCoinRoomStake() && this.screen === "match" && !this.ended) {
+      this.endMatch(now, "loss");
+    }
     this.toMenu();
   }
 
@@ -631,6 +659,161 @@ export class GameSession {
 
   coinRoom(): CoinRoom {
     return coinRoomById(this.selectedRoomId);
+  }
+
+  /**
+   * Explicit coin-room entry. Time/Score via chooseMode remain free.
+   * Deducts the entry fee only when startMatch actually begins the match.
+   */
+  enterCoinRoomMatch(mode: GameMode, roomId?: string, now = performance.now()): CoinRoomEnterResult {
+    const room = coinRoomById(roomId ?? this.selectedRoomId);
+    this.selectCoinRoom(room.id);
+    const have = Math.max(0, Math.trunc(Number(this.progress.winningCoins) || 0));
+    const fail = (reason: "funds" | "unavailable"): CoinRoomEnterResult => {
+      const result: CoinRoomEnterResult = { ok: false, reason, room, have, need: room.entryCoins, charged: 0 };
+      this.lastCoinRoomEnter = result;
+      this.coinRoomIntent = null;
+      return result;
+    };
+    this.refreshDailyRun();
+    if (!this.canEnterLocalBattle()) return fail("unavailable");
+    if (!canAffordCoinRoom(have, room)) return fail("funds");
+    this.coinRoomIntent = openCoinRoomRecord(room, now);
+    this.chooseMode(mode, now);
+    if (this.screen !== "ready") return fail("unavailable");
+    const result: CoinRoomEnterResult = { ok: true, room, have, need: room.entryCoins, charged: 0 };
+    this.lastCoinRoomEnter = result;
+    return result;
+  }
+
+  activeCoinRoomMatch(): CoinRoomMatchRecord | null {
+    return this.activeCoinRoom;
+  }
+
+  /** Idempotent settlement. Win pays rewardCoins once; any other outcome pays 0. */
+  settleActiveCoinRoom(outcome: CoinRoomSettleOutcome): CoinRoomSettlement | null {
+    const record =
+      this.activeCoinRoom ??
+      clampCoinRoomMatch(this.progress.coinRoomMatch);
+    if (!record?.charged) return this.lastCoinRoomSettlement;
+    if (record.settled) {
+      const already: CoinRoomSettlement = {
+        matchId: record.matchId,
+        roomId: record.roomId,
+        entryCoins: record.entryCoins,
+        payout: 0,
+        settled: true,
+        outcome,
+      };
+      this.lastCoinRoomSettlement = already;
+      this.activeCoinRoom = record;
+      return already;
+    }
+    const payout = roomPayoutForOutcome(record, outcome);
+    let next = this.progress;
+    if (payout > 0) {
+      const granted = grantWinningCoins(economyFromProgress(next), payout);
+      if (granted.ok) next = applyEconomy(next, granted.state);
+    }
+    const settled = markCoinRoomSettled(record);
+    next = { ...next, coinRoomMatch: settled };
+    this.progress = next;
+    saveProgress(this.progress);
+    this.activeCoinRoom = settled;
+    const settlement: CoinRoomSettlement = {
+      matchId: settled.matchId,
+      roomId: settled.roomId,
+      entryCoins: settled.entryCoins,
+      payout,
+      settled: true,
+      outcome,
+    };
+    this.lastCoinRoomSettlement = settlement;
+    return settlement;
+  }
+
+  private reconcileAbandonedCoinRoom(): void {
+    const rec = clampCoinRoomMatch(this.progress.coinRoomMatch);
+    if (!rec?.charged || rec.settled) {
+      this.activeCoinRoom = rec?.charged ? rec : null;
+      return;
+    }
+    this.activeCoinRoom = rec;
+    this.settleActiveCoinRoom("void");
+  }
+
+  private hasOpenCoinRoomStake(): boolean {
+    const rec = this.activeCoinRoom ?? clampCoinRoomMatch(this.progress.coinRoomMatch);
+    return Boolean(rec?.charged && !rec.settled);
+  }
+
+  private abandonOpenCoinRoomMatch(): void {
+    if (this.ended) return;
+    if (this.hasOpenCoinRoomStake()) this.settleActiveCoinRoom("void");
+  }
+
+  private chargeCoinRoomIntent(): CoinRoomEnterResult {
+    const intent = this.coinRoomIntent;
+    const room = intent ? coinRoomById(intent.roomId) : this.coinRoom();
+    const have = Math.max(0, Math.trunc(Number(this.progress.winningCoins) || 0));
+    if (!intent) {
+      return { ok: true, room, have, need: 0, charged: 0 };
+    }
+    const persisted = clampCoinRoomMatch(this.progress.coinRoomMatch);
+    if (persisted?.matchId === intent.matchId && persisted.charged) {
+      this.activeCoinRoom = persisted;
+      this.coinRoomIntent = null;
+      const result: CoinRoomEnterResult = {
+        ok: true,
+        room,
+        have,
+        need: intent.entryCoins,
+        charged: persisted.settled ? 0 : intent.entryCoins,
+      };
+      this.lastCoinRoomEnter = result;
+      return result;
+    }
+    if (!canAffordCoinRoom(have, room)) {
+      this.coinRoomIntent = null;
+      const result: CoinRoomEnterResult = {
+        ok: false,
+        reason: "funds",
+        room,
+        have,
+        need: room.entryCoins,
+        charged: 0,
+      };
+      this.lastCoinRoomEnter = result;
+      return result;
+    }
+    const spent = spendWinningCoins(economyFromProgress(this.progress), intent.entryCoins);
+    if (!spent.ok) {
+      this.coinRoomIntent = null;
+      const result: CoinRoomEnterResult = {
+        ok: false,
+        reason: "funds",
+        room,
+        have,
+        need: room.entryCoins,
+        charged: 0,
+      };
+      this.lastCoinRoomEnter = result;
+      return result;
+    }
+    const charged = markCoinRoomCharged(intent);
+    this.progress = { ...applyEconomy(this.progress, spent.state), coinRoomMatch: charged };
+    saveProgress(this.progress);
+    this.activeCoinRoom = charged;
+    this.coinRoomIntent = null;
+    const result: CoinRoomEnterResult = {
+      ok: true,
+      room,
+      have: this.progress.winningCoins,
+      need: charged.entryCoins,
+      charged: charged.entryCoins,
+    };
+    this.lastCoinRoomEnter = result;
+    return result;
   }
 
   chooseMode(mode: GameMode, now = performance.now()): void {
@@ -773,8 +956,29 @@ export class GameSession {
   startMatch(now = performance.now()): void {
     this.refreshDailyRun();
     if (!this.canEnterLocalBattle()) {
+      if (this.coinRoomIntent) {
+        const room = coinRoomById(this.coinRoomIntent.roomId);
+        this.lastCoinRoomEnter = {
+          ok: false,
+          reason: "unavailable",
+          room,
+          have: Math.max(0, Math.trunc(Number(this.progress.winningCoins) || 0)),
+          need: room.entryCoins,
+          charged: 0,
+        };
+        this.coinRoomIntent = null;
+      }
       this.screen = "modes";
       return;
+    }
+    if (this.coinRoomIntent) {
+      const charged = this.chargeCoinRoomIntent();
+      if (!charged.ok) {
+        this.screen = "modes";
+        return;
+      }
+    } else {
+      this.activeCoinRoom = null;
     }
     this.inspectionMatch = !this.canStartDailyRun();
     this.resetFighters();
@@ -1422,6 +1626,7 @@ export class GameSession {
     else if (!forced && playerScore < opponentScore) outcome = "loss";
 
     if (this.inspectionMatch) {
+      const coinRoom = this.settleActiveCoinRoom(outcome);
       this.result = {
         outcome,
         playerScore,
@@ -1433,6 +1638,7 @@ export class GameSession {
         progress: { ...this.progress },
         grant: null,
         inspection: true,
+        coinRoom,
       };
     } else {
       const recorded = grantMatchRewards(this.progress, {
@@ -1453,6 +1659,7 @@ export class GameSession {
           this.trustedUtcMs != null,
         ),
       );
+      const coinRoom = this.settleActiveCoinRoom(outcome);
       saveProgress(this.progress);
       this.result = {
         outcome,
@@ -1464,6 +1671,7 @@ export class GameSession {
         target: this.mode === "score" ? this.scoreTarget : MATCH_SECONDS,
         progress: { ...this.progress },
         grant: recorded.grant,
+        coinRoom,
       };
     }
     const side: FxSide = outcome === "loss" ? "opponent" : "player";

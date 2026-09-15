@@ -126,6 +126,15 @@ export interface LocalProgress {
   lastMode: GameMode;
   /** Selected virtual coin room id. Clamped to the rooms catalog on load. */
   lastCoinRoomId: string;
+  /** Open/last virtual coin-room stake. Null when no coin-room match is in flight. */
+  coinRoomMatch: {
+    matchId: string;
+    roomId: string;
+    entryCoins: number;
+    rewardCoins: number;
+    charged: boolean;
+    settled: boolean;
+  } | null;
   vfxTheme: string;
   recentMatches: RecentMatch[];
   winningCoins: number;
@@ -175,6 +184,7 @@ export const EMPTY_PROGRESS: LocalProgress = {
   matchesSeen: 0,
   lastMode: "time",
   lastCoinRoomId: "rookie",
+  coinRoomMatch: null,
   vfxTheme: "core",
   recentMatches: [],
   winningCoins: 0,
