@@ -107,6 +107,8 @@ describe("GameUI reskin assets", () => {
     expect(atlas).toContain("isolateAtlasGems");
     expect(atlas).toContain("comps.slice(0, 6)");
     expect(atlas).toContain("gradeIsolatedAtlasColors");
+    expect(atlas).toContain("shrinkIsolatedAtlasCell");
+    expect(atlas).toContain("BLUE_ARTWORK_SCALE = 0.93");
   });
 
   it("grades isolated atlas body hues without replacing the sheet", () => {

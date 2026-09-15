@@ -333,11 +333,11 @@ const GEM_BODY_HUE = [
   CRIMSON_RED_HUE, // inverted triangle: magenta/pink → crimson/ruby red
   -1, // gold
   0.375, // green ~135° emerald
-  0.614, // blue ~221° electric blue (away from indigo/violet)
+  0.622, // blue ~224° rich royal/electric (away from cyan 185° and violet 291°)
   0.808, // purple ~291° violet (away from blue 221° and cyan 185°)
   0.514, // cyan ~185° aqua
 ] as const;
-const GEM_HUE_MIX = [0.94, 0, 0.58, 0.62, 0.52, 0.38] as const;
+const GEM_HUE_MIX = [0.94, 0, 0.58, 0.7, 0.52, 0.38] as const;
 
 function extraPull(colorIndex: number, hueDeg: number): number {
   switch (colorIndex) {
@@ -446,22 +446,38 @@ export function gradeIsolatedAtlasColors(data: ImageData, cell = 256, cols = 3):
 
         const hueDeg = hue * 360;
         const pull = extraPull(colorIndex, hueDeg);
-        // Pale wrong-family tints (violet on blue, cyan on green) look like
-        // gloss but must be retinted. True silver/white metal stays put.
-        if (pull <= 0 && (sat < 0.16 || (sat < 0.22 && v > 0.84))) continue;
-        if (pull > 0 && sat < 0.08) continue;
+        // Blue square: icy white cores are tinted (sat 0.08–0.45, high value),
+        // not metal. Retint those; skip only near-neutral bezel sparkle.
+        const blueBloom =
+          colorIndex === 4 && v > 0.62 && sat < 0.45 && hueDeg > 185 && hueDeg < 265;
+        if (!blueBloom) {
+          if (pull <= 0 && (sat < 0.16 || (sat < 0.22 && v > 0.84))) continue;
+          if (pull > 0 && sat < 0.08) continue;
+        } else if (sat < 0.05) {
+          continue;
+        }
 
         const body = smoothstep(0.16, 0.42, sat);
         const k = Math.min(1, mix * body + pull * smoothstep(0.12, 0.4, sat));
-        if (k < 0.03) continue;
-        hue = mixHue(hue, target, k);
+        if (k < 0.03 && !blueBloom) continue;
+        hue = mixHue(hue, target, blueBloom ? Math.max(k, 0.55) : k);
 
         let outSat = sat;
+        let outV = v;
         if (colorIndex === 1 && sat > 0.18) outSat = Math.min(1, sat * 1.14);
         if (colorIndex === 3 && sat > 0.22) outSat = Math.min(1, sat * 1.08);
-        if (colorIndex === 4 && sat > 0.22) outSat = Math.min(1, sat * 1.1);
         if (colorIndex === 5 && sat > 0.22) outSat = Math.min(1, sat * 1.06);
-        writeHsv(px, o, hue, outSat, v);
+        if (colorIndex === 4) {
+          if (sat > 0.16) outSat = Math.min(1, sat * 1.24);
+          if (v > 0.7 && sat < 0.58) {
+            const bloom = smoothstep(0.7, 0.96, v) * (1 - smoothstep(0.26, 0.58, sat));
+            outV = v * (1 - 0.24 * bloom);
+            outSat = Math.min(1, outSat + 0.22 * bloom);
+          } else if (sat > 0.28) {
+            outV = v * 0.93;
+          }
+        }
+        writeHsv(px, o, hue, outSat, outV);
       }
     }
   }

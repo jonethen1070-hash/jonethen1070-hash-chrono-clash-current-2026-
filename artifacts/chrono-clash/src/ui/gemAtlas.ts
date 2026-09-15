@@ -73,12 +73,43 @@ function applyBlackKey(img: HTMLImageElement): HTMLCanvasElement | null {
       if (lum < 18) px[i + 3] = 0;
       else if (lum < 36) px[i + 3] = Math.round(a * ((lum - 18) / 18));
     }
-    if (isolateAtlasGems(data)) gradeIsolatedAtlasColors(data, GEM_CELL, GEM_COLS);
+    const isolated = isolateAtlasGems(data);
+    if (isolated) gradeIsolatedAtlasColors(data, GEM_CELL, GEM_COLS);
     ctx.putImageData(data, 0, 0);
+    // Blue square reads oversized in-cell vs the other silhouettes. Shrink
+    // that one 256 cell only — board cell size and the other five gems stay put.
+    if (isolated) shrinkIsolatedAtlasCell(ctx, GEM_ORDER[3]!, BLUE_ARTWORK_SCALE);
   } catch {
     // Android/WebView can reject getImageData; keep the unkeyed sheet so gems still draw.
   }
   return canvas;
+}
+
+/** 7% smaller blue artwork inside its atlas cell (5–8% target). */
+const BLUE_ARTWORK_SCALE = 0.93;
+
+function shrinkIsolatedAtlasCell(
+  ctx: CanvasRenderingContext2D,
+  cellIndex: number,
+  scale: number,
+): void {
+  const col = cellIndex % GEM_COLS;
+  const row = Math.floor(cellIndex / GEM_COLS);
+  const x = col * GEM_CELL;
+  const y = row * GEM_CELL;
+  const dest = Math.round(GEM_CELL * scale);
+  const ox = x + Math.round((GEM_CELL - dest) / 2);
+  const oy = y + Math.round((GEM_CELL - dest) / 2);
+  const tmp = document.createElement("canvas");
+  tmp.width = GEM_CELL;
+  tmp.height = GEM_CELL;
+  const tctx = tmp.getContext("2d");
+  if (!tctx) return;
+  tctx.drawImage(ctx.canvas, x, y, GEM_CELL, GEM_CELL, 0, 0, GEM_CELL, GEM_CELL);
+  ctx.clearRect(x, y, GEM_CELL, GEM_CELL);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(tmp, 0, 0, GEM_CELL, GEM_CELL, ox, oy, dest, dest);
 }
 
 /**
