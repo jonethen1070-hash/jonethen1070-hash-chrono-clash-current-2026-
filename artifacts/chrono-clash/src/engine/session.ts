@@ -681,6 +681,11 @@ export class GameSession {
     return coinRoomById(this.selectedRoomId);
   }
 
+  /** Room waiting on the Ready screen. Null for free Time/Score. Does not charge. */
+  pendingCoinRoom(): CoinRoom | null {
+    return this.coinRoomIntent ? coinRoomById(this.coinRoomIntent.roomId) : null;
+  }
+
   /**
    * Explicit coin-room entry. Time/Score via chooseMode remain free.
    * Deducts the entry fee only when startMatch actually begins the match.
@@ -1101,7 +1106,7 @@ export class GameSession {
     this.pruneFx(now);
     if (this.bounce && now - this.bounce.born > INVALID_RETURN_MS) this.bounce = null;
     if (this.screen === "splash" && now - this.splashAt >= INTRO_TOTAL_MS) this.screen = "menu";
-    if (this.screen === "ready" && now - this.readyAt >= READY_MS) this.startMatch(now);
+    if (this.screen === "ready" && !this.coinRoomIntent && now - this.readyAt >= READY_MS) this.startMatch(now);
     if (this.screen !== "match") return;
 
     if (this.phase === "countdown") {

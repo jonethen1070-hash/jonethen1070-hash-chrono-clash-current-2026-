@@ -16,6 +16,7 @@ import { GameMode, LocalProgress } from "../engine/types";
 import {
   canAffordCoinRoom,
   coinRooms,
+  type CoinRoom,
   type CoinRoomEnterResult,
 } from "../engine/rooms";
 import { DAILY_LIFE_ADS_MAX, DAILY_LIVES_MAX, dailyRunFromProgress } from "../engine/dailyRun";
@@ -231,6 +232,32 @@ export function roomsViewHtml(
   </div>
   <div class="room-list">${cards}</div>
   <p class="rooms-status muted">${status}</p>`;
+}
+
+export function coinReadyViewHtml(p: LocalProgress, room: CoinRoom): string {
+  const have = Math.max(0, Math.trunc(Number(p.winningCoins) || 0));
+  const pilot = String(p.name || "CHRONO PILOT").toUpperCase();
+  return `<div class="ready-clash-card room-${room.id}" data-ready-room="${room.id}" data-ready-entry="${room.entryCoins}" data-ready-wallet="${have}">
+    <div class="ready-stake">
+      <span class="ready-stake-room"><small>ROOM</small><b>${room.name.toUpperCase()}</b></span>
+      <span class="ready-stake-entry"><small>ENTRY</small><b>${coinsLabel(room.entryCoins)}</b></span>
+    </div>
+    <div class="ready-duel">
+      <div class="ready-fighter you">
+        ${avatarFaceHtml(p, "ready-face")}
+        <small>YOU</small>
+        <b>${pilot}</b>
+        <span>BALANCE ${coinsLabel(have)}</span>
+      </div>
+      <div class="ready-vs" aria-hidden="true">VS</div>
+      <div class="ready-fighter rival">
+        <div class="avatar rival-face a3 ready-face">◆</div>
+        <small>OPPONENT</small>
+        <b>LOCAL RIVAL</b>
+        <span>TEST</span>
+      </div>
+    </div>
+  </div>`;
 }
 
 export function readyPowerStripHtml(p: LocalProgress): string {

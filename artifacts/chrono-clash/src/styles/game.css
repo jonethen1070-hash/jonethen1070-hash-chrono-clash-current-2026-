@@ -1731,6 +1731,114 @@ button:active {
   background: radial-gradient(circle, rgba(139,108,255,0.5), transparent 70%);
   animation: pulse 0.9s infinite alternate;
 }
+
+#ready.coin-ready {
+  gap: 8px;
+  justify-content: flex-start;
+}
+#ready.coin-ready .logo.compact {
+  margin-top: 0.6vh;
+}
+#ready.coin-ready .ready-pulse {
+  display: none;
+}
+.ready-clash {
+  width: 100%;
+}
+.ready-clash-card {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 20px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow:
+    var(--shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 4px 0 0 var(--room-accent, var(--accent));
+}
+.ready-clash-card.room-rookie { --room-accent: var(--cyan); }
+.ready-clash-card.room-pro { --room-accent: var(--green); }
+.ready-clash-card.room-elite { --room-accent: var(--gold); }
+.ready-clash-card.room-master { --room-accent: var(--violet); }
+.ready-clash-card.room-champion { --room-accent: var(--magenta); }
+.ready-stake {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.ready-stake span {
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: rgba(0, 8, 18, 0.55);
+  border: 1px solid rgba(0, 212, 255, 0.16);
+}
+.ready-stake small {
+  color: var(--accent-2);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  font-weight: 800;
+}
+.ready-stake b {
+  color: var(--text);
+  font-size: 16px;
+  letter-spacing: 0.12em;
+}
+.ready-stake-entry b { color: var(--gold); }
+.ready-duel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+.ready-fighter {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  text-align: center;
+  min-width: 0;
+}
+.ready-fighter .ready-face {
+  width: 48px;
+  height: 48px;
+  font-size: 20px;
+}
+.ready-fighter small {
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  font-weight: 800;
+}
+.ready-fighter.you small { color: var(--cyan); }
+.ready-fighter.rival small { color: var(--magenta); }
+.ready-fighter b {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ready-fighter span {
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+}
+.ready-vs {
+  font-family: var(--font-display);
+  font-size: 16px;
+  letter-spacing: 0.22em;
+  color: var(--gold);
+  text-shadow: 0 0 16px rgba(255, 209, 102, 0.4);
+}
+#readyStart {
+  min-height: 48px;
+  letter-spacing: 0.22em;
+}
+
 .brief {
   color: var(--muted);
   font-size: 16px;

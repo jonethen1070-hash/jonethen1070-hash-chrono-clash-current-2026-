@@ -27,7 +27,7 @@ import { prefetchGemAtlas } from "./ui/gemAtlas";
 import { comboBurstClass, resultHeadline, scoreTickerRate } from "./ui/feel";
 import { matchImpactDelayMs } from "./ui/gemMotion";
 import { HapticBus, hapticCuesFromFx } from "./ui/haptics";
-import { chatHtml, dailyRunHtml, equippedAvatarName, matchPowerQty, powerArmoryHtml, profileView, readyPowerStripHtml, renderMenuPilot, roomsViewHtml, trophiesHtml } from "./ui/metaViews";
+import { chatHtml, coinReadyViewHtml, dailyRunHtml, equippedAvatarName, matchPowerQty, powerArmoryHtml, profileView, readyPowerStripHtml, renderMenuPilot, roomsViewHtml, trophiesHtml } from "./ui/metaViews";
 import { RewardGrant, grantHasBounty, xpToNext } from "./engine/progress";
 import { paintAvatarElement } from "./ui/avatarFace";
 import { mountAvatarPhotoFlow } from "./ui/avatarPhotoFlow";
@@ -270,8 +270,10 @@ app.innerHTML = `
       <div class="logo compact"><h1 id="readyTitle">TIME BATTLE</h1><p id="readySub">HIGHEST SCORE IN 60s</p></div>
       <div class="ready-target" id="readyTarget"></div>
       <div class="ready-powers" id="readyPowers"></div>
+      <div id="readyClash" class="ready-clash hidden"></div>
       <div class="ready-pulse"></div>
       <p class="muted" id="readyHint">Swipe gems. Chain combos. Spend stored Chrono Power charges in battle.</p>
+      <div class="stack"><button type="button" class="primary hidden" id="readyStart">READY</button></div>
     </section>
 
     <section id="tutorial" class="screen">
@@ -593,6 +595,9 @@ const ui = {
   readyTitle: $("#readyTitle"),
   readySub: $("#readySub"),
   readyTarget: $("#readyTarget"),
+  readyClash: $("#readyClash"),
+  readyHint: $("#readyHint"),
+  readyStart: $("#readyStart") as HTMLButtonElement,
 };
 
 const photoFlow = mountAvatarPhotoFlow(document.body, {
@@ -885,6 +890,30 @@ function paintDailyRun(): void {
 
 function paintReadyPowers(): void {
   ui.readyPowers.innerHTML = readyPowerStripHtml(session.progress);
+}
+
+const READY_HINT = "Swipe gems. Chain combos. Spend stored Chrono Power charges in battle.";
+
+function paintReady(): void {
+  const info = modeInfo(session.mode, session.scoreTarget);
+  const room = session.pendingCoinRoom();
+  ui.ready.classList.toggle("coin-ready", Boolean(room));
+  ui.readyClash.classList.toggle("hidden", !room);
+  ui.readyStart.classList.toggle("hidden", !room);
+  if (room) {
+    ui.readyTitle.textContent = "COIN MATCH";
+    ui.readySub.textContent = info.name;
+    ui.readyTarget.textContent = `${room.name.toUpperCase()} · ${room.entryCoins.toLocaleString("en-US")} 🪙`;
+    ui.readyHint.textContent = "Entry is taken when the match starts.";
+    ui.readyClash.innerHTML = coinReadyViewHtml(session.progress, room);
+  } else {
+    ui.readyTitle.textContent = info.name;
+    ui.readySub.textContent = info.tag;
+    ui.readyTarget.textContent = session.mode === "score" ? `TARGET ${session.scoreTarget.toLocaleString()}` : "60 SECONDS";
+    ui.readyHint.textContent = READY_HINT;
+    ui.readyClash.innerHTML = "";
+  }
+  paintReadyPowers();
 }
 
 let roomsBattleMode: GameMode = session.mode === "score" ? "score" : "time";
@@ -1590,6 +1619,7 @@ ui.roomsView.addEventListener("click", (e) => {
     const result = session.enterCoinRoomMatch(roomsBattleMode, enter.dataset.enter);
     if (result.ok) {
       syncScreenNow();
+      paintReady();
       return;
     }
     paintRooms();
@@ -1600,6 +1630,12 @@ ui.roomsView.addEventListener("click", (e) => {
   pressUi();
   session.selectCoinRoom(card.dataset.room);
   paintRooms();
+});
+ui.readyStart.addEventListener("click", () => {
+  if (session.screen !== "ready") return;
+  pressUi("confirm");
+  session.confirmReady();
+  syncScreenNow();
 });
 ui.dailyRun.addEventListener("click", (e) => {
   const ad = (e.target as HTMLElement).closest<HTMLElement>("[data-life-ad]");
@@ -2417,11 +2453,7 @@ function onScreenEnter(id: string, now: number): void {
     paintRooms();
   }
   if (id === "ready") {
-    const info = modeInfo(session.mode, session.scoreTarget);
-    ui.readyTitle.textContent = info.name;
-    ui.readySub.textContent = info.tag;
-    ui.readyTarget.textContent = session.mode === "score" ? `TARGET ${session.scoreTarget.toLocaleString()}` : "60 SECONDS";
-    paintReadyPowers();
+    paintReady();
     announcer.reset();
     announcer.submit("ready", now);
   }
@@ -2869,7 +2901,7 @@ if (location.hostname === "127.0.0.1" || location.hostname === "localhost") {
     paint() {
       paintDailyRun();
       paintArmory();
-      paintReadyPowers();
+      paintReady();
       paintRooms();
     },
     renderState() {

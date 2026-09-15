@@ -95,7 +95,8 @@ button {
 #settingsScreen.screen,
 #online.screen,
 #modes.screen,
-#rooms.screen {
+#rooms.screen,
+#ready.screen {
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
