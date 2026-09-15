@@ -1,5 +1,7 @@
 /** GameUI 3×2 gem sheet. Presentation only — does not change COLORS or match rules. */
 
+import { gradeIsolatedAtlasColors } from "./gemMaterial";
+
 export const GEM_ATLAS_URL = "/assets/chrono-clash-gems.png";
 export const GEM_ORDER = [4, 2, 1, 5, 3, 0] as const;
 export const GEM_CELL = 256;
@@ -71,12 +73,43 @@ function applyBlackKey(img: HTMLImageElement): HTMLCanvasElement | null {
       if (lum < 18) px[i + 3] = 0;
       else if (lum < 36) px[i + 3] = Math.round(a * ((lum - 18) / 18));
     }
-    isolateAtlasGems(data);
+    const isolated = isolateAtlasGems(data);
+    if (isolated) gradeIsolatedAtlasColors(data, GEM_CELL, GEM_COLS);
     ctx.putImageData(data, 0, 0);
+    // Blue square reads oversized in-cell vs the other silhouettes. Shrink
+    // that one 256 cell only — board cell size and the other five gems stay put.
+    if (isolated) shrinkIsolatedAtlasCell(ctx, GEM_ORDER[3]!, BLUE_ARTWORK_SCALE);
   } catch {
     // Android/WebView can reject getImageData; keep the unkeyed sheet so gems still draw.
   }
   return canvas;
+}
+
+/** 7% smaller blue artwork inside its atlas cell (5–8% target). */
+const BLUE_ARTWORK_SCALE = 0.93;
+
+function shrinkIsolatedAtlasCell(
+  ctx: CanvasRenderingContext2D,
+  cellIndex: number,
+  scale: number,
+): void {
+  const col = cellIndex % GEM_COLS;
+  const row = Math.floor(cellIndex / GEM_COLS);
+  const x = col * GEM_CELL;
+  const y = row * GEM_CELL;
+  const dest = Math.round(GEM_CELL * scale);
+  const ox = x + Math.round((GEM_CELL - dest) / 2);
+  const oy = y + Math.round((GEM_CELL - dest) / 2);
+  const tmp = document.createElement("canvas");
+  tmp.width = GEM_CELL;
+  tmp.height = GEM_CELL;
+  const tctx = tmp.getContext("2d");
+  if (!tctx) return;
+  tctx.drawImage(ctx.canvas, x, y, GEM_CELL, GEM_CELL, 0, 0, GEM_CELL, GEM_CELL);
+  ctx.clearRect(x, y, GEM_CELL, GEM_CELL);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(tmp, 0, 0, GEM_CELL, GEM_CELL, ox, oy, dest, dest);
 }
 
 /**
@@ -84,7 +117,7 @@ function applyBlackKey(img: HTMLImageElement): HTMLCanvasElement | null {
  * Bottom-row 256 crops therefore contain the gem above plus the intended gem.
  * Keep the six largest keyed blobs and place exactly one, centered, in each cell.
  */
-function isolateAtlasGems(data: ImageData): void {
+function isolateAtlasGems(data: ImageData): boolean {
   const { width, height, data: px } = data;
   const n = width * height;
   const seen = new Uint8Array(n);
@@ -129,7 +162,7 @@ function isolateAtlasGems(data: ImageData): void {
 
   comps.sort((a, b) => b.pixels.length - a.pixels.length);
   const gems = comps.slice(0, 6);
-  if (gems.length < 6) return;
+  if (gems.length < 6) return false;
   gems.sort((a, b) => a.sy - b.sy || a.sx - b.sx);
   const top = gems.slice(0, 3).sort((a, b) => a.sx - b.sx);
   const bot = gems.slice(3, 6).sort((a, b) => a.sx - b.sx);
@@ -137,23 +170,96 @@ function isolateAtlasGems(data: ImageData): void {
 
   const copy = new Uint8ClampedArray(px);
   px.fill(0);
+
+  // Scale each isolated gem to fill most of its 256 cell so crystals read at
+  // match-3 size on the board. Same source artwork — presentation crop/fit only.
+  const fit = GEM_CELL * 0.995;
+  const scratch =
+    typeof document !== "undefined" ? document.createElement("canvas") : null;
+  const scratchCtx = scratch?.getContext("2d");
+
   for (let idx = 0; idx < 6; idx++) {
     const gem = ordered[idx]!;
     const col = idx % GEM_COLS;
     const row = Math.floor(idx / GEM_COLS);
-    const destCx = col * GEM_CELL + GEM_CELL / 2;
-    const destCy = row * GEM_CELL + GEM_CELL / 2;
-    const ox = Math.round(destCx - gem.sx);
-    const oy = Math.round(destCy - gem.sy);
     const x0 = col * GEM_CELL;
     const y0 = row * GEM_CELL;
     const x1 = x0 + GEM_CELL;
     const y1 = y0 + GEM_CELL;
+
+    let minX = width;
+    let minY = height;
+    let maxX = -1;
+    let maxY = -1;
     for (const p of gem.pixels) {
       const x = p % width;
       const y = (p - x) / width;
-      const nx = x + ox;
-      const ny = y + oy;
+      if (x < minX) minX = x;
+      if (y < minY) minY = y;
+      if (x > maxX) maxX = x;
+      if (y > maxY) maxY = y;
+    }
+    const bw = Math.max(1, maxX - minX + 1);
+    const bh = Math.max(1, maxY - minY + 1);
+    const scale = Math.min(fit / bw, fit / bh);
+    const dw = Math.max(1, Math.round(bw * scale));
+    const dh = Math.max(1, Math.round(bh * scale));
+    const dx = x0 + Math.round((GEM_CELL - dw) / 2);
+    const dy = y0 + Math.round((GEM_CELL - dh) / 2);
+
+    if (scratch && scratchCtx) {
+      scratch.width = bw;
+      scratch.height = bh;
+      const src = scratchCtx.createImageData(bw, bh);
+      const sp = src.data;
+      for (const p of gem.pixels) {
+        const x = p % width;
+        const y = (p - x) / width;
+        const lx = x - minX;
+        const ly = y - minY;
+        const di = (ly * bw + lx) * 4;
+        const si = p * 4;
+        sp[di] = copy[si]!;
+        sp[di + 1] = copy[si + 1]!;
+        sp[di + 2] = copy[si + 2]!;
+        sp[di + 3] = copy[si + 3]!;
+      }
+      scratchCtx.putImageData(src, 0, 0);
+
+      const cellCanvas = document.createElement("canvas");
+      cellCanvas.width = GEM_CELL;
+      cellCanvas.height = GEM_CELL;
+      const cellCtx = cellCanvas.getContext("2d");
+      if (!cellCtx) continue;
+      cellCtx.imageSmoothingEnabled = true;
+      cellCtx.imageSmoothingQuality = "high";
+      cellCtx.clearRect(0, 0, GEM_CELL, GEM_CELL);
+      cellCtx.drawImage(scratch, 0, 0, bw, bh, dx - x0, dy - y0, dw, dh);
+      const out = cellCtx.getImageData(0, 0, GEM_CELL, GEM_CELL).data;
+      for (let ly = 0; ly < GEM_CELL; ly++) {
+        for (let lx = 0; lx < GEM_CELL; lx++) {
+          const si = (ly * GEM_CELL + lx) * 4;
+          if ((out[si + 3] ?? 0) < 1) continue;
+          const di = ((y0 + ly) * width + (x0 + lx)) * 4;
+          px[di] = out[si]!;
+          px[di + 1] = out[si + 1]!;
+          px[di + 2] = out[si + 2]!;
+          px[di + 3] = out[si + 3]!;
+        }
+      }
+      continue;
+    }
+
+    // Fallback without DOM canvas: nearest-neighbor scale into the cell.
+    const srcCx = (minX + maxX) / 2;
+    const srcCy = (minY + maxY) / 2;
+    const destCx = x0 + GEM_CELL / 2;
+    const destCy = y0 + GEM_CELL / 2;
+    for (const p of gem.pixels) {
+      const x = p % width;
+      const y = (p - x) / width;
+      const nx = Math.round(destCx + (x - srcCx) * scale);
+      const ny = Math.round(destCy + (y - srcCy) * scale);
       if (nx < x0 || ny < y0 || nx >= x1 || ny >= y1) continue;
       const di = (ny * width + nx) * 4;
       const si = p * 4;
@@ -163,4 +269,5 @@ function isolateAtlasGems(data: ImageData): void {
       px[di + 3] = copy[si + 3]!;
     }
   }
+  return true;
 }

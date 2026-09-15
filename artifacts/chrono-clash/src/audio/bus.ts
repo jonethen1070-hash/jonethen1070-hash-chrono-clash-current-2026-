@@ -311,6 +311,14 @@ export class AudioBus {
     this.playSynthCue("match", wave);
   }
 
+  playMatchWaveLater(wave = 1, delayMs = 0): void {
+    if (delayMs <= 0) {
+      this.playMatchWave(wave);
+      return;
+    }
+    this.defer(() => this.playMatchWave(wave), delayMs);
+  }
+
   /** Plays exactly one uploaded swap sample for each committed valid player swap. */
   playSwapWave(): void {
     this.swapWave = Math.min(5, this.swapWave + 1);

@@ -72,9 +72,11 @@ describe("GameUI reskin assets", () => {
     const renderer = readFileSync(join(process.cwd(), "src/ui/renderer.ts"), "utf8");
     const paint = renderer.slice(renderer.indexOf("private paintAtlasGem("), renderer.indexOf("private drawProceduralGem("));
     expect(paint).toContain("ctx.drawImage(atlas");
+    expect(paint).toContain("if (ATLAS_ARTWORK_FAITHFUL)");
     expect(paint).toContain("jewelPath(ctx, cx, cy, s, colorIndex)");
     expect(paint).toContain("ctx.clip()");
-    expect(paint).toContain("drawGemIcon(ctx, cx, cy, s, colorIndex, color)");
+    expect(paint).toContain("paintCrystalOptics(ctx, cx, cy, s, colorIndex, color)");
+    expect(paint).toContain("applyGemMaterial(ctx, cx, cy, s, {");
     expect(paint).toContain("crystal.edge");
     expect(paint).not.toContain("ellipse(cx - s * 0.16");
   });
@@ -104,6 +106,17 @@ describe("GameUI reskin assets", () => {
     const atlas = readFileSync(join(process.cwd(), "src/ui/gemAtlas.ts"), "utf8");
     expect(atlas).toContain("isolateAtlasGems");
     expect(atlas).toContain("comps.slice(0, 6)");
+    expect(atlas).toContain("gradeIsolatedAtlasColors");
+    expect(atlas).toContain("shrinkIsolatedAtlasCell");
+    expect(atlas).toContain("BLUE_ARTWORK_SCALE = 0.93");
+  });
+
+  it("grades isolated atlas body hues without replacing the sheet", () => {
+    const material = readFileSync(join(process.cwd(), "src/ui/gemMaterial.ts"), "utf8");
+    expect(material).toContain("export function gradeIsolatedAtlasColors");
+    expect(material).toContain("extraPull");
+    expect(material).toContain("GEM_BODY_HUE");
+    expect(material).toContain("contaminated highlights");
   });
 
   it("keeps match HUD overlays out of document flow", () => {
@@ -132,22 +145,28 @@ describe("GameUI reskin assets", () => {
     expect(css).toContain("@keyframes finalTick");
   });
 
-  it("keeps the rival board a compact square below the HUD and above energy", () => {
+  it("keeps the rival board a compact square below the HUD", () => {
     const studio = readFileSync(join(process.cwd(), "src/styles/studio.css"), "utf8");
     const polish = readFileSync(join(process.cwd(), "src/styles/aaa-polish.css"), "utf8");
     const main = readFileSync(join(process.cwd(), "src/main.ts"), "utf8");
-    const boards = main.slice(main.indexOf('class="boards"'), main.indexOf('class="powers"'));
-    expect(boards.indexOf('id="oppBoard"')).toBeLessThan(boards.indexOf('class="energy-wrap"'));
-    expect(boards.indexOf('class="energy-wrap"')).toBeLessThan(boards.indexOf('id="playerBoard"'));
+    const match = main.slice(main.indexOf('id="match"'), main.indexOf('id="sheet"'));
+    expect(match).toContain('id="oppBoard"');
+    expect(match).toContain('id="playerBoard"');
+    expect(match).not.toContain('class="energy-wrap"');
+    expect(match).not.toContain('class="powers"');
+    expect(match.indexOf('id="oppBoard"')).toBeGreaterThan(match.indexOf('id="playerBoard"'));
     expect(studio).toContain("grid-template-rows: max-content max-content minmax(0, 1fr)");
     expect(studio).toContain("#match .rival-side .board-slot");
-    expect(studio).toContain("min(28vw, 14dvh, 120px)");
-    expect(polish).toContain("width: min(100%, calc(100vw - var(--safe-left) - var(--safe-right) - 2px), 388px)");
-    expect(studio).toContain("aspect-ratio: 1 / 1");
+    expect(studio).toContain("min(28vw, 11.2dvh, 96px)");
+    expect(polish).toContain("--mobile-board-side-gutter: 8px");
+    expect(polish).toContain("--board-after-energy-gap: 6px");
+    expect(polish).toContain("--board-before-abilities-gap: 8px");
+    expect(polish).toContain("width: var(--mobile-board-size) !important");
+    expect(studio).toContain("aspect-ratio: 8 / 10");
     expect(studio).toContain("#rewind .glyph");
     expect(studio).toContain("rgba(251,113,133,0.6)");
     expect(studio).toContain("background: transparent");
     expect(studio).toMatch(/#match \.power \{[\s\S]*min-height: 48px/);
-    expect(studio).not.toMatch(/@media \(max-height: 740px\) \{[\s\S]*?\.match-brand \{ display: none/);
+    expect(studio).not.toMatch(/\.match-brand([^-a-zA-Z]|$)/);
   });
 });

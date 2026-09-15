@@ -534,12 +534,18 @@ button:active {
   animation: finalTick 0.28s ease;
 }
 
-#megaStrikeAttack.ready-pulse {
+#megaStrikeAttack.ready-pulse,
+#energyBurstAttack.ready-pulse,
+#rewind.ready-pulse {
   animation: readyPulse 0.48s ease;
 }
 
 #megaStrikeAttack.charged {
   box-shadow: 0 0 18px rgba(255, 209, 102, 0.34);
+}
+
+#energyBurstAttack.ready {
+  box-shadow: 0 0 16px rgba(47, 230, 247, 0.28);
 }
 
 #oppCard.danger {
@@ -595,10 +601,30 @@ button:active {
 .callout.urgent { color: var(--warn); }
 .callout.triumphant { color: var(--win); }
 .callout.subtle { color: #7dd3fc; font-size: clamp(18px, 5vw, 28px); }
+/* In-match toasts sit on the BOARD crown — never over timer / fighters / energy.
+   Center with left/right+margin so overlaypop scale animation cannot desync X. */
 .callout.ingame {
-  top: 9%;
-  font-size: clamp(18px, 5.2vw, 30px);
-  letter-spacing: 0.12em;
+  top: max(124px, calc(env(safe-area-inset-top, 0px) + 118px));
+  left: 0;
+  right: 0;
+  margin-inline: auto;
+  width: max-content;
+  max-width: min(92vw, 340px);
+  transform: none;
+  font-size: clamp(14px, 3.8vw, 20px);
+  letter-spacing: 0.1em;
+  line-height: 1.15;
+  white-space: normal;
+  padding: 6px 12px;
+  border-radius: 12px;
+  background: rgba(4, 8, 18, 0.72);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(180, 230, 255, 0.12);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.75);
+}
+
+.callout.ingame.powerful,
+.callout.ingame.dramatic {
+  font-size: clamp(15px, 4.1vw, 22px);
 }
 
 .boards {
@@ -1018,6 +1044,77 @@ button:active {
 .results.win h2 { color: var(--win); text-shadow: 0 0 36px rgba(74, 222, 128, 0.5); }
 .results.loss h2 { color: var(--warn); text-shadow: 0 0 36px rgba(255, 93, 117, 0.48); }
 .results.tie h2 { color: var(--gold); text-shadow: 0 0 28px rgba(255, 213, 102, 0.32); }
+
+.result-coins {
+  width: 100%;
+}
+.result-coins-card {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 18px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow:
+    var(--shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 4px 0 0 var(--room-accent, var(--gold));
+}
+.result-coins-card.room-rookie { --room-accent: var(--cyan); }
+.result-coins-card.room-pro { --room-accent: var(--green); }
+.result-coins-card.room-elite { --room-accent: var(--gold); }
+.result-coins-card.room-master { --room-accent: var(--violet); }
+.result-coins-card.room-champion { --room-accent: var(--magenta); }
+.result-coins-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.result-coins-grid span,
+.result-coins-balance {
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: rgba(0, 8, 18, 0.55);
+  border: 1px solid rgba(0, 212, 255, 0.16);
+}
+.result-coins-grid small,
+.result-coins-balance small {
+  color: var(--accent-2);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  font-weight: 800;
+}
+.result-coins-grid b,
+.result-coins-balance b {
+  color: var(--text);
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.result-coins-grid b.up,
+.result-coins-balance b {
+  color: var(--gold);
+}
+.result-coins-grid b.down { color: var(--warn); }
+.result-coins-grid b.flat { color: var(--muted); }
+#results.coin-result {
+  justify-content: flex-start;
+  gap: 10px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+#results.coin-result h2 {
+  margin: 1.2vh 0 0;
+  font-size: clamp(32px, 10vw, 48px);
+}
+#resultPlayAgain,
+#resultBackRooms {
+  min-height: 48px;
+  letter-spacing: 0.16em;
+}
 
 .stat-grid {
   display: grid;
@@ -1577,6 +1674,117 @@ button:active {
 .mode-card b { display: block; font-size: 18px; letter-spacing: 0.16em; margin-bottom: 8px; }
 .mode-card span { color: var(--muted); font-size: 13px; letter-spacing: 0.04em; font-weight: 600; }
 
+.rooms-view {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px 2px 8px;
+  -webkit-overflow-scrolling: touch;
+}
+.rooms-wallet {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 209, 102, 0.16), rgba(2, 8, 16, 0.92));
+  border: 1px solid rgba(255, 209, 102, 0.42);
+  box-shadow: var(--glow-gold), inset 0 1px 0 rgba(255, 246, 196, 0.18);
+}
+.rooms-wallet small {
+  color: var(--gold);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  font-weight: 800;
+}
+.rooms-wallet b {
+  color: var(--text);
+  font-size: 20px;
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 16px rgba(255, 209, 102, 0.35);
+}
+.rooms-modes { justify-content: center; }
+.room-list { display: grid; gap: 10px; }
+.room-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 14px 14px 14px 16px;
+  color: var(--text);
+  box-shadow:
+    var(--shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 4px 0 0 var(--room-accent, var(--accent));
+}
+.room-card.room-rookie { --room-accent: var(--cyan); }
+.room-card.room-pro { --room-accent: var(--green); }
+.room-card.room-elite { --room-accent: var(--gold); }
+.room-card.room-master { --room-accent: var(--violet); }
+.room-card.room-champion { --room-accent: var(--magenta); }
+.room-card.on {
+  border-color: color-mix(in srgb, var(--room-accent, var(--accent)) 70%, var(--line-strong));
+  box-shadow:
+    0 0 22px color-mix(in srgb, var(--room-accent, var(--accent)) 28%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 4px 0 0 var(--room-accent, var(--accent));
+}
+.room-card.locked {
+  opacity: 0.78;
+}
+.room-card-copy { min-width: 0; }
+.room-card-copy small {
+  display: block;
+  color: var(--accent-2);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  margin-bottom: 4px;
+}
+.room-card-copy b {
+  display: block;
+  font-size: 15px;
+  letter-spacing: 0.12em;
+  margin-bottom: 6px;
+}
+.room-balance,
+.room-access {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+}
+.room-access.ready { color: var(--green); }
+.room-access.need { color: var(--warn); }
+.room-enter {
+  min-width: 92px;
+  min-height: 44px;
+  padding: 10px 14px;
+  letter-spacing: 0.14em;
+  font-size: 12px;
+}
+.room-enter:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.rooms-status {
+  margin: 2px 6px 0;
+  font-size: 12px;
+  line-height: 1.4;
+}
+#roomsBack {
+  letter-spacing: 0.16em;
+}
+
 .ready-target {
   min-height: 28px;
   text-align: center;
@@ -1594,6 +1802,114 @@ button:active {
   background: radial-gradient(circle, rgba(139,108,255,0.5), transparent 70%);
   animation: pulse 0.9s infinite alternate;
 }
+
+#ready.coin-ready {
+  gap: 8px;
+  justify-content: flex-start;
+}
+#ready.coin-ready .logo.compact {
+  margin-top: 0.6vh;
+}
+#ready.coin-ready .ready-pulse {
+  display: none;
+}
+.ready-clash {
+  width: 100%;
+}
+.ready-clash-card {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 20px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow:
+    var(--shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 4px 0 0 var(--room-accent, var(--accent));
+}
+.ready-clash-card.room-rookie { --room-accent: var(--cyan); }
+.ready-clash-card.room-pro { --room-accent: var(--green); }
+.ready-clash-card.room-elite { --room-accent: var(--gold); }
+.ready-clash-card.room-master { --room-accent: var(--violet); }
+.ready-clash-card.room-champion { --room-accent: var(--magenta); }
+.ready-stake {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.ready-stake span {
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: rgba(0, 8, 18, 0.55);
+  border: 1px solid rgba(0, 212, 255, 0.16);
+}
+.ready-stake small {
+  color: var(--accent-2);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  font-weight: 800;
+}
+.ready-stake b {
+  color: var(--text);
+  font-size: 16px;
+  letter-spacing: 0.12em;
+}
+.ready-stake-entry b { color: var(--gold); }
+.ready-duel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+.ready-fighter {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  text-align: center;
+  min-width: 0;
+}
+.ready-fighter .ready-face {
+  width: 48px;
+  height: 48px;
+  font-size: 20px;
+}
+.ready-fighter small {
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  font-weight: 800;
+}
+.ready-fighter.you small { color: var(--cyan); }
+.ready-fighter.rival small { color: var(--magenta); }
+.ready-fighter b {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ready-fighter span {
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+}
+.ready-vs {
+  font-family: var(--font-display);
+  font-size: 16px;
+  letter-spacing: 0.22em;
+  color: var(--gold);
+  text-shadow: 0 0 16px rgba(255, 209, 102, 0.4);
+}
+#readyStart {
+  min-height: 48px;
+  letter-spacing: 0.22em;
+}
+
 .brief {
   color: var(--muted);
   font-size: 16px;
@@ -2080,13 +2396,6 @@ button:active {
     radial-gradient(70% 36% at 50% 100%, rgba(251, 113, 133, 0.1), transparent 58%);
 }
 
-.match-brand-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  min-height: 22px;
-}
 .hud-mute {
   flex: 0 0 auto;
   min-height: 28px;
@@ -2102,20 +2411,6 @@ button:active {
   color: #fecaca;
   border-color: rgba(248, 113, 113, 0.45);
 }
-.match-brand {
-  text-align: center;
-  font-family: Orbitron, Outfit, sans-serif;
-  font-weight: 900;
-  font-size: clamp(11px, 3.4vw, 15px);
-  letter-spacing: 0.42em;
-  background: linear-gradient(180deg, #ffffff 10%, #e0f2fe 48%, #7dd3fc 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  filter: drop-shadow(0 0 12px rgba(125, 211, 252, 0.55));
-  margin: 0 0 4px;
-}
-
 .match-top {
   align-items: center;
   gap: 6px;
@@ -2416,7 +2711,6 @@ button:active {
 }
 
 @media (max-height: 720px) {
-  .match-brand { font-size: 10px; margin-bottom: 0; }
   .match-screen .boards { grid-template-rows: max-content max-content minmax(160px, 1fr); }
   .match-screen .power { min-height: 74px; border-radius: 28px; }
   .match-screen .power .glyph { width: 34px; height: 34px; font-size: 16px; }
@@ -2630,15 +2924,26 @@ button:active {
   width: min(68%, 248px);
 }
 
+/* Keep in-match callouts on the board crown (duplicate late rule — must not reintroduce HUD overlap). */
 .callout.ingame {
-  top: 7.5%;
-  max-width: 92%;
+  top: max(124px, calc(env(safe-area-inset-top, 0px) + 118px));
+  left: 0;
+  right: 0;
+  margin-inline: auto;
+  width: max-content;
+  max-width: min(92vw, 340px);
+  transform: none;
   white-space: normal;
-  font-size: clamp(15px, 4.4vw, 24px);
+  font-size: clamp(14px, 3.8vw, 20px);
   line-height: 1.15;
-  padding: 4px 10px;
+  padding: 6px 12px;
   border-radius: 12px;
-  background: rgba(6, 8, 20, 0.55);
+  background: rgba(4, 8, 18, 0.72);
+}
+
+.callout.ingame.powerful,
+.callout.ingame.dramatic {
+  font-size: clamp(15px, 4.1vw, 22px);
 }
 
 #match > .combo-burst {

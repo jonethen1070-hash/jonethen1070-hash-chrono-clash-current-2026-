@@ -2,17 +2,17 @@ import { cosmeticsOf, isOwned } from "../engine/catalog";
 import { hasAvatarPhoto, loadAvatarPhoto } from "../engine/avatarPhoto";
 import { avatarFaceHtml, isCustomAvatarEquipped } from "./avatarFace";
 import { ACHIEVEMENTS, favoritePower, winRate, xpToNext } from "../engine/progress";
+import { economyFromProgress, getCharge } from "../engine/economy";
+import { storefrontPowers } from "../engine/powers";
+import { GameMode, LocalProgress } from "../engine/types";
 import {
-  WINNING_COINS_DAILY_WIN,
-  WINNING_COINS_WEEKLY_BONUS,
-  WINNING_COINS_WEEKLY_WINS,
-  economyFromProgress,
-  getCharge,
-  utcDayKey,
-  utcWeekKey,
-} from "../engine/economy";
-import { POWER_CHARGE_COIN_COST, PowerDefinition, storefrontPowers } from "../engine/powers";
-import { LocalProgress } from "../engine/types";
+  canAffordCoinRoom,
+  coinRoomById,
+  coinRooms,
+  type CoinRoom,
+  type CoinRoomEnterResult,
+  type CoinRoomSettlement,
+} from "../engine/rooms";
 import { DAILY_LIFE_ADS_MAX, DAILY_LIVES_MAX, dailyRunFromProgress } from "../engine/dailyRun";
 import { isDevBattleBypassEnabled } from "../engine/devBattleBypass";
 
@@ -126,25 +126,9 @@ export function trophiesHtml(p: LocalProgress): string {
   }).join("");
 }
 
-export function powerArmoryHtml(p: LocalProgress, adsAvailable: boolean): string {
-  const econ = economyFromProgress(p);
-  const cards = storefrontPowers()
-    .map((power) => armoryCard(power, econ.winningCoins, getCharge(econ, power.id), adsAvailable))
-    .join("");
-  const day = utcDayKey();
-  const week = utcWeekKey();
-  const dailyClaimed = p.coinDailyDay === day;
-  const weeklyWins = p.coinWeeklyWeek === week ? p.coinWeeklyWins : 0;
-  const weeklyClaimed = weeklyWins >= WINNING_COINS_WEEKLY_WINS;
-  return `<div class="armory">
-    <div class="armory-head"><small>CHRONO POWERS</small><b>WINNING COINS ${econ.winningCoins}</b></div>
-    <p class="armory-note">${POWER_CHARGE_COIN_COST} coins = 1 charge. Coins are rare. Ads grant +1 charge, not coins.</p>
-    <div class="armory-objectives">
-      <span>DAILY WIN ${dailyClaimed ? "CLAIMED" : `+${WINNING_COINS_DAILY_WIN}`}</span>
-      <span>WEEKLY ${weeklyWins}/${WINNING_COINS_WEEKLY_WINS} WINS ${weeklyClaimed ? "CLAIMED" : `+${WINNING_COINS_WEEKLY_BONUS}`}</span>
-    </div>
-    ${cards}
-  </div>`;
+export function modesWalletHtml(p: LocalProgress): string {
+  const have = Math.max(0, Math.trunc(Number(p.winningCoins) || 0));
+  return `<div class="armory-head"><small>WINNING COINS</small><b>${have}</b></div>`;
 }
 
 export function dailyRunHtml(p: LocalProgress, adsAvailable: boolean): string {
@@ -172,6 +156,112 @@ export function dailyRunHtml(p: LocalProgress, adsAvailable: boolean): string {
   </div>`;
 }
 
+function coinsLabel(value: number): string {
+  return `${Math.max(0, Math.trunc(Number(value) || 0)).toLocaleString("en-US")} 🪙`;
+}
+
+function signedCoinsLabel(value: number): string {
+  const amount = Math.trunc(Number(value) || 0);
+  if (amount < 0) return `-${coinsLabel(Math.abs(amount))}`;
+  return `+${coinsLabel(amount)}`;
+}
+
+export function roomsViewHtml(
+  p: LocalProgress,
+  selectedId: string,
+  battleMode: GameMode,
+  canEnterBattle: boolean,
+  lastEnter: CoinRoomEnterResult | null = null,
+): string {
+  const have = Math.max(0, Math.trunc(Number(p.winningCoins) || 0));
+  const rooms = coinRooms();
+  const cards = rooms
+    .map((room, index) => {
+      const afford = canAffordCoinRoom(have, room);
+      const canPlay = afford && canEnterBattle;
+      const selected = room.id === selectedId;
+      const gate = String(index + 1).padStart(2, "0");
+      const access = !canEnterBattle
+        ? "NO LIVES LEFT"
+        : afford
+          ? "ENTRY OPEN"
+          : `NEED ${coinsLabel(Math.max(0, room.entryCoins - have))}`;
+      const enterLabel = canPlay ? `Enter ${room.name}` : `${room.name} locked`;
+      return `<article class="room-card room-${room.id}${selected ? " on" : ""}${afford ? " open" : " locked"}" data-room="${room.id}" aria-selected="${selected ? "true" : "false"}">
+      <div class="room-card-copy">
+        <small>GATE ${gate}</small>
+        <b>${room.name.toUpperCase()} — ${coinsLabel(room.entryCoins)}</b>
+        <span class="room-balance">YOUR BALANCE ${coinsLabel(have)}</span>
+        <span class="room-access ${canPlay ? "ready" : "need"}">${access}</span>
+      </div>
+      <button type="button" class="${canPlay ? "primary" : "ghost"} room-enter" data-enter="${room.id}" ${canPlay ? "" : "disabled"} aria-label="${enterLabel}">${canPlay ? "ENTER" : "LOCKED"}</button>
+    </article>`;
+    })
+    .join("");
+  let status = "Select a room, then ENTER. Coins are taken when the match starts.";
+  if (!canEnterBattle) status = "No lives left. Coin rooms stay closed until the daily run resets.";
+  else if (lastEnter && !lastEnter.ok) {
+    status =
+      lastEnter.reason === "funds"
+        ? `${lastEnter.room.name.toUpperCase()} needs ${coinsLabel(lastEnter.need)}. You have ${coinsLabel(lastEnter.have)}.`
+        : "This room is unavailable right now.";
+  }
+  return `<div class="rooms-wallet" data-wallet="${have}">
+    <small>WINNING COINS</small>
+    <b>${coinsLabel(have)}</b>
+  </div>
+  <div class="chips rooms-modes" role="group" aria-label="Battle mode for coin rooms">
+    <button type="button" class="chip ${battleMode === "time" ? "on" : ""}" data-rooms-mode="time">TIME BATTLE</button>
+    <button type="button" class="chip ${battleMode === "score" ? "on" : ""}" data-rooms-mode="score">SCORE BATTLE</button>
+  </div>
+  <div class="room-list">${cards}</div>
+  <p class="rooms-status muted">${status}</p>`;
+}
+
+export function coinReadyViewHtml(p: LocalProgress, room: CoinRoom): string {
+  const have = Math.max(0, Math.trunc(Number(p.winningCoins) || 0));
+  const pilot = String(p.name || "CHRONO PILOT").toUpperCase();
+  return `<div class="ready-clash-card room-${room.id}" data-ready-room="${room.id}" data-ready-entry="${room.entryCoins}" data-ready-wallet="${have}">
+    <div class="ready-stake">
+      <span class="ready-stake-room"><small>ROOM</small><b>${room.name.toUpperCase()}</b></span>
+      <span class="ready-stake-entry"><small>ENTRY</small><b>${coinsLabel(room.entryCoins)}</b></span>
+    </div>
+    <div class="ready-duel">
+      <div class="ready-fighter you">
+        ${avatarFaceHtml(p, "ready-face")}
+        <small>YOU</small>
+        <b>${pilot}</b>
+        <span>BALANCE ${coinsLabel(have)}</span>
+      </div>
+      <div class="ready-vs" aria-hidden="true">VS</div>
+      <div class="ready-fighter rival">
+        <div class="avatar rival-face a3 ready-face">◆</div>
+        <small>OPPONENT</small>
+        <b>LOCAL RIVAL</b>
+        <span>TEST</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+export function coinResultViewHtml(settlement: CoinRoomSettlement, balance: number): string {
+  const room = coinRoomById(settlement.roomId);
+  const entry = Math.max(0, Math.trunc(Number(settlement.entryCoins) || room.entryCoins));
+  const winnings = Math.max(0, Math.trunc(Number(settlement.payout) || 0));
+  const net = winnings - entry;
+  const have = Math.max(0, Math.trunc(Number(balance) || 0));
+  const netClass = net > 0 ? "up" : net < 0 ? "down" : "flat";
+  return `<div class="result-coins-card room-${room.id}" data-result-room="${room.id}" data-result-entry="${entry}" data-result-winnings="${winnings}" data-result-net="${net}" data-result-balance="${have}">
+    <div class="result-coins-grid">
+      <span><small>ROOM</small><b>${room.name.toUpperCase()}</b></span>
+      <span><small>ENTRY</small><b>${coinsLabel(entry)}</b></span>
+      <span><small>WINNINGS</small><b class="up">${signedCoinsLabel(winnings)}</b></span>
+      <span><small>NET</small><b class="${netClass}">${signedCoinsLabel(net)}</b></span>
+    </div>
+    <div class="result-coins-balance"><small>BALANCE</small><b>${coinsLabel(have)}</b></div>
+  </div>`;
+}
+
 export function readyPowerStripHtml(p: LocalProgress): string {
   const econ = economyFromProgress(p);
   const run = dailyRunFromProgress(p);
@@ -189,24 +279,4 @@ export function matchPowerQty(p: LocalProgress, id: string, fallback: string): s
   const power = storefrontPowers().find((item) => item.id === id);
   if (!power) return fallback;
   return `${getCharge(economyFromProgress(p), id)}/${power.maxCharges}`;
-}
-
-function armoryCard(power: PowerDefinition, coins: number, qty: number, adsAvailable: boolean): string {
-  const full = qty >= power.maxCharges;
-  const afford = coins >= power.coinCost;
-  const buyOff = full || !afford;
-  const adOff = full || !adsAvailable || !power.rewardedAd;
-  const buyWhy = full ? "FULL 5/5" : !afford ? "NEED COINS" : `BUY ${power.coinCost}`;
-  const adWhy = full ? "FULL 5/5" : !adsAvailable || !power.rewardedAd ? "AD UNAVAILABLE" : "WATCH AD +1";
-  return `<article class="armory-card ${full ? "full" : ""}">
-    <span class="armory-icon" aria-hidden="true">${power.icon}</span>
-    <div class="armory-copy">
-      <b>${power.displayName}</b>
-      <span class="armory-qty">${qty}/${power.maxCharges}</span>
-    </div>
-    <div class="armory-actions">
-      <button type="button" class="ghost armory-buy" data-buy="${power.id}" ${buyOff ? "disabled" : ""}>${buyWhy}</button>
-      <button type="button" class="ghost armory-ad" data-ad="${power.id}" ${adOff ? "disabled" : ""}>${adWhy}</button>
-    </div>
-  </article>`;
 }

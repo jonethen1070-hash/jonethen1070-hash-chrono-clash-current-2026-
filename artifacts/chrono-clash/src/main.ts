@@ -8,13 +8,16 @@ import { GameSettings, applyMatchAudioMute, isMatchAudioMuted, loadSettings, sav
 import { unlockGameAudio } from "./audio/unlock";
 import { canSkipIntro } from "./engine/intro";
 import {
+  COLS,
   ENERGY_BURST,
   ENERGY_FREEZE,
   ENERGY_MAX,
   ENERGY_MEGA_STRIKE,
   ENERGY_REWIND,
+  ROWS,
   SCORE_TARGETS,
   type Coord,
+  type GameMode,
 } from "./engine/types";
 import { GAME_MODES, modeInfo } from "./engine/catalog";
 import { comboBurstText } from "./engine/combat";
@@ -22,8 +25,9 @@ import { GameSession, type FxEvent } from "./engine/session";
 import { BOARD_FRAME, BOARD_GAP, BoardRenderer, RenderFx } from "./ui/renderer";
 import { prefetchGemAtlas } from "./ui/gemAtlas";
 import { comboBurstClass, resultHeadline, scoreTickerRate } from "./ui/feel";
+import { matchImpactDelayMs } from "./ui/gemMotion";
 import { HapticBus, hapticCuesFromFx } from "./ui/haptics";
-import { chatHtml, dailyRunHtml, equippedAvatarName, matchPowerQty, powerArmoryHtml, profileView, readyPowerStripHtml, renderMenuPilot, trophiesHtml } from "./ui/metaViews";
+import { chatHtml, coinReadyViewHtml, coinResultViewHtml, dailyRunHtml, equippedAvatarName, modesWalletHtml, profileView, readyPowerStripHtml, renderMenuPilot, roomsViewHtml, trophiesHtml } from "./ui/metaViews";
 import { RewardGrant, grantHasBounty, xpToNext } from "./engine/progress";
 import { paintAvatarElement } from "./ui/avatarFace";
 import { mountAvatarPhotoFlow } from "./ui/avatarPhotoFlow";
@@ -242,8 +246,13 @@ app.innerHTML = `
           <b>${GAME_MODES.score.name}</b>
           <span>${GAME_MODES.score.detail}</span>
         </button>
+        <button class="mode-card" id="modeRooms">
+          <small>VIRTUAL STAKES</small>
+          <b>COIN ROOMS</b>
+          <span>Pick a room. Entry coins are taken only when the match starts.</span>
+        </button>
       </div>
-      <div id="powerArmory" class="power-armory"></div>
+      <div id="modesWallet"></div>
       <div class="target-setup">
         <small>SCORE BATTLE TARGET</small>
         <div class="chips" id="scoreTargets"></div>
@@ -251,12 +260,20 @@ app.innerHTML = `
       <div class="stack"><button class="ghost" id="modesBack">BACK</button></div>
     </section>
 
+    <section id="rooms" class="screen">
+      <div class="logo compact"><h1>COIN ROOMS</h1><p>SELECT YOUR STAKE</p></div>
+      <div id="roomsView" class="rooms-view"></div>
+      <div class="stack"><button class="ghost" id="roomsBack">BACK</button></div>
+    </section>
+
     <section id="ready" class="screen ready">
       <div class="logo compact"><h1 id="readyTitle">TIME BATTLE</h1><p id="readySub">HIGHEST SCORE IN 60s</p></div>
       <div class="ready-target" id="readyTarget"></div>
       <div class="ready-powers" id="readyPowers"></div>
+      <div id="readyClash" class="ready-clash hidden"></div>
       <div class="ready-pulse"></div>
       <p class="muted" id="readyHint">Swipe gems. Chain combos. Spend stored Chrono Power charges in battle.</p>
+      <div class="stack"><button type="button" class="primary hidden" id="readyStart">READY</button></div>
     </section>
 
     <section id="tutorial" class="screen">
@@ -287,9 +304,39 @@ app.innerHTML = `
       <div class="match-stage">
       <div class="arena-architecture" aria-hidden="true">
         <div class="arena-backplane"></div>
+        <div class="arena-energy-chamber">
+          <i class="chamber-rib a"></i>
+          <i class="chamber-rib b"></i>
+          <i class="chamber-rib c"></i>
+          <i class="chamber-conduit left"></i>
+          <i class="chamber-conduit right"></i>
+          <i class="chamber-core"></i>
+          <i class="chamber-haze"></i>
+        </div>
         <div class="arena-pylon arena-pylon-left"><i></i><i></i><i></i></div>
         <div class="arena-pylon arena-pylon-right"><i></i><i></i><i></i></div>
-        <div class="arena-deck"></div>
+        <div class="arena-board-cradle"></div>
+        <div class="arena-deck">
+          <i class="deck-plate"></i>
+          <i class="deck-seam"></i>
+          <i class="deck-conduit"></i>
+          <i class="deck-reactor a"></i>
+          <i class="deck-reactor b"></i>
+          <i class="deck-reactor c"></i>
+        </div>
+        <div class="arena-lower-floor" data-env-surface="arena-floor">
+          <i class="floor-wash"></i>
+          <i class="floor-perspective"></i>
+          <i class="floor-bridge"></i>
+          <i class="floor-bay left"></i>
+          <i class="floor-bay center"></i>
+          <i class="floor-bay right"></i>
+          <i class="floor-seams"></i>
+          <i class="floor-spine"></i>
+          <i class="floor-rail player"></i>
+          <i class="floor-rail rival"></i>
+          <i class="floor-edge"></i>
+        </div>
       </div>
       <div class="match-controls-row">
         <div class="match-brand-actions">
@@ -348,11 +395,6 @@ app.innerHTML = `
         </div>
       </div>
       <div class="boards">
-        <div class="energy-wrap">
-          <small>ENERGY</small>
-          <div class="energy"><span id="energyFill"></span></div>
-          <b id="energyLabel">0 / 100</b>
-        </div>
         <div class="player-side">
           <div class="you-meta" aria-hidden="true">
             <span class="shift-clock" id="shiftClock"></span>
@@ -370,32 +412,6 @@ app.innerHTML = `
             </div>
             <canvas id="playerGems" class="board-canvas" aria-hidden="true"></canvas>
           </div>
-        </div>
-      </div>
-      <div class="powers">
-        <div class="ability-deck" aria-hidden="true">
-          <i class="ability-deck-rail"></i>
-          <i class="ability-deck-core"></i>
-        </div>
-        <button type="button" class="energy-attack burst" id="energyBurstAttack" data-power-id="burst">
-          <span class="energy-attack-glyph" aria-hidden="true"></span>
-          <span class="energy-attack-copy">
-            <b>ENERGY BURST</b>
-            <small>Destroy 3x3 area</small>
-          </span>
-          <span class="energy-attack-cost"><i aria-hidden="true"></i>${ENERGY_BURST}</span>
-        </button>
-        <button type="button" class="energy-attack strike" id="megaStrikeAttack" data-power-id="megaStrike">
-          <span class="energy-attack-glyph" aria-hidden="true"></span>
-          <span class="energy-attack-copy">
-            <b>MEGA STRIKE</b>
-            <small>Destroy all gems of a color</small>
-          </span>
-          <span class="energy-attack-cost"><i aria-hidden="true"></i>${ENERGY_MEGA_STRIKE}</span>
-        </button>
-        <button class="power" id="rewind"><span class="glyph" aria-hidden="true">↺</span><i class="ability-fx" aria-hidden="true"></i><b>REWIND</b><span class="cost">${ENERGY_REWIND} ENERGY</span><span class="need">Restores your last valid move.</span></button>
-        <div class="power-cancel" hidden>
-          <button type="button" class="power-cancel-button" id="cancelPowerTarget" aria-controls="playerBoard">CANCEL TARGET</button>
         </div>
       </div>
       <div id="oppBoard" class="opponent-render-reserve" aria-hidden="true">
@@ -437,9 +453,14 @@ app.innerHTML = `
         <div class="stat"><span>Best combo</span><b id="resCombo">0</b></div>
         <div class="stat"><span>Mode</span><b id="resMode">TIME</b></div>
       </div>
-      <div class="stack result-actions">
+      <div id="resultCoins" class="result-coins hidden"></div>
+      <div class="stack result-actions" id="resultStandardActions">
         <button class="primary" id="retryMatch">RETRY</button>
         <button class="ghost" id="toRewards">CONTINUE</button>
+      </div>
+      <div class="stack result-actions hidden" id="resultCoinActions">
+        <button type="button" class="primary" id="resultPlayAgain">PLAY AGAIN</button>
+        <button type="button" class="ghost" id="resultBackRooms">BACK TO ROOMS</button>
       </div>
     </section>
 
@@ -506,6 +527,8 @@ const ui = {
   profile: $("#profile"),
   trophies: $("#trophies"),
   modes: $("#modes"),
+  rooms: $("#rooms"),
+  roomsView: $("#roomsView"),
   ready: $("#ready"),
   tutorial: $("#tutorial"),
   settings: $("#settingsScreen"),
@@ -524,8 +547,8 @@ const ui = {
   oppCombo: $("#oppCombo"),
   freezeClock: $("#freezeClock"),
   shiftClock: $("#shiftClock"),
-  energyFill: $("#energyFill"),
-  energyLabel: $("#energyLabel"),
+  energyFill: document.querySelector<HTMLElement>("#energyFill"),
+  energyLabel: document.querySelector<HTMLElement>("#energyLabel"),
   playerScoreFill: $("#playerScoreFill"),
   oppScoreFill: $("#oppScoreFill"),
   comboDamage: $("#comboDamage"),
@@ -538,14 +561,15 @@ const ui = {
   callout: $("#callout"),
   playerBoard: $("#playerBoard"),
   oppBoard: $("#oppBoard"),
-  rewind: $("#rewind") as HTMLButtonElement,
-  energyBurstAttack: $("#energyBurstAttack") as HTMLButtonElement,
-  megaStrikeAttack: $("#megaStrikeAttack") as HTMLButtonElement,
-  cancelPowerTarget: $("#cancelPowerTarget") as HTMLButtonElement,
-  powerArmory: $("#powerArmory"),
+  rewind: document.querySelector<HTMLButtonElement>("#rewind"),
+  energyBurstAttack: document.querySelector<HTMLButtonElement>("#energyBurstAttack"),
+  megaStrikeAttack: document.querySelector<HTMLButtonElement>("#megaStrikeAttack"),
+  cancelPowerTarget: document.querySelector<HTMLButtonElement>("#cancelPowerTarget"),
+  modesWallet: $("#modesWallet"),
   dailyRun: $("#dailyRun"),
   modeTime: $("#modeTime") as HTMLButtonElement,
   modeScore: $("#modeScore") as HTMLButtonElement,
+  modeRooms: $("#modeRooms") as HTMLButtonElement,
   readyPowers: $("#readyPowers"),
   youAvatar: $("#youAvatar"),
   youName: $("#youName"),
@@ -563,6 +587,11 @@ const ui = {
   resultMark: $("#resultMark"),
   retryMatch: $("#retryMatch") as HTMLButtonElement,
   toRewards: $("#toRewards") as HTMLButtonElement,
+  resultCoins: $("#resultCoins"),
+  resultStandardActions: $("#resultStandardActions"),
+  resultCoinActions: $("#resultCoinActions"),
+  resultPlayAgain: $("#resultPlayAgain") as HTMLButtonElement,
+  resultBackRooms: $("#resultBackRooms") as HTMLButtonElement,
   resPlayer: $("#resPlayer"),
   resOpp: $("#resOpp"),
   resCombo: $("#resCombo"),
@@ -576,6 +605,9 @@ const ui = {
   readyTitle: $("#readyTitle"),
   readySub: $("#readySub"),
   readyTarget: $("#readyTarget"),
+  readyClash: $("#readyClash"),
+  readyHint: $("#readyHint"),
+  readyStart: $("#readyStart") as HTMLButtonElement,
 };
 
 const photoFlow = mountAvatarPhotoFlow(document.body, {
@@ -588,7 +620,7 @@ const photoFlow = mountAvatarPhotoFlow(document.body, {
   },
 });
 
-const energyWrap = ui.energyFill.closest(".energy-wrap");
+const energyWrap = ui.energyFill?.closest(".energy-wrap") ?? null;
 
 const SCREEN_NODES: [HTMLElement, string][] = [
   [ui.splash, "splash"],
@@ -597,6 +629,7 @@ const SCREEN_NODES: [HTMLElement, string][] = [
   [ui.profile, "profile"],
   [ui.trophies, "trophies"],
   [ui.modes, "modes"],
+  [ui.rooms, "rooms"],
   [ui.ready, "ready"],
   [ui.tutorial, "tutorial"],
   [ui.settings, "settings"],
@@ -613,7 +646,8 @@ function syncScreenNow(): void {
   }
 }
 
-function restartAnim(el: HTMLElement, cls: string): void {
+function restartAnim(el: HTMLElement | null | undefined, cls: string): void {
+  if (!el) return;
   el.classList.remove(cls);
   requestAnimationFrame(() => el.classList.add(cls));
 }
@@ -631,11 +665,13 @@ function formatClock(ms: number): string {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
-function setText(el: HTMLElement, value: string): void {
+function setText(el: HTMLElement | null | undefined, value: string): void {
+  if (!el) return;
   if (el.textContent !== value) el.textContent = value;
 }
 
-function setWidth(el: HTMLElement, value: string): void {
+function setWidth(el: HTMLElement | null | undefined, value: string): void {
+  if (!el) return;
   if (el.style.width !== value) el.style.width = value;
 }
 
@@ -793,7 +829,7 @@ function displayCallout(id: VoiceLineId): void {
   const line = VOICE[id];
   showCallout(line.text, line.intensity);
   if (line.priority >= 40 && settings.effects !== "low") {
-    restartAnim(ui.match, "impact");
+    flashImpact();
   }
 }
 
@@ -829,12 +865,11 @@ function renderScoreTargets(): void {
     (n) =>
       `<button type="button" class="chip ${session.scoreTarget === n ? "on" : ""}" data-target="${n}">${n.toLocaleString()}</button>`,
   ).join("");
-  paintArmory();
   paintDailyRun();
 }
 
-function paintArmory(): void {
-  ui.powerArmory.innerHTML = powerArmoryHtml(session.progress, ads.isAvailable());
+function paintModesWallet(): void {
+  ui.modesWallet.innerHTML = modesWalletHtml(session.progress);
 }
 
 let dailyAudioKey = "";
@@ -852,10 +887,11 @@ function paintDailyRun(): void {
   }
   dailyAudioKey = key;
   ui.dailyRun.innerHTML = dailyRunHtml(session.progress, ads.isAvailable());
+  paintModesWallet();
   const bypass = isDevBattleBypassEnabled();
   const blocked = !session.canEnterLocalBattle();
   ui.modes.classList.toggle("dev-local-open", bypass);
-  for (const btn of [ui.modeTime, ui.modeScore]) {
+  for (const btn of [ui.modeTime, ui.modeScore, ui.modeRooms]) {
     btn.disabled = blocked;
     btn.classList.toggle("off", blocked);
     btn.setAttribute("aria-disabled", blocked ? "true" : "false");
@@ -864,6 +900,42 @@ function paintDailyRun(): void {
 
 function paintReadyPowers(): void {
   ui.readyPowers.innerHTML = readyPowerStripHtml(session.progress);
+}
+
+const READY_HINT = "Swipe gems. Chain combos. Spend stored Chrono Power charges in battle.";
+
+function paintReady(): void {
+  const info = modeInfo(session.mode, session.scoreTarget);
+  const room = session.pendingCoinRoom();
+  ui.ready.classList.toggle("coin-ready", Boolean(room));
+  ui.readyClash.classList.toggle("hidden", !room);
+  ui.readyStart.classList.toggle("hidden", !room);
+  if (room) {
+    ui.readyTitle.textContent = "COIN MATCH";
+    ui.readySub.textContent = info.name;
+    ui.readyTarget.textContent = `${room.name.toUpperCase()} · ${room.entryCoins.toLocaleString("en-US")} 🪙`;
+    ui.readyHint.textContent = "Entry is taken when the match starts.";
+    ui.readyClash.innerHTML = coinReadyViewHtml(session.progress, room);
+  } else {
+    ui.readyTitle.textContent = info.name;
+    ui.readySub.textContent = info.tag;
+    ui.readyTarget.textContent = session.mode === "score" ? `TARGET ${session.scoreTarget.toLocaleString()}` : "60 SECONDS";
+    ui.readyHint.textContent = READY_HINT;
+    ui.readyClash.innerHTML = "";
+  }
+  paintReadyPowers();
+}
+
+let roomsBattleMode: GameMode = session.mode === "score" ? "score" : "time";
+
+function paintRooms(): void {
+  ui.roomsView.innerHTML = roomsViewHtml(
+    session.progress,
+    session.selectedRoomId,
+    roomsBattleMode,
+    session.canEnterLocalBattle(),
+    session.lastCoinRoomEnter,
+  );
 }
 
 async function pullTrustedClock(): Promise<void> {
@@ -887,6 +959,7 @@ async function pullRemoteEconomy(): Promise<void> {
       /* keep local economy if the server is unreachable */
     }
   }
+  paintModesWallet();
 }
 
 async function pullRemoteDailyRun(): Promise<void> {
@@ -906,47 +979,6 @@ async function pullRemoteDailyRun(): Promise<void> {
     }
   }
   paintDailyRun();
-}
-
-async function buyArmoryPower(id: string): Promise<void> {
-  if (net.token) {
-    try {
-      const out = await net.buyPower(id);
-      if (out.ok) {
-        session.syncEconomy(out.economy);
-        audio.play("confirm");
-      } else if (out.reason === "funds") audio.play("deny");
-      paintArmory();
-      return;
-    } catch {
-      /* fall through to local wallet */
-    }
-  }
-  const local = session.buyPowerCharge(id);
-  if (local.ok) audio.play("confirm");
-  else if (local.reason === "funds") audio.play("deny");
-  paintArmory();
-}
-
-async function watchArmoryAd(id: string): Promise<void> {
-  const shown = await ads.showRewarded(id);
-  if (!shown.ok) {
-    paintArmory();
-    return;
-  }
-  if (net.token) {
-    try {
-      const out = await net.claimAdReward(id, shown.receiptId);
-      ads.redeemReceipt(shown.receiptId);
-      if (out.ok) session.syncEconomy(out.economy);
-    } catch {
-      /* keep the receipt unredeemed so a network retry can still reach the server */
-    }
-    paintArmory();
-    return;
-  }
-  session.claimPowerAd(id, shown.receiptId, (receipt) => ads.redeemReceipt(receipt));
-  paintArmory();
 }
 
 async function watchDailyLifeAd(): Promise<void> {
@@ -1418,12 +1450,11 @@ ui.emailForm.addEventListener("submit", (event) => {
 $("#menuGuest").addEventListener("click", () => {
   unlockGameAudio(audio, settings.music, false);
   pressUi();
-  // TEMPORARY DIRECT GAMEPLAY BYPASS — REMOVE AFTER GAMEPLAY TESTING
   session.clearOnlineMatch();
-  audio.resetSwapWave();
-  session.startMatch();
+  session.openModes();
   syncScreenNow();
-  if (settings.music) audio.syncBed("battle");
+  if (session.screen === "tutorial") renderTutorial();
+  if (session.screen === "modes") renderScoreTargets();
 });
 $("#hudMute").addEventListener("click", () => {
   const muted = !isMatchAudioMuted(settings);
@@ -1528,22 +1559,58 @@ $("#modeScore").addEventListener("click", () => {
   session.chooseMode("score");
   syncScreenNow();
 });
+$("#modeRooms").addEventListener("click", () => {
+  pressUi("confirm");
+  roomsBattleMode = session.mode === "score" ? "score" : "time";
+  session.openRooms();
+  syncScreenNow();
+  paintRooms();
+});
+$("#roomsBack").addEventListener("click", () => {
+  pressUi();
+  session.openModes();
+  syncScreenNow();
+  if (session.screen === "modes") renderScoreTargets();
+});
+ui.roomsView.addEventListener("click", (e) => {
+  const t = e.target as HTMLElement;
+  const modeChip = t.closest<HTMLElement>("[data-rooms-mode]");
+  if (modeChip?.dataset.roomsMode === "time" || modeChip?.dataset.roomsMode === "score") {
+    roomsBattleMode = modeChip.dataset.roomsMode;
+    pressUi();
+    paintRooms();
+    return;
+  }
+  const enter = t.closest<HTMLButtonElement>("[data-enter]");
+  if (enter?.dataset.enter) {
+    if (enter.disabled) return;
+    pressUi("confirm");
+    const result = session.enterCoinRoomMatch(roomsBattleMode, enter.dataset.enter);
+    if (result.ok) {
+      syncScreenNow();
+      paintReady();
+      return;
+    }
+    paintRooms();
+    return;
+  }
+  const card = t.closest<HTMLElement>("[data-room]");
+  if (!card?.dataset.room) return;
+  pressUi();
+  session.selectCoinRoom(card.dataset.room);
+  paintRooms();
+});
+ui.readyStart.addEventListener("click", () => {
+  if (session.screen !== "ready") return;
+  pressUi("confirm");
+  session.confirmReady();
+  syncScreenNow();
+});
 ui.dailyRun.addEventListener("click", (e) => {
   const ad = (e.target as HTMLElement).closest<HTMLElement>("[data-life-ad]");
   if (!ad) return;
   pressUi();
   void watchDailyLifeAd();
-});
-ui.powerArmory.addEventListener("click", (e) => {
-  const buy = (e.target as HTMLElement).closest<HTMLElement>("[data-buy]");
-  const ad = (e.target as HTMLElement).closest<HTMLElement>("[data-ad]");
-  if (buy?.dataset.buy) {
-    pressUi();
-    void buyArmoryPower(buy.dataset.buy);
-  } else if (ad?.dataset.ad) {
-    pressUi();
-    void watchArmoryAd(ad.dataset.ad);
-  }
 });
 $("#tutNext").addEventListener("click", () => {
   pressUi();
@@ -1568,6 +1635,24 @@ $("#retryMatch").addEventListener("click", () => {
   leaveOnlineBattle();
   session.playAgain();
   syncScreenNow();
+});
+$("#resultPlayAgain").addEventListener("click", () => {
+  pressUi("confirm");
+  audio.startMusic();
+  audio.resetSwapWave();
+  leaveOnlineBattle();
+  const replay = session.replayCoinRoom();
+  syncScreenNow();
+  if (replay.ok) paintReady();
+  else paintRooms();
+});
+$("#resultBackRooms").addEventListener("click", () => {
+  pressUi();
+  audio.stopMusic();
+  leaveOnlineBattle();
+  session.openRooms();
+  syncScreenNow();
+  paintRooms();
 });
 $("#again").addEventListener("click", () => {
   pressUi("confirm");
@@ -1604,7 +1689,7 @@ ui.timerBtn.addEventListener("click", () => {
   }
 });
 let castTimer = 0;
-function flashCast(matchClass: string, btn?: HTMLButtonElement): void {
+function flashCast(matchClass: string, btn?: HTMLButtonElement | null): void {
   ui.match.classList.remove("cast-freeze", "cast-shift", "cast-rewind", "cast-burst", "cast-mega", "clash-in");
   ui.match.classList.add(matchClass);
   if (btn) restartAnim(btn, "cast");
@@ -1615,14 +1700,24 @@ function flashCast(matchClass: string, btn?: HTMLButtonElement): void {
   }, 420);
 }
 
+let impactPulseTimer = 0;
+function flashImpact(): void {
+  // Short arena/board pulse — must clear so rails return to quiet idle.
+  restartAnim(ui.match, "impact");
+  window.clearTimeout(impactPulseTimer);
+  impactPulseTimer = window.setTimeout(() => {
+    ui.match.classList.remove("impact");
+  }, 220);
+}
+
 let comboPulseTimer = 0;
 function flashCombo(combo: number): void {
   ui.match.classList.remove("combo-pulse", "combo-hot", "combo-max", "combo-mega");
   restartAnim(ui.match, "combo-pulse");
-  if (combo >= 4) ui.match.classList.add("combo-hot");
-  if (combo >= 6) ui.match.classList.add("combo-max");
-  if (combo >= 8) ui.match.classList.add("combo-mega");
-  if (combo >= 3 && settings.effects !== "low") {
+  if (combo >= 2) ui.match.classList.add("combo-hot");
+  if (combo >= 3) ui.match.classList.add("combo-max");
+  if (combo >= 5) ui.match.classList.add("combo-mega");
+  if (combo >= 2 && settings.effects !== "low") {
     ui.energyBurst.classList.remove("hidden");
     restartAnim(ui.energyBurst, "pop");
   }
@@ -1634,14 +1729,14 @@ function flashCombo(combo: number): void {
   }, 480);
 }
 
-ui.rewind.addEventListener("click", () => {
+ui.rewind?.addEventListener("click", () => {
   if (armedEnergyPower) {
     setArmedEnergyPower(null);
     renderer.setPowerCastTarget(null, performance.now());
   }
   if (session.usePower("rewind")) {
     ping(ui.rewind);
-    flashCast("cast-rewind", ui.rewind);
+    flashCast("cast-rewind", ui.rewind ?? undefined);
     sendOnlineAction({ type: "power", id: "rewind" });
   }
 });
@@ -1649,10 +1744,12 @@ function setArmedEnergyPower(id: "burst" | "megaStrike" | null): void {
   armedEnergyPower = id;
   session.setDrag(null);
   renderer.setPowerTargeting(id === "megaStrike" ? "mega" : id === "burst" ? "burst" : null, performance.now());
-  ui.energyBurstAttack.setAttribute("aria-pressed", id === "burst" ? "true" : "false");
-  ui.megaStrikeAttack.setAttribute("aria-pressed", id === "megaStrike" ? "true" : "false");
-  ui.cancelPowerTarget.closest(".power-cancel")?.toggleAttribute("hidden", id === null);
-  ui.cancelPowerTarget.textContent = id === "burst" ? "CANCEL ENERGY BURST" : id === "megaStrike" ? "CANCEL MEGA STRIKE" : "CANCEL TARGET";
+  ui.energyBurstAttack?.setAttribute("aria-pressed", id === "burst" ? "true" : "false");
+  ui.megaStrikeAttack?.setAttribute("aria-pressed", id === "megaStrike" ? "true" : "false");
+  ui.cancelPowerTarget?.closest(".power-cancel")?.toggleAttribute("hidden", id === null);
+  if (ui.cancelPowerTarget) {
+    ui.cancelPowerTarget.textContent = id === "burst" ? "CANCEL ENERGY BURST" : id === "megaStrike" ? "CANCEL MEGA STRIKE" : "CANCEL TARGET";
+  }
 }
 
 function useEnergyAttack(id: "burst" | "megaStrike", button: HTMLButtonElement): void {
@@ -1674,7 +1771,7 @@ function reportCanceledEnergyPower(id: "burst" | "megaStrike"): void {
   const name = id === "burst" ? "Energy Burst" : "Mega Strike";
   ui.matchStatus.textContent = `Target canceled. Select a gem on the board to use ${name}.`;
   showCallout("TARGET CANCELED", "urgent", 520);
-  restartAnim(ui.match, "impact");
+  flashImpact();
 }
 
 function cancelArmedEnergyPower(): void {
@@ -1685,17 +1782,21 @@ function cancelArmedEnergyPower(): void {
   audio.play("ui");
 }
 
-ui.energyBurstAttack.addEventListener("click", () => useEnergyAttack("burst", ui.energyBurstAttack));
-ui.megaStrikeAttack.addEventListener("click", () => useEnergyAttack("megaStrike", ui.megaStrikeAttack));
-ui.cancelPowerTarget.addEventListener("click", cancelArmedEnergyPower);
+ui.energyBurstAttack?.addEventListener("click", () => {
+  if (ui.energyBurstAttack) useEnergyAttack("burst", ui.energyBurstAttack);
+});
+ui.megaStrikeAttack?.addEventListener("click", () => {
+  if (ui.megaStrikeAttack) useEnergyAttack("megaStrike", ui.megaStrikeAttack);
+});
+ui.cancelPowerTarget?.addEventListener("click", cancelArmedEnergyPower);
 document.querySelector(".powers")?.addEventListener("pointerdown", (e) => {
   const point = e as PointerEvent;
   const target = e.target;
   if (!(target instanceof Element) || !target.closest("#rewind")) return;
   const x = point.clientX;
   const y = point.clientY;
-  const box = ui.rewind.getBoundingClientRect();
-  if (x >= box.left && x <= box.right && y >= box.top && y <= box.bottom && !session.canUsePower("rewind")) {
+  const box = ui.rewind?.getBoundingClientRect();
+  if (box && x >= box.left && x <= box.right && y >= box.top && y <= box.bottom && !session.canUsePower("rewind")) {
     audio.play("deny");
   }
 });
@@ -2059,11 +2160,13 @@ retain2d(canvas);
 retain2d(playerGems);
 retain2d(oppGems);
 
-function ping(btn: HTMLButtonElement): void {
+function ping(btn: HTMLButtonElement | null | undefined): void {
+  if (!btn) return;
   restartAnim(btn, "active");
 }
 
-function pressPowerButton(btn: HTMLButtonElement): void {
+function pressPowerButton(btn: HTMLButtonElement | null | undefined): void {
+  if (!btn) return;
   restartAnim(btn, "power-press");
   window.setTimeout(() => btn.classList.remove("power-press"), 170);
 }
@@ -2078,14 +2181,17 @@ function cellSize(): number {
   ensureInputLayout();
   if (cachedCellSize > 0) return cachedCellSize;
   const rect = layout.player;
-  const size = Math.min(rect.width, rect.height);
-  const inner = size - BOARD_FRAME * 2;
-  cachedCellSize = (inner - BOARD_GAP * (8 + 1)) / 8;
+  // Square cells on an 8x10 board: limited by both width and height budgets.
+  const innerW = rect.width - BOARD_FRAME * 2;
+  const innerH = rect.height - BOARD_FRAME * 2;
+  const cellW = (innerW - BOARD_GAP * (COLS + 1)) / COLS;
+  const cellH = (innerH - BOARD_GAP * (ROWS + 1)) / ROWS;
+  cachedCellSize = Math.min(cellW, cellH);
   return cachedCellSize;
 }
 
 function swipeMin(): number {
-  return Math.max(8, cellSize() * 0.12);
+  return Math.max(6, cellSize() * 0.1);
 }
 
 function commitSwipe(from: Coord, target: Coord, now: number, gestureDx = 0, gestureDy = 0): boolean {
@@ -2097,6 +2203,7 @@ function commitSwipe(from: Coord, target: Coord, now: number, gestureDx = 0, ges
     return true;
   }
   renderer.flashInvalid(from, target, now);
+  feelHaptic("invalid");
   return false;
 }
 
@@ -2115,6 +2222,7 @@ ui.playerBoard.addEventListener(
     session.setDrag(cell, 0, 0);
     if (armedEnergyPower) renderer.setPowerTarget(cell, now);
     renderer.flashSelect(cell, now);
+    feelHaptic("tap");
     try {
       ui.playerBoard.setPointerCapture(e.pointerId);
     } catch {
@@ -2233,6 +2341,8 @@ function pop(el: HTMLElement): void {
 
 let shownPlayer = 0;
 let shownOpp = 0;
+let revealPlayerScore = 0;
+let pendingPlayerScoreAt = 0;
 let lastPlayerScore = 0;
 let lastOppScore = 0;
 let lastPlayerEnergy = 0;
@@ -2252,6 +2362,8 @@ let matchEffectsStopped = false;
 let lastRivalActionAt = -Infinity;
 let lastFinalSecond = 0;
 let lastMegaReady = false;
+let lastBurstReady = false;
+let lastRewindReady = false;
 let objectiveCompleted = false;
 const RESULTS_BOARD_FADE_MS = 220;
 
@@ -2313,12 +2425,11 @@ function onScreenEnter(id: string, now: number): void {
     void pullRemoteDailyRun();
     paintDailyRun();
   }
+  if (id === "rooms") {
+    paintRooms();
+  }
   if (id === "ready") {
-    const info = modeInfo(session.mode, session.scoreTarget);
-    ui.readyTitle.textContent = info.name;
-    ui.readySub.textContent = info.tag;
-    ui.readyTarget.textContent = session.mode === "score" ? `TARGET ${session.scoreTarget.toLocaleString()}` : "60 SECONDS";
-    paintReadyPowers();
+    paintReady();
     announcer.reset();
     announcer.submit("ready", now);
   }
@@ -2330,6 +2441,8 @@ function onScreenEnter(id: string, now: number): void {
     lastPlayerEnergy = 0;
     lastFinalSecond = 0;
     lastMegaReady = false;
+    lastBurstReady = false;
+    lastRewindReady = false;
     lastRivalActionAt = -Infinity;
     objectiveCompleted = false;
     matchObjective = MATCH_OBJECTIVES[session.progress.matchesSeen % MATCH_OBJECTIVES.length]!;
@@ -2409,9 +2522,27 @@ function frame(now: number): void {
       matchEffectsStopped = true;
     }
     const rate = scoreTickerRate(settings.animation, reducedMotion());
-    shownPlayer += (snap.player.score - shownPlayer) * rate;
+    if (snap.player.score !== lastPlayerScore) {
+      if (snap.player.score > lastPlayerScore) {
+        const delay = matchImpactDelayMs(reducedMotion());
+        pendingPlayerScoreAt = now + delay;
+        if (delay > 0) audio.playLater("score", delay);
+        else audio.play("score");
+        window.setTimeout(() => pop(ui.playerCard), delay);
+      } else {
+        revealPlayerScore = snap.player.score;
+        pendingPlayerScoreAt = 0;
+        pop(ui.playerCard);
+      }
+      lastPlayerScore = snap.player.score;
+    }
+    if (pendingPlayerScoreAt && now >= pendingPlayerScoreAt) {
+      revealPlayerScore = lastPlayerScore;
+      pendingPlayerScoreAt = 0;
+    }
+    shownPlayer += (revealPlayerScore - shownPlayer) * rate;
     shownOpp += (snap.opponent.score - shownOpp) * rate;
-    if (Math.abs(snap.player.score - shownPlayer) < 0.6) shownPlayer = snap.player.score;
+    if (Math.abs(revealPlayerScore - shownPlayer) < 0.6) shownPlayer = revealPlayerScore;
     if (Math.abs(snap.opponent.score - shownOpp) < 0.6) shownOpp = snap.opponent.score;
     setText(ui.playerScore, String(Math.round(shownPlayer)));
     setText(ui.oppScore, String(Math.round(shownOpp)));
@@ -2423,11 +2554,6 @@ function frame(now: number): void {
     );
     setWidth(ui.playerScoreFill, `${Math.min(100, (shownPlayer / scoreCap) * 100)}%`);
     setWidth(ui.oppScoreFill, `${Math.min(100, (shownOpp / scoreCap) * 100)}%`);
-    if (snap.player.score !== lastPlayerScore) {
-      if (snap.player.score > lastPlayerScore) audio.play("score");
-      lastPlayerScore = snap.player.score;
-      pop(ui.playerCard);
-    }
     if (snap.opponent.score !== lastOppScore) {
       // Rival board SFX stay silent — no oppscore / gem-break / match cues.
       lastOppScore = snap.opponent.score;
@@ -2499,6 +2625,16 @@ function frame(now: number): void {
        restartAnim(ui.megaStrikeAttack, "ready-pulse");
      }
      lastMegaReady = megaReady;
+    const burstThresholdReady = snap.player.energy >= ENERGY_BURST;
+    if (burstThresholdReady && !lastBurstReady) {
+      restartAnim(ui.energyBurstAttack, "ready-pulse");
+    }
+    lastBurstReady = burstThresholdReady;
+    const rewindThresholdReady = snap.player.energy >= ENERGY_REWIND;
+    if (rewindThresholdReady && !lastRewindReady) {
+      restartAnim(ui.rewind, "ready-pulse");
+    }
+    lastRewindReady = rewindThresholdReady;
     if (snap.player.energy > lastPlayerEnergy + 0.5) {
       if (energyWrap instanceof HTMLElement) restartAnim(energyWrap, "gain");
       restartAnim(ui.energyFill, "surge");
@@ -2508,17 +2644,23 @@ function frame(now: number): void {
     lastPlayerEnergy = snap.player.energy;
     energyWrap?.classList.toggle("low", snap.player.energy < ENERGY_FREEZE);
     energyWrap?.classList.toggle("hot", snap.player.energy >= 70);
-    ui.rewind.disabled = !session.canUsePower("rewind", now);
+    if (ui.rewind) ui.rewind.disabled = !session.canUsePower("rewind", now);
     const burstReady = session.canUsePower("burst", now);
     const megaStrikeReady = session.canUsePower("megaStrike", now);
-    ui.energyBurstAttack.disabled = !burstReady;
-    ui.megaStrikeAttack.disabled = !megaStrikeReady;
-    ui.energyBurstAttack.classList.toggle("ready", burstReady);
-    ui.megaStrikeAttack.classList.toggle("ready", megaStrikeReady);
-    ui.energyBurstAttack.classList.toggle("unavailable", !burstReady);
-    ui.megaStrikeAttack.classList.toggle("unavailable", !megaStrikeReady);
-     ui.megaStrikeAttack.classList.toggle("charged", megaReady);
-    ui.rewind.classList.toggle("ready", playing && snap.player.energy >= ENERGY_REWIND);
+    if (ui.energyBurstAttack) {
+      ui.energyBurstAttack.disabled = !burstReady;
+      ui.energyBurstAttack.classList.toggle("ready", burstReady);
+      ui.energyBurstAttack.classList.toggle("unavailable", !burstReady);
+    }
+    if (ui.megaStrikeAttack) {
+      ui.megaStrikeAttack.disabled = !megaStrikeReady;
+      ui.megaStrikeAttack.classList.toggle("ready", megaStrikeReady);
+      ui.megaStrikeAttack.classList.toggle("unavailable", !megaStrikeReady);
+      ui.megaStrikeAttack.classList.toggle("charged", megaReady);
+    }
+    const rewindReady = playing && snap.player.energy >= ENERGY_REWIND && !(ui.rewind?.disabled ?? true);
+    ui.rewind?.classList.toggle("ready", rewindReady);
+    ui.rewind?.classList.toggle("unavailable", !rewindReady);
      updateMatchObjective(snap);
 
     const comboAt = session.screen === "match" ? lastGameplayCalloutAt : announcer.lastComboAt;
@@ -2527,13 +2669,23 @@ function frame(now: number): void {
       if (fx.id <= seenFx) continue;
       seenFx = Math.max(seenFx, fx.id);
       freshFx.push(fx);
-      playBattleCues(audio, fx, fx.combo || 1);
-      haptics.dispatch(hapticCuesFromFx(fx), now);
+      const boardFeel = fx.side !== "opponent" && (fx.kind === "clear" || fx.kind === "combo");
+      const feelDelay = boardFeel ? matchImpactDelayMs(reducedMotion()) : 0;
+      playBattleCues(audio, fx, fx.combo || 1, feelDelay);
+      const hapticCues = hapticCuesFromFx(fx).map((cue) =>
+        feelDelay > 0 && !cue.delayMs ? { ...cue, delayMs: feelDelay } : cue,
+      );
+      haptics.dispatch(hapticCues, now);
       if (fx.kind === "countdown") {
         if (fx.text === "CLASH!") {
           audio.playMatchStart(String(fx.id));
           flashCast("clash-in");
         } else audio.play("countdown");
+      }
+      if (fx.kind === "clear" && fx.side !== "opponent") {
+        // Pulse the arena on the break, not on the swipe.
+        if (feelDelay > 0) window.setTimeout(() => flashImpact(), feelDelay);
+        else flashImpact();
       }
       if (fx.kind === "combo" && (fx.combo ?? 0) >= 2 && fx.side !== "opponent") {
         flashCombo(fx.combo ?? 1);
@@ -2552,10 +2704,10 @@ function frame(now: number): void {
         else if (t.includes("TIME") || t.includes("TEMPO") || t.includes("SHIFT")) {
           flashCast("cast-shift");
         }
-        else if (t.includes("ENERGY BURST")) flashCast("cast-burst", t.startsWith("RIVAL") ? undefined : ui.energyBurstAttack);
-        else if (t.includes("MEGA STRIKE")) flashCast("cast-mega", t.startsWith("RIVAL") ? undefined : ui.megaStrikeAttack);
+        else if (t.includes("ENERGY BURST")) flashCast("cast-burst", t.startsWith("RIVAL") ? undefined : ui.energyBurstAttack ?? undefined);
+        else if (t.includes("MEGA STRIKE")) flashCast("cast-mega", t.startsWith("RIVAL") ? undefined : ui.megaStrikeAttack ?? undefined);
       }
-      if (fx.kind === "rewind") flashCast("cast-rewind", ui.rewind);
+      if (fx.kind === "rewind") flashCast("cast-rewind", ui.rewind ?? undefined);
       if (fx.kind === "combo" || fx.kind === "power" || fx.kind === "rewind" || fx.kind === "attack" || fx.kind === "finale" || fx.kind === "urgent") {
         if (fx.side !== "opponent" || fx.kind === "attack" || fx.kind === "power" || fx.kind === "urgent") {
           logBattle(fx.text);
@@ -2590,7 +2742,8 @@ function frame(now: number): void {
         break;
       }
     }
-    if (burst && now - burst.born < 880 && settings.showComboEffects && settings.effects !== "low") {
+    const comboFeelAt = burst ? burst.born + matchImpactDelayMs(reducedMotion()) : 0;
+    if (burst && now >= comboFeelAt && now - burst.born < 880 + matchImpactDelayMs(reducedMotion()) && settings.showComboEffects && settings.effects !== "low") {
       const intensity = comboBurstClass(burst.combo ?? 1);
       ui.comboBurst.textContent = comboBurstText(burst.combo ?? 1);
       ui.comboBurst.className = `combo-burst pop ${intensity}`;
@@ -2637,6 +2790,9 @@ function frame(now: number): void {
     renderer.clear();
     shownPlayer = 0;
     shownOpp = 0;
+    revealPlayerScore = 0;
+    pendingPlayerScoreAt = 0;
+    lastPlayerScore = 0;
     boardsDrawn = false;
   }
 
@@ -2644,12 +2800,19 @@ function frame(now: number): void {
   if ((screen === "results" || screen === "rewards") && result) {
     const r = result;
     const lives = session.dailyLives();
-    const key = `${r.outcome}|${r.playerScore}|${r.opponentScore}|${r.playerBestCombo}|${r.mode}|${r.grant?.xp ?? 0}|${lives}`;
+    const key = `${r.outcome}|${r.playerScore}|${r.opponentScore}|${r.playerBestCombo}|${r.mode}|${r.grant?.xp ?? 0}|${lives}|${r.coinRoom?.matchId ?? ""}|${r.coinRoom?.payout ?? ""}`;
     if (key !== lastResultKey) {
       lastResultKey = key;
       ui.results.classList.remove("win", "loss", "tie");
       ui.results.classList.add(r.outcome);
-      ui.resultTitle.textContent = resultHeadline(r.outcome);
+      ui.results.classList.toggle("coin-result", Boolean(r.coinRoom));
+      ui.resultTitle.textContent = r.coinRoom
+        ? r.outcome === "win"
+          ? "VICTORY"
+          : r.outcome === "loss"
+            ? "DEFEAT"
+            : "DRAW"
+        : resultHeadline(r.outcome);
       ui.resultXp.textContent = r.inspection
         ? "DEV INSPECTION · NO XP OR COINS"
         : r.grant
@@ -2667,6 +2830,17 @@ function frame(now: number): void {
       ui.resOpp.textContent = String(r.opponentScore);
       ui.resCombo.textContent = `x${r.playerBestCombo}`;
       ui.resMode.textContent = r.mode === "score" ? "SCORE BATTLE" : "TIME BATTLE";
+      const coin = r.coinRoom;
+      ui.resultCoins.classList.toggle("hidden", !coin);
+      ui.resultStandardActions.classList.toggle("hidden", Boolean(coin));
+      ui.resultCoinActions.classList.toggle("hidden", !coin);
+      if (coin) {
+        ui.resultPlayAgain.className = r.outcome === "loss" ? "primary play-cta" : "ghost game-ctl";
+        ui.resultBackRooms.className = r.outcome === "win" ? "primary play-cta" : "ghost game-ctl";
+        ui.resultCoins.innerHTML = coinResultViewHtml(coin, session.progress.winningCoins);
+      } else {
+        ui.resultCoins.innerHTML = "";
+      }
     }
   } else if (screen !== "results" && screen !== "rewards") {
     lastResultKey = "";
@@ -2697,6 +2871,7 @@ armFrame();
 if (location.hostname === "127.0.0.1" || location.hostname === "localhost") {
   const chrono = {
     session,
+    renderer,
     audio() {
       return audio.status();
     },
@@ -2719,8 +2894,8 @@ if (location.hostname === "127.0.0.1" || location.hostname === "localhost") {
     },
     paint() {
       paintDailyRun();
-      paintArmory();
-      paintReadyPowers();
+      paintReady();
+      paintRooms();
     },
     renderState() {
       return renderer.inspectPlayer();

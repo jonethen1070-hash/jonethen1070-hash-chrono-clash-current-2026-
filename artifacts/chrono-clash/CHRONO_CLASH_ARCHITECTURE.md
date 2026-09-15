@@ -20,8 +20,10 @@ protocol, authentication, or persistence semantics.
 | Canvas gems, wells, board lighting, gameplay FX | `src/ui/renderer.ts` | frame loop | DOM/CSS frame |
 | Menus, metadata views, profile/chat HTML fragments | `src/ui/metaViews.ts` | `main.ts` | board engine |
 | Screen transitions, HUD projection, DOM event wiring, frame loop | `src/main.ts` | app entrypoint | board mutation/rendering internals |
-| Global layout and presentation CSS | `src/styles/game.css`, `src/styles/studio.css`, `src/styles/aaa-polish.css` | `index.html` | engine modules |
-| Player DOM board frame and hardware material pass | `src/styles/match-frame.css` | loaded last by `index.html` | Canvas renderer or gem atlas |
+| Global / arena presentation CSS (non-HUD cosmetics + geometry) | `src/styles/game.css`, `src/styles/studio.css`, `src/styles/aaa-polish.css` | `index.html` | engine modules |
+| Match-stage responsive geometry (`--*-height`, board size budget) | `src/styles/aaa-polish.css` (“LOCKED BASELINE”) | match layout only | HUD cosmetic files |
+| Match HUD cosmetics (controls, fighters, VS/timer, energy skin, ability dock look) | `src/styles/hud-redesign.css` | loaded last among presentation sheets | `aaa-polish.css` cosmetic passes, board frame |
+| Player DOM board frame and hardware material pass | `src/styles/match-frame.css` | loaded after presentation sheets, before `hud-redesign.css` | Canvas renderer or gem atlas |
 | Local settings/profile/economy persistence | `src/engine/settings.ts`, `src/engine/progress.ts` | session/UI | server battle rules |
 
 `main.ts` remains the browser adapter. It is not the gameplay authority: it
@@ -52,11 +54,24 @@ the engine helpers rather than reimplementing swipe math.
 
 ### CSS contract
 
-`match-frame.css` is loaded after the three existing presentation sheets. It
-is the only file for future player board-frame and hardware material changes.
-The file intentionally restates the existing winning declarations rather than
-changing geometry or the Canvas board. The frame does not own the board's
-canvas, gem sprites, stage atmosphere, or match layout.
+Load order in `index.html`:
+
+1. `game.css` — base app / early match layout
+2. `studio.css` — studio presentation layer
+3. `aaa-polish.css` — arena polish + **locked match-stage geometry**
+4. `match-frame.css` — player board-frame / hardware materials only
+5. `hud-redesign.css` — **authoritative match HUD cosmetics** (last)
+
+`match-frame.css` is the only file for future player board-frame and hardware
+material changes. It intentionally restates the existing winning declarations
+rather than changing geometry or the Canvas board. The frame does not own the
+board's canvas, gem sprites, stage atmosphere, or match HUD.
+
+`hud-redesign.css` is the only file for future match HUD visual redesign work
+(top controls, fighter panels, VS/timer, energy rail skin, ability dock look).
+Do not add new HUD cosmetic passes to `aaa-polish.css`. Geometry variables that
+size the board remain in the aaa-polish locked baseline until a deliberate
+geometry migration.
 
 When cleaning further CSS, preserve these invariants:
 
@@ -65,6 +80,8 @@ When cleaning further CSS, preserve these invariants:
 3. Do not restore the hidden rival mini-board or attack bars.
 4. Keep frame glow outside the socket bed so wells and gems remain crisp.
 5. Keep reduced-motion and low-quality selectors effective.
+6. Do not reintroduce a `#match .match-brand` title element; the title strip is
+   removed from the match DOM. Keep `.match-brand-actions` for Chat/Audio/Settings.
 
 ## State-to-rendering flow
 
@@ -163,9 +180,10 @@ Then restart the managed Chrono Clash workflow and verify:
 - `main.ts` is still the application coordinator and is intentionally not
   split into a framework component hierarchy during this no-visual-change
   refactor.
-- The three presentation stylesheets contain historical layout and cosmetic
-  layers. New board-frame work must go only in `match-frame.css`; broader
-  stylesheet cleanup requires computed-style and screenshot comparison at the
-  same mobile breakpoints.
+- Historical HUD cosmetic rules still exist inside `aaa-polish.css` /
+  `studio.css` / `game.css`. They are cascade-superseded by `hud-redesign.css`
+  for active-match cosmetics, but have not all been deleted yet. Future HUD
+  redesigns must edit `hud-redesign.css` only; leftover polish HUD passes should
+  be removed in later cleanup passes after screenshot comparison.
 - DOM HUD projection and Canvas rendering are both driven from the same frame
   loop, but they should not share mutable rendering state.

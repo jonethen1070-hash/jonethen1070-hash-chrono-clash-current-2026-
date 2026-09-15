@@ -1,14 +1,20 @@
 import { COLORS, COLS, Coord, Intensity, Piece, PieceKind, ROWS } from "../engine/types";
 import { DragState, FxEvent, GameSnapshot } from "../engine/session";
-import { feelMul, particleBudget } from "./feel";
+import { feelMul, particleBudget, rewardScoreFloat } from "./feel";
 import { GEM_CELL, gemAtlasCanvas, gemCellOrigin } from "./gemAtlas";
+import { applyGemMaterial, gemFacetSpec, hexHueSat } from "./gemMaterial";
 import {
   easeCrystalDie,
   gemDieDuration,
+  gemDragStretch,
   gemFallDelay,
+  gemMatchImpactStretch,
+  gemSelectPop,
   gemTravelDuration,
   gemTravelEase,
   liveGemDrawOrigin,
+  MATCH_ANTICIPATE_MS,
+  SWAP_TOTAL_MS,
   type GemMoveKind,
 } from "./gemMotion";
 
@@ -18,7 +24,18 @@ export { LIVE_GEM_MAX_IN_CELL_DROP, liveGemDrawOrigin } from "./gemMotion";
 const GAP = BOARD_GAP;
 const FRAME = BOARD_FRAME;
 const MATCH_IMPACT_MS = 54;
+/* Idle draw size seats atlas crystals to the reference gem-to-cell occupancy.
+   Measured on the 390×844 reference: h-pitch 44.4css, visible gem ~41.1css
+   (gold ~42.5), h-gap ~3.5css. Atlas solid ≈ 0.92 of the sprite, so s ≈ 44.6
+   → scale 1.06 against inner = cell - inset. */
 const GEM_VISUAL_SCALE = 1.06;
+/**
+ * Atlas gems draw their own artwork: baked at device resolution, unclipped, and
+ * without the procedural silhouette/material overlays on top. The artwork owns
+ * the silhouette, bezel, facets and core, so anything that masked or relit it
+ * only destroyed detail. Set to false to fall back to the overlay pipeline.
+ */
+const ATLAS_ARTWORK_FAITHFUL = true;
 const MATCH_STAGGER_MIN_MS = 8;
 const MATCH_STAGGER_STEP_MS = 4;
 const MATCH_STAGGER_MAX_MS = MATCH_STAGGER_MIN_MS + MATCH_STAGGER_STEP_MS * 2;
@@ -290,6 +307,7 @@ export class BoardRenderer {
   private playerView = new BoardView();
   private oppView = new BoardView();
   private lastScreen = "";
+  private lastMatchPhase = "";
   private invalidUntil = 0;
   private invalidA: Coord | null = null;
   private invalidB: Coord | null = null;
@@ -304,6 +322,7 @@ export class BoardRenderer {
   private lastDpr = 0;
   private lastAnimAt = 0;
   private animDt = 1 / 60;
+  private hitchMotionDt = 1 / 60;
   private lastPlayerCell = 32;
   private parentLeft = 0;
   private parentTop = 0;
@@ -356,26 +375,17 @@ export class BoardRenderer {
     this.invalidA = a;
     this.invalidB = b;
     this.invalidUntil = now + 220;
-    this.playerView.shake = Math.max(this.playerView.shake, 5);
+    this.playerView.shake = Math.max(this.playerView.shake, 1.4);
   }
 
   flashSelect(at: Coord, now: number): void {
     const tile = [...this.playerView.tiles.values()].find((t) => t.r === at.r && t.c === at.c && !t.dying);
     if (!tile) return;
     const cell = this.lastPlayerCell;
-    tile.flash = Math.max(tile.flash, 0.72);
-    tile.glow = Math.max(tile.glow, 0.82);
+    tile.flash = Math.max(tile.flash, 0.78);
+    tile.glow = Math.max(tile.glow, 0.88);
+    tile.scale = Math.max(tile.scale, gemSelectPop());
     if (this.fx.reducedMotion) return;
-    this.playerView.shake = Math.max(this.playerView.shake, 0.8);
-    this.addShockwave(
-      this.playerView,
-      tile.x + cell / 2,
-      tile.y + cell / 2,
-      cell * 0.16,
-      "#7CF5FF",
-      260,
-      1.7,
-    );
     this.impactSpark(this.playerView, tile.x + cell / 2, tile.y + cell / 2, tile.color, cell);
     void now;
   }
@@ -641,14 +651,26 @@ export class BoardRenderer {
     this.ctx.clearRect(0, 0, w, h);
     gemAtlasCanvas();
     if (this.lastAnimAt) {
-      this.animDt = Math.min(0.033, Math.max(0.008, (now - this.lastAnimAt) / 1000));
+      const rawElapsed = (now - this.lastAnimAt) / 1000;
+      this.animDt = Math.min(0.033, Math.max(0.008, rawElapsed));
+      // Normal frames stay on the 33ms cap. After a long main-thread pause,
+      // dying/falling must catch up to wall-clock so frozen tiles expire.
+      this.hitchMotionDt = rawElapsed > 0.1 ? rawElapsed : this.animDt;
     } else {
       this.animDt = 1 / 60;
+      this.hitchMotionDt = this.animDt;
     }
     this.lastAnimAt = now;
 
-    if (snap.screen !== this.lastScreen) {
-      if (snap.screen === "match") {
+    // A new match always starts in countdown. Reset on that beat even when
+    // lastScreen is still "match" (quit-to-menu / Guest replay never redraws
+    // the menu, so the screen-name gate would keep leftover die/VFX live).
+    const beginMatch =
+      snap.screen === "match" &&
+      snap.phase === "countdown" &&
+      this.lastMatchPhase !== "countdown";
+    if (snap.screen !== this.lastScreen || beginMatch) {
+      if (snap.screen === "match" && (snap.screen !== this.lastScreen || beginMatch)) {
         this.recycleViewEffects(this.playerView);
         this.recycleViewEffects(this.oppView);
         this.playerView.reset();
@@ -660,6 +682,7 @@ export class BoardRenderer {
       }
       this.lastScreen = snap.screen;
     }
+    this.lastMatchPhase = snap.screen === "match" ? snap.phase : "";
 
     const parent = this.canvasOrigin();
     this.ctx.save();
@@ -881,11 +904,14 @@ export class BoardRenderer {
     lockLeftMs = 0,
   ): void {
     const layout = boardLayout(x, y, w, h);
-    const { size, ox, oy, cell, rowCell, ix, iy } = layout;
-    if (!(size > 8 && cell > 2 && Number.isFinite(cell))) return;
+    const { boardW, boardH, ox, oy, cell, rowCell, ix, iy } = layout;
+    if (!(boardW > 8 && boardH > 8 && cell > 2 && Number.isFinite(cell))) return;
     if (isPlayer) this.lastPlayerCell = cell;
-    const rowOrigin = (r: number) => iy + GAP + r * (rowCell + GAP) + (rowCell - cell) / 2;
-    const rowCenter = (r: number) => rowOrigin(r) + cell / 2;
+    // Square gem seats inside each row band; center them when row pitch > cell
+    // so sockets and crystals share one vertical rhythm (no dark orphan bands).
+    const rowOrigin = (r: number) => iy + GAP + r * (rowCell + GAP);
+    const gemOriginY = (r: number) => rowOrigin(r) + Math.max(0, (rowCell - cell) / 2);
+    const rowCenter = (r: number) => rowOrigin(r) + rowCell / 2;
     const ctx = this.ctx;
 
     view.shake *= 0.78;
@@ -913,19 +939,12 @@ export class BoardRenderer {
     ctx.save();
     ctx.translate(sx + impulseX, sy + impulseY);
 
-    // The board housing can use a taller mobile row, but the gem layer below
-    // remains unscaled so each crystal keeps its approved proportions.
-    const boardScaleY = h / size;
-    ctx.save();
-    ctx.translate(0, oy);
-    ctx.scale(1, boardScaleY);
-    ctx.translate(0, -oy);
-
+    // Rectangular 8x10 housing with square cells — no Y-stretch of gem art.
     const slabEdge = isPlayer ? "#007A9E" : "#8E1740";
     const slabFace = isPlayer ? "#062B39" : "#32101C";
     ctx.save();
-    if (isPlayer) chamferedRect(ctx, ox + 7, oy + 10, size, 14);
-    else roundRect(ctx, ox + 7, oy + 10, size, size, 22);
+    if (isPlayer) chamferedRect(ctx, ox + 7, oy + 10, boardW, boardH, 14);
+    else roundRect(ctx, ox + 7, oy + 10, boardW, boardH, 22);
     ctx.fillStyle = "rgba(0, 2, 8, 0.82)";
     ctx.fill();
     ctx.strokeStyle = "rgba(0, 0, 0, 0.9)";
@@ -934,8 +953,8 @@ export class BoardRenderer {
     ctx.restore();
 
     ctx.save();
-    if (isPlayer) chamferedRect(ctx, ox + 3, oy + 5, size, 14);
-    else roundRect(ctx, ox + 3, oy + 5, size, size, 22);
+    if (isPlayer) chamferedRect(ctx, ox + 3, oy + 5, boardW, boardH, 14);
+    else roundRect(ctx, ox + 3, oy + 5, boardW, boardH, 22);
     ctx.fillStyle = slabFace;
     ctx.fill();
     ctx.strokeStyle = colorWithAlpha(slabEdge, 0.62);
@@ -943,61 +962,40 @@ export class BoardRenderer {
     ctx.stroke();
     ctx.restore();
 
-    this.blitWells(ctx, ox, oy, size, cell, isPlayer);
-    this.drawBoardDepth(ctx, ox, oy, size, isPlayer, boosted, frozen);
-    ctx.save();
-    if (isPlayer) chamferedRect(ctx, ox + FRAME, oy + FRAME, size - FRAME * 2, 8);
-    else roundRect(ctx, ox + FRAME, oy + FRAME, size - FRAME * 2, size - FRAME * 2, 14);
-    ctx.clip();
-    const cavity = ctx.createLinearGradient(ox + FRAME, oy + FRAME, ox + size - FRAME, oy + size - FRAME);
-    cavity.addColorStop(0, "rgba(0, 2, 8, 0.1)");
-    cavity.addColorStop(0.55, "rgba(0, 2, 8, 0.2)");
-    cavity.addColorStop(1, "rgba(0, 2, 8, 0.42)");
-    ctx.fillStyle = cavity;
-    ctx.fillRect(ox + FRAME, oy + FRAME, size - FRAME * 2, size - FRAME * 2);
-    ctx.restore();
+    this.blitWells(ctx, ox, oy, boardW, boardH, cell, rowCell, isPlayer);
+    this.drawBoardDepth(ctx, ox, oy, boardW, boardH, isPlayer, boosted, frozen);
 
-    this.drawBoardEnergy(ctx, ox, oy, size, isPlayer, boosted, frozen, now);
+    this.drawBoardEnergy(ctx, ox, oy, boardW, boardH, isPlayer, boosted, frozen, now);
     if (isPlayer) {
-      this.drawPowerTargetingAtmosphere(view, ox, oy, size, now);
-      this.drawPowerWake(view, ctx, ox, oy, size, now);
+      this.drawPowerTargetingAtmosphere(view, ox, oy, boardW, boardH, now);
+      this.drawPowerWake(view, ctx, ox, oy, boardW, boardH, now);
     }
 
-    ctx.save();
-    if (isPlayer) chamferedRect(ctx, ox + 1, oy + 1, size - 2, 13);
-    else roundRect(ctx, ox + 1, oy + 1, size - 2, size - 2, 21);
-    ctx.clip();
-    const plane = ctx.createLinearGradient(ox, oy, ox + size, oy + size);
-    plane.addColorStop(0, isPlayer ? "#B9F8FF0D" : "#FFD6E20B");
-    plane.addColorStop(0.3, "#FFFFFF03");
-    plane.addColorStop(0.7, "#0000000A");
-    plane.addColorStop(1, "#01050A8F");
-    ctx.fillStyle = plane;
-    ctx.fillRect(ox, oy, size, size);
-    ctx.restore();
+    // No interior lighting wash — a diagonal plane gradient here used to
+    // split the playable field into a lit upper zone and a darker lower band.
 
     if (isPlayer) {
-      this.paintPlayerFrameLighting(ctx, ox, oy, size, boosted, frozen);
+      this.paintPlayerFrameLighting(ctx, ox, oy, boardW, boardH, boosted, frozen);
     } else {
-      const bevel = ctx.createLinearGradient(ox, oy, ox + size, oy + size);
+      const bevel = ctx.createLinearGradient(ox, oy, ox + boardW, oy + boardH);
       bevel.addColorStop(0, "#FFE1EA4A");
       bevel.addColorStop(0.16, "#FF6B9120");
       bevel.addColorStop(0.52, "#FFFFFF00");
       bevel.addColorStop(0.84, "#01050A18");
       bevel.addColorStop(1, "#01050AC4");
-      roundRect(ctx, ox + 2, oy + 2, size - 4, size - 4, 20);
+      roundRect(ctx, ox + 2, oy + 2, boardW - 4, boardH - 4, 20);
       ctx.strokeStyle = bevel;
       ctx.lineWidth = 1.8;
       ctx.stroke();
 
       const rim = frozen ? "#FF174F8C" : "#FF174FC7";
-      roundRect(ctx, ox, oy, size, size, 22);
+      roundRect(ctx, ox, oy, boardW, boardH, 22);
       ctx.strokeStyle = rim;
       ctx.lineWidth = 1.8;
       ctx.stroke();
       ctx.strokeStyle = "#FFD6E22E";
       ctx.lineWidth = 1;
-      roundRect(ctx, ox + 3, oy + 3, size - 6, size - 6, 18);
+      roundRect(ctx, ox + 3, oy + 3, boardW - 6, boardH - 6, 18);
       ctx.stroke();
     }
     ctx.restore();
@@ -1006,6 +1004,7 @@ export class BoardRenderer {
     const live = view.live;
     live.clear();
     const dt = this.animDt;
+    const hitchExtra = Math.max(0, this.hitchMotionDt - dt);
     const anim = this.fx.animation ?? this.fx.quality;
     const reduced = this.fx.reducedMotion;
     const fxSide = isPlayer ? "player" : "opponent";
@@ -1027,7 +1026,8 @@ export class BoardRenderer {
       }
     }
     const swapRemainingMs = [...view.tiles.values()].reduce((max, tile) => {
-      if (tile.moveKind !== "swap" || tile.moveDur <= 0) return max;
+      // Leftover dying swap poses must not stretch the next resolve's gravity hold.
+      if (tile.dying || tile.moveKind !== "swap" || tile.moveDur <= 0) return max;
       return Math.max(max, (tile.moveDur - tile.moveAge) * 1000);
     }, 0);
     if (isPlayer && view.pendingSwap) {
@@ -1059,13 +1059,28 @@ export class BoardRenderer {
     const hadPendingSwap = view.pendingSwapIds.size > 0;
     const hasMatchPresentation = Number.isFinite(recentClearBorn) || hadPendingSwap;
     const swapWindowMs = Math.max(swapRemainingMs, pendingSwapMs);
-    const clearAgeMs = Number.isFinite(recentClearBorn) ? Math.max(0, now - recentClearBorn) : 0;
-    const impactDelay = reduced
-      ? 20
-      : Math.max(MATCH_IMPACT_MS, swapWindowMs + MATCH_IMPACT_MS);
-    const cascadeHold = hasMatchPresentation
-      ? Math.max(0, impactDelay - clearAgeMs) / 1000
+    // A fresh player swap owns this frame's hold. Ignore a leftover clear FX
+    // from the previous resolve so rapid follow-up moves stay snappy.
+    const clearAgeMs = hadPendingSwap
+      ? 0
+      : Number.isFinite(recentClearBorn)
+        ? Math.max(0, now - recentClearBorn)
+        : 0;
+    // Seat the swap, then a short charged anticipation, then the break.
+    const impactDelay = reduced ? 0 : swapWindowMs + MATCH_ANTICIPATE_MS;
+    const clearLeadMs = hasMatchPresentation
+      ? MATCH_ANTICIPATE_MS + gemDieDuration(anim, reduced) * 1000 * (reduced ? 0.4 : 0.58)
       : 0;
+    const seatedHold = hasMatchPresentation
+      ? Math.max(0, swapWindowMs + clearLeadMs - clearAgeMs) / 1000
+      : 0;
+    // Shatter/sparkle stays decorative. Gravity and refill must never park
+    // behind that seat — including the first paint, when dying flags are
+    // not set yet and gravityLive would still be false.
+    const gravityLive = [...view.tiles.values()].some(
+      (tile) => tile.dying || tile.moveKind === "fall",
+    );
+    const cascadeHold = 0;
     const populated = view.tiles.size > 0;
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
@@ -1073,7 +1088,7 @@ export class BoardRenderer {
         if (!piece) continue;
         live.add(piece.id);
         const tx = ix + GAP + c * (cell + GAP);
-        const ty = rowOrigin(r);
+        const ty = gemOriginY(r);
         let tile = view.tiles.get(piece.id);
         if (!tile) {
             const startY = populated ? ty - rowCell * (r + 1.15) : ty;
@@ -1206,11 +1221,12 @@ export class BoardRenderer {
 
         if (tile.moveKind !== "idle") {
           if (tile.moveHold > 0) {
-            tile.moveHold -= dt;
+            tile.moveHold -= dt + hitchExtra;
             tile.vx = 0;
             tile.vy = 0;
           } else {
             tile.moveAge += dt;
+            if (hitchExtra) tile.moveAge += hitchExtra;
             const t = tile.moveDur <= 0 ? 1 : Math.min(1, tile.moveAge / tile.moveDur);
             const e = gemTravelEase(tile.moveKind, t);
             const nx = tile.fromX + (tile.toX - tile.fromX) * e;
@@ -1233,7 +1249,7 @@ export class BoardRenderer {
                   const moveDistance = Math.hypot(moveX, moveY) || 1;
                   const settle = Math.min(3.2, Math.max(2, moveDistance * 0.055));
                   tile.settleAge = 0;
-                  tile.settleDur = 0.052;
+                  tile.settleDur = 0.068;
                   view.settleCount += 1;
                   tile.settleX = (moveX / moveDistance) * settle;
                   tile.settleY = (moveY / moveDistance) * settle;
@@ -1253,12 +1269,15 @@ export class BoardRenderer {
                   }
                 } else if (completedKind === "fall" && anim !== "low" && Math.abs(tile.fromY - tile.toY) > cell * 0.4) {
                   const direction = Math.sign(tile.toY - tile.fromY) || 1;
+                  const drop = Math.abs(tile.toY - tile.fromY);
                   tile.settleAge = 0;
                   tile.settleDur = 0.06;
                   view.settleCount += 1;
                   tile.settleX = 0;
-                  tile.settleY = direction * Math.min(2, Math.max(1, Math.abs(tile.toY - tile.fromY) * 0.012));
+                  tile.settleY = direction * Math.min(2.8, Math.max(1.2, drop * 0.016));
                   tile.scale = 1.015;
+                  tile.flash = Math.max(tile.flash, 0.24);
+                  tile.glow = Math.max(tile.glow, 0.22);
                 }
               }
               if (Math.abs(tile.fromY - tile.toY) > cell * 0.4) {
@@ -1318,7 +1337,7 @@ export class BoardRenderer {
         : 0;
       if (tile.dieStaggerMs > 0) view.staggerCount += 1;
       const impactRemaining = hasMatchPresentation
-        ? Math.max(0, impactDelay - (Number.isFinite(recentClearBorn) ? now - recentClearBorn : 0))
+        ? Math.max(0, impactDelay - clearAgeMs)
         : 0;
       tile.dieAge = -(impactRemaining + tile.dieStaggerMs) / 1000;
       if (!swapTarget) tile.moveKind = "idle";
@@ -1340,11 +1359,13 @@ export class BoardRenderer {
         );
          if (tile.breakStrength >= 4 || recentClearSize >= 6) {
            view.hitStopUntil = Math.max(view.hitStopUntil, now + 28);
-           view.shake = Math.max(view.shake, Math.min(5.5, 1.6 + tile.breakStrength * 0.52));
-           view.flash = Math.max(view.flash, 0.18 + Math.min(0.22, tile.breakStrength * 0.03));
+           view.shake = Math.max(view.shake, Math.min(3.2, 1.1 + tile.breakStrength * 0.28));
+           view.flash = Math.max(view.flash, 0.14 + Math.min(0.16, tile.breakStrength * 0.02));
          }
       }
-      if (isPlayer) view.shake = Math.max(view.shake, 0.9);
+      if (isPlayer) {
+        view.shake = Math.max(view.shake, recentClearCombo >= 3 ? 1.15 : recentClearCombo >= 2 ? 0.75 : 0.4);
+      }
     }
 
     let overlayPower: FxEvent | undefined;
@@ -1375,8 +1396,8 @@ export class BoardRenderer {
           isPlayer && view.powerCastTarget && now - view.powerCastTarget.born < 900
             ? view.powerCastTarget.at
             : fxEvent.at;
-        const castX = castTarget ? ix + GAP + castTarget.c * (cell + GAP) + cell / 2 : ox + size / 2;
-        const castY = castTarget ? rowCenter(castTarget.r) : oy + size / 2;
+        const castX = castTarget ? ix + GAP + castTarget.c * (cell + GAP) + cell / 2 : ox + boardW / 2;
+        const castY = castTarget ? rowCenter(castTarget.r) : oy + boardH / 2;
         this.castPower(view, fxEvent.text, castX, castY, cell, isPlayer, now);
         if (isPlayer) view.powerCastTarget = null;
         if (fxEvent.kind === "rewind" && isPlayer && !this.fx.reducedMotion) {
@@ -1391,25 +1412,26 @@ export class BoardRenderer {
       const combo = fxEvent.combo ?? 1;
       if (fxEvent.kind === "clear") {
         const pts = Math.abs(Number(String(fxEvent.text).replace(/[^\d]/g, "")) || 0);
-        const px = fxEvent.at ? ix + GAP + fxEvent.at.c * (cell + GAP) + cell / 2 : ox + size / 2;
-        const py = fxEvent.at ? rowCenter(fxEvent.at.r) : oy + size * 0.46;
+        const px = fxEvent.at ? ix + GAP + fxEvent.at.c * (cell + GAP) + cell / 2 : ox + boardW / 2;
+        const py = fxEvent.at ? rowCenter(fxEvent.at.r) : oy + boardH * 0.46;
+        const pop = rewardScoreFloat(combo, pts, isPlayer);
         view.floats.push({
           x: px,
           y: py,
           text: fxEvent.text,
-          born: now,
-          color: combo >= 4 || pts >= 400 ? (isPlayer ? "#EAFBFF" : "#FFD6E2") : "#F3FAFF",
-          size: 14 + Math.min(18, Math.log10(pts + 12) * 7 + combo),
-          rise: 24 + combo * 5 + Math.min(18, pts / 80),
-          life: 640 + Math.min(280, combo * 40 + pts / 12),
+          born: now + (isPlayer && !reduced ? MATCH_ANTICIPATE_MS + SWAP_TOTAL_MS : 0),
+          color: pop.color,
+          size: pop.size,
+          rise: pop.rise,
+          life: pop.life,
         });
         if (view.floats.length > 5) view.floats.splice(0, view.floats.length - 5);
       }
       if (fxEvent.kind === "combo") {
         if (!isPlayer) {
           view.floats.push({
-            x: ox + size / 2,
-            y: oy + size * 0.32,
+            x: ox + boardW / 2,
+            y: oy + boardH * 0.32,
             text: fxEvent.text,
             born: now,
             color: combo >= 5 ? "#FFE1EA" : combo >= 4 ? "#FF6B91" : "#FFD6E2",
@@ -1418,13 +1440,13 @@ export class BoardRenderer {
             life: 700 + Math.min(280, combo * 50),
           });
         }
-        view.shake = Math.max(view.shake, (combo >= 6 ? 5.2 : combo >= 4 ? 3.4 : combo >= 3 ? 2.2 : 1.4) * mul);
+        view.shake = Math.max(view.shake, (combo >= 6 ? 2.4 : combo >= 4 ? 1.8 : combo >= 3 ? 1.25 : 0.85) * mul);
         if (view.floats.length > 5) view.floats.splice(0, view.floats.length - 5);
       }
     }
 
     this.drawPowerEffects(view, now);
-    this.drawPowerArenaLight(view, ox, oy, size, cell, now, isPlayer);
+    this.drawPowerArenaLight(view, ox, oy, boardW, boardH, cell, rowCell, now, isPlayer);
     let megaStrikeBorn = Number.NaN;
     let megaStrikeSide: FxEvent["side"] | undefined;
     for (const fxEvent of fx) {
@@ -1461,6 +1483,7 @@ export class BoardRenderer {
       if (!tile.dying) continue;
       if (tile.moveKind === "swap" && tile.moveDur > 0) {
         tile.moveAge += dt;
+        if (hitchExtra) tile.moveAge += hitchExtra;
         const swapT = Math.min(1, tile.moveAge / tile.moveDur);
         const swapE = gemTravelEase("swap", swapT);
         tile.x = tile.fromX + (tile.toX - tile.fromX) * swapE;
@@ -1472,6 +1495,7 @@ export class BoardRenderer {
         }
       }
        tile.dieAge += dt;
+      if (hitchExtra) tile.dieAge += hitchExtra;
       if (!tile.burstEmitted && tile.dieAge >= 0) {
         tile.burstEmitted = true;
         view.fractureCount += 1;
@@ -1488,8 +1512,8 @@ export class BoardRenderer {
         );
          if (tile.breakStrength >= 4 || recentClearSize >= 6) {
            view.hitStopUntil = Math.max(view.hitStopUntil, now + 28);
-           view.shake = Math.max(view.shake, Math.min(5.5, 1.6 + tile.breakStrength * 0.52));
-           view.flash = Math.max(view.flash, 0.18 + Math.min(0.22, tile.breakStrength * 0.03));
+           view.shake = Math.max(view.shake, Math.min(3.2, 1.1 + tile.breakStrength * 0.28));
+           view.flash = Math.max(view.flash, 0.14 + Math.min(0.16, tile.breakStrength * 0.02));
          }
       }
       const pose = easeCrystalDie(Math.max(0, tile.dieAge) / dieDur);
@@ -1497,16 +1521,19 @@ export class BoardRenderer {
         tile.alpha -= 0.28;
         tile.flash *= 0.7;
       } else if (tile.dieAge < 0) {
-        // Hold the matched crystal in a tiny charged lock before the break.
+        // Match impact: brighten → charged squash → existing break VFX.
         const charge = Math.max(0, Math.min(1, (tile.dieAge + MATCH_IMPACT_MS / 1000) / (MATCH_IMPACT_MS / 1000)));
-        tile.scale = 1.018 - charge * 0.028;
+        tile.scale = 1.06 - charge * 0.09;
         tile.alpha = 1;
-        tile.flash = Math.max(tile.flash, 0.42 + charge * 0.3);
-        tile.glow = Math.max(tile.glow, 0.38 + charge * 0.28);
+        tile.flash = Math.max(tile.flash, 0.68 + charge * 0.32);
+        tile.glow = Math.max(tile.glow, 0.64 + charge * 0.34);
+        if (isPlayer && charge > 0.82) {
+          view.flash = Math.max(view.flash, 0.1 + tile.breakStrength * 0.012);
+        }
       } else {
         tile.scale = pose.scale;
         tile.alpha = pose.alpha;
-        tile.flash = pose.flash;
+        tile.flash = Math.max(pose.flash, 0.55 * (1 - Math.min(1, tile.dieAge / dieDur)));
         tile.glow = pose.flash;
       }
     }
@@ -1542,9 +1569,21 @@ export class BoardRenderer {
          ((this.invalidA?.r === tile.r && this.invalidA?.c === tile.c) ||
            (this.invalidB?.r === tile.r && this.invalidB?.c === tile.c));
       const wobble = bad ? Math.sin(now / 18) * 3.2 : 0;
+      // Selection uses a tiny lift (contracted at 1.026) plus emissive pop.
       const lift = sel ? 1.026 : 1;
+      if (sel && !tile.dying && !this.fx.reducedMotion) {
+        // Select: restrained emissive pop + scale settle (no constant bounce).
+        tile.flash = Math.max(tile.flash, 0.5 + Math.sin(now / 110) * 0.05);
+        tile.glow = Math.max(tile.glow, 0.52 + Math.sin(now / 130) * 0.04);
+        tile.scale = Math.max(tile.scale, gemSelectPop());
+      } else if (!tile.dying && !this.fx.reducedMotion && this.fx.animation !== "low") {
+        // Near-static idle: only a whisper of core energy so matches/selects own the bloom.
+        const phase = now / 1000 + tile.id * 0.37 + tile.r * 0.11 + tile.c * 0.07;
+        const breath = 0.5 + 0.5 * Math.sin(phase * Math.PI * 2 * 0.16);
+        tile.glow = Math.max(tile.glow, 0.03 + breath * 0.04);
+      }
       const restX = ix + GAP + tile.c * (cell + GAP);
-      const restY = rowOrigin(tile.r);
+      const restY = gemOriginY(tile.r);
       const settleT = tile.settleDur > 0 ? Math.min(1, tile.settleAge / tile.settleDur) : 1;
       const settleEase = 1 - Math.pow(1 - settleT, 3);
       const settleDx = tile.settleX * (1 - settleEase);
@@ -1600,7 +1639,7 @@ export class BoardRenderer {
         view.shake = Math.max(view.shake, 7);
         view.flash = Math.max(view.flash, 0.28);
       }
-      roundRect(ctx, ox, oy, size, size, 22);
+      roundRect(ctx, ox, oy, boardW, boardH, 22);
       ctx.fillStyle = "#7CF5FF29";
       ctx.fill();
       ctx.strokeStyle = "#7CF5FFD9";
@@ -1608,22 +1647,22 @@ export class BoardRenderer {
       ctx.stroke();
       ctx.save();
       ctx.beginPath();
-      ctx.rect(ox + 8, oy + 8, size - 16, size - 16);
+      ctx.rect(ox + 8, oy + 8, boardW - 16, boardH - 16);
       ctx.clip();
       ctx.strokeStyle = "#EAFBFF73";
       ctx.lineWidth = 1.1;
       for (let i = 0; i < 6; i++) {
-        const px = ox + 10 + ((i * 53) % (size - 20));
+        const px = ox + 10 + ((i * 53) % (boardW - 20));
         ctx.beginPath();
         ctx.moveTo(px, oy + 8);
-        ctx.lineTo(px + size * 0.12, oy + size - 8);
+        ctx.lineTo(px + boardW * 0.12, oy + boardH - 8);
         ctx.stroke();
       }
       ctx.restore();
       ctx.fillStyle = "rgba(255,255,255,0.55)";
       for (let i = 0; i < 10; i++) {
-        const px = ox + 12 + ((i * 47) % (size - 24));
-        const py = oy + 10 + ((i * 31) % (size - 20));
+        const px = ox + 12 + ((i * 47) % (boardW - 24));
+        const py = oy + 10 + ((i * 31) % (boardH - 20));
         ctx.beginPath();
         ctx.arc(px, py, 1.4, 0, Math.PI * 2);
         ctx.fill();
@@ -1632,64 +1671,64 @@ export class BoardRenderer {
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillStyle = "#03121A8C";
-      roundRect(ctx, ox + size * 0.18, oy + size * 0.34, size * 0.64, size * 0.32, 16);
+      roundRect(ctx, ox + boardW * 0.18, oy + boardH * 0.34, boardW * 0.64, boardH * 0.32, 16);
       ctx.fill();
       ctx.fillStyle = "#EAFBFF";
       ctx.font = "800 12px Outfit, Trebuchet MS, sans-serif";
-      ctx.fillText("FREEZE", ox + size / 2, oy + size * 0.42);
+      ctx.fillText("FREEZE", ox + boardW / 2, oy + boardH * 0.42);
       ctx.font = "900 36px Outfit, Trebuchet MS, sans-serif";
-      ctx.fillText(String(secs), ox + size / 2, oy + size * 0.56);
+      ctx.fillText(String(secs), ox + boardW / 2, oy + boardH * 0.56);
     }
 
     if (shiftLeftMs > 0 && !frozen) {
-      roundRect(ctx, ox, oy, size, size, 22);
+      roundRect(ctx, ox, oy, boardW, boardH, 22);
       ctx.fillStyle = "#A855F71F";
       ctx.fill();
       ctx.strokeStyle = "#D8B4FEC7";
       ctx.lineWidth = 2.2;
       ctx.stroke();
       if (this.fx.quality !== "low" && !this.fx.reducedMotion) {
-        const scan = ((now / 28) % (size * 0.7)) - size * 0.1;
+        const scan = ((now / 28) % (boardH * 0.7)) - boardH * 0.1;
         ctx.fillStyle = "#D8B4FE1A";
-        roundRect(ctx, ox + 6, oy + scan, size - 12, size * 0.1, 8);
+        roundRect(ctx, ox + 6, oy + scan, boardW - 12, boardH * 0.1, 8);
         ctx.fill();
       }
       const secs = Math.max(1, Math.ceil(shiftLeftMs / 1000));
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillStyle = "#080B188C";
-      roundRect(ctx, ox + size * 0.16, oy + size * 0.36, size * 0.68, size * 0.28, 16);
+      roundRect(ctx, ox + boardW * 0.16, oy + boardH * 0.36, boardW * 0.68, boardH * 0.28, 16);
       ctx.fill();
       ctx.fillStyle = "#EAFBFF";
       ctx.font = "800 12px Outfit, Trebuchet MS, sans-serif";
-      ctx.fillText("TIME STOLEN", ox + size / 2, oy + size * 0.44);
+      ctx.fillText("TIME STOLEN", ox + boardW / 2, oy + boardH * 0.44);
       ctx.font = "900 28px Outfit, Trebuchet MS, sans-serif";
-      ctx.fillText(String(secs), ox + size / 2, oy + size * 0.56);
+      ctx.fillText(String(secs), ox + boardW / 2, oy + boardH * 0.56);
       if (this.fx.quality !== "low" && !this.fx.reducedMotion) {
-        const cx = ox + size / 2;
-        const cy = oy + size / 2;
+        const cx = ox + boardW / 2;
+        const cy = oy + boardH / 2;
         const spin = now / 180;
         ctx.strokeStyle = "#D8B4FEB3";
         ctx.lineWidth = 1.4;
         for (let i = 0; i < 8; i++) {
           const a = spin + (Math.PI * 2 * i) / 8;
           ctx.beginPath();
-          ctx.moveTo(cx + Math.cos(a) * size * 0.28, cy + Math.sin(a) * size * 0.28);
-          ctx.lineTo(cx + Math.cos(a) * size * 0.36, cy + Math.sin(a) * size * 0.36);
+          ctx.moveTo(cx + Math.cos(a) * Math.min(boardW, boardH) * 0.28, cy + Math.sin(a) * Math.min(boardW, boardH) * 0.28);
+          ctx.lineTo(cx + Math.cos(a) * Math.min(boardW, boardH) * 0.36, cy + Math.sin(a) * Math.min(boardW, boardH) * 0.36);
           ctx.stroke();
         }
       }
     }
 
     if (lockLeftMs > 0) {
-      roundRect(ctx, ox, oy, size, size, 22);
+      roundRect(ctx, ox, oy, boardW, boardH, 22);
       ctx.fillStyle = "#FF174F24";
       ctx.fill();
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillStyle = "#FFD6E2";
       ctx.font = "800 13px Outfit, Trebuchet MS, sans-serif";
-      ctx.fillText("LOCKED", ox + size / 2, oy + size * 0.5);
+      ctx.fillText("LOCKED", ox + boardW / 2, oy + boardH * 0.5);
     }
 
     const powerFx = overlayPower;
@@ -1711,23 +1750,23 @@ export class BoardRenderer {
         : rewind
           ? colorWithAlpha("#B9E8FF", 0.82 * t)
           : colorWithAlpha("#EAFBFF", (mega ? 0.92 : burst ? 0.86 : 0.85) * t);
-      roundRect(ctx, ox, oy, size, size, 22);
+      roundRect(ctx, ox, oy, boardW, boardH, 22);
       ctx.fillStyle = fill;
       ctx.fill();
       ctx.strokeStyle = stroke;
       ctx.lineWidth = freeze || mega ? 3 : 2.4;
       ctx.stroke();
       if (rewind && this.fx.quality !== "low" && !this.fx.reducedMotion) {
-        const cx = ox + size / 2;
-        const cy = oy + size / 2;
+        const cx = ox + boardW / 2;
+        const cy = oy + boardH / 2;
         const spin = -now / 90;
         ctx.strokeStyle = colorWithAlpha("#2E9BFF", 0.75 * t);
         ctx.lineWidth = 1.6;
         ctx.beginPath();
-        ctx.arc(cx, cy, size * 0.28, spin, spin + 1.8);
+        ctx.arc(cx, cy, Math.min(boardW, boardH) * 0.28, spin, spin + 1.8);
         ctx.stroke();
         ctx.beginPath();
-        ctx.arc(cx, cy, size * 0.36, spin + Math.PI, spin + Math.PI + 1.6);
+        ctx.arc(cx, cy, Math.min(boardW, boardH) * 0.36, spin + Math.PI, spin + Math.PI + 1.6);
         ctx.stroke();
       }
       if (!frozen && !(shiftLeftMs > 0)) {
@@ -1741,13 +1780,13 @@ export class BoardRenderer {
         ctx.textBaseline = "middle";
         ctx.fillText(
           freeze ? "FREEZE" : rewind ? "REWIND" : mega ? "MEGA STRIKE" : burst ? "ENERGY BURST" : "TIME SHIFT",
-          ox + size / 2,
-          oy + size * 0.5,
+          ox + boardW / 2,
+          oy + boardH * 0.5,
         );
       }
     } else if (rewindFx && now - rewindFx.born < 720) {
       const t = 1 - (now - rewindFx.born) / 720;
-      roundRect(ctx, ox, oy, size, size, 22);
+      roundRect(ctx, ox, oy, boardW, boardH, 22);
       ctx.fillStyle = colorWithAlpha("#2E9BFF", 0.1 * t);
       ctx.fill();
       ctx.strokeStyle = colorWithAlpha("#B9E8FF", 0.82 * t);
@@ -1756,11 +1795,11 @@ export class BoardRenderer {
       ctx.fillStyle = colorWithAlpha("#B9E8FF", 0.9 * t);
       ctx.font = "800 13px Outfit, Trebuchet MS, sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("REWIND", ox + size / 2, oy + size * 0.5);
+      ctx.fillText("REWIND", ox + boardW / 2, oy + boardH * 0.5);
     }
 
     if (view.flash > 0.02) {
-      roundRect(ctx, ox, oy, size, size, 22);
+      roundRect(ctx, ox, oy, boardW, boardH, 22);
       ctx.fillStyle = isPlayer
         ? colorWithAlpha("#EAFBFF", view.flash * 0.28)
         : colorWithAlpha("#FFD6E2", view.flash * 0.24);
@@ -1793,48 +1832,50 @@ export class BoardRenderer {
     ctx: CanvasRenderingContext2D,
     ox: number,
     oy: number,
-    size: number,
+    boardW: number,
+    boardH: number,
     isPlayer: boolean,
     boosted: boolean,
     frozen: boolean,
   ): void {
     const rim = frozen ? "#B9F8FF" : isPlayer ? "#39D8EA" : "#D72B61";
     const hot = boosted ? "#F4FFFF" : isPlayer ? "#B9F8FF" : "#FFD6E2";
-    const chamfer = Math.min(16, Math.max(10, size * 0.085));
+    const scale = Math.min(boardW, boardH);
+    const chamfer = Math.min(16, Math.max(10, scale * 0.085));
 
     ctx.save();
     ctx.lineJoin = "round";
     ctx.shadowColor = "rgba(0, 0, 0, 0.72)";
-    ctx.shadowBlur = Math.max(5, size * 0.028);
-    ctx.shadowOffsetX = size * 0.018;
-    ctx.shadowOffsetY = size * 0.028;
-    chamferedRect(ctx, ox + 2.4, oy + 3.8, size - 4.8, chamfer);
+    ctx.shadowBlur = Math.max(5, scale * 0.028);
+    ctx.shadowOffsetX = scale * 0.018;
+    ctx.shadowOffsetY = scale * 0.028;
+    chamferedRect(ctx, ox + 2.4, oy + 3.8, boardW - 4.8, boardH - 4.8, chamfer);
     ctx.strokeStyle = "rgba(0, 0, 0, 0.72)";
-    ctx.lineWidth = Math.max(2.8, size * 0.018);
+    ctx.lineWidth = Math.max(2.8, scale * 0.018);
     ctx.stroke();
     ctx.shadowBlur = 0;
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 0;
 
-    const topRail = ctx.createLinearGradient(ox, oy, ox + size, oy + size * 0.16);
+    const topRail = ctx.createLinearGradient(ox, oy, ox + boardW, oy + boardH * 0.16);
     topRail.addColorStop(0, colorWithAlpha(hot, 0.66));
     topRail.addColorStop(0.28, colorWithAlpha(rim, 0.28));
     topRail.addColorStop(0.7, "rgba(255,255,255,0.03)");
     topRail.addColorStop(1, colorWithAlpha(rim, 0.34));
-    chamferedRect(ctx, ox + 2.2, oy + 2.2, size - 4.4, chamfer - 1);
+    chamferedRect(ctx, ox + 2.2, oy + 2.2, boardW - 4.4, boardH - 4.4, chamfer - 1);
     ctx.strokeStyle = topRail;
-    ctx.lineWidth = Math.max(1.2, size * 0.009);
+    ctx.lineWidth = Math.max(1.2, scale * 0.009);
     ctx.stroke();
 
     ctx.globalCompositeOperation = "lighter";
     ctx.globalAlpha = boosted ? 0.34 : 0.16;
     ctx.strokeStyle = rim;
-    ctx.lineWidth = Math.max(0.8, size * 0.006);
+    ctx.lineWidth = Math.max(0.8, scale * 0.006);
     ctx.beginPath();
     ctx.moveTo(ox + chamfer + 8, oy + 1.8);
-    ctx.lineTo(ox + size - chamfer - 8, oy + 1.8);
+    ctx.lineTo(ox + boardW - chamfer - 8, oy + 1.8);
     ctx.moveTo(ox + 1.8, oy + chamfer + 8);
-    ctx.lineTo(ox + 1.8, oy + size - chamfer - 8);
+    ctx.lineTo(ox + 1.8, oy + boardH - chamfer - 8);
     ctx.stroke();
 
     ctx.globalCompositeOperation = "source-over";
@@ -1842,29 +1883,39 @@ export class BoardRenderer {
     ctx.restore();
   }
 
-  private blitWells(ctx: CanvasRenderingContext2D, ox: number, oy: number, size: number, cell: number, isPlayer: boolean): void {
+  private blitWells(
+    ctx: CanvasRenderingContext2D,
+    ox: number,
+    oy: number,
+    boardW: number,
+    boardH: number,
+    cell: number,
+    rowCell: number,
+    isPlayer: boolean,
+  ): void {
     const theme = this.fx.boardTheme;
-    const key = `${Math.round(size)}|${Math.round(cell * 10)}|${isPlayer ? "p" : "o"}|${theme}|hw8`;
+    const key = `${Math.round(boardW)}x${Math.round(boardH)}|${Math.round(cell * 10)}x${Math.round(rowCell * 10)}|${isPlayer ? "p" : "o"}|${theme}|hw823`;
     let sheet = this.wellCache.get(key);
     if (!sheet) {
       sheet = document.createElement("canvas");
       const scale = Math.min(2, window.devicePixelRatio || 1);
-      sheet.width = Math.max(1, Math.floor(size * scale));
-      sheet.height = Math.max(1, Math.floor(size * scale));
+      sheet.width = Math.max(1, Math.floor(boardW * scale));
+      sheet.height = Math.max(1, Math.floor(boardH * scale));
       const g = sheet.getContext("2d");
       if (!g) return;
       g.setTransform(scale, 0, 0, scale, 0, 0);
-      paintDeviceBoard(g, size, cell, isPlayer, theme);
+      paintDeviceBoard(g, boardW, boardH, cell, rowCell, isPlayer, theme);
       this.wellCache.set(key, sheet);
     }
-    ctx.drawImage(sheet, ox, oy, size, size);
+    ctx.drawImage(sheet, ox, oy, boardW, boardH);
   }
 
   private drawBoardEnergy(
     ctx: CanvasRenderingContext2D,
     ox: number,
     oy: number,
-    size: number,
+    boardW: number,
+    boardH: number,
     isPlayer: boolean,
     boosted: boolean,
     frozen: boolean,
@@ -1880,9 +1931,10 @@ export class BoardRenderer {
     ctx.globalAlpha = alpha;
     ctx.strokeStyle = color;
     ctx.lineWidth = boosted ? 1.8 : 1;
-    const radius = size * 0.46;
-    const cx = ox + size / 2;
-    const cy = oy + size / 2;
+    const scale = Math.min(boardW, boardH);
+    const radius = scale * 0.46;
+    const cx = ox + boardW / 2;
+    const cy = oy + boardH / 2;
     const spin = now / (boosted ? 800 : 1800);
     ctx.beginPath();
     ctx.arc(cx, cy, radius, spin, spin + (boosted ? 1.5 : 0.9));
@@ -1893,7 +1945,7 @@ export class BoardRenderer {
     if (boosted) {
       ctx.globalAlpha = alpha * 0.55;
       ctx.fillStyle = color;
-      ctx.fillRect(ox + size * 0.12, oy + size * 0.08 + ((now / 24) % (size * 0.84)), size * 0.76, 1);
+      ctx.fillRect(ox + boardW * 0.12, oy + boardH * 0.08 + ((now / 24) % (boardH * 0.84)), boardW * 0.76, 1);
     }
     ctx.restore();
   }
@@ -1903,9 +1955,11 @@ export class BoardRenderer {
     ctx: CanvasRenderingContext2D,
     ox: number,
     oy: number,
-    size: number,
+    boardW: number,
+    boardH: number,
     now: number,
   ): void {
+    const size = Math.min(boardW, boardH);
     const wake = view.powerWake;
     if (!wake || this.fx.quality === "low" || this.fx.reducedMotion) return;
     const age = now - wake.born;
@@ -1955,8 +2009,10 @@ export class BoardRenderer {
     view: BoardView,
     ox: number,
     oy: number,
-    size: number,
+    boardW: number,
+    boardH: number,
     cell: number,
+    rowCell: number,
     now: number,
     isPlayer: boolean,
   ): void {
@@ -1987,21 +2043,21 @@ export class BoardRenderer {
     ctx.globalCompositeOperation = "lighter";
     ctx.fillStyle = pulse;
     ctx.globalAlpha = isPlayer ? 1 : 0.72;
-    ctx.fillRect(ox + FRAME, oy + FRAME, size - FRAME * 2, size - FRAME * 2);
+    ctx.fillRect(ox + FRAME, oy + FRAME, boardW - FRAME * 2, boardH - FRAME * 2);
 
     ctx.globalAlpha = (effect.kind === "mega" ? 0.52 : 0.36) * peak;
     ctx.strokeStyle = effect.kind === "mega" ? "#EAFBFF" : "#7CF5FF";
     ctx.lineWidth = Math.max(1.2, cell * (effect.kind === "mega" ? 0.028 : 0.02));
     ctx.shadowColor = "#00D9FF";
     ctx.shadowBlur = cell * (effect.kind === "mega" ? 0.16 : 0.1);
-    chamferedRect(ctx, ox + 2, oy + 2, size - 4, Math.min(14, size * 0.085));
+    chamferedRect(ctx, ox + 2, oy + 2, boardW - 4, boardH - 4, Math.min(14, Math.min(boardW, boardH) * 0.085));
     ctx.stroke();
 
     // Light catches the nearest socket rims without rebuilding the static well sheet.
     const ix = ox + FRAME;
     const iy = oy + FRAME;
     const targetCol = Math.round((effect.x - ix - cell / 2) / (cell + GAP));
-    const targetRow = Math.round((effect.y - iy - cell / 2) / (cell + GAP));
+    const targetRow = Math.round((effect.y - iy - rowCell / 2) / (rowCell + GAP));
     ctx.lineWidth = Math.max(0.8, cell * 0.012);
     ctx.globalAlpha = (effect.kind === "mega" ? 0.24 : 0.16) * peak;
     for (let r = Math.max(0, targetRow - 2); r <= Math.min(ROWS - 1, targetRow + 2); r++) {
@@ -2011,7 +2067,7 @@ export class BoardRenderer {
         const distance = Math.hypot(dx, dy);
         if (distance > 2.35) continue;
         const sx = ix + GAP + c * (cell + GAP) + cell / 2;
-        const sy = iy + GAP + r * (cell + GAP) + cell / 2;
+        const sy = iy + GAP + r * (rowCell + GAP) + rowCell / 2;
         ctx.globalAlpha = (effect.kind === "mega" ? 0.24 : 0.16) * peak * (1 - distance / 3.2);
         ctx.beginPath();
         ctx.arc(sx, sy, cell * 0.42, 0, Math.PI * 2);
@@ -2065,9 +2121,24 @@ export class BoardRenderer {
     if (this.shardPool.length < 96) this.shardPool.push(shard);
   }
 
+  /** Device-pixel scale of the target context, so sprites bake 1:1 to screen. */
+  private spriteScale(): number {
+    const dpr = typeof window === "undefined" ? 1 : window.devicePixelRatio || 1;
+    return Math.min(2, dpr);
+  }
+
   private gemSprite(atlas: HTMLCanvasElement, colorIndex: number, color: string, inner: number, selected: boolean): HTMLCanvasElement {
-    const q = Math.max(GEM_CELL, Math.round(inner));
-    const key = `${colorIndex}|${q}|${selected ? 1 : 0}|c6`;
+    // Bake at the seated cell size, not the per-frame travel/die/select scale.
+    // Keying off animated `inner` allocated a new canvas whenever a gem's
+    // drawn size changed by 1px, blew the 40-sprite cap, and the discarded
+    // backing stores piled up for the whole match.
+    const cell = this.lastPlayerCell > 2 ? this.lastPlayerCell : inner;
+    const inset = Math.max(0.6, cell * 0.012);
+    const restCss = Math.max(8, cell - inset * 2) * GEM_VISUAL_SCALE;
+    const q = ATLAS_ARTWORK_FAITHFUL
+      ? Math.max(24, Math.round(restCss * this.spriteScale()))
+      : Math.max(GEM_CELL, Math.round(restCss));
+    const key = `${colorIndex}|${q}|${selected ? 1 : 0}|m2faithful`;
     let sheet = this.gemSprites.get(key);
     if (sheet) return sheet;
     sheet = document.createElement("canvas");
@@ -2080,7 +2151,7 @@ export class BoardRenderer {
     g.imageSmoothingEnabled = true;
     g.imageSmoothingQuality = "high";
     this.paintAtlasGem(atlas, q / 2, q / 2, q, colorIndex, color, selected);
-    paintStaticGemDepth(g, q / 2, q / 2, q, colorIndex, color);
+    if (!ATLAS_ARTWORK_FAITHFUL) paintStaticGemDepth(g, q / 2, q / 2, q, colorIndex, color);
     this.ctx = prev;
     this.gemSprites.set(key, sheet);
     if (this.gemSprites.size > 40) {
@@ -3207,10 +3278,12 @@ export class BoardRenderer {
     ctx: CanvasRenderingContext2D,
     ox: number,
     oy: number,
-    size: number,
+    boardW: number,
+    boardH: number,
     boosted: boolean,
     frozen: boolean,
   ): void {
+    const size = Math.min(boardW, boardH);
     const chamfer = Math.min(12, Math.max(8, size * 0.08));
     const frameInset = FRAME - 0.7;
     const rail = boosted ? "#8AFFFF" : frozen ? "#7CF5FF" : "#28DFFF";
@@ -3222,13 +3295,13 @@ export class BoardRenderer {
     ctx.lineJoin = "round";
 
     // Dark metal housing: the player frame keeps a distinct lower-right shadow.
-    const housing = ctx.createLinearGradient(ox, oy, ox + size, oy + size);
+    const housing = ctx.createLinearGradient(ox, oy, ox + boardW, oy + boardH);
     housing.addColorStop(0, "#DDF8FF42");
     housing.addColorStop(0.12, "#173C4A");
     housing.addColorStop(0.52, "#06131C");
     housing.addColorStop(0.82, "#01050A");
     housing.addColorStop(1, "#000204");
-    chamferedRect(ctx, ox + 1.2, oy + 1.2, size - 2.4, chamfer);
+    chamferedRect(ctx, ox + 1.2, oy + 1.2, boardW - 2.4, boardH - 2.4, chamfer);
     ctx.strokeStyle = housing;
     ctx.lineWidth = 4.6;
     ctx.shadowColor = "#000000A8";
@@ -3239,20 +3312,20 @@ export class BoardRenderer {
     ctx.shadowOffsetY = 0;
 
     // Metallic bevel separating the bright rails from the recessed board.
-    const bevel = ctx.createLinearGradient(ox, oy, ox + size, oy + size);
+    const bevel = ctx.createLinearGradient(ox, oy, ox + boardW, oy + boardH);
     bevel.addColorStop(0, "#EAFBFF70");
     bevel.addColorStop(0.18, "#6FEAFF38");
     bevel.addColorStop(0.48, "#0A3543");
     bevel.addColorStop(0.78, "#01050A");
     bevel.addColorStop(1, "#000204");
-    chamferedRect(ctx, ox + 2.5, oy + 2.5, size - 5, chamfer - 1);
+    chamferedRect(ctx, ox + 2.5, oy + 2.5, boardW - 5, boardH - 5, chamfer - 1);
     ctx.strokeStyle = bevel;
     ctx.lineWidth = 2;
     ctx.stroke();
 
     // Side rails carry the strongest energy; the segmented pass keeps them
     // technological rather than reading as one uniform cyan glow.
-    const sideRail = ctx.createLinearGradient(ox, oy, ox, oy + size);
+    const sideRail = ctx.createLinearGradient(ox, oy, ox, oy + boardH);
     sideRail.addColorStop(0, railHot);
     sideRail.addColorStop(0.18, rail);
     sideRail.addColorStop(0.5, railSoft);
@@ -3265,10 +3338,10 @@ export class BoardRenderer {
     ctx.shadowColor = "#00D9FF80";
     ctx.shadowBlur = 7;
     for (let edge = 0; edge < 2; edge++) {
-      const edgeX = ox + (edge === 0 ? 2.5 : size - 2.5);
+      const edgeX = ox + (edge === 0 ? 2.5 : boardW - 2.5);
       ctx.beginPath();
       ctx.moveTo(edgeX, oy + chamfer + 3);
-      ctx.lineTo(edgeX, oy + size - chamfer - 3);
+      ctx.lineTo(edgeX, oy + boardH - chamfer - 3);
       ctx.stroke();
     }
     ctx.shadowBlur = 0;
@@ -3277,16 +3350,16 @@ export class BoardRenderer {
     ctx.lineWidth = 0.9;
     ctx.strokeStyle = "#7CF5FFB8";
     for (let edge = 0; edge < 2; edge++) {
-      const edgeX = ox + (edge === 0 ? 2.5 : size - 2.5);
+      const edgeX = ox + (edge === 0 ? 2.5 : boardW - 2.5);
       ctx.beginPath();
       ctx.moveTo(edgeX, oy + chamfer + 4);
-      ctx.lineTo(edgeX, oy + size - chamfer - 4);
+      ctx.lineTo(edgeX, oy + boardH - chamfer - 4);
       ctx.stroke();
     }
     ctx.setLineDash([]);
 
     // Top and bottom rails are quieter horizontal reflections.
-    const horizontalRail = ctx.createLinearGradient(ox, oy, ox + size, oy);
+    const horizontalRail = ctx.createLinearGradient(ox, oy, ox + boardW, oy);
     horizontalRail.addColorStop(0, "#00D9FF60");
     horizontalRail.addColorStop(0.18, railHot);
     horizontalRail.addColorStop(0.5, "#00D9FF88");
@@ -3297,10 +3370,10 @@ export class BoardRenderer {
     ctx.shadowColor = "#00D9FF4D";
     ctx.shadowBlur = 4;
     for (let edge = 0; edge < 2; edge++) {
-      const edgeY = oy + (edge === 0 ? 2.5 : size - 2.5);
+      const edgeY = oy + (edge === 0 ? 2.5 : boardH - 2.5);
       ctx.beginPath();
       ctx.moveTo(ox + chamfer + 3, edgeY);
-      ctx.lineTo(ox + size - chamfer - 3, edgeY);
+      ctx.lineTo(ox + boardW - chamfer - 3, edgeY);
       ctx.stroke();
     }
     ctx.shadowBlur = 0;
@@ -3308,8 +3381,8 @@ export class BoardRenderer {
 
     // Four angular energy nodes concentrate the brightest light at the corners.
     for (let corner = 0; corner < 4; corner++) {
-      const cx = ox + (corner % 2 === 0 ? 3.8 : size - 3.8);
-      const cy = oy + (corner < 2 ? 3.8 : size - 3.8);
+      const cx = ox + (corner % 2 === 0 ? 3.8 : boardW - 3.8);
+      const cy = oy + (corner < 2 ? 3.8 : boardH - 3.8);
       const node = ctx.createRadialGradient(cx, cy, 0, cx, cy, 6.5);
       node.addColorStop(0, "#F4FFFFFF");
       node.addColorStop(0.2, "#B9F8FFFF");
@@ -3336,14 +3409,14 @@ export class BoardRenderer {
     const innerReflection = ctx.createLinearGradient(
       ox + frameInset,
       oy + frameInset,
-      ox + size - frameInset,
-      oy + size - frameInset,
+      ox + boardW - frameInset,
+      oy + boardH - frameInset,
     );
     innerReflection.addColorStop(0, "#EAFBFF42");
     innerReflection.addColorStop(0.28, "#00D9FF12");
     innerReflection.addColorStop(0.68, "#00D9FF18");
     innerReflection.addColorStop(1, "#7CF5FF58");
-    chamferedRect(ctx, ox + frameInset, oy + frameInset, size - frameInset * 2, 5);
+    chamferedRect(ctx, ox + frameInset, oy + frameInset, boardW - frameInset * 2, boardH - frameInset * 2, 5);
     ctx.strokeStyle = innerReflection;
     ctx.lineWidth = 1.15;
     ctx.stroke();
@@ -3366,15 +3439,17 @@ export class BoardRenderer {
     const ctx = this.ctx;
     const color = COLORS[tile.color - 1] ?? "#FFFFFF";
     const pulse =
-      selected && this.fx.animation !== "low" && !this.fx.reducedMotion ? 1 + Math.sin(now / 140) * 0.03 : 1;
-    const visScale = Math.min(tile.scale * GEM_VISUAL_SCALE, 1.1);
+      selected && this.fx.animation !== "low" && !this.fx.reducedMotion
+        ? 1 + Math.sin(now / 140) * 0.028
+        : 1;
+    const visScale = Math.min(tile.scale * GEM_VISUAL_SCALE, 1.16);
     let travelLift = 1;
     if (!tile.dying && tile.moveKind !== "idle" && tile.moveDur > 0 && !this.fx.reducedMotion) {
       const t = Math.min(1, tile.moveAge / tile.moveDur);
       const arch = Math.sin(Math.PI * t);
-      travelLift = tile.moveKind === "fall" ? 1 + 0.03 * arch : 1 + 0.016 * arch;
+      travelLift = tile.moveKind === "fall" ? 1 + 0.035 * arch : 1 + 0.046 * arch;
     }
-    const inset = Math.max(1.1, size * 0.028);
+    const inset = Math.max(0.6, size * 0.012);
     const inner = Math.max(8, size - inset * 2);
     const s = inner * visScale * lift * pulse * travelLift;
     const cx = x + size / 2;
@@ -3384,34 +3459,80 @@ export class BoardRenderer {
       tile.dying && tile.dieAge < 0
         ? Math.max(0, Math.min(1, (tile.dieAge + MATCH_IMPACT_MS / 1000) / (MATCH_IMPACT_MS / 1000)))
         : 0;
+    const energized =
+      selected || charge > 0 || tile.dying || tile.glow > 0.28 || Boolean(powerTargeting?.target);
     ctx.save();
     ctx.globalAlpha *= tile.alpha;
     const atlas = gemAtlasCanvas();
     const useAtlas = Boolean(atlas && tile.color >= 1 && tile.color <= 6);
-    ctx.fillStyle = "rgba(0, 0, 0, 0.66)";
-    ctx.beginPath();
-    ctx.ellipse(cx, cy + s * 0.44, s * 0.36, s * 0.12, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = "rgba(0, 0, 0, 0.38)";
-    ctx.beginPath();
-    ctx.ellipse(cx, cy + s * 0.36, s * 0.22, s * 0.07, 0, 0, Math.PI * 2);
-    ctx.fill();
+    const faithfulAtlas = useAtlas && ATLAS_ARTWORK_FAITHFUL;
+
+    // Recessed socket rim only — the previous 70% black occluder fill
+    // peeked under every gem and joined into a continuous mid-board band.
+    if (!faithfulAtlas) {
     ctx.save();
-    jewelPath(ctx, cx + s * 0.032, cy + s * 0.09, s * 0.95, tile.color);
-    ctx.fillStyle = "rgba(0, 3, 10, 0.78)";
-    ctx.fill();
-    ctx.strokeStyle = colorWithAlpha(color, 0.24);
-    ctx.lineWidth = Math.max(1, s * 0.024);
+    jewelPath(ctx, cx + s * 0.028, cy + s * 0.085, s * 0.95, tile.color);
+    ctx.strokeStyle = colorWithAlpha(color, 0.1);
+    ctx.lineWidth = Math.max(1, s * 0.02);
     ctx.stroke();
     ctx.restore();
+    }
+
+    // Localized bloom only — idle gems stay nearly dry; events own the emissive.
+    const bloomStrength = energized
+      ? selected || charge > 0 || tile.dying
+        ? 1
+        : 0.48 + Math.min(0.32, tile.glow * 0.45)
+      : 0.08;
+    // Colored light spill onto the socket (source = this crystal). Idle spill is tiny.
+    const spill = energized ? 0.16 + Math.min(0.14, tile.glow * 0.2) : 0.02;
+    if (!faithfulAtlas) {
+    ctx.save();
+    ctx.globalAlpha *= spill;
     ctx.beginPath();
-    ctx.arc(cx, cy + s * 0.04, s * 0.4, 0, Math.PI * 2);
-    const halo = ctx.createRadialGradient(cx, cy - s * 0.04, s * 0.04, cx, cy + s * 0.06, s * 0.4);
+    ctx.ellipse(cx + s * 0.02, cy + s * 0.44, s * 0.36, s * 0.14, 0.08, 0, Math.PI * 2);
+    const spillGrad = ctx.createRadialGradient(cx, cy + s * 0.34, s * 0.02, cx, cy + s * 0.44, s * 0.4);
+    spillGrad.addColorStop(0, colorWithAlpha(crystal.core, 0.35));
+    spillGrad.addColorStop(0.45, colorWithAlpha(color, 0.18));
+    spillGrad.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = spillGrad;
+    ctx.fill();
+    ctx.restore();
+    ctx.save();
+    ctx.globalAlpha *= bloomStrength;
+    ctx.beginPath();
+    ctx.arc(cx, cy - s * 0.08, s * (energized ? 0.4 : 0.24), 0, Math.PI * 2);
+    const halo = ctx.createRadialGradient(cx, cy - s * 0.1, s * 0.04, cx, cy - s * 0.04, s * (energized ? 0.4 : 0.24));
     halo.addColorStop(0, crystal.bloom);
-    halo.addColorStop(0.32, `${color}15`);
+    halo.addColorStop(0.34, `${color}${energized ? "18" : "08"}`);
     halo.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = halo;
     ctx.fill();
+    ctx.restore();
+    }
+
+    // Squash & stretch: match impact + drag response.
+    let stretchSx = 1;
+    let stretchSy = 1;
+    let stretchAngle = 0;
+    if (charge > 0 && !this.fx.reducedMotion) {
+      const impact = gemMatchImpactStretch(charge, tile.breakStrength);
+      stretchSx = impact.sx;
+      stretchSy = impact.sy;
+    } else if (dragging && !tile.dying && !this.fx.reducedMotion) {
+      const drag = gemDragStretch(tile.vx, tile.vy);
+      stretchSx = drag.sx;
+      stretchSy = drag.sy;
+      stretchAngle = drag.angle;
+    }
+    const useStretch = Math.abs(stretchSx - 1) > 0.004 || Math.abs(stretchSy - 1) > 0.004;
+    if (useStretch) {
+      ctx.translate(cx, cy);
+      if (stretchAngle) ctx.rotate(stretchAngle);
+      ctx.scale(stretchSx, stretchSy);
+      if (stretchAngle) ctx.rotate(-stretchAngle);
+      ctx.translate(-cx, -cy);
+    }
     if (charge > 0 && !this.fx.reducedMotion) {
       ctx.save();
       ctx.globalAlpha *= 0.13 + charge * 0.1;
@@ -3431,7 +3552,7 @@ export class BoardRenderer {
       }
       ctx.restore();
     }
-    if (tile.glow > 0.05 && !tile.dying) {
+    if (!faithfulAtlas && tile.glow > 0.05 && !tile.dying) {
       ctx.beginPath();
       ctx.arc(cx, cy - s * 0.12, s * 0.2, 0, Math.PI * 2);
       ctx.fillStyle = `rgba(255,255,255,${Math.min(0.3, tile.glow * 0.42)})`;
@@ -3455,7 +3576,7 @@ export class BoardRenderer {
       else this.drawProceduralGem(cx + ox, cy + oy, s, tile.color, color, selected);
       ctx.restore();
     }
-    if (!dragging && !tile.dying) {
+    if (!faithfulAtlas && !dragging && !tile.dying) {
       roundRect(ctx, x + 0.8, y + 0.8, size - 1.6, size - 1.6, Math.max(5, size * 0.2));
       ctx.clip();
     }
@@ -3464,7 +3585,7 @@ export class BoardRenderer {
     } else {
       this.drawProceduralGem(cx, cy, s, tile.color, color, selected);
     }
-    this.drawGemMaterialLighting(cx, cy, s, tile.color, color, now, selected);
+    if (!faithfulAtlas) this.drawGemMaterialLighting(cx, cy, s, tile.color, color, now, selected);
     const targeting = powerTargeting;
     if (
       targeting &&
@@ -3561,10 +3682,15 @@ export class BoardRenderer {
   ): void {
     const ctx = this.ctx;
     const active = selected || Boolean(this.playerView.powerTargeting);
-    const intensity = active ? 1 : 0.42;
+    // Idle materials stay readable/dimensional; emissive energy is reserved for action.
+    const intensity = active ? 1 : 0.4;
     const phase = this.fx.reducedMotion ? 0.32 : (now / 4200 + (cx + cy) * 0.0008) % 1;
     const sweepX = cx - s * 0.82 + phase * s * 1.64;
     const crystal = crystalAccent(colorIndex);
+    const idleSpark =
+      !active && !this.fx.reducedMotion
+        ? Math.max(0, Math.sin(now / 720 + cx * 0.03 + cy * 0.02) * 0.22)
+        : 0;
 
     ctx.save();
     jewelPath(ctx, cx, cy, s * 0.92, colorIndex);
@@ -3572,9 +3698,9 @@ export class BoardRenderer {
 
     const sweep = ctx.createLinearGradient(sweepX - s * 0.22, cy - s, sweepX + s * 0.22, cy + s);
     sweep.addColorStop(0, "rgba(255,255,255,0)");
-    sweep.addColorStop(0.44, `rgba(255,255,255,${0.2 * intensity})`);
-    sweep.addColorStop(0.52, `rgba(255,255,255,${0.32 * intensity})`);
-    sweep.addColorStop(0.62, colorWithAlpha(crystal.edge, 0.15 * intensity));
+    sweep.addColorStop(0.44, `rgba(255,255,255,${(0.12 + idleSpark * 0.08) * intensity})`);
+    sweep.addColorStop(0.52, `rgba(255,255,255,${(0.2 + idleSpark * 0.12) * intensity})`);
+    sweep.addColorStop(0.62, colorWithAlpha(crystal.edge, (0.18 + idleSpark * 0.1) * intensity));
     sweep.addColorStop(1, "rgba(255,255,255,0)");
     ctx.globalCompositeOperation = "lighter";
     ctx.fillStyle = sweep;
@@ -3595,18 +3721,18 @@ export class BoardRenderer {
     jewelPath(ctx, cx, cy, s * 0.82, colorIndex);
     ctx.clip();
     ctx.globalCompositeOperation = "lighter";
-    const corePulse = 0.72 + Math.sin(now / 680 + cx * 0.01) * 0.12;
+    const corePulse = 0.78 + Math.sin(now / 620 + cx * 0.01) * 0.16;
     const internal = ctx.createRadialGradient(
-      cx - s * 0.12,
-      cy - s * 0.18,
-      s * 0.01,
       cx,
-      cy + s * 0.04,
-      s * 0.42,
+      cy - s * 0.04,
+      s * 0.004,
+      cx,
+      cy - s * 0.02,
+      s * 0.18,
     );
-    internal.addColorStop(0, colorWithAlpha("#FFFFFF", 0.34 * intensity * corePulse));
-    internal.addColorStop(0.14, colorWithAlpha(crystal.core, 0.38 * intensity * corePulse));
-    internal.addColorStop(0.48, colorWithAlpha(color, 0.1 * intensity));
+    internal.addColorStop(0, colorWithAlpha("#FFFFFF", (0.14 + idleSpark * 0.06) * intensity * corePulse));
+    internal.addColorStop(0.16, colorWithAlpha(crystal.core, (0.3 + idleSpark * 0.08) * intensity * corePulse));
+    internal.addColorStop(0.48, colorWithAlpha(color, 0.16 * intensity));
     internal.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = internal;
     ctx.fillRect(cx - s * 0.9, cy - s * 0.9, s * 1.8, s * 1.8);
@@ -3625,8 +3751,8 @@ export class BoardRenderer {
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
     const rim = ctx.createLinearGradient(cx - s * 0.56, cy - s * 0.56, cx + s * 0.5, cy + s * 0.58);
-    rim.addColorStop(0, colorWithAlpha("#FFFFFF", selected ? 0.55 : 0.28));
-    rim.addColorStop(0.24, colorWithAlpha(crystal.edge, selected ? 0.36 : 0.18));
+    rim.addColorStop(0, colorWithAlpha("#FFFFFF", selected ? 0.55 : 0.18));
+    rim.addColorStop(0.24, colorWithAlpha(crystal.edge, selected ? 0.36 : 0.1));
     rim.addColorStop(0.62, colorWithAlpha(color, 0.04));
     rim.addColorStop(1, colorWithAlpha("#06101A", 0.24));
     jewelPath(ctx, cx, cy, s * 0.94, colorIndex);
@@ -3698,9 +3824,11 @@ export class BoardRenderer {
     view: BoardView,
     ox: number,
     oy: number,
-    size: number,
+    boardW: number,
+    boardH: number,
     now: number,
   ): void {
+    const size = Math.min(boardW, boardH);
     const targeting = view.powerTargeting;
     if (!targeting || this.fx.reducedMotion) return;
     const age = Math.max(0, now - targeting.born);
@@ -3716,17 +3844,17 @@ export class BoardRenderer {
     ctx.globalCompositeOperation = "lighter";
     ctx.globalAlpha = 1;
     if (sweepFade > 0.01) {
-      const sweepX = ox + size * (-0.12 + sweepT * 1.24);
+      const sweepX = ox + boardW * (-0.12 + sweepT * 1.24);
       const sweep = ctx.createLinearGradient(sweepX - size * 0.14, 0, sweepX + size * 0.14, 0);
       sweep.addColorStop(0, "rgba(0, 217, 255, 0)");
        sweep.addColorStop(0.5, mega ? "rgba(234, 251, 255, 0.44)" : "rgba(124, 245, 255, 0.34)");
       sweep.addColorStop(1, "rgba(0, 217, 255, 0)");
       ctx.fillStyle = sweep;
       ctx.globalAlpha = sweepFade * (mega ? 1.2 : 1.04);
-      ctx.fillRect(sweepX - size * 0.14, oy + 3, size * 0.28, size - 6);
+      ctx.fillRect(sweepX - size * 0.14, oy + 3, size * 0.28, boardH - 6);
     }
 
-    roundRect(ctx, ox + 2, oy + 2, size - 4, size - 4, 18);
+    roundRect(ctx, ox + 2, oy + 2, boardW - 4, boardH - 4, 18);
     ctx.strokeStyle = mega
       ? `rgba(234, 251, 255, ${edgeAlpha})`
       : `rgba(124, 245, 255, ${edgeAlpha})`;
@@ -4028,6 +4156,8 @@ export class BoardRenderer {
     const ctx = this.ctx;
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
+    // Sprite is baked at s * deviceScale, then drawn at s CSS px. That is a
+    // 1:1 device-pixel blit — one resample from the 256 atlas cell, not 256→128.
     ctx.drawImage(sprite, cx - s / 2, cy - s / 2, s, s);
   }
 
@@ -4042,118 +4172,123 @@ export class BoardRenderer {
   ): void {
     const ctx = this.ctx;
     const { sx, sy } = gemCellOrigin(colorIndex);
-    const dest = s * 0.98;
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+
+    // Atlas artwork already owns silhouette, bezel, facets and core. Draw it
+    // 1:1 into the sprite with no procedural silhouette mask and no overlays.
+    if (ATLAS_ARTWORK_FAITHFUL) {
+      ctx.drawImage(atlas, sx, sy, GEM_CELL, GEM_CELL, cx - s / 2, cy - s / 2, s, s);
+      return;
+    }
+
+    const dest = s * 1.06;
     const dx = cx - dest / 2;
-    const dy = cy - dest / 2 + s * 0.018;
+    const dy = cy - dest / 2;
     const crystal = crystalAccent(colorIndex);
 
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(cx, cy + s * 0.08, s * 0.36, 0, Math.PI * 2);
-    const under = ctx.createRadialGradient(cx, cy - s * 0.02, s * 0.02, cx, cy + s * 0.1, s * 0.36);
-    under.addColorStop(0, crystal.bloom);
-    under.addColorStop(0.38, `${color}45`);
-    under.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = under;
-    ctx.fill();
-    ctx.restore();
-
+    // Crystal body first: artwork + facet planes, then one material grade over
+    // those pixels. Flat colour fills used to sit on top and desaturate both.
     ctx.save();
     jewelPath(ctx, cx, cy, s, colorIndex);
-    ctx.beginPath();
-    ctx.arc(cx, cy, s * 0.5, 0, Math.PI * 2);
     ctx.clip();
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
     ctx.drawImage(atlas, sx, sy, GEM_CELL, GEM_CELL, dx, dy, dest, dest);
 
     ctx.globalCompositeOperation = "source-atop";
-    // The atlas supplies the approved silhouettes and reflections, but its
-    // baked colors can otherwise overpower the live palette. A restrained
-    // exact-primary tint makes each crystal read as its gameplay color while
-    // preserving the atlas material detail.
-    ctx.fillStyle = colorWithAlpha(color, 0.48);
+    ctx.globalAlpha = selected ? 0.5 : 0.4;
+    paintCrystalOptics(ctx, cx, cy, s, colorIndex, color);
+    ctx.globalAlpha = 1;
+    ctx.restore();
+
+    // Facet contrast, chroma lock, bevel volume, dark rim, internal core.
+    const chroma = hexHueSat(color);
+    const facetSpec = gemFacetSpec(colorIndex);
+    applyGemMaterial(ctx, cx, cy, s, {
+      hue: chroma.hue,
+      sat: chroma.sat,
+      facets: facetSpec.facets,
+      facetPhase: facetSpec.facetPhase,
+      selected,
+    });
+
+    ctx.save();
+    jewelPath(ctx, cx, cy, s, colorIndex);
+    ctx.clip();
+    ctx.globalCompositeOperation = "source-atop";
+
+    const bottomShade = ctx.createLinearGradient(cx, cy + s * 0.12, cx, cy + s * 0.5);
+    bottomShade.addColorStop(0, "rgba(0,0,0,0)");
+    bottomShade.addColorStop(0.55, "rgba(0, 3, 10, 0.12)");
+    bottomShade.addColorStop(1, "rgba(0, 6, 14, 0.36)");
+    ctx.fillStyle = bottomShade;
     ctx.fillRect(dx, dy, dest, dest);
-    const occlude = ctx.createRadialGradient(cx + s * 0.14, cy + s * 0.24, s * 0.02, cx, cy, s * 0.52);
-    occlude.addColorStop(0, "rgba(0, 4, 12, 0.4)");
-    occlude.addColorStop(0.42, "rgba(0,0,0,0)");
-    occlude.addColorStop(1, "rgba(0, 6, 14, 0.24)");
+
+    const occlude = ctx.createRadialGradient(cx, cy - s * 0.03, s * 0.28, cx, cy, s * 0.52);
+    occlude.addColorStop(0, "rgba(0,0,0,0)");
+    occlude.addColorStop(0.62, "rgba(0,0,0,0)");
+    occlude.addColorStop(0.84, "rgba(0, 4, 12, 0.22)");
+    occlude.addColorStop(1, "rgba(0, 6, 14, 0.48)");
     ctx.fillStyle = occlude;
     ctx.fillRect(dx, dy, dest, dest);
-    const volume = ctx.createRadialGradient(cx - s * 0.16, cy - s * 0.26, s * 0.01, cx, cy + s * 0.1, s * 0.5);
-    volume.addColorStop(0, selected ? "rgba(255,255,255,0.24)" : "rgba(255,255,255,0.08)");
-    volume.addColorStop(0.18, `${color}38`);
-    volume.addColorStop(0.46, `${crystal.edge}18`);
-    volume.addColorStop(0.72, "rgba(0,0,0,0)");
-    volume.addColorStop(1, "rgba(0,8,18,0.28)");
-    ctx.fillStyle = volume;
-    ctx.fillRect(dx, dy, dest, dest);
-    const refraction = ctx.createLinearGradient(
-      cx - s * 0.5,
-      cy + s * 0.42,
-      cx + s * 0.42,
-      cy - s * 0.5,
-    );
-    refraction.addColorStop(0, colorWithAlpha(crystal.core, 0.04));
-    refraction.addColorStop(0.42, colorWithAlpha(crystal.edge, 0.12));
-    refraction.addColorStop(0.5, "rgba(255,255,255,0.1)");
-    refraction.addColorStop(0.58, colorWithAlpha(color, 0.08));
-    refraction.addColorStop(1, "rgba(255,255,255,0)");
-    ctx.fillStyle = refraction;
-    ctx.fillRect(dx, dy, dest, dest);
-    paintCrystalOptics(ctx, cx, cy, s, colorIndex, color);
 
-    const bevel = ctx.createLinearGradient(cx - s * 0.46, cy - s * 0.46, cx + s * 0.46, cy + s * 0.46);
-    bevel.addColorStop(0, "rgba(255,255,255,0.08)");
+    const bevel = ctx.createLinearGradient(cx - s * 0.4, cy - s * 0.5, cx + s * 0.42, cy + s * 0.42);
+    bevel.addColorStop(0, "rgba(255,255,255,0.06)");
     bevel.addColorStop(0.32, "rgba(255,255,255,0)");
-    bevel.addColorStop(0.72, "rgba(0,0,0,0.04)");
-    bevel.addColorStop(1, "rgba(0,5,14,0.42)");
+    bevel.addColorStop(0.7, "rgba(0,0,0,0)");
+    bevel.addColorStop(1, "rgba(0,5,14,0.18)");
     ctx.fillStyle = bevel;
     ctx.fillRect(dx, dy, dest, dest);
-    const edgeShade = ctx.createLinearGradient(cx - s * 0.48, cy - s * 0.48, cx + s * 0.48, cy + s * 0.48);
-    edgeShade.addColorStop(0, "rgba(255,255,255,0)");
-    edgeShade.addColorStop(0.62, "rgba(0,0,0,0)");
-    edgeShade.addColorStop(1, "rgba(0,8,18,0.55)");
+    const edgeShade = ctx.createLinearGradient(cx - s * 0.4, cy - s * 0.45, cx + s * 0.45, cy + s * 0.45);
+    edgeShade.addColorStop(0, "rgba(255,255,255,0.06)");
+    edgeShade.addColorStop(0.55, "rgba(0,0,0,0)");
+    edgeShade.addColorStop(1, "rgba(0,8,18,0.44)");
     jewelPath(ctx, cx, cy, s * 0.97, colorIndex);
     ctx.strokeStyle = edgeShade;
     ctx.lineWidth = Math.max(1, s * 0.024);
     ctx.stroke();
 
     ctx.globalCompositeOperation = "lighter";
-    const core = ctx.createRadialGradient(cx - s * 0.04, cy - s * 0.08, s * 0.006, cx, cy + s * 0.02, s * 0.26);
-    core.addColorStop(0, "rgba(255,255,255,0.28)");
-    core.addColorStop(0.16, colorWithAlpha(crystal.core, 0.82));
-    core.addColorStop(0.52, `${color}4d`);
+    const coreR = selected ? 0.13 : 0.1;
+    const core = ctx.createRadialGradient(cx, cy - s * 0.04, s * 0.003, cx, cy - s * 0.02, s * coreR);
+    core.addColorStop(0, selected ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.13)");
+    core.addColorStop(0.24, colorWithAlpha(crystal.core, selected ? 0.62 : 0.44));
+    core.addColorStop(0.58, selected ? `${color}3a` : `${color}26`);
     core.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = core;
     ctx.beginPath();
-    ctx.arc(cx, cy - s * 0.05, s * 0.26, 0, Math.PI * 2);
+    ctx.arc(cx, cy - s * 0.03, s * coreR, 0, Math.PI * 2);
     ctx.fill();
     paintSpeculars(ctx, cx, cy, s, crystal);
 
     ctx.globalCompositeOperation = "source-atop";
     jewelPath(ctx, cx, cy, s * 0.92, colorIndex);
-    ctx.strokeStyle = "rgba(255,255,255,0.3)";
-    ctx.lineWidth = Math.max(0.8, s * 0.016);
+    ctx.strokeStyle = "rgba(255,255,255,0.14)";
+    ctx.lineWidth = Math.max(0.8, s * 0.014);
     ctx.stroke();
     jewelPath(ctx, cx, cy, s * 0.98, colorIndex);
     ctx.strokeStyle = crystal.edge;
     ctx.globalAlpha = 0.4;
-    ctx.lineWidth = Math.max(0.9, s * 0.02);
+    ctx.lineWidth = Math.max(0.9, s * 0.018);
     ctx.stroke();
     ctx.globalAlpha = 1;
 
     ctx.restore();
 
+    // Socket spill sits behind the graded crystal so it never bleeds into the
+    // coverage field the bevel shading is derived from.
     ctx.save();
-    ctx.strokeStyle = crystal.edge;
-    ctx.globalAlpha = 0.48;
-    ctx.lineWidth = Math.max(1, s * 0.014);
+    ctx.globalCompositeOperation = "destination-over";
     ctx.beginPath();
-    ctx.arc(cx, cy - s * 0.02, s * 0.09, 0, Math.PI * 2);
-    ctx.stroke();
+    ctx.arc(cx, cy + s * 0.02, s * (selected ? 0.34 : 0.26), 0, Math.PI * 2);
+    const under = ctx.createRadialGradient(cx, cy - s * 0.06, s * 0.02, cx, cy + s * 0.04, s * (selected ? 0.34 : 0.26));
+    under.addColorStop(0, selected ? crystal.bloom : colorWithAlpha(crystal.core, 0.2));
+    under.addColorStop(0.4, selected ? `${color}3a` : `${color}18`);
+    under.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = under;
+    ctx.fill();
     ctx.restore();
-    drawGemIcon(ctx, cx, cy, s, colorIndex, color);
   }
 
   private drawProceduralGem(
@@ -4175,19 +4310,20 @@ export class BoardRenderer {
     ctx.fill();
 
     jewelPath(ctx, cx, cy, s * 0.78, colorIndex);
-    const body = ctx.createLinearGradient(cx - s * 0.2, cy - s * 0.46, cx + s * 0.18, cy + s * 0.46);
-    body.addColorStop(0, shade(color, 1.55));
-    body.addColorStop(0.35, shade(color, 1.08));
-    body.addColorStop(0.62, color);
-    body.addColorStop(1, shade(color, 0.38));
+    const body = ctx.createRadialGradient(cx, cy - s * 0.06, s * 0.02, cx, cy, s * 0.46);
+    body.addColorStop(0, shade(color, 1.22));
+    body.addColorStop(0.32, shade(color, 1.0));
+    body.addColorStop(0.68, shade(color, 0.58));
+    body.addColorStop(1, shade(color, 0.26));
     ctx.fillStyle = body;
     ctx.fill();
 
-    const core = ctx.createRadialGradient(cx - s * 0.08, cy - s * 0.1, s * 0.04, cx, cy, s * 0.34);
-    core.addColorStop(0, colorWithAlpha(crystal.core, 0.72));
-    core.addColorStop(0.35, `${color}dd`);
+    const core = ctx.createRadialGradient(cx, cy - s * 0.05, s * 0.004, cx, cy - s * 0.02, s * 0.16);
+    core.addColorStop(0, colorWithAlpha("#FFFFFF", 0.36));
+    core.addColorStop(0.22, colorWithAlpha(crystal.core, 0.72));
+    core.addColorStop(0.58, `${color}88`);
     core.addColorStop(1, "rgba(0,0,0,0)");
-    jewelPath(ctx, cx, cy, s * 0.62, colorIndex);
+    jewelPath(ctx, cx, cy, s * 0.58, colorIndex);
     ctx.fillStyle = core;
     ctx.fill();
 
@@ -4218,13 +4354,13 @@ export class BoardRenderer {
     ctx.globalCompositeOperation = "lighter";
     paintSpeculars(ctx, cx, cy, s, crystal);
     ctx.restore();
-
-    drawGemIcon(ctx, cx, cy, s, colorIndex, color);
   }
 }
 
 function boardLayout(x: number, y: number, w: number, h: number): {
   size: number;
+  boardW: number;
+  boardH: number;
   ox: number;
   oy: number;
   cell: number;
@@ -4232,14 +4368,42 @@ function boardLayout(x: number, y: number, w: number, h: number): {
   ix: number;
   iy: number;
 } {
-  const size = Math.min(w, h);
-  const ox = x + (w - size) / 2;
-  const oy = y;
-  const inner = size - FRAME * 2;
-  const cell = (inner - GAP * (COLS + 1)) / COLS;
-  const rowInner = Math.max(inner, h - FRAME * 2);
-  const rowCell = (rowInner - GAP * (ROWS + 1)) / ROWS;
-  return { size, ox, oy, cell, rowCell, ix: ox + FRAME, iy: oy + FRAME };
+  // Keep gem chips perfectly square on the 8x10 grid. The board frame still
+  // fills a tall portrait slot; leftover height is top/bottom inset, not extra
+  // space between rows. Row pitch is gem draw size + the 2.8css gutter measured
+  // on the 390×844 reference (live was ~15.7css).
+  const innerW = Math.max(0, w - FRAME * 2);
+  const innerH = Math.max(0, h - FRAME * 2);
+  const cellW = (innerW - GAP * (COLS + 1)) / COLS;
+  const cellH = (innerH - GAP * (ROWS + 1)) / ROWS;
+  const cell = Math.min(cellW, cellH);
+  const fillRowCell = cellH > cellW ? cellH : cell;
+  const inset = Math.max(0.6, cell * 0.012);
+  const gemDraw = Math.max(8, cell - inset * 2) * GEM_VISUAL_SCALE;
+  const refRowGap = 2.8;
+  // 13 rows at the preferred pitch overflow the playable inner by ~18css and
+  // clip the last row. Fit the same row count inside innerH; 2css slack keeps
+  // bezels off the frame. Horizontal cell size is unchanged.
+  const fitRowCell = (innerH - 2 - GAP * (ROWS + 1)) / ROWS;
+  const rowCell = Math.min(fitRowCell, Math.max(cell, gemDraw + refRowGap - GAP));
+  const gridW = cell * COLS + GAP * (COLS + 1);
+  const fillGridH = fillRowCell * ROWS + GAP * (ROWS + 1);
+  const gemGridH = rowCell * ROWS + GAP * (ROWS + 1);
+  const boardW = gridW + FRAME * 2;
+  const boardH = fillGridH + FRAME * 2;
+  const ox = x + (w - boardW) / 2;
+  const oy = y + (h - boardH) / 2;
+  return {
+    size: boardW,
+    boardW,
+    boardH,
+    ox,
+    oy,
+    cell,
+    rowCell,
+    ix: ox + FRAME,
+    iy: oy + FRAME + Math.max(0, (innerH - gemGridH) / 2),
+  };
 }
 
 function drawIrregularEnergyArc(
@@ -4284,8 +4448,10 @@ function crystalAccent(colorIndex: number): { core: string; edge: string; bloom:
 
 function paintDeviceBoard(
   g: CanvasRenderingContext2D,
-  size: number,
+  boardW: number,
+  boardH: number,
   cell: number,
+  rowCell: number,
   isPlayer: boolean,
   theme: string,
 ): void {
@@ -4295,7 +4461,8 @@ function paintDeviceBoard(
   const rimHot = isPlayer ? "#6FEAFF" : "#FFD6E2";
   const rimSoft = isPlayer ? "#007A9E9E" : "#8F163D94";
   const rimDim = isPlayer ? "#005B7833" : "#8F163D26";
-  const body = g.createLinearGradient(0, 0, 0, size);
+  const size = Math.min(boardW, boardH); // scale reference for ornaments
+  const body = g.createLinearGradient(0, 0, 0, boardH);
   if (ember) {
     body.addColorStop(0, "#300D1C");
     body.addColorStop(0.5, "#190812");
@@ -4315,11 +4482,11 @@ function paintDeviceBoard(
     body.addColorStop(0.55, "#180710");
     body.addColorStop(1, "#01050A");
   }
-  roundRect(g, 0, 0, size, size, 22);
+  roundRect(g, 0, 0, boardW, boardH, 22);
   g.fillStyle = body;
   g.fill();
 
-  const metal = g.createLinearGradient(0, 0, size, size);
+  const metal = g.createLinearGradient(0, 0, boardW, boardH);
   metal.addColorStop(0, isPlayer ? "#DDF8FF29" : "#FFD6E21F");
   metal.addColorStop(0.22, "#FFFFFF14");
   metal.addColorStop(0.48, "#0613222E");
@@ -4328,7 +4495,7 @@ function paintDeviceBoard(
   g.fillStyle = metal;
   g.fill();
 
-  const bevel = g.createLinearGradient(0, 0, 0, size);
+  const bevel = g.createLinearGradient(0, 0, 0, boardH);
   bevel.addColorStop(0, "rgba(255,255,255,0.14)");
   bevel.addColorStop(0.08, "rgba(255,255,255,0.04)");
   bevel.addColorStop(0.92, "rgba(0,0,0,0)");
@@ -4336,70 +4503,62 @@ function paintDeviceBoard(
   g.fillStyle = bevel;
   g.fill();
 
-  const glass = g.createLinearGradient(0, 0, 0, size * 0.28);
+  const glass = g.createLinearGradient(0, 0, 0, boardH * 0.28);
   glass.addColorStop(0, "rgba(255,255,255,0.16)");
   glass.addColorStop(0.42, "rgba(255,255,255,0.05)");
   glass.addColorStop(1, "rgba(255,255,255,0)");
   g.fillStyle = glass;
   g.fill();
 
-  const innerShade = g.createLinearGradient(0, size * 0.62, 0, size);
-  innerShade.addColorStop(0, "rgba(0,0,0,0)");
-  innerShade.addColorStop(1, "rgba(0,0,0,0.38)");
-  g.fillStyle = innerShade;
-  g.fill();
-
-  const wellGlass = g.createLinearGradient(size * 0.08, size * 0.08, size * 0.4, size * 0.32);
+  const wellGlass = g.createLinearGradient(boardW * 0.08, boardH * 0.08, boardW * 0.4, boardH * 0.32);
   wellGlass.addColorStop(0, "rgba(255,255,255,0.16)");
   wellGlass.addColorStop(1, "rgba(255,255,255,0)");
   g.fillStyle = wellGlass;
-  roundRect(g, size * 0.07, size * 0.07, size * 0.38, size * 0.2, 10);
+  roundRect(g, boardW * 0.07, boardH * 0.07, boardW * 0.38, boardH * 0.2, 10);
   g.fill();
 
-  const edgeLite = g.createLinearGradient(0, 0, size, 0);
+  const edgeLite = g.createLinearGradient(0, 0, boardW, 0);
   edgeLite.addColorStop(0, isPlayer ? "#00CFFF4D" : "#FF174F1F");
   edgeLite.addColorStop(0.45, "#FFFFFF00");
   edgeLite.addColorStop(1, isPlayer ? "#00CFFF1F" : "#FF174F42");
   g.fillStyle = edgeLite;
   g.fill();
 
-  roundRect(g, 0.7, 0.7, size - 1.4, size - 1.4, 21);
+  roundRect(g, 0.7, 0.7, boardW - 1.4, boardH - 1.4, 21);
    g.strokeStyle = "#01050A";
   g.lineWidth = 1.4;
   g.stroke();
 
-  roundRect(g, 1.6, 1.6, size - 3.2, size - 3.2, 20);
+  roundRect(g, 1.6, 1.6, boardW - 3.2, boardH - 3.2, 20);
   g.strokeStyle = rimSoft;
   g.lineWidth = 1.7;
   g.stroke();
 
-  roundRect(g, 3.15, 3.15, size - 6.3, size - 6.3, 18);
+  roundRect(g, 3.15, 3.15, boardW - 6.3, boardH - 6.3, 18);
   g.strokeStyle = "#FFFFFF29";
   g.lineWidth = 0.9;
   g.stroke();
 
-  roundRect(g, 4.35, 4.35, size - 8.7, size - 8.7, 16);
+  roundRect(g, 4.35, 4.35, boardW - 8.7, boardH - 8.7, 16);
   g.strokeStyle = rim;
   g.lineWidth = 1.35;
   g.stroke();
 
-  roundRect(g, 6.2, 6.2, size - 12.4, size - 12.4, 14);
+  roundRect(g, 6.2, 6.2, boardW - 12.4, boardH - 12.4, 14);
    g.fillStyle = isPlayer ? "#04101A" : "#190812";
   g.fill();
-  const pit = g.createRadialGradient(size * 0.5, size * 0.38, size * 0.05, size * 0.5, size * 0.52, size * 0.76);
-  pit.addColorStop(0, isPlayer ? "#005B7852" : "#8A12353D");
-  pit.addColorStop(0.5, "rgba(0,0,0,0.22)");
-  pit.addColorStop(1, "rgba(0,0,0,0.7)");
-  g.fillStyle = pit;
+  // Flat well tint — the old radial (hot at 38% boardH) split the playfield
+  // into a lit upper zone and a darker lower-middle band.
+  g.fillStyle = isPlayer ? "#005B7852" : "#8A12353D";
   g.fill();
   g.strokeStyle = rimDim;
   g.lineWidth = 1;
   g.stroke();
-  roundRect(g, 6.9, 6.9, size - 13.8, size - 13.8, 13);
+  roundRect(g, 6.9, 6.9, boardW - 13.8, boardH - 13.8, 13);
   g.strokeStyle = "#01050A8C";
   g.lineWidth = 2.2;
   g.stroke();
-  roundRect(g, 5.05, 5.05, size - 10.1, size - 10.1, 15);
+  roundRect(g, 5.05, 5.05, boardW - 10.1, boardH - 10.1, 15);
   g.strokeStyle = isPlayer ? "#DDF8FF29" : "#FFD6E21F";
   g.lineWidth = 0.9;
   g.stroke();
@@ -4410,17 +4569,17 @@ function paintDeviceBoard(
   g.lineWidth = isPlayer ? 1.55 : 1.35;
   g.lineCap = "round";
   const pipePad = Math.max(18, size * 0.07);
-  const mid = size / 2;
+  const mid = boardH / 2;
   g.beginPath();
   g.moveTo(pipePad, 3.15);
-  g.lineTo(size - pipePad, 3.15);
-  g.moveTo(pipePad, size - 3.15);
-  g.lineTo(size - pipePad, size - 3.15);
+  g.lineTo(boardW - pipePad, 3.15);
+  g.moveTo(pipePad, boardH - 3.15);
+  g.lineTo(boardW - pipePad, boardH - 3.15);
   if (isPlayer) {
     g.moveTo(3.15, mid - pipePad * 0.4);
     g.lineTo(3.15, mid + pipePad * 0.4);
-    g.moveTo(size - 3.15, mid - pipePad * 0.4);
-    g.lineTo(size - 3.15, mid + pipePad * 0.4);
+    g.moveTo(boardW - 3.15, mid - pipePad * 0.4);
+    g.lineTo(boardW - 3.15, mid + pipePad * 0.4);
   }
   g.stroke();
   g.globalAlpha = 1;
@@ -4431,21 +4590,21 @@ function paintDeviceBoard(
   g.moveTo(11, 11 + tick);
   g.lineTo(11, 11);
   g.lineTo(11 + tick, 11);
-  g.moveTo(size - 11 - tick, 11);
-  g.lineTo(size - 11, 11);
-  g.lineTo(size - 11, 11 + tick);
-  g.moveTo(11, size - 11 - tick);
-  g.lineTo(11, size - 11);
-  g.lineTo(11 + tick, size - 11);
-  g.moveTo(size - 11 - tick, size - 11);
-  g.lineTo(size - 11, size - 11);
-  g.lineTo(size - 11, size - 11 - tick);
+  g.moveTo(boardW - 11 - tick, 11);
+  g.lineTo(boardW - 11, 11);
+  g.lineTo(boardW - 11, 11 + tick);
+  g.moveTo(11, boardH - 11 - tick);
+  g.lineTo(11, boardH - 11);
+  g.lineTo(11 + tick, boardH - 11);
+  g.moveTo(boardW - 11 - tick, boardH - 11);
+  g.lineTo(boardW - 11, boardH - 11);
+  g.lineTo(boardW - 11, boardH - 11 - tick);
   g.stroke();
   const rivets: Array<[number, number]> = [
     [4.8, 4.8],
-    [size - 4.8, 4.8],
-    [4.8, size - 4.8],
-    [size - 4.8, size - 4.8],
+    [boardW - 4.8, 4.8],
+    [4.8, boardH - 4.8],
+    [boardW - 4.8, boardH - 4.8],
   ];
   for (const [rx, ry] of rivets) {
     g.beginPath();
@@ -4462,24 +4621,41 @@ function paintDeviceBoard(
   }
   g.restore();
 
-  const wellR = Math.max(3.2, cell * 0.15);
-  const pad = Math.max(1.8, cell * 0.11);
-  const lipFill = isPlayer ? "#06111C" : "#190812";
+  const wellR = Math.max(2.8, cell * 0.12);
+  const pad = Math.max(1.2, cell * 0.045);
+  const rowPitch = rowCell + GAP;
+  const colPitch = cell + GAP;
+  const gemYPad = Math.max(0, (rowCell - cell) / 2);
+  const gemGridH = rowCell * ROWS + GAP * (ROWS + 1);
+  const rowPad = Math.max(0, (boardH - FRAME * 2 - gemGridH) / 2);
+  // Portrait row pitch is taller than the square gem. Painting sockets only
+  // at cell height left a full-width pit gutter after every row — the dark
+  // band. Skip-wells (flat pit) removed it. Grow each socket to the row band
+  // so the field is continuous; gem seats stay square and centered.
+  const seatFill = isPlayer ? "#04101A" : "#190812";
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
-      const wx = FRAME + GAP + c * (cell + GAP);
-      const wy = FRAME + GAP + r * (cell + GAP);
+      const wx = FRAME + GAP + c * colPitch;
+      const rowY = FRAME + rowPad + GAP + r * rowPitch;
+      const wy = rowY + gemYPad;
+      if (r === 0) {
+        roundRect(g, wx, FRAME + rowPad + GAP, cell, ROWS * rowPitch - GAP, wellR);
+        g.fillStyle = seatFill;
+        g.fill();
+        g.fillStyle = isPlayer ? "#005B7852" : "#8A12353D";
+        g.fill();
+      }
       roundRect(g, wx, wy, cell, cell, wellR);
-      g.fillStyle = lipFill;
-      g.fill();
-      const well = g.createLinearGradient(wx, wy, wx, wy + cell);
-      well.addColorStop(0, isPlayer ? "#005B7847" : "#8A123538");
-      well.addColorStop(0.42, "#01050A00");
-      well.addColorStop(1, "#01050AC7");
+      // Shared key from upper-left: cool rim catch. No full-cell black pocket.
+      const well = g.createLinearGradient(wx, wy, wx + cell, wy + cell);
+      well.addColorStop(0, isPlayer ? "#1A6A824F" : "#9A284048");
+      well.addColorStop(0.28, isPlayer ? "#005B7847" : "#8A123538");
+      well.addColorStop(0.62, "#01050A00");
+      well.addColorStop(1, "#01050A00");
       g.fillStyle = well;
       g.fill();
       roundRect(g, wx + pad, wy + pad, cell - pad * 2, cell - pad * 2, Math.max(2, wellR - 1.5));
-       g.fillStyle = (r + c) % 2 === 0 ? "#02060D" : "#06111C";
+       g.fillStyle = (r + c) % 2 === 0 ? "#04101A" : "#06111C";
       g.fill();
        const contact = g.createRadialGradient(
          wx + cell * 0.52,
@@ -4489,30 +4665,19 @@ function paintDeviceBoard(
          wy + cell * 0.72,
          cell * 0.5,
        );
-       contact.addColorStop(0, "rgba(0, 0, 0, 0.54)");
-       contact.addColorStop(0.52, "rgba(0, 0, 0, 0.18)");
+       contact.addColorStop(0, "rgba(0, 0, 0, 0.22)");
+       contact.addColorStop(0.52, "rgba(0, 0, 0, 0.08)");
        contact.addColorStop(1, "rgba(0, 0, 0, 0)");
        g.fillStyle = contact;
        g.beginPath();
-       g.ellipse(wx + cell * 0.52, wy + cell * 0.7, cell * 0.36, cell * 0.2, 0, 0, Math.PI * 2);
+       g.ellipse(wx + cell * 0.52, wy + cell * 0.7, cell * 0.28, cell * 0.14, 0, 0, Math.PI * 2);
        g.fill();
-      const dent = g.createLinearGradient(wx, wy, wx, wy + cell);
-      dent.addColorStop(0, "#FFFFFF0D");
-      dent.addColorStop(0.32, "#01050A00");
-      dent.addColorStop(1, "#01050A6B");
+      const dent = g.createLinearGradient(wx - cell * 0.05, wy - cell * 0.08, wx + cell * 0.85, wy + cell);
+      dent.addColorStop(0, "#FFFFFF14");
+      dent.addColorStop(0.22, "#FFFFFF08");
+      dent.addColorStop(0.48, "#01050A00");
+      dent.addColorStop(1, "#01050A22");
       g.fillStyle = dent;
-      g.fill();
-      const pocket = g.createRadialGradient(
-        wx + cell * 0.5,
-        wy + cell * 0.72,
-        cell * 0.04,
-        wx + cell * 0.5,
-        wy + cell * 0.58,
-        cell * 0.46,
-      );
-      pocket.addColorStop(0, "#01050A9E");
-      pocket.addColorStop(1, "#01050A00");
-      g.fillStyle = pocket;
       g.fill();
       const lip = g.createLinearGradient(wx, wy, wx + cell * 0.62, wy + cell * 0.28);
       lip.addColorStop(0, "#FFFFFF1A");
@@ -4521,24 +4686,9 @@ function paintDeviceBoard(
       g.fillStyle = lip;
       roundRect(g, wx + pad, wy + pad, cell - pad * 2, Math.max(4, (cell - pad * 2) * 0.38), Math.max(2, wellR - 1.5));
       g.fill();
-      g.strokeStyle = "#01050A7A";
-      g.lineWidth = 1;
-      roundRect(g, wx + 0.8, wy + 0.8, cell - 1.6, cell - 1.6, wellR);
-      g.stroke();
-      g.strokeStyle = rimDim;
-      g.lineWidth = 0.55;
-      roundRect(g, wx + 0.5, wy + 0.5, cell - 1, cell - 1, wellR);
-      g.stroke();
-       const socketRim = g.createLinearGradient(wx, wy, wx + cell, wy + cell);
-       socketRim.addColorStop(0, isPlayer ? "#B9F8FF42" : "#FFD6E22E");
-       socketRim.addColorStop(0.3, isPlayer ? "#00D9FF12" : "#FF174F0B");
-       socketRim.addColorStop(0.72, "#01050A00");
-       socketRim.addColorStop(1, "#00000070");
-       g.strokeStyle = socketRim;
-       g.lineWidth = Math.max(0.65, cell * 0.014);
-       roundRect(g, wx + pad * 0.62, wy + pad * 0.62, cell - pad * 1.24, cell - pad * 1.24, Math.max(2, wellR - 1.2));
-       g.stroke();
-       g.strokeStyle = isPlayer ? "#12394A2E" : "#8F163D22";
+      // No full-cell dark stroke — those rims met across 8 columns and framed
+      // the portrait row gutters into one horizontal dark band.
+      g.strokeStyle = isPlayer ? "#12394A2E" : "#8F163D22";
       g.lineWidth = 0.55;
       roundRect(g, wx + pad * 0.45, wy + pad * 0.45, cell - pad * 0.9, cell - pad * 0.9, Math.max(2, wellR - 1));
       g.stroke();
@@ -4546,20 +4696,13 @@ function paintDeviceBoard(
   }
 
   g.save();
-  roundRect(g, FRAME, FRAME, size - FRAME * 2, size - FRAME * 2, 13);
+  roundRect(g, FRAME, FRAME, boardW - FRAME * 2, boardH - FRAME * 2, 13);
   g.clip();
-  const sheen = g.createLinearGradient(FRAME, FRAME, size * 0.7, FRAME + (size - FRAME * 2) * 0.4);
-  sheen.addColorStop(0, isPlayer ? "#DDF8FF0E" : "#FFD6E20A");
-  sheen.addColorStop(0.3, "#FFFFFF05");
-  sheen.addColorStop(0.58, "#FFFFFF00");
-  sheen.addColorStop(1, "#01050A1F");
-  g.fillStyle = sheen;
-  g.fillRect(FRAME, FRAME, size - FRAME * 2, size - FRAME * 2);
   const innerLit = g.createLinearGradient(FRAME, FRAME, FRAME, FRAME + 16);
   innerLit.addColorStop(0, "#FFFFFF12");
   innerLit.addColorStop(1, "#FFFFFF00");
   g.fillStyle = innerLit;
-  g.fillRect(FRAME, FRAME, size - FRAME * 2, 16);
+  g.fillRect(FRAME, FRAME, boardW - FRAME * 2, 16);
   g.restore();
 }
 
@@ -4585,18 +4728,19 @@ function chamferedRect(
   ctx: CanvasRenderingContext2D,
   x: number,
   y: number,
-  size: number,
+  w: number,
+  h: number,
   chamfer: number,
 ): void {
-  const c = Math.min(Math.max(0, chamfer), size / 2);
+  const c = Math.min(Math.max(0, chamfer), Math.min(w, h) / 2);
   ctx.beginPath();
   ctx.moveTo(x + c, y);
-  ctx.lineTo(x + size - c, y);
-  ctx.lineTo(x + size, y + c);
-  ctx.lineTo(x + size, y + size - c);
-  ctx.lineTo(x + size - c, y + size);
-  ctx.lineTo(x + c, y + size);
-  ctx.lineTo(x, y + size - c);
+  ctx.lineTo(x + w - c, y);
+  ctx.lineTo(x + w, y + c);
+  ctx.lineTo(x + w, y + h - c);
+  ctx.lineTo(x + w - c, y + h);
+  ctx.lineTo(x + c, y + h);
+  ctx.lineTo(x, y + h - c);
   ctx.lineTo(x, y + c);
   ctx.closePath();
 }
@@ -4643,10 +4787,10 @@ function paintSpeculars(
   accent: { core: string; edge: string },
 ): void {
   const glints: Array<[number, number, number, number]> = [
-    [-0.2, -0.24, 0.082, 0.78],
-    [0.16, -0.14, 0.036, 0.54],
-    [-0.06, 0.18, 0.03, 0.22],
-    [0.22, 0.06, 0.026, 0.4],
+    [-0.12, -0.2, 0.09, 0.85],
+    [0.14, -0.12, 0.04, 0.55],
+    [-0.18, -0.02, 0.028, 0.35],
+    [0.2, -0.02, 0.024, 0.32],
   ];
   for (let index = 0; index < glints.length; index++) {
     const [ox, oy, rad, a] = glints[index]!;
@@ -4676,18 +4820,19 @@ function paintStaticGemDepth(
   jewelPath(ctx, cx, cy, s * 0.92, colorIndex);
   ctx.clip();
 
-  const key = ctx.createLinearGradient(cx - s * 0.62, cy - s * 0.68, cx + s * 0.64, cy + s * 0.68);
-  key.addColorStop(0, "rgba(255,255,255,0.1)");
-  key.addColorStop(0.28, colorWithAlpha(accent.edge, 0.08));
-  key.addColorStop(0.62, "rgba(0, 2, 10, 0.04)");
-  key.addColorStop(1, "rgba(0, 4, 12, 0.25)");
+  const rimMul = ctx.createRadialGradient(cx, cy - s * 0.04, s * 0.1, cx, cy, s * 0.58);
+  rimMul.addColorStop(0, "rgba(255,255,255,0)");
+  rimMul.addColorStop(0.48, "rgba(255,255,255,0)");
+  rimMul.addColorStop(0.78, "rgba(0, 2, 10, 0.16)");
+  rimMul.addColorStop(1, "rgba(0, 4, 12, 0.38)");
   ctx.globalCompositeOperation = "multiply";
-  ctx.fillStyle = key;
+  ctx.fillStyle = rimMul;
   ctx.fillRect(cx - s, cy - s, s * 2, s * 2);
 
-  const core = ctx.createRadialGradient(cx - s * 0.18, cy - s * 0.22, 0, cx, cy, s * 0.68);
-  core.addColorStop(0, colorWithAlpha(accent.edge, 0.08));
-  core.addColorStop(0.26, colorWithAlpha(color, 0.08));
+  const core = ctx.createRadialGradient(cx, cy - s * 0.04, 0, cx, cy - s * 0.02, s * 0.2);
+  core.addColorStop(0, colorWithAlpha("#FFFFFF", 0.07));
+  core.addColorStop(0.2, colorWithAlpha(accent.core, 0.22));
+  core.addColorStop(0.55, colorWithAlpha(color, 0.1));
   core.addColorStop(1, "rgba(0,0,0,0)");
   ctx.globalCompositeOperation = "lighter";
   ctx.fillStyle = core;
@@ -4695,11 +4840,11 @@ function paintStaticGemDepth(
   ctx.restore();
 
   ctx.save();
-  const rim = ctx.createLinearGradient(cx - s * 0.58, cy - s * 0.58, cx + s * 0.58, cy + s * 0.6);
-  rim.addColorStop(0, colorWithAlpha("#FFFFFF", 0.26));
-  rim.addColorStop(0.3, colorWithAlpha(accent.edge, 0.14));
-  rim.addColorStop(0.72, colorWithAlpha(color, 0.03));
-  rim.addColorStop(1, "rgba(0, 4, 12, 0.22)");
+  const rim = ctx.createLinearGradient(cx - s * 0.5, cy - s * 0.55, cx + s * 0.5, cy + s * 0.45);
+  rim.addColorStop(0, colorWithAlpha("#FFFFFF", 0.28));
+  rim.addColorStop(0.28, colorWithAlpha(accent.edge, 0.14));
+  rim.addColorStop(0.7, colorWithAlpha(color, 0.03));
+  rim.addColorStop(1, "rgba(0, 4, 12, 0.18)");
   jewelPath(ctx, cx, cy, s * 0.94, colorIndex);
   ctx.globalCompositeOperation = "lighter";
   ctx.strokeStyle = rim;
@@ -4720,28 +4865,37 @@ function paintCrystalOptics(
   ctx.save();
   ctx.lineJoin = "round";
   ctx.lineCap = "round";
+  const crease = Math.max(0.7, s * 0.018);
   if (colorIndex === 1) {
     ctx.beginPath();
     ctx.moveTo(cx, cy - r * 0.18);
     ctx.lineTo(cx - r * 0.58, cy - r * 0.4);
     ctx.lineTo(cx, cy + r * 0.68);
     ctx.closePath();
-    ctx.fillStyle = "#8F084857";
+    ctx.fillStyle = "#8F0848A8";
     ctx.fill();
     ctx.beginPath();
     ctx.moveTo(cx, cy - r * 0.18);
     ctx.lineTo(cx + r * 0.58, cy - r * 0.4);
     ctx.lineTo(cx, cy + r * 0.68);
     ctx.closePath();
-     ctx.fillStyle = "#FF86C847";
+    ctx.fillStyle = "#FF6AB66A";
     ctx.fill();
     ctx.beginPath();
-    ctx.moveTo(cx, cy + r * 0.22);
-    ctx.lineTo(cx - r * 0.3, cy - r * 0.16);
-    ctx.lineTo(cx + r * 0.3, cy - r * 0.16);
+    ctx.moveTo(cx, cy - r * 0.08);
+    ctx.lineTo(cx - r * 0.28, cy - r * 0.28);
+    ctx.lineTo(cx + r * 0.28, cy - r * 0.28);
     ctx.closePath();
-    ctx.fillStyle = "#FF48C847";
+    ctx.fillStyle = "#FF86C8A0";
     ctx.fill();
+    ctx.strokeStyle = "#FF9AD188";
+    ctx.lineWidth = crease;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - r * 0.18);
+    ctx.lineTo(cx, cy + r * 0.68);
+    ctx.moveTo(cx - r * 0.28, cy - r * 0.28);
+    ctx.lineTo(cx + r * 0.28, cy - r * 0.28);
+    ctx.stroke();
   } else if (colorIndex === 2) {
     for (let i = 0; i < 5; i++) {
       const a0 = -Math.PI / 2 + (Math.PI * 2 * i) / 5;
@@ -4751,39 +4905,53 @@ function paintCrystalOptics(
       ctx.lineTo(cx + Math.cos(a0) * r * 0.74, cy + Math.sin(a0) * r * 0.74);
       ctx.lineTo(cx + Math.cos(a1) * r * 0.74, cy + Math.sin(a1) * r * 0.74);
       ctx.closePath();
-       ctx.fillStyle = i % 2 === 0 ? "#FFD04A47" : "#FFE08A24";
+      ctx.fillStyle = i % 2 === 0 ? "#FFB00078" : "#FFE08A50";
       ctx.fill();
     }
-    ctx.beginPath();
-     ctx.strokeStyle = "#FFE08A59";
-    ctx.lineWidth = Math.max(1.4, s * 0.03);
+    ctx.strokeStyle = "#FFE08A99";
+    ctx.lineWidth = crease;
     polygonPath(ctx, cx, cy, r * 0.78, 5, -Math.PI / 2);
     ctx.stroke();
+    for (let i = 0; i < 5; i++) {
+      const a0 = -Math.PI / 2 + (Math.PI * 2 * i) / 5;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(a0) * r * 0.74, cy + Math.sin(a0) * r * 0.74);
+      ctx.stroke();
+    }
   } else if (colorIndex === 3) {
     ctx.beginPath();
     ctx.moveTo(cx, cy - r * 0.5);
     ctx.lineTo(cx - r * 0.46, cy + r * 0.34);
     ctx.lineTo(cx, cy + r * 0.18);
     ctx.closePath();
-    ctx.fillStyle = "#005C3847";
+    ctx.fillStyle = "#005C3898";
     ctx.fill();
     ctx.beginPath();
     ctx.moveTo(cx, cy - r * 0.5);
     ctx.lineTo(cx + r * 0.46, cy + r * 0.34);
     ctx.lineTo(cx, cy + r * 0.18);
     ctx.closePath();
-     ctx.fillStyle = "#8DFFBF42";
+    ctx.fillStyle = "#3DFFA06A";
     ctx.fill();
     ctx.beginPath();
-    ctx.moveTo(cx, cy - r * 0.36);
-    ctx.lineTo(cx + r * 0.32, cy + r * 0.22);
-    ctx.lineTo(cx - r * 0.32, cy + r * 0.22);
+    ctx.moveTo(cx, cy - r * 0.42);
+    ctx.lineTo(cx + r * 0.22, cy - r * 0.02);
+    ctx.lineTo(cx - r * 0.22, cy - r * 0.02);
     ctx.closePath();
-    ctx.fillStyle = `${color}40`;
+    ctx.fillStyle = "#8DFFBFA0";
     ctx.fill();
+    ctx.strokeStyle = "#9CFFD188";
+    ctx.lineWidth = crease;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - r * 0.5);
+    ctx.lineTo(cx, cy + r * 0.18);
+    ctx.moveTo(cx - r * 0.46, cy + r * 0.34);
+    ctx.lineTo(cx + r * 0.46, cy + r * 0.34);
+    ctx.stroke();
   } else if (colorIndex === 4) {
     const t = r * 0.38;
-    ctx.fillStyle = `${color}30`;
+    ctx.fillStyle = `${color}48`;
     roundRect(ctx, cx - t, cy - t, t * 2, t * 2, r * 0.08);
     ctx.fill();
     ctx.beginPath();
@@ -4792,7 +4960,7 @@ function paintCrystalOptics(
     ctx.lineTo(cx + t, cy - t);
     ctx.lineTo(cx - t, cy - t);
     ctx.closePath();
-     ctx.fillStyle = "#9DD7FF42";
+    ctx.fillStyle = "#9DD7FF78";
     ctx.fill();
     ctx.beginPath();
     ctx.moveTo(cx + r * 0.64, cy - r * 0.64);
@@ -4800,7 +4968,7 @@ function paintCrystalOptics(
     ctx.lineTo(cx + t, cy + t);
     ctx.lineTo(cx + t, cy - t);
     ctx.closePath();
-    ctx.fillStyle = "#073A9E38";
+    ctx.fillStyle = "#073A9E70";
     ctx.fill();
     ctx.beginPath();
     ctx.moveTo(cx - r * 0.64, cy + r * 0.64);
@@ -4808,8 +4976,12 @@ function paintCrystalOptics(
     ctx.lineTo(cx + t, cy + t);
     ctx.lineTo(cx - t, cy + t);
     ctx.closePath();
-    ctx.fillStyle = "#073A9E2E";
+    ctx.fillStyle = "#02182888";
     ctx.fill();
+    ctx.strokeStyle = "#9CDFFF77";
+    ctx.lineWidth = crease;
+    roundRect(ctx, cx - t, cy - t, t * 2, t * 2, r * 0.08);
+    ctx.stroke();
   } else if (colorIndex === 5) {
     ctx.beginPath();
     ctx.moveTo(cx, cy - r * 0.74);
@@ -4821,7 +4993,7 @@ function paintCrystalOptics(
     ctx.lineTo(cx - r * 0.68, cy);
     ctx.lineTo(cx - r * 0.24, cy - r * 0.08);
     ctx.closePath();
-    ctx.fillStyle = `${color}36`;
+    ctx.fillStyle = `${color}55`;
     ctx.fill();
     ctx.beginPath();
     ctx.moveTo(cx, cy - r * 0.42);
@@ -4829,19 +5001,27 @@ function paintCrystalOptics(
     ctx.lineTo(cx, cy + r * 0.42);
     ctx.lineTo(cx - r * 0.28, cy);
     ctx.closePath();
-     ctx.fillStyle = "#D8A5FF38";
+    ctx.fillStyle = "#D8A5FF70";
     ctx.fill();
+    ctx.strokeStyle = "#E0A5FF88";
+    ctx.lineWidth = crease;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - r * 0.74);
+    ctx.lineTo(cx, cy + r * 0.74);
+    ctx.moveTo(cx - r * 0.68, cy);
+    ctx.lineTo(cx + r * 0.68, cy);
+    ctx.stroke();
   } else {
-     ctx.fillStyle = "#52E8FF1F";
+    ctx.fillStyle = "#52E8FF46";
     ctx.beginPath();
     ctx.arc(cx, cy, r * 0.58, 0, Math.PI * 2);
     ctx.fill();
-     ctx.fillStyle = "#9AF7FF29";
+    ctx.fillStyle = "#9AF7FF55";
     ctx.beginPath();
     ctx.arc(cx, cy, r * 0.34, 0, Math.PI * 2);
     ctx.fill();
-     ctx.strokeStyle = "#9AF7FF61";
-    ctx.lineWidth = Math.max(1.6, s * 0.028);
+    ctx.strokeStyle = "#9AF7FF99";
+    ctx.lineWidth = crease;
     ctx.beginPath();
     ctx.arc(cx, cy, r * 0.5, 0, Math.PI * 2);
     ctx.stroke();
@@ -4855,8 +5035,10 @@ function paintCrystalOptics(
       ctx.lineTo(cx + Math.cos(a) * r * 0.62, cy + Math.sin(a) * r * 0.62);
       ctx.lineTo(cx + Math.cos(a + 0.38) * r * 0.5, cy + Math.sin(a + 0.38) * r * 0.5);
       ctx.closePath();
-       ctx.fillStyle = i % 2 === 0 ? "#52E8FF1A" : "#005C731A";
+      ctx.fillStyle = i % 2 === 0 ? "#52E8FF48" : "#005C7348";
       ctx.fill();
+      ctx.strokeStyle = "#9AF7FF66";
+      ctx.stroke();
     }
   }
   ctx.globalCompositeOperation = "lighter";
@@ -4881,6 +5063,7 @@ function paintCrystalOptics(
   ctx.restore();
 }
 
+// drawGemIcon removed to eliminate synthetic flat vector overlays over 3D crystal bodies
 function jewelPath(ctx: CanvasRenderingContext2D, cx: number, cy: number, s: number, colorIndex: number): void {
   const r = s / 2;
   if (colorIndex === 1) {
@@ -4900,7 +5083,7 @@ function jewelPath(ctx: CanvasRenderingContext2D, cx: number, cy: number, s: num
     return;
   }
   if (colorIndex === 4) {
-    roundRect(ctx, cx - r * 0.84, cy - r * 0.84, r * 1.68, r * 1.68, r * 0.22);
+    roundRect(ctx, cx - r * 0.88, cy - r * 0.88, r * 1.76, r * 1.76, r * 0.22);
     return;
   }
   if (colorIndex === 5) {
@@ -4913,71 +5096,6 @@ function jewelPath(ctx: CanvasRenderingContext2D, cx: number, cy: number, s: num
     return;
   }
   ctx.beginPath();
-  ctx.arc(cx, cy, r * 0.88, 0, Math.PI * 2);
+  ctx.arc(cx, cy, r * 0.92, 0, Math.PI * 2);
   ctx.closePath();
-}
-
-function drawGemIcon(
-  ctx: CanvasRenderingContext2D,
-  cx: number,
-  cy: number,
-  s: number,
-  colorIndex: number,
-  color: string,
-): void {
-  ctx.save();
-  ctx.lineCap = "round";
-  ctx.lineJoin = "round";
-  const r = Math.max(2.4, s * 0.2);
-  ctx.beginPath();
-  if (colorIndex === 1) {
-    ctx.moveTo(cx - r, cy - r * 0.1);
-    ctx.lineTo(cx, cy + r * 0.78);
-    ctx.lineTo(cx + r, cy - r * 0.1);
-    ctx.closePath();
-  } else if (colorIndex === 2) {
-    ctx.moveTo(cx - r, cy + r * 0.48);
-    ctx.lineTo(cx - r, cy - r * 0.08);
-    ctx.lineTo(cx - r * 0.4, cy + r * 0.16);
-    ctx.lineTo(cx, cy - r * 0.58);
-    ctx.lineTo(cx + r * 0.4, cy + r * 0.16);
-    ctx.lineTo(cx + r, cy - r * 0.08);
-    ctx.lineTo(cx + r, cy + r * 0.48);
-    ctx.closePath();
-  } else if (colorIndex === 3) {
-    ctx.moveTo(cx, cy - r * 0.78);
-    ctx.lineTo(cx + r * 0.8, cy + r * 0.52);
-    ctx.lineTo(cx - r * 0.8, cy + r * 0.52);
-    ctx.closePath();
-  } else if (colorIndex === 4) {
-    roundRect(ctx, cx - r * 0.56, cy - r * 0.56, r * 1.12, r * 1.12, r * 0.12);
-  } else if (colorIndex === 5) {
-    ctx.moveTo(cx, cy - r * 0.86);
-    ctx.lineTo(cx + r * 0.28, cy - r * 0.08);
-    ctx.lineTo(cx + r * 0.9, cy);
-    ctx.lineTo(cx + r * 0.28, cy + r * 0.08);
-    ctx.lineTo(cx, cy + r * 0.86);
-    ctx.lineTo(cx - r * 0.28, cy + r * 0.08);
-    ctx.lineTo(cx - r * 0.9, cy);
-    ctx.lineTo(cx - r * 0.28, cy - r * 0.08);
-    ctx.closePath();
-  } else {
-    ctx.arc(cx, cy, r * 0.78, 0, Math.PI * 2);
-    ctx.moveTo(cx + r * 0.46, cy);
-    ctx.arc(cx, cy, r * 0.46, 0, Math.PI * 2);
-    ctx.moveTo(cx + r * 0.2, cy);
-    ctx.arc(cx, cy, r * 0.2, 0, Math.PI * 2);
-  }
-  const glow = ctx.createRadialGradient(cx, cy - r * 0.08, r * 0.06, cx, cy, r);
-  glow.addColorStop(0, "rgba(255,255,255,0.38)");
-  glow.addColorStop(0.38, colorWithAlpha(color, 0.24));
-  glow.addColorStop(1, "rgba(255,255,255,0)");
-  ctx.globalCompositeOperation = "lighter";
-  ctx.fillStyle = glow;
-  ctx.fill("evenodd");
-  ctx.globalCompositeOperation = "source-over";
-  ctx.strokeStyle = colorWithAlpha(color, 0.48);
-  ctx.lineWidth = Math.max(1, s * 0.02);
-  ctx.stroke();
-  ctx.restore();
 }

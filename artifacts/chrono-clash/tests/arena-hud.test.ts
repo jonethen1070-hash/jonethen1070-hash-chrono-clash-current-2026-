@@ -10,23 +10,26 @@ function read(rel: string): string {
 }
 
 describe("arena HUD polish outside the gem board", () => {
-  it("keeps gem identities, board mechanics, and Chrono Power IDs locked", () => {
+  it("keeps gem identities, board mechanics, and match HUD IDs locked", () => {
     expect([...COLORS]).toEqual(["#D1166D", "#D38800", "#008F5B", "#1754C7", "#6D25C9", "#008EAA"]);
     const main = read("src/main.ts");
-    expect(main).toContain('id="playerGems"');
-    expect(main).toContain('id="oppGems"');
-    expect(main).not.toContain('id="freeze"');
-    expect(main).not.toContain('id="timeshift"');
-    expect(main).toContain('id="rewind"');
-    expect(main).toContain('id="energyBurstAttack"');
-    expect(main).toContain('id="megaStrikeAttack"');
-    expect(main).toContain('id="energyFill"');
-    expect(main).toContain('id="energyLabel"');
-    expect(main).toContain('class="opponent-render-reserve"');
-    expect(main).not.toContain('id="playerAttack"');
-    expect(main).not.toContain('id="oppAttack"');
+    const match = main.slice(main.indexOf('id="match"'), main.indexOf('id="sheet"'));
+    expect(match).toContain('id="playerGems"');
+    expect(match).toContain('id="oppGems"');
+    expect(match).not.toContain('id="freeze"');
+    expect(match).not.toContain('id="timeshift"');
+    expect(match).not.toContain('id="rewind"');
+    expect(match).not.toContain('id="energyBurstAttack"');
+    expect(match).not.toContain('id="megaStrikeAttack"');
+    expect(match).not.toContain('id="energyFill"');
+    expect(match).not.toContain('id="energyLabel"');
+    expect(match).not.toContain('class="energy-wrap"');
+    expect(match).not.toContain('class="powers"');
+    expect(match).toContain('class="opponent-render-reserve"');
+    expect(match).not.toContain('id="playerAttack"');
+    expect(match).not.toContain('id="oppAttack"');
     const studio = read("src/styles/studio.css");
-    expect(studio).toContain("min(28vw, 14dvh, 120px)");
+    expect(studio).toContain("min(28vw, 11.2dvh, 96px)");
   });
 
   it("layers a deeper cosmic arena with foreground debris", () => {

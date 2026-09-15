@@ -52,7 +52,7 @@ This snapshot is CSS + canvas. Screens toggle with `.screen.active`. There is no
 
 | Asset | Screen / component | Wiring |
 |---|---|---|
-| `chrono-clash-logo.png` | `#splash` `#titleMark`; `#menu` `.menu-hero` | `<img class="logo-art">` in `src/main.ts`. Text `h1` kept and visually hidden (`.logo.has-art h1`). `#match .match-brand` stays text. |
+| `chrono-clash-logo.png` | `#splash` `#titleMark`; `#menu` `.menu-hero` | `<img class="logo-art">` in `src/main.ts`. Text `h1` kept and visually hidden (`.logo.has-art h1`). Match screen has no title brand element; Chat/Audio/Settings live under `.match-brand-actions`. |
 | `chrono-clash-gems.png` | canvas `#stage` over `#playerBoard` / `#oppBoard` | Verified 768×768, 3×2, `GEM_ORDER = [4, 2, 1, 5, 3, 0]`. Loaded in `src/ui/gemAtlas.ts` with black-key. `BoardRenderer.drawGem` uses the atlas and falls back to procedural gems if load/size fails. Hit-testing on `#playerBoard` is unchanged. |
 | `chrono-clash-ui-metal-background.jpg` | `.power`, `.mode-card`, `.stat`, `.setting-row`, `.sheet-card`, `.game-ctl:not(.primary)`, `.menu-pilot`, `.match-dock` | `::before` overlay, `mix-blend-mode: multiply` (JPEG is mostly white HUD chrome). Not stretched as a button fill. Dock SVG icons unchanged. |
 | `chrono-clash-battle-arena.jpg` | `#match`, `#ready` | `#app:has(#match.active) .space-nebula` and ready. Does not paint over board slots. |

@@ -27,6 +27,8 @@ export interface BattleFx {
   text: string;
   combo?: number;
   side?: string;
+  score?: number;
+  cells?: { length: number };
 }
 
 /** Local gem match / break / clear / cascade on a board. Not combat, UI, or music. */
@@ -42,10 +44,13 @@ export function isPlayerBoardFx(fx: BattleFx): boolean {
   return fx.side !== "opponent" && isBoardDestroyFx(fx);
 }
 
-/** One shatter layer for the whole resolve. Combo banners must not fire a second copy. */
+/** First-wave shatter, then cascade / jackpot cues. Combo banners must not fire a second shatter. */
 export function playerBoardDestroyCue(fx: BattleFx): BattleCue | null {
   if (isRivalBoardFx(fx)) return null;
   if (fx.kind !== "clear" || fx.side === "opponent") return null;
+  const combo = fx.combo ?? 1;
+  if (combo >= 3) return "bigCombo";
+  if (combo >= 2) return "cascade";
   return "matchWave";
 }
 
@@ -74,9 +79,26 @@ export function battleCuesFromFx(fx: BattleFx): BattleCue[] {
   return [];
 }
 
-export function playBattleCues(bus: AudioBus, fx: BattleFx, combo?: number): void {
+export function playBattleCues(bus: AudioBus, fx: BattleFx, combo?: number, delayMs = 0): void {
   const peak = combo ?? fx.combo ?? 1;
-  for (const cue of battleCuesFromFx(fx)) playBattleCue(bus, cue, peak, fx.text);
+  const cleared = fx.cells?.length ?? 0;
+  for (const cue of battleCuesFromFx(fx)) {
+    if (delayMs > 0 && cue === "matchWave") {
+      const wave = cleared >= 5 ? 3 : cleared >= 4 ? 2 : Math.max(1, peak);
+      bus.playMatchWaveLater(wave, delayMs);
+      continue;
+    }
+    if (delayMs > 0 && (cue === "cascade" || cue === "combo" || cue === "bigCombo")) {
+      bus.playLater(cue === "bigCombo" ? "highcombo" : "combo", delayMs, peak);
+      continue;
+    }
+    if (cue === "matchWave") {
+      const wave = cleared >= 5 ? 3 : cleared >= 4 ? 2 : Math.max(1, peak);
+      bus.playMatchWave(wave);
+      continue;
+    }
+    playBattleCue(bus, cue, peak, fx.text);
+  }
 }
 
 export function playBattleCue(bus: AudioBus, cue: BattleCue, combo = 1, text = ""): void {

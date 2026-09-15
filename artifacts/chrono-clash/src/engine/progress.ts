@@ -7,6 +7,7 @@ import {
 } from "./types";
 import { cosmeticsUnlockedAtLevel } from "./catalog";
 import { applyEconomy, clampCoinEarn, economyFromProgress, grantWinningCoins, matchCoinPayout } from "./economy";
+import { clampCoinRoomMatch, parseCoinRoomId } from "./rooms";
 import { clampDailyRun } from "./dailyRun";
 import { clearAvatarPhoto, hasAvatarPhoto } from "./avatarPhoto";
 
@@ -119,6 +120,8 @@ function clampProgress(parsed: Partial<LocalProgress>): LocalProgress {
     tutorialDone: Boolean(parsed.tutorialDone),
     matchesSeen: Number(parsed.matchesSeen) || 0,
     lastMode: parsed.lastMode === "score" ? "score" : "time",
+    lastCoinRoomId: parseCoinRoomId(parsed.lastCoinRoomId),
+    coinRoomMatch: clampCoinRoomMatch(parsed.coinRoomMatch),
     vfxTheme: parsed.vfxTheme || base.vfxTheme,
     winningCoins: economy.winningCoins,
     powerCharges: economy.powerCharges,

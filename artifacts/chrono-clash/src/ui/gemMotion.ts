@@ -8,6 +8,12 @@ export type GemMoveKind = "swap" | "fall";
 export const SWAP_PUSH_MS = 72;
 export const SWAP_MAGNET_MS = 48;
 export const SWAP_TOTAL_MS = SWAP_PUSH_MS + SWAP_MAGNET_MS;
+/** Seated pulse after the swap seats, before the crystal breaks. */
+export const MATCH_ANTICIPATE_MS = 44;
+
+export function matchImpactDelayMs(reduced = false): number {
+  return reduced ? 0 : SWAP_TOTAL_MS + MATCH_ANTICIPATE_MS;
+}
 
 export function clamp01(t: number): number {
   return t < 0 ? 0 : t > 1 ? 1 : t;
@@ -37,7 +43,7 @@ export function easeInOutSine(t: number): number {
 export function easeMagneticSwap(t: number): number {
   const x = clamp01(t);
   const magnetStart = SWAP_PUSH_MS / SWAP_TOTAL_MS;
-  const approachDistance = 0.86;
+  const approachDistance = 0.84;
   if (x <= magnetStart) {
     return approachDistance * easeInOutCubic(x / magnetStart);
   }
@@ -45,15 +51,15 @@ export function easeMagneticSwap(t: number): number {
   return approachDistance + (1 - approachDistance) * easeOutCubic(pull);
 }
 
-/** Accelerate then settle into the well. No bounce, no linear slot-drop. */
+/** Accelerate with gravity, then ease into the socket. No bounce. */
 export function easeCrystalFall(t: number): number {
   const x = clamp01(t);
-  if (x < 0.4) {
-    const u = x / 0.4;
-    return 0.34 * u * u;
+  if (x < 0.55) {
+    const u = x / 0.55;
+    return 0.72 * u * u;
   }
-  const u = (x - 0.4) / 0.6;
-  return 0.34 + 0.66 * (1 - (1 - u) * (1 - u) * (1 - u));
+  const u = (x - 0.55) / 0.45;
+  return 0.72 + 0.28 * (1 - (1 - u) * (1 - u) * (1 - u));
 }
 
 export function gemTravelEase(kind: GemMoveKind, t: number): number {
@@ -74,11 +80,11 @@ export function gemTravelDuration(
     if (animation === "medium") return 0.15;
     return SWAP_TOTAL_MS / 1000;
   }
-  // Keep the first cell punchy, then give deeper drops just enough extra
-  // travel to read as physical without putting dead time between cascades.
-  const base = animation === "low" ? 0.09 : animation === "medium" ? 0.095 : 0.1;
-  const perCell = animation === "low" ? 0.035 : animation === "medium" ? 0.038 : 0.04;
-  return Math.min(0.28, base + Math.max(0, cells - 1) * perCell);
+  // Short hops stay punchy; longer drops add a little travel, then cap so
+  // deep refill columns never feel sluggish between cascade waves.
+  const base = animation === "low" ? 0.11 : animation === "medium" ? 0.115 : 0.12;
+  const perCell = animation === "low" ? 0.022 : animation === "medium" ? 0.024 : 0.025;
+  return Math.min(0.22, base + Math.max(0, cells - 1) * perCell);
 }
 
 export function gemFallDelay(
@@ -88,9 +94,9 @@ export function gemFallDelay(
   reduced: boolean,
 ): number {
   if (reduced || animation === "low") return 0;
-  const spread = animation === "medium" ? 0.002 : 0.003;
-  const lead = animation === "medium" ? 0.006 : 0.008;
-  return Math.min(0.045, lead + col * spread + Math.max(0, cellsFallen) * 0.001);
+  const spread = animation === "medium" ? 0.001 : 0.0015;
+  const lead = animation === "medium" ? 0.003 : 0.004;
+  return Math.min(0.016, lead + col * spread + Math.max(0, cellsFallen) * 0.0005);
 }
 
 export function gemDieDuration(animation: Intensity, reduced: boolean): number {
@@ -100,16 +106,44 @@ export function gemDieDuration(animation: Intensity, reduced: boolean): number {
   return 0.12;
 }
 
-/** Energy bloom, then a short crystal dissolve. Fast enough for competitive play. */
+/**
+ * Match dissolve juice: snap-punch bloom, then a decisive fade.
+ * Uniform scale stays fast; squash/stretch is applied in the renderer.
+ */
 export function easeCrystalDie(t: number): { scale: number; alpha: number; flash: number } {
   const x = clamp01(t);
-  if (x < 0.28) {
-    const u = x / 0.28;
-    return { scale: 1 + 0.1 * u, alpha: 1, flash: 0.38 + 0.62 * u };
+  if (x < 0.22) {
+    const u = x / 0.22;
+    const punch = 1 - (1 - u) * (1 - u);
+    return { scale: 1 + 0.2 * punch, alpha: 1, flash: 0.55 + 0.45 * punch };
   }
-  const u = (x - 0.28) / 0.72;
+  const u = (x - 0.22) / 0.78;
   const e = 1 - (1 - u) * (1 - u);
-  return { scale: 1.1 * (1 - 0.6 * e), alpha: 1 - e, flash: (1 - e) * 0.82 };
+  return { scale: 1.2 * (1 - 0.72 * e), alpha: 1 - e, flash: (1 - e) * 0.9 };
+}
+
+/** Match-impact squash: compress into the board, then release into the die bloom. */
+export function gemMatchImpactStretch(charge: number, combo = 1): { sx: number; sy: number } {
+  const c = clamp01(charge);
+  const amp = combo >= 3 ? 1.18 : combo >= 2 ? 1.08 : 1;
+  return { sx: 1 + 0.12 * c * amp, sy: 1 - 0.17 * c * amp };
+}
+
+/** Drag stretch along velocity — restrained, mobile-readable. */
+export function gemDragStretch(vx: number, vy: number): { sx: number; sy: number; angle: number } {
+  const speed = Math.hypot(vx, vy);
+  if (speed < 40) return { sx: 1, sy: 1, angle: 0 };
+  const amount = Math.min(0.11, (speed - 40) / 1600);
+  return {
+    sx: 1 + amount,
+    sy: 1 - amount * 0.55,
+    angle: Math.atan2(vy, vx),
+  };
+}
+
+/** Select / press settle: tiny scale-up then ease back via tile.scale spring. */
+export function gemSelectPop(): number {
+  return 1.085;
 }
 
 /**

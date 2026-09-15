@@ -14,8 +14,10 @@ import {
   SWAP_MAGNET_MS,
   SWAP_PUSH_MS,
   SWAP_TOTAL_MS,
+  MATCH_ANTICIPATE_MS,
+  matchImpactDelayMs,
 } from "../src/ui/gemMotion";
-import { COLS, INVALID_RETURN_MS, ROWS } from "../src/engine/types";
+import { COLS, INVALID_RETURN_MS, ROWS, SWAP_INPUT_LOCK_MS } from "../src/engine/types";
 import { cloneBoard, createSeededRng, findMatches, makePiece, resetIds, trySwap } from "../src/engine/board";
 import { LARGE_MATCH_VFX_FIXTURES } from "./vfxFixtures";
 
@@ -28,11 +30,39 @@ const THREE_ROW_CASCADE_FIXTURE = [
   [3, 2, 1, 5, 4, 1, 2, 1],
   [4, 6, 2, 6, 5, 3, 2, 5],
   [6, 6, 5, 6, 6, 1, 1, 6],
+  [1, 2, 1, 2, 1, 2, 3, 1],
+  [2, 1, 2, 1, 2, 1, 2, 3],
 ] as const;
+
+function padToLiveRows(colors: readonly (readonly number[])[]): number[][] {
+  const rows = colors.map((row) => [...row]);
+  while (rows.length < ROWS) {
+    const r = rows.length;
+    const prev = rows[r - 1]!;
+    const prev2 = rows[r - 2] ?? prev;
+    const row: number[] = [];
+    for (let c = 0; c < COLS; c++) {
+      let color = 1 + ((r + c * 2) % 6);
+      const left = row[c - 1];
+      const left2 = row[c - 2];
+      const up = prev[c]!;
+      const up2 = prev2[c]!;
+      for (let i = 0; i < 8; i++) {
+        const tripleH = left != null && left2 != null && color === left && color === left2;
+        const tripleV = color === up && color === up2;
+        if (!tripleH && !tripleV && color !== up) break;
+        color = (color % 6) + 1;
+      }
+      row.push(color);
+    }
+    rows.push(row);
+  }
+  return rows;
+}
 
 function cascadeFixture() {
   resetIds();
-  return THREE_ROW_CASCADE_FIXTURE.map((row) => row.map((color) => makePiece(color)));
+  return padToLiveRows(THREE_ROW_CASCADE_FIXTURE).map((row) => row.map((color) => makePiece(color)));
 }
 
 describe("crystal gem motion curves", () => {
@@ -64,17 +94,21 @@ describe("crystal gem motion curves", () => {
     expect(SWAP_MAGNET_MS).toBe(48);
     expect(SWAP_TOTAL_MS).toBe(120);
     expect(swap).toBe(0.12);
-    expect(fallOne).toBeCloseTo(0.1, 5);
+    expect(fallOne).toBeCloseTo(0.12, 5);
     expect(fallThree).toBeGreaterThan(fallOne);
     expect(fallFar).toBeGreaterThan(fallThree);
-    expect(fallThree).toBeCloseTo(0.18, 5);
-    expect(fallFar).toBeCloseTo(0.26, 5);
-    expect(gemTravelDuration(40 * 4, 40, "fall", "high", false)).toBeCloseTo(0.22, 5);
-    expect(gemTravelDuration(40 * 8, 40, "fall", "high", false)).toBe(0.28);
+    expect(fallThree).toBeCloseTo(0.17, 5);
+    expect(fallFar).toBeCloseTo(0.22, 5);
+    expect(gemTravelDuration(40 * 4, 40, "fall", "high", false)).toBeCloseTo(0.195, 5);
+    expect(gemTravelDuration(40 * 8, 40, "fall", "high", false)).toBe(0.22);
     expect(fallFar).toBeGreaterThan(swap);
     expect(gemFallDelay(0, 3, "high", false)).toBeLessThan(gemFallDelay(7, 3, "high", false));
     expect(gemFallDelay(3, 2, "high", true)).toBe(0);
-    expect(INVALID_RETURN_MS).toBe(160);
+    expect(gemFallDelay(7, 8, "high", false)).toBeLessThanOrEqual(0.016);
+    expect(INVALID_RETURN_MS).toBe(110);
+    expect(SWAP_INPUT_LOCK_MS).toBe(140);
+    expect(MATCH_ANTICIPATE_MS).toBe(44);
+    expect(matchImpactDelayMs()).toBe(164);
   });
 
   it("blooms then dissolves matched crystals instead of popping them", () => {
@@ -170,7 +204,7 @@ describe("large-match VFX fixtures", () => {
   it("keeps deterministic 3, 4, and 5+ gem recognition cases", () => {
     for (const [name, fixture] of Object.entries(LARGE_MATCH_VFX_FIXTURES).slice(0, 3)) {
       resetIds();
-      const board = fixture.board.map((row) => row.map((color) => makePiece(color)));
+      const board = padToLiveRows(fixture.board).map((row) => row.map((color) => makePiece(color)));
       expect(findMatches(board), `${name} starts without a match`).toHaveLength(0);
       const result = trySwap(board, fixture.from, fixture.to, createSeededRng(fixture.rngSeed));
       expect(result, `${name} accepts its fixture swap`).not.toBeNull();
@@ -183,7 +217,7 @@ describe("large-match VFX fixtures", () => {
     for (const name of ["oneCascade", "multipleCascade", "longFall"] as const) {
       const fixture = LARGE_MATCH_VFX_FIXTURES[name];
       resetIds();
-      const before = fixture.board.map((row) => row.map((color) => makePiece(color)));
+      const before = padToLiveRows(fixture.board).map((row) => row.map((color) => makePiece(color)));
       const originalPositions = new Map(
         before.flatMap((row, r) => row.map((piece, c) => [piece.id, { r, c }] as const)),
       );
@@ -211,7 +245,7 @@ describe("landing feedback", () => {
     expect(renderer).toContain("x: tile.toX + cell / 2");
     expect(renderer).toContain("const lift = sel ? 1.026 : 1");
     expect(renderer).toContain("tile.scale = Math.max(tile.scale, 1.035)");
-    expect(renderer).toContain("tile.settleDur = 0.052");
+    expect(renderer).toContain("tile.settleDur = 0.068");
     expect(renderer).toContain("tile.scale = 0.985");
     expect(renderer).toContain("tile.scale = 1.015");
     expect(renderer).toContain("primeSwapPose");
@@ -220,6 +254,20 @@ describe("landing feedback", () => {
     expect(renderer).toContain("const MATCH_STAGGER_MIN_MS = 8");
     expect(renderer).toContain("const MATCH_STAGGER_STEP_MS = 4");
     expect(renderer).toContain("const cascadeHold");
+    expect(renderer).toContain("swapWindowMs + clearLeadMs");
+    expect(renderer).toContain("swapWindowMs + MATCH_ANTICIPATE_MS");
+    expect(renderer).toContain("const gravityLive");
+    expect(renderer).toContain("const cascadeHold = 0");
+    expect(renderer).not.toContain("const cascadeHold = gravityLive ? 0 : seatedHold");
+    expect(renderer).toContain("const beginMatch =");
+    expect(renderer).toContain("this.lastMatchPhase !== \"countdown\"");
+    expect(renderer).toContain("if (tile.dying || tile.moveKind !== \"swap\" || tile.moveDur <= 0) return max");
+    expect(renderer).not.toContain("swapWindowMs + MATCH_IMPACT_MS");
+    const session = readFileSync("src/engine/session.ts", "utf8");
+    expect(session).toContain("this.busyUntil = now + SWAP_INPUT_LOCK_MS");
+    expect(session).toContain("this.busyUntil = Math.max(this.busyUntil, now + SWAP_INPUT_LOCK_MS)");
+    expect(session).not.toContain("this.busyUntil = Math.max(this.busyUntil, now + 620)");
+    expect(session).not.toContain("132 + result.events.length");
     expect(renderer).toContain("life: megaHero ? 0.28 : burstHero ? 0.23 : 0.18");
     expect(renderer).toContain("const charge =");
     expect(renderer).toContain("branchAngle");

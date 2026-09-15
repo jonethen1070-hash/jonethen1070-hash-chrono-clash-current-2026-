@@ -15,11 +15,12 @@ describe("phase 8 event haptics", () => {
     expect(hapticPattern("swap")).toBe(12);
     expect(hapticPattern("tap")).toBe(12);
     expect(hapticPattern("invalid")).toEqual([10, 20, 14]);
-    expect(hapticPattern("match")).toBe(20);
-    expect(hapticPattern("combo", 2)).toBe(32);
-    expect(hapticPattern("combo", 5)).toBe(42);
-    expect(hapticPattern("combo", 8)).toBe(62);
-    expect(hapticPattern("power")).toBe(58);
+    expect(hapticPattern("match")).toBe(16);
+    expect(hapticPattern("match", 3)).toBe(30);
+    expect(hapticPattern("combo", 2)).toBe(34);
+    expect(hapticPattern("combo", 5)).toBe(52);
+    expect(hapticPattern("combo", 8)).toBe(60);
+    expect(hapticPattern("power")).toBe(48);
     expect(hapticPattern("freeze")).toBe(24);
     expect(hapticPattern("timeshift")).toBe(28);
     expect(hapticPattern("rewind")).toBe(30);
