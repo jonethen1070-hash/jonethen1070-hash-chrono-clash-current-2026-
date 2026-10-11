@@ -6110,9 +6110,8 @@ html body #app #match.match-screen {
   --battle-height: 68px;
   --energy-height: 32px;
   --ability-height: 0px;
-  /* Phase 1 ability deck: raise control row so ICON → NAME → COST can match
-     reference hierarchy. Board still owns leftover flex space (row 5). */
-  --control-height: 136px;
+  /* Compact coin / lives status strip. Board still owns leftover flex space. */
+  --control-height: 56px;
 
   inset: 0 !important;
   width: 100% !important;
@@ -9220,8 +9219,7 @@ html body #app #match.active .you-meta {
     --board-before-abilities-gap: 4px;
     --battle-height: 56px;
     --energy-height: 28px;
-    /* Slightly shorter control band frees arena floor without collapsing Phase 1 icon stack. */
-    --control-height: 108px;
+    --control-height: 54px;
   }
   html body #app #match.active .arena-architecture {
     /* Thin lip frees ~30–40px for floor vs previous tall stalk+bridge. */
@@ -9896,8 +9894,7 @@ html body #app #results.active .result-actions {
 /* Keep the armed-power cancel row inside short mobile viewports. */
 @media (max-height: 760px) {
   html body #app #match.match-screen {
-    /* Still tall enough for icon → name → cost; do not crush back to 42–48px. */
-    --control-height: 112px;
+    --control-height: 54px;
   }
 
   html body #app #match .powers {
@@ -9950,7 +9947,7 @@ html body #app #results.active .result-actions {
 
 @media (max-height: 600px) {
   html body #app #match.match-screen {
-    --control-height: 96px;
+    --control-height: 52px;
   }
 }
 

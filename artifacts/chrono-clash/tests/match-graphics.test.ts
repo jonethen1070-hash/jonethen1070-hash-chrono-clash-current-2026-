@@ -18,12 +18,13 @@ describe("match screen graphics-only polish", () => {
     expect(BOARD_FRAME).toBe(6);
     expect(BOARD_GAP).toBe(1.5);
     const main = read("src/main.ts");
+    const match = main.slice(main.indexOf('id="match"'), main.indexOf('id="sheet"'));
     expect(main).not.toContain('id="freeze"');
     expect(main).not.toContain('id="timeshift"');
-    expect(main).toContain('id="rewind"');
-    expect(main).toContain(">REWIND<");
-    expect(main).toContain('id="energyBurstAttack"');
-    expect(main).toContain('id="megaStrikeAttack"');
+    expect(match).not.toContain('id="rewind"');
+    expect(match).not.toContain(">REWIND<");
+    expect(match).not.toContain('id="energyBurstAttack"');
+    expect(match).not.toContain('id="megaStrikeAttack"');
     expect(main).toContain('id="playerGems"');
     expect(main).toContain('id="oppGems"');
     expect(main).toContain('id="energyFill"');
