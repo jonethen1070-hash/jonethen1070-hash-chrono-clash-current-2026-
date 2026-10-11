@@ -15,7 +15,7 @@ const root = process.cwd();
 
 describe("visual depth polish", () => {
   it("keeps gem identities, board size, and motion contracts", () => {
-    expect([...COLORS]).toEqual(["#D1166D", "#D38800", "#008F5B", "#1754C7", "#6D25C9", "#008EAA"]);
+    expect([...COLORS]).toEqual(["#C4142E", "#D38800", "#008F5B", "#0B2A8C", "#6D25C9", "#008EAA"]);
     expect(BOARD_GAP).toBe(1.5);
     expect(BOARD_FRAME).toBe(6);
     const motion = readFileSync(join(root, "src/ui/gemMotion.ts"), "utf8");

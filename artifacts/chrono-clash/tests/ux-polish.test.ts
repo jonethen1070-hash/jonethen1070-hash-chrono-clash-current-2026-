@@ -59,7 +59,7 @@ describe("premium UX polish", () => {
         notes: [],
       }),
     ).toBe(true);
-    expect([...COLORS]).toEqual(["#D1166D", "#D38800", "#008F5B", "#1754C7", "#6D25C9", "#008EAA"]);
+    expect([...COLORS]).toEqual(["#C4142E", "#D38800", "#008F5B", "#0B2A8C", "#6D25C9", "#008EAA"]);
   });
 
   it("uses fast cinematic screen motion and tactile buttons without 3D gimmicks", () => {

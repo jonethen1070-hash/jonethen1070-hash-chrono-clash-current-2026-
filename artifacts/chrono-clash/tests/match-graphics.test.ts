@@ -12,7 +12,7 @@ function read(rel: string): string {
 
 describe("match screen graphics-only polish", () => {
   it("keeps gem identities, board math, and Chrono Power wiring locked", () => {
-    expect([...COLORS]).toEqual(["#D1166D", "#D38800", "#008F5B", "#1754C7", "#6D25C9", "#008EAA"]);
+    expect([...COLORS]).toEqual(["#C4142E", "#D38800", "#008F5B", "#0B2A8C", "#6D25C9", "#008EAA"]);
     expect(COLS).toBe(8);
     expect(ROWS).toBe(13);
     expect(BOARD_FRAME).toBe(6);

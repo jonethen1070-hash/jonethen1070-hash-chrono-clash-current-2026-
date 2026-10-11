@@ -1,4 +1,7 @@
-/** GameUI 3×2 gem sheet. Presentation only — does not change COLORS or match rules. */
+/** GameUI 3×2 gem sheet. Presentation only — does not change match rules. */
+
+import { COLORS } from "../engine/types";
+import { gemReadabilityGrade, recolorCrystalCell } from "./gemMaterial";
 
 export const GEM_ATLAS_URL = "/assets/chrono-clash-gems.png";
 export const GEM_ORDER = [4, 2, 1, 5, 3, 0] as const;
@@ -72,11 +75,22 @@ function applyBlackKey(img: HTMLImageElement): HTMLCanvasElement | null {
       else if (lum < 36) px[i + 3] = Math.round(a * ((lum - 18) / 18));
     }
     isolateAtlasGems(data);
+    applyPaletteReadability(data);
     ctx.putImageData(data, 0, 0);
   } catch {
     // Android/WebView can reject getImageData; keep the unkeyed sheet so gems still draw.
   }
   return canvas;
+}
+
+function applyPaletteReadability(data: ImageData): void {
+  for (let colorIndex = 1; colorIndex <= COLORS.length; colorIndex++) {
+    const grade = gemReadabilityGrade(colorIndex);
+    const hex = COLORS[colorIndex - 1];
+    if (!grade || !hex) continue;
+    const { sx, sy } = gemCellOrigin(colorIndex);
+    recolorCrystalCell(data, sx, sy, GEM_CELL, hex, grade);
+  }
 }
 
 /**

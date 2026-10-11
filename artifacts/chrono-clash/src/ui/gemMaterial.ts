@@ -313,6 +313,137 @@ export function gemFacetSpec(colorIndex: number): { facets: number; facetPhase: 
   }
 }
 
+export interface GemRecolorGrade {
+  /** 0..1 pull of pixel hue toward the palette hex. */
+  hueLock: number;
+  /** Extra saturation added after the lock. */
+  satLift: number;
+  /** Midtone value scale; <1 deepens the crystal body. */
+  valueScale: number;
+  /** Colored core lift on lit, saturated pixels. */
+  coreLift: number;
+}
+
+/** Only the confused pair is remapped. Other atlas cells stay as authored. */
+export function gemReadabilityGrade(colorIndex: number): GemRecolorGrade | null {
+  switch (colorIndex) {
+    case 1:
+      return { hueLock: 0.86, satLift: 0.2, valueScale: 0.86, coreLift: 0.16 };
+    case 4:
+      return { hueLock: 0.64, satLift: 0.1, valueScale: 0.68, coreLift: 0.05 };
+    default:
+      return null;
+  }
+}
+
+export function recolorCrystalCell(
+  data: ImageData,
+  x0: number,
+  y0: number,
+  cell: number,
+  hex: string,
+  grade: GemRecolorGrade,
+): void {
+  recolorCrystalPixels(data.data, data.width, x0, y0, cell, hex, grade);
+}
+
+export function recolorCrystalPixels(
+  px: Uint8ClampedArray,
+  width: number,
+  x0: number,
+  y0: number,
+  cell: number,
+  hex: string,
+  grade: GemRecolorGrade,
+): void {
+  const { hue: targetHue, sat: targetSat } = hexHueSat(hex);
+  const height = Math.floor(px.length / 4 / width);
+  const x1 = Math.min(width, x0 + cell);
+  const y1 = Math.min(height, y0 + cell);
+  for (let y = y0; y < y1; y++) {
+    for (let x = x0; x < x1; x++) {
+      const o = (y * width + x) * 4;
+      const a = px[o + 3] ?? 0;
+      if (a < 8) continue;
+
+      let r = (px[o] ?? 0) / 255;
+      let g = (px[o + 1] ?? 0) / 255;
+      let b = (px[o + 2] ?? 0) / 255;
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      const delta = max - min;
+      let v = max;
+      let sat = max > 0.001 ? delta / max : 0;
+      let hue = targetHue;
+      if (delta > 0.001) {
+        if (max === r) hue = (((g - b) / delta) % 6 + 6) % 6;
+        else if (max === g) hue = (b - r) / delta + 2;
+        else hue = (r - g) / delta + 4;
+        hue /= 6;
+      }
+
+      const specular = v > 0.86 && sat < 0.28;
+      if (specular) {
+        // Keep the authored glint; warm it slightly for ruby, cool it for royal.
+        const warm = targetHue < 0.08 || targetHue > 0.92 ? 0.035 : 0;
+        const cool = targetHue > 0.55 && targetHue < 0.75 ? 0.02 : 0;
+        px[o] = Math.round(Math.min(255, (px[o] ?? 0) + warm * 255 - cool * 80));
+        px[o + 1] = Math.round(Math.min(255, (px[o + 1] ?? 0) - warm * 40));
+        px[o + 2] = Math.round(Math.min(255, (px[o + 2] ?? 0) + cool * 255 - warm * 50));
+        continue;
+      }
+
+      hue = mixHue(hue, targetHue, grade.hueLock);
+      sat = clamp01(sat * (1 + grade.satLift) + targetSat * 0.12);
+      const core = clamp01((v - 0.42) / 0.48);
+      v = clamp01(v * grade.valueScale + grade.coreLift * core * sat);
+
+      const hs = hue * 6;
+      const hi = Math.floor(hs) % 6;
+      const f = hs - Math.floor(hs);
+      const p = v * (1 - sat);
+      const q = v * (1 - f * sat);
+      const t = v * (1 - (1 - f) * sat);
+      switch (hi) {
+        case 0:
+          r = v;
+          g = t;
+          b = p;
+          break;
+        case 1:
+          r = q;
+          g = v;
+          b = p;
+          break;
+        case 2:
+          r = p;
+          g = v;
+          b = t;
+          break;
+        case 3:
+          r = p;
+          g = q;
+          b = v;
+          break;
+        case 4:
+          r = t;
+          g = p;
+          b = v;
+          break;
+        default:
+          r = v;
+          g = p;
+          b = q;
+          break;
+      }
+
+      px[o] = Math.round(r * 255);
+      px[o + 1] = Math.round(g * 255);
+      px[o + 2] = Math.round(b * 255);
+    }
+  }
+}
+
 /** Palette hex -> hue/saturation for the chroma lock. */
 export function hexHueSat(hex: string): { hue: number; sat: number } {
   const n = parseInt(hex.slice(1), 16);
