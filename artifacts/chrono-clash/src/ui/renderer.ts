@@ -4400,13 +4400,13 @@ function drawIrregularEnergyArc(
 function crystalAccent(colorIndex: number): { core: string; edge: string; bloom: string } {
   switch (colorIndex) {
     case 1:
-      return { core: "#FF4EAD", edge: "#FF9AD1", bloom: "#D1166D55" };
+      return { core: "#FF2E48", edge: "#FFB3BE", bloom: "#C4142E55" };
     case 2:
       return { core: "#FFD04A", edge: "#FFE19A", bloom: "#D3880055" };
     case 3:
       return { core: "#41F3A1", edge: "#9CFFD1", bloom: "#008F5B55" };
     case 4:
-      return { core: "#4EC8FF", edge: "#9CDFFF", bloom: "#1754C755" };
+      return { core: "#2F5BFF", edge: "#8AABFF", bloom: "#0B2A8C55" };
     case 5:
       return { core: "#D064FF", edge: "#E0A5FF", bloom: "#6D25C955" };
     default:

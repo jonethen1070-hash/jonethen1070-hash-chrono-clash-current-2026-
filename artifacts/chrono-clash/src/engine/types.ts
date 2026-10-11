@@ -33,10 +33,10 @@ export const XP_PER_LEVEL = 120;
 export const APP_VERSION = "1.0.0";
 
 export const COLORS = [
-  "#D1166D",
+  "#C4142E",
   "#D38800",
   "#008F5B",
-  "#1754C7",
+  "#0B2A8C",
   "#6D25C9",
   "#008EAA",
 ] as const;
