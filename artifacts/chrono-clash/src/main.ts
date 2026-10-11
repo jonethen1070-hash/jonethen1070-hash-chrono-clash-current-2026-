@@ -405,84 +405,19 @@ app.innerHTML = `
         </div>
       </div>
       <div class="powers">
-        <div class="ability-deck" aria-hidden="true">
-          <i class="ability-deck-rail"></i>
-          <i class="ability-deck-core"></i>
-          <i class="ability-deck-bay a"></i>
-          <i class="ability-deck-bay b"></i>
-          <i class="ability-deck-bay c"></i>
+        <div class="match-economy">
+          <span class="hud-stat coins">
+            <i class="hud-coin" aria-hidden="true"></i>
+            <b id="matchCoins">0</b>
+            <button type="button" class="hud-coin-add" id="matchCoinAdd" aria-label="Add coins">+</button>
+          </span>
+          <span class="hud-stat lives" id="matchLives" aria-label="0 of ${DAILY_LIVES_MAX} lives">
+            <svg class="hud-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path fill="currentColor" d="M12 20.4S4.4 15.2 4.4 9.7C4.4 6.8 6.6 4.7 9.4 4.7c1.5 0 2.8.8 3.6 2 0.8-1.2 2.1-2 3.6-2 2.8 0 5 2.1 5 5 0 5.5-7.6 10.7-7.6 10.7z"/>
+            </svg>
+            <b id="matchLivesCount">0</b>
+          </span>
         </div>
-        <button type="button" class="energy-attack burst" id="energyBurstAttack" data-power-id="burst">
-          <span class="ability-icon-stage" aria-hidden="true">
-            <span class="energy-attack-glyph">
-              <svg class="ability-icon" viewBox="0 0 64 64" focusable="false">
-                <defs>
-                  <linearGradient id="burstGrad" x1="18" y1="4" x2="46" y2="60" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stop-color="#b8ffff"/>
-                    <stop offset="45%" stop-color="#3de8ff"/>
-                    <stop offset="100%" stop-color="#0890b0"/>
-                  </linearGradient>
-                </defs>
-                <path fill="url(#burstGrad)" d="M38.5 3.2 15.2 33.8h12.4L21.4 60.8 50.2 24.6H35.8l2.7-21.4z"/>
-                <path fill="rgba(255,255,255,0.55)" d="M36.6 9.2 32.8 24.6h9.4z"/>
-                <path fill="rgba(255,255,255,0.22)" d="M27.6 33.8h8.2l-3.4 14.2z"/>
-              </svg>
-            </span>
-          </span>
-          <span class="energy-attack-copy">
-            <b>ENERGY BURST</b>
-            <small>Destroy 3x3 area</small>
-          </span>
-          <span class="energy-attack-cost"><i aria-hidden="true"></i>${ENERGY_BURST}</span>
-        </button>
-        <button type="button" class="energy-attack strike" id="megaStrikeAttack" data-power-id="megaStrike">
-          <span class="ability-icon-stage" aria-hidden="true">
-            <span class="energy-attack-glyph">
-              <svg class="ability-icon" viewBox="0 0 64 64" focusable="false">
-                <defs>
-                  <linearGradient id="strikeGrad" x1="12" y1="4" x2="52" y2="60" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stop-color="#ffd0e0"/>
-                    <stop offset="40%" stop-color="#ff4d88"/>
-                    <stop offset="100%" stop-color="#9a1848"/>
-                  </linearGradient>
-                </defs>
-                <path fill="url(#strikeGrad)" d="M32 3.5 54 22.8 42.2 60.5H21.8L10 22.8z"/>
-                <path fill="rgba(255,255,255,0.42)" d="M32 3.5 43.5 23H20.5z"/>
-                <path fill="rgba(255,255,255,0.18)" d="M32 23 42.2 60.5 32 51.2 21.8 60.5z"/>
-                <path fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.4" d="M32 12.5 44 24.5 36.5 52"/>
-              </svg>
-            </span>
-          </span>
-          <span class="energy-attack-copy">
-            <b>MEGA STRIKE</b>
-            <small>Destroy all gems of a color</small>
-          </span>
-          <span class="energy-attack-cost"><i aria-hidden="true"></i>${ENERGY_MEGA_STRIKE}</span>
-        </button>
-        <button type="button" class="energy-attack rewind power" id="rewind" data-power-id="rewind">
-          <span class="ability-icon-stage" aria-hidden="true">
-            <span class="energy-attack-glyph glyph">
-              <svg class="ability-icon" viewBox="0 0 64 64" focusable="false">
-                <defs>
-                  <linearGradient id="rewindGrad" x1="10" y1="8" x2="54" y2="56" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stop-color="#f0e0ff"/>
-                    <stop offset="45%" stop-color="#c59bff"/>
-                    <stop offset="100%" stop-color="#6a38b8"/>
-                  </linearGradient>
-                </defs>
-                <path fill="none" stroke="url(#rewindGrad)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" d="M20.5 21.5a18.5 18.5 0 1 1-3.8 20.2"/>
-                <path fill="url(#rewindGrad)" d="M21 10.2v18.8H5.4z"/>
-                <circle cx="32" cy="34" r="4.2" fill="rgba(255,255,255,0.55)"/>
-              </svg>
-            </span>
-          </span>
-          <i class="ability-fx" aria-hidden="true"></i>
-          <span class="energy-attack-copy">
-            <b>REWIND</b>
-            <small class="need">Restores your last valid move.</small>
-          </span>
-          <span class="energy-attack-cost cost"><i aria-hidden="true"></i>${ENERGY_REWIND}</span>
-        </button>
         <div class="power-cancel" hidden>
           <button type="button" class="power-cancel-button" id="cancelPowerTarget" aria-controls="playerBoard">CANCEL TARGET</button>
         </div>
@@ -601,6 +536,10 @@ const ui = {
   match: $("#match"),
   results: $("#results"),
   rewards: $("#rewards"),
+  matchLives: $("#matchLives"),
+  matchLivesCount: $("#matchLivesCount"),
+  matchCoins: $("#matchCoins"),
+  matchCoinAdd: document.querySelector<HTMLButtonElement>("#matchCoinAdd"),
   playerScore: $("#playerScore"),
   oppScore: $("#oppScore"),
   playerCard: $("#playerCard"),
@@ -627,9 +566,9 @@ const ui = {
   callout: $("#callout"),
   playerBoard: $("#playerBoard"),
   oppBoard: $("#oppBoard"),
-  rewind: $("#rewind") as HTMLButtonElement,
-  energyBurstAttack: $("#energyBurstAttack") as HTMLButtonElement,
-  megaStrikeAttack: $("#megaStrikeAttack") as HTMLButtonElement,
+  rewind: document.querySelector<HTMLButtonElement>("#rewind"),
+  energyBurstAttack: document.querySelector<HTMLButtonElement>("#energyBurstAttack"),
+  megaStrikeAttack: document.querySelector<HTMLButtonElement>("#megaStrikeAttack"),
   cancelPowerTarget: $("#cancelPowerTarget") as HTMLButtonElement,
   powerArmory: $("#powerArmory"),
   dailyRun: $("#dailyRun"),
@@ -702,9 +641,24 @@ function syncScreenNow(): void {
   }
 }
 
-function restartAnim(el: HTMLElement, cls: string): void {
+function restartAnim(el: HTMLElement | null | undefined, cls: string): void {
+  if (!el) return;
   el.classList.remove(cls);
   requestAnimationFrame(() => el.classList.add(cls));
+}
+
+function paintMatchEconomy(): void {
+  setText(
+    ui.matchCoins,
+    String(Math.max(0, Math.trunc(Number(session.progress.winningCoins) || 0))),
+  );
+  const lives = dailyRunFromProgress(session.progress).lives;
+  setText(ui.matchLivesCount, String(lives));
+  ui.matchLives.querySelector(".hud-heart")?.classList.toggle("on", lives > 0);
+  const label = `${lives} of ${DAILY_LIVES_MAX} lives`;
+  if (ui.matchLives.getAttribute("aria-label") !== label) {
+    ui.matchLives.setAttribute("aria-label", label);
+  }
 }
 
 function $(sel: string): HTMLElement {
@@ -1693,7 +1647,7 @@ ui.timerBtn.addEventListener("click", () => {
   }
 });
 let castTimer = 0;
-function flashCast(matchClass: string, btn?: HTMLButtonElement): void {
+function flashCast(matchClass: string, btn?: HTMLButtonElement | null): void {
   ui.match.classList.remove("cast-freeze", "cast-shift", "cast-rewind", "cast-burst", "cast-mega", "clash-in");
   ui.match.classList.add(matchClass);
   if (btn) restartAnim(btn, "cast");
@@ -1733,12 +1687,12 @@ function flashCombo(combo: number): void {
   }, 480);
 }
 
-ui.rewind.addEventListener("click", () => {
+ui.rewind?.addEventListener("click", () => {
   if (armedEnergyPower) {
     setArmedEnergyPower(null);
     renderer.setPowerCastTarget(null, performance.now());
   }
-  if (session.usePower("rewind")) {
+  if (session.usePower("rewind") && ui.rewind) {
     ping(ui.rewind);
     flashCast("cast-rewind", ui.rewind);
     sendOnlineAction({ type: "power", id: "rewind" });
@@ -1748,8 +1702,8 @@ function setArmedEnergyPower(id: "burst" | "megaStrike" | null): void {
   armedEnergyPower = id;
   session.setDrag(null);
   renderer.setPowerTargeting(id === "megaStrike" ? "mega" : id === "burst" ? "burst" : null, performance.now());
-  ui.energyBurstAttack.setAttribute("aria-pressed", id === "burst" ? "true" : "false");
-  ui.megaStrikeAttack.setAttribute("aria-pressed", id === "megaStrike" ? "true" : "false");
+  ui.energyBurstAttack?.setAttribute("aria-pressed", id === "burst" ? "true" : "false");
+  ui.megaStrikeAttack?.setAttribute("aria-pressed", id === "megaStrike" ? "true" : "false");
   ui.cancelPowerTarget.closest(".power-cancel")?.toggleAttribute("hidden", id === null);
   ui.cancelPowerTarget.textContent = id === "burst" ? "CANCEL ENERGY BURST" : id === "megaStrike" ? "CANCEL MEGA STRIKE" : "CANCEL TARGET";
 }
@@ -1784,13 +1738,20 @@ function cancelArmedEnergyPower(): void {
   audio.play("ui");
 }
 
-ui.energyBurstAttack.addEventListener("click", () => useEnergyAttack("burst", ui.energyBurstAttack));
-ui.megaStrikeAttack.addEventListener("click", () => useEnergyAttack("megaStrike", ui.megaStrikeAttack));
+ui.energyBurstAttack?.addEventListener("click", () => {
+  if (ui.energyBurstAttack) useEnergyAttack("burst", ui.energyBurstAttack);
+});
+ui.megaStrikeAttack?.addEventListener("click", () => {
+  if (ui.megaStrikeAttack) useEnergyAttack("megaStrike", ui.megaStrikeAttack);
+});
 ui.cancelPowerTarget.addEventListener("click", cancelArmedEnergyPower);
+ui.matchCoinAdd?.addEventListener("click", () => {
+  audio.play("ui");
+});
 document.querySelector(".powers")?.addEventListener("pointerdown", (e) => {
   const point = e as PointerEvent;
   const target = e.target;
-  if (!(target instanceof Element) || !target.closest("#rewind")) return;
+  if (!(target instanceof Element) || !target.closest("#rewind") || !ui.rewind) return;
   const x = point.clientX;
   const y = point.clientY;
   const box = ui.rewind.getBoundingClientRect();
@@ -2162,7 +2123,8 @@ function ping(btn: HTMLButtonElement): void {
   restartAnim(btn, "active");
 }
 
-function pressPowerButton(btn: HTMLButtonElement): void {
+function pressPowerButton(btn: HTMLButtonElement | null | undefined): void {
+  if (!btn) return;
   restartAnim(btn, "power-press");
   window.setTimeout(() => btn.classList.remove("power-press"), 170);
 }
@@ -2521,6 +2483,7 @@ function frame(now: number): void {
     if (Math.abs(snap.opponent.score - shownOpp) < 0.6) shownOpp = snap.opponent.score;
     setText(ui.playerScore, String(Math.round(shownPlayer)));
     setText(ui.oppScore, String(Math.round(shownOpp)));
+    paintMatchEconomy();
     const scoreCap = Math.max(
       snap.mode === "score" ? snap.target || session.scoreTarget : 4000,
       snap.player.score,
@@ -2624,19 +2587,23 @@ function frame(now: number): void {
     lastPlayerEnergy = snap.player.energy;
     energyWrap?.classList.toggle("low", snap.player.energy < ENERGY_FREEZE);
     energyWrap?.classList.toggle("hot", snap.player.energy >= 70);
-    ui.rewind.disabled = !session.canUsePower("rewind", now);
+    if (ui.rewind) ui.rewind.disabled = !session.canUsePower("rewind", now);
     const burstReady = session.canUsePower("burst", now);
     const megaStrikeReady = session.canUsePower("megaStrike", now);
-    ui.energyBurstAttack.disabled = !burstReady;
-    ui.megaStrikeAttack.disabled = !megaStrikeReady;
-    ui.energyBurstAttack.classList.toggle("ready", burstReady);
-    ui.megaStrikeAttack.classList.toggle("ready", megaStrikeReady);
-    ui.energyBurstAttack.classList.toggle("unavailable", !burstReady);
-    ui.megaStrikeAttack.classList.toggle("unavailable", !megaStrikeReady);
-     ui.megaStrikeAttack.classList.toggle("charged", megaReady);
-    const rewindReady = playing && snap.player.energy >= ENERGY_REWIND && !ui.rewind.disabled;
-    ui.rewind.classList.toggle("ready", rewindReady);
-    ui.rewind.classList.toggle("unavailable", !rewindReady);
+    if (ui.energyBurstAttack) {
+      ui.energyBurstAttack.disabled = !burstReady;
+      ui.energyBurstAttack.classList.toggle("ready", burstReady);
+      ui.energyBurstAttack.classList.toggle("unavailable", !burstReady);
+    }
+    if (ui.megaStrikeAttack) {
+      ui.megaStrikeAttack.disabled = !megaStrikeReady;
+      ui.megaStrikeAttack.classList.toggle("ready", megaStrikeReady);
+      ui.megaStrikeAttack.classList.toggle("unavailable", !megaStrikeReady);
+      ui.megaStrikeAttack.classList.toggle("charged", megaReady);
+    }
+    const rewindReady = playing && snap.player.energy >= ENERGY_REWIND && !ui.rewind?.disabled;
+    ui.rewind?.classList.toggle("ready", rewindReady);
+    ui.rewind?.classList.toggle("unavailable", !rewindReady);
      updateMatchObjective(snap);
 
     const comboAt = session.screen === "match" ? lastGameplayCalloutAt : announcer.lastComboAt;
